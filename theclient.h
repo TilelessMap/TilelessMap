@@ -141,6 +141,7 @@ typedef struct
     uint32_t max_n_vals;
     float *rotation; //list if id to corresponding point array
     float *size; //list if id to corresponding point array
+    uint32_t *anchor;
     uint32_t *styleID; //array of styleID
 }
 TEXTSTRUCT;
@@ -187,7 +188,11 @@ typedef struct
     GLint maxScale;
     GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
- //   TEXTSTRUCT *text;
+    TEXTSTRUCT *text;
+ 
+    uint8_t show_text;
+    
+ 
 }
 LAYER_RUNTIME;
 
@@ -273,7 +278,7 @@ int element_set_end(uint32_t npoints, uint8_t ndims,uint32_t styleID, ELEMENTSTR
 
 
 TEXTSTRUCT* init_text_buf();
-int text_write(char *the_text,uint32_t styleID, float size, float rotation, TEXTSTRUCT *text_buf);
+int text_write(const char *the_text,uint32_t styleID, float size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf);
 void text_reset_buffer(TEXTSTRUCT *text_buf);
 void text_destroy_buffer(TEXTSTRUCT *text_buf);
 

@@ -166,10 +166,12 @@ int set_end_polygon(GLESSTRUCT *res_buf)
 
 void reset_buffer(GLESSTRUCT *res_buf)
 {
+  printf("ok, reset %p\n",res_buf);
     res_buf->used_n_pa = 0;
     res_buf->used_n_polygon = 0;
     res_buf->total_npoints = 0;
     res_buf->first_free=res_buf->vertex_array;
+    
 }
 
 void destroy_buffer(GLESSTRUCT *res_buf)
@@ -323,6 +325,7 @@ TEXTSTRUCT* init_text_buf()
     text_buf->rotation= malloc(sizeof(float)*START_MAX_labels); 
     text_buf->size= malloc(sizeof(float)*START_MAX_labels); 
     text_buf->styleID= malloc(sizeof(uint32_t)*START_MAX_labels); 
+    text_buf->anchor= malloc(sizeof(uint32_t)*START_MAX_labels); 
     
     text_buf->used_n_vals = 0;
 
@@ -338,12 +341,12 @@ TEXTSTRUCT* init_text_buf()
 
 
 
-int text_write(char *the_text,uint32_t styleID, float size, float rotation, TEXTSTRUCT *text_buf)
+int text_write(const char *the_text,uint32_t styleID, float size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf)
 {
 
     size_t new_size, new_n_vals;
     
-    size_t len_of_str = strlen(the_text) + 1;
+    size_t len_of_str = strlen((const char*) the_text) + 1;
 
     char *new_array;
 
@@ -368,6 +371,7 @@ int text_write(char *the_text,uint32_t styleID, float size, float rotation, TEXT
      
      text_buf->size = realloc(text_buf->size, new_n_vals * sizeof(float));
      text_buf->rotation = realloc(text_buf->rotation, new_n_vals * sizeof(float));
+     text_buf->anchor = realloc(text_buf->anchor, new_n_vals * sizeof(uint32_t));
      text_buf->styleID = realloc(text_buf->styleID, new_n_vals * sizeof(uint32_t));
       
     }
@@ -375,6 +379,7 @@ int text_write(char *the_text,uint32_t styleID, float size, float rotation, TEXT
     *(text_buf->size + text_buf->used_n_vals) = size;
     *(text_buf->rotation + text_buf->used_n_vals) = rotation;
     *(text_buf->styleID + text_buf->used_n_vals) = styleID;
+    *(text_buf->anchor + text_buf->used_n_vals) = anchor;
     text_buf->max_n_vals = new_n_vals;
     text_buf->used_n_vals++;
     

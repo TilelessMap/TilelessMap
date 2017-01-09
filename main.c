@@ -39,6 +39,9 @@ int init_resources()
     char *styleselect;
     char stylejoin[128];
     char stylewhere[128];
+    char textselect[128];
+    char textjoin[128];
+    //char stylewhere[128];
     GLint link_ok = GL_FALSE;
 
     GLuint vs, fs, program;
@@ -63,13 +66,15 @@ int init_resources()
                             /*fields for creating the prepared statement to get data later*/
                             "l.geometryField,l.triIndexField, l.idField, l.name layername, l.geometryindex, "
                             /*fields to inform comming processes about how and when to render*/
-                            " l.defaultVisible, l.minScale, l.maxScale, geometryType,styleField, l.layerID"
+                            " l.defaultVisible, l.minScale, l.maxScale, geometryType,styleField,showText, l.layerID, "
+                            "tc.size_fld, rotation_fld, anchor_fld, txt_fld"
 
                             " FROM layers l "
                             "INNER JOIN dbs d on l.source = d.name "
                             "INNER JOIN programs p on l.program = p.programID "
                             "INNER JOIN shaders vs on p.vs = vs.name "
-                            "INNER JOIN shaders fs on p.fs = fs.name order by l.orderby ;";
+                            "INNER JOIN shaders fs on p.fs = fs.name "
+			    "LEFT JOIN text_conf tc on l.layerID=tc.layerID order by l.orderby ;";
     DEBUG_PRINT(("Get Layer sql : %s\n",sqlLayerLoading));
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
@@ -261,12 +266,19 @@ int init_resources()
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,8);
         const unsigned char *geometryindex = sqlite3_column_text(preparedLayerLoading, 9);
         const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 14);
-        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 15);
+        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 16);
 
         oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 10);
         oneLayer->minScale = sqlite3_column_int(preparedLayerLoading, 11);
         oneLayer->maxScale = sqlite3_column_int(preparedLayerLoading, 12);
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
+	
+        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 15);
+	
+        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,17);
+        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 18);
+        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 19);
+        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 20);
 //	oneLayer->has_text=0;
 
         char tri_idx_fld[32];
@@ -298,13 +310,22 @@ int init_resources()
             stylejoin[0] = '\0';
             stylewhere[0] =  '\0';
         }
+        
+        if(oneLayer->show_text)
+        {
+            snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",txt_fld, size_fld, rotation_fld, anchor_fld);
+        }
+        else
+        {
+            textselect[0] = '\0';
+        }
 
 
-        snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+        snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
                  "select ",
                  geometryfield,
                  ", ",tri_idx_fld,
-                 ", e.", idfield, styleselect, " from ",
+                 ", e.", idfield, styleselect, textselect,  " from ",
                  dbname, ".",layername,
                  " e inner join ",
                  dbname, ".",geometryindex,
@@ -327,14 +348,17 @@ int init_resources()
         DEBUG_PRINT(("put prepared statement from sql : %s, into : %p\n",sql,oneLayer->preparedStatement ));
 
         oneLayer->res_buf =  init_res_buf();
-
+printf("lager %d = %p and resbuf = %p\n" ,i,  oneLayer, oneLayer->res_buf);
         if (oneLayer->geometryType == POLYGONTYPE)
             oneLayer->tri_index =  init_element_buf();
 
-//	if (oneLayer->has_text)
-//	  oneLayer->text =  init_text_buf();
+	if (oneLayer->show_text)
+	  oneLayer->text =  init_text_buf();
 
     }
+
+      
+    
 
     sqlite3_finalize(preparedLayerLoading);
     return 0;
@@ -380,6 +404,7 @@ int ti;
             switch (ev.type)
             {
             case SDL_QUIT:
+	      free(touches);
                 return;
             case SDL_MOUSEBUTTONDOWN:
                 mouse_down = 1;
@@ -444,6 +469,7 @@ int ti;
         }
         //      render_data(window,currentBBOX,theMatrix);
     }
+	      free(touches);
     return ;
 }
 
