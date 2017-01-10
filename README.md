@@ -2,7 +2,7 @@
 a map client for offline usage
 
 
-This info is dated, new will come.
+#### This info is dated, new will come. ####
 
 The project has had some progress.
 I have it working on Android and Linux.
