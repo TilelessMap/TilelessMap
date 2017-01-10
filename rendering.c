@@ -365,6 +365,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
   
     DEBUG_PRINT(("Entering renderText\n"));
+    char *rest;
     uint32_t i;
     GLfloat *color;
   int ndims=2;
@@ -447,9 +448,12 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     
        
 	/* Loop through all characters */
-	for (p = txt; *p; p++) {
+	//for (p = txt; *p; p++) 
+	p = txt;
+	  while(*p)
+	{
 		/* Try to load and render the character */
-		if (FT_Load_Char(face, *p, FT_LOAD_RENDER))
+		if (FT_Load_Char(face, utf82unicode(p,&p), FT_LOAD_RENDER))
 			continue;
 
 		/* Upload the "bitmap", which contains an 8-bit grayscale image, as an alpha texture */

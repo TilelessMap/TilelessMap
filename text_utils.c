@@ -107,3 +107,42 @@ int init_text_resources()
 	return 0;
 }
 
+
+uint32_t utf82unicode(const char *text,const char **the_rest)
+{
+	uint32_t res = 0;
+	uint8_t nbytes=0;
+	uint8_t c;
+	int i =0;
+	
+	c = text[0];
+	if(c==0)
+	{
+		return 0;
+	}
+	else if(!(c & 128))
+	{
+		res = (uint32_t) c;
+		*(the_rest) = text+1;
+		return res;
+	}
+
+	while((c<<++nbytes) & 128)
+	{};
+		
+	*(the_rest) = text+nbytes;	
+	
+	res = ((c<<nbytes) & 0xff)>>nbytes;
+		
+	for (i=1;i<nbytes;i++)	
+	{
+		c = text[i];
+		if(c==0)
+		{
+			printf("Something went wrong, UTF is invalid\n");
+			return 0;
+		}
+		res = (res<<6) | (c & 63);	
+	}
+	return res;	
+}

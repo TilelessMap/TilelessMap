@@ -361,7 +361,8 @@ GLuint create_program(const unsigned char *vs_source,const unsigned char *fs_sou
 
 void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 
-
+//uint32_t utf82unicode(char *text, char **the_rest);
+uint32_t utf82unicode(const char *text,const char **the_rest);
 int init_text_resources();
 void render_txt(SDL_Window* window);
 /*********************** Global variables*******************************/

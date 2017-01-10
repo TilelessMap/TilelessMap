@@ -382,7 +382,7 @@ int text_write(const char *the_text,uint32_t styleID, float size, float rotation
     *(text_buf->anchor + text_buf->used_n_vals) = anchor;
     
     text_buf->used_n_vals++;
-    printf("printed %d texts, max is %d, text is %s\n",text_buf->used_n_vals,  text_buf->max_n_vals, the_text);
+
     
 return 0;
 }
