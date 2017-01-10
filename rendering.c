@@ -25,6 +25,12 @@
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
+  if(oneLayer->show_text)
+  {
+    
+render_text(oneLayer,theMatrix);
+return 0;
+  }
     GLESSTRUCT *rb = oneLayer->res_buf;
 
     glGenBuffers(1, &(oneLayer->vbo));
@@ -348,12 +354,147 @@ int render_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
 
 
+
+
 /**
  * Render text using the currently loaded font and currently set font size.
  * Rendering starts at coordinates (x, y), z is always 0.
  * The pixel coordinates that the FreeType2 library uses are scaled by (sx, sy).
  */
-void render_text(const char *text, float x, float y, float sx, float sy)
+int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
+{
+  
+    DEBUG_PRINT(("Entering renderText\n"));
+    uint32_t i;
+    GLfloat *color;
+  int ndims=2;
+	GLfloat x,y;
+	const char *p;
+	FT_GlyphSlot g = face->glyph;
+	GLuint text_vbo;
+	/* Create a texture that will be used to hold one "glyph" */
+	GLuint tex;
+
+	GLESSTRUCT *rb = oneLayer->res_buf;
+	
+	GLfloat point_coord[2];
+	glUseProgram(oneLayer->txt_program);
+	
+	glUniformMatrix4fv(oneLayer->txt_theMatrix, 1, GL_FALSE,theMatrix );
+	
+	
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glUniform1i(text_uniform_tex, 0);
+
+	/* We require 1 byte alignment when uploading texture data */
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	/* Clamping to edges is important to prevent artifacts when scaling */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	/* Linear filtering usually looks best for text */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	/* Set up the VBO for our vertex data */
+	glEnableVertexAttribArray(oneLayer->txt_box);
+	glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
+	glVertexAttribPointer(oneLayer->txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	
+	
+	
+	
+	
+		float sx = 2.0 / CURR_WIDTH;
+	float sy = 2.0 / CURR_HEIGHT;
+
+	
+	if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
+      printf("There is a mismatch between number of labels and number of corresponding points\n");
+    int used=0;
+    for (i=0; i<rb->used_n_pa; i++)
+    {
+        Uint32 styleID = *(rb->styleID+i);
+        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+        {
+            color = global_styles[styleID].color;
+        }
+        glUniform4fv(oneLayer->txt_color,1,color );
+	
+	point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
+	point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
+	
+        glUniform2fv(oneLayer->txt_coord2d,1,point_coord );
+	
+
+	      
+		char *txt=oneLayer->text->char_array+used;
+
+		used+=strlen(txt)+1;
+
+		//TODO, set this dynamically from oneLayer->text->size
+	 
+   FT_Set_Pixel_Sizes(face, 0, oneLayer->text->size);
+    
+    
+    x = 0;
+    y = 0;
+    
+    
+       
+	/* Loop through all characters */
+	for (p = txt; *p; p++) {
+		/* Try to load and render the character */
+		if (FT_Load_Char(face, *p, FT_LOAD_RENDER))
+			continue;
+
+		/* Upload the "bitmap", which contains an 8-bit grayscale image, as an alpha texture */
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, g->bitmap.width, g->bitmap.rows, 0, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
+
+		/* Calculate the vertex and texture coordinates */
+		GLfloat x2 = x + g->bitmap_left * sx;
+		GLfloat y2 = -y - g->bitmap_top * sy;
+		GLfloat w = g->bitmap.width * sx;
+		GLfloat h = g->bitmap.rows * sy;
+
+		point box[4] = {
+			{x2, -y2, 0, 0},
+			{x2 + w, -y2, 1, 0},
+			{x2, -y2 - h, 0, 1},
+			{x2 + w, -y2 - h, 1, 1},
+		};
+
+		/* Draw the character on the screen */
+		glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_DYNAMIC_DRAW);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		/* Advance the cursor to the start of the next character */
+		x += (g->advance.x >> 6) * sx;
+		y += (g->advance.y >> 6) * sy;
+	}
+	
+	
+	 }
+	
+
+	glDisableVertexAttribArray(text_attribute_coord);
+	glDeleteTextures(1, &tex);
+ return 0;
+  
+ 
+}
+
+
+/**
+ * Render text using the currently loaded font and currently set font size.
+ * Rendering starts at coordinates (x, y), z is always 0.
+ * The pixel coordinates that the FreeType2 library uses are scaled by (sx, sy).
+ */
+void render_text_test(const char *text, float x, float y, float sx, float sy)
 {
 	const char *p;
 	FT_GlyphSlot g = face->glyph;

@@ -189,7 +189,13 @@ typedef struct
     GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
- 
+    //Placeholders in text_shader
+    GLuint txt_program;
+    GLint txt_coord2d;
+    GLint txt_theMatrix;
+    GLint txt_color;
+    GLint txt_box;
+    
     uint8_t show_text;
     
  
@@ -351,6 +357,9 @@ int get_box_from_touches(FINGEREVENT *touches,GLfloat *currentBBOX,GLfloat *newB
 int register_touch_down(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y);
 int register_touch_up(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y);
 
+GLuint create_program(const unsigned char *vs_source,const unsigned char *fs_source, GLuint *vs, GLuint *fs);
+
+void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 
 
 int init_text_resources();
@@ -368,7 +377,9 @@ LAYER_RUNTIME *layerRuntime;
 
 STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
-void render_text(const char *text, float x, float y, float sx, float sy);
+void render_text_test(const char *text, float x, float y, float sx, float sy);
+
+int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int CURR_WIDTH;
 int CURR_HEIGHT;
 

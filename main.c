@@ -32,7 +32,7 @@ int init_resources()
     DEBUG_PRINT(("Entering init_resources\n"));
     int i, rc;
     char     *err_msg;
-    GLint attribute_coord2d, uniform_theMatrix, uniform_color;
+    GLint attribute_coord2d, uniform_theMatrix, uniform_color, uniform_coord2d, box4d;
     
     LAYER_RUNTIME *oneLayer;
     char sql[2048];
@@ -42,7 +42,7 @@ int init_resources()
     char textselect[128];
     char textjoin[128];
     //char stylewhere[128];
-    GLint link_ok = GL_FALSE;
+
 
     GLuint vs, fs, program;
     sqlite3_stmt *preparedLayerLoading;
@@ -67,14 +67,21 @@ int init_resources()
                             "l.geometryField,l.triIndexField, l.idField, l.name layername, l.geometryindex, "
                             /*fields to inform comming processes about how and when to render*/
                             " l.defaultVisible, l.minScale, l.maxScale, geometryType,styleField,showText, l.layerID, "
-                            "tc.size_fld, rotation_fld, anchor_fld, txt_fld"
-
+                            "tc.size_fld, rotation_fld, anchor_fld, txt_fld,pt.programID , vt.source vtSource, ft.source ftSource "
                             " FROM layers l "
                             "INNER JOIN dbs d on l.source = d.name "
                             "INNER JOIN programs p on l.program = p.programID "
                             "INNER JOIN shaders vs on p.vs = vs.name "
                             "INNER JOIN shaders fs on p.fs = fs.name "
-			    "LEFT JOIN text_conf tc on l.layerID=tc.layerID order by l.orderby ;";
+			    "LEFT JOIN text_conf tc on l.layerID=tc.layerID "
+			    "LEFT JOIN programs pt on tc.program=pt.programID "
+			    "LEFT JOIN shaders vt on pt.vs=vt.name "
+			    "LEFT JOIN shaders ft on pt.fs=ft.name "			    
+			    "order by l.orderby ;";
+			    
+			    
+			    
+			    
     DEBUG_PRINT(("Get Layer sql : %s\n",sqlLayerLoading));
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
@@ -213,21 +220,9 @@ int init_resources()
         const unsigned char * vs_source = sqlite3_column_text(preparedLayerLoading, 3);
         const unsigned char *  fs_source = sqlite3_column_text(preparedLayerLoading, 4);
 
-        if ((vs = create_shader((const char*) vs_source, GL_VERTEX_SHADER))   == 0) return 0;
-        if ((fs = create_shader((const char*) fs_source, GL_FRAGMENT_SHADER)) == 0) return 0;
-
-        program = glCreateProgram();
-        glAttachShader(program, vs);
-        glAttachShader(program, fs);
-        glLinkProgram(program);
-        glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
-        if (!link_ok) {
-            fprintf(stderr, "glLinkProgram");
-            print_log(program);
-            return 0;
-        }
-
-
+	
+	program = create_program(vs_source, fs_source, &vs, &fs);
+	
         attribute_coord2d = glGetAttribLocation(program, "coord2d");
         if (attribute_coord2d == -1) {
             fprintf(stderr, "Could not bind attribute : %s\n", "coord2d");
@@ -251,10 +246,9 @@ int init_resources()
         oneLayer->uniform_theMatrix = uniform_theMatrix;
         oneLayer->uniform_color = uniform_color;
 
-        glDetachShader(program, vs);
-        glDetachShader(program, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+	reset_shaders(vs, fs, program);
+	
+	
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *geometryfield = sqlite3_column_text(preparedLayerLoading, 5);
 
@@ -281,6 +275,55 @@ int init_resources()
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 20);
 //	oneLayer->has_text=0;
 
+	
+	if(oneLayer->show_text)
+	{
+	    const unsigned char *vt_source = sqlite3_column_text(preparedLayerLoading, 22);
+	    const unsigned char *ft_source = sqlite3_column_text(preparedLayerLoading, 23);
+
+	
+	program = create_program(vt_source, ft_source, &vs, &fs);
+	
+        uniform_coord2d = glGetUniformLocation(program, "coord2d");
+        if (uniform_coord2d == -1) {
+            fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
+            return 0;
+        }
+
+        box4d = glGetAttribLocation(program, "box");
+        if (box4d == -1) {
+            fprintf(stderr, "Could not bind attribute : %s\n", "box");
+            return 0;
+        }
+
+        uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
+        if (uniform_theMatrix == -1) {
+            fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+            return 0;
+        }
+
+        uniform_color = glGetUniformLocation(program, "color");
+        if (uniform_color == -1) {
+            fprintf(stderr, "Could not bind uniform : %s\n", "color");
+            return 0;
+        }
+
+        oneLayer->txt_program = program;
+        oneLayer->txt_coord2d = uniform_coord2d;
+        oneLayer->txt_theMatrix = uniform_theMatrix;
+        oneLayer->txt_color = uniform_color;
+      oneLayer->txt_box = box4d;
+	reset_shaders(vs, fs, program);
+	
+	  
+	  
+	}
+	
+	
+	
+	
+	
+	
         char tri_idx_fld[32];
         if(oneLayer->geometryType == POLYGONTYPE)
         {
@@ -562,10 +605,11 @@ DEBUG_PRINT(("projectfile = %s\n",projectfile));
 
     if (init_resources())
         return EXIT_FAILURE;
-if (init_text_resources())
+//if (init_text_resources())
+  //      return EXIT_FAILURE;
+
+        if (init_text_resources())
         return EXIT_FAILURE;
-
-
 
     mainLoop(window);
 

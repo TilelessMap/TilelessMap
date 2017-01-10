@@ -100,7 +100,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         }
     }
     
-render_txt(window);
+//render_txt(window);
     SDL_GL_SwapWindow(window);
 //render(window,res_buf);
     return 0;
