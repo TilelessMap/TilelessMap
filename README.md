@@ -1,6 +1,13 @@
 # noTile
 a map client for offline usage
 
+
+This info is dated, new will come.
+
+The project has had some progress.
+I have it working on Android and Linux.
+
+
 This is a project in a very early stage
 
 Licensce GPL v2
@@ -23,21 +30,4 @@ apt-get install libglew1.10 libsdl2-dev
 
 Building:
 make
-
-
-## Maps to use ##
-
-prepacked maps can be found at: http://twkb.jordogskog.no/maps
-
-## To test things
-
-download the data db norge.sqlite (it is approx 2.4 GB) into the root folder of this project.
-
-Then open a terminal and run:
-
-./noTile norge_proj.sqlite
-
-If everything works as expected you should get a window with an inzoomed map.
-
-You can zoom in the map by scrolling the mouse and pan by click and drag
 
