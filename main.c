@@ -546,6 +546,8 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
 
 int main(int argc, char *argv[])
 {
+  
+  text_scale=2;
   char *projectfile;
   if(argc > 1)
     projectfile = argv[argc-1];

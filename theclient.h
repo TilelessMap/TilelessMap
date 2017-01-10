@@ -370,7 +370,7 @@ void render_txt(SDL_Window* window);
 sqlite3 *projectDB;
 
 int nLayers;
-
+int text_scale;
 
 LAYER_RUNTIME *layerRuntime;
 
@@ -403,7 +403,6 @@ typedef struct  {
 }point;
 
 GLuint text_vbo;
-
 
 
 

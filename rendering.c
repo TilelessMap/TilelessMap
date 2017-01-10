@@ -435,10 +435,10 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 		char *txt=oneLayer->text->char_array+used;
 
 		used+=strlen(txt)+1;
-
-		//TODO, set this dynamically from oneLayer->text->size
 	 
-   FT_Set_Pixel_Sizes(face, 0, oneLayer->text->size);
+		
+		int psz =  (int) roundf(*(oneLayer->text->size+i)) * text_scale;
+   FT_Set_Pixel_Sizes(face, 0,psz);
     
     
     x = 0;
