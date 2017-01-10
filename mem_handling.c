@@ -373,16 +373,16 @@ int text_write(const char *the_text,uint32_t styleID, float size, float rotation
      text_buf->rotation = realloc(text_buf->rotation, new_n_vals * sizeof(float));
      text_buf->anchor = realloc(text_buf->anchor, new_n_vals * sizeof(uint32_t));
      text_buf->styleID = realloc(text_buf->styleID, new_n_vals * sizeof(uint32_t));
-      
+      text_buf->max_n_vals = new_n_vals;
     }
     
     *(text_buf->size + text_buf->used_n_vals) = size;
     *(text_buf->rotation + text_buf->used_n_vals) = rotation;
     *(text_buf->styleID + text_buf->used_n_vals) = styleID;
     *(text_buf->anchor + text_buf->used_n_vals) = anchor;
-    text_buf->max_n_vals = new_n_vals;
-    text_buf->used_n_vals++;
     
+    text_buf->used_n_vals++;
+    printf("printed %d texts, max is %d, text is %s\n",text_buf->used_n_vals,  text_buf->max_n_vals, the_text);
     
 return 0;
 }

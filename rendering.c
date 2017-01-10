@@ -39,6 +39,7 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
+  int ndims = 2;
     uint32_t i;//, np, pi;
     GLfloat *color;
   //  GLenum err;
@@ -51,7 +52,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
     glVertexAttribPointer(
         oneLayer->attribute_coord2d, // attribute
-        2,                 // number of elements per vertex, here (x,y)
+        ndims,                 // number of elements per vertex, here (x,y)
         GL_FLOAT,          // the type of each element
         GL_FALSE,          // take our values as-is
         0,                 // no extra data between each position
@@ -70,6 +71,9 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         fprintf(stderr,"opengl error:%d\n", err);
     }*/
 
+    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
+      printf("There is a mismatch between number of labels and number of corresponding points\n");
+    int used=0;
     for (i=0; i<rb->used_n_pa; i++)
     {
         Uint32 styleID = *(rb->styleID+i);
@@ -79,6 +83,19 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         }
         glUniform4fv(oneLayer->uniform_color,1,color );
         glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
+	     if(oneLayer->show_text)
+	    {
+	      int antal = oneLayer->text->used_n_vals;
+	      
+	      printf("start, print text %d\n",antal);
+
+		char *txt=oneLayer->text->char_array+used;
+		printf("text %s, x %f, y %f, startindex = %d\n",txt, *(rb->vertex_array+ *(rb->start_index+i)*ndims), *(rb->vertex_array+ *(rb->start_index+i)*ndims+1), *(rb->start_index+i));
+		used+=strlen(txt)+1;
+	      
+	      printf("printed %d texts\n",i);
+	      
+	    }
     }
     glDisableVertexAttribArray(oneLayer->attribute_coord2d);
 

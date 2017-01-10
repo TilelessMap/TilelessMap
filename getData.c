@@ -51,6 +51,9 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         if(oneLayer->geometryType == POLYGONTYPE)
             element_reset_buffer(oneLayer->tri_index);
 
+	if(oneLayer->show_text)
+	  text_reset_buffer(oneLayer->text);
+	
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
 
@@ -90,6 +93,10 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
                 loadPolygon( oneLayer, theMatrix);
                 break;
             }
+            
+            
+            
+
         }
     }
     

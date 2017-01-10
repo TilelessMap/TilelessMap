@@ -137,10 +137,11 @@ void *twkb_fromSQLiteBBOX(void *theL)
         if(theLayer->show_text)
 	{
 	  const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
+
 	  size = sqlite3_column_double(prepared_statement, 5);
 	  rotation = sqlite3_column_double(prepared_statement, 6);
 	  anchor = sqlite3_column_double(prepared_statement, 7);  
-	  
+	 
 	  text_write(txt,0, size, rotation,anchor, theLayer->text);
 	}
 
