@@ -1,23 +1,23 @@
 /**********************************************************************
  *
- * NoTile
+ * TileLess
  *
- * NoTile is free software: you can redistribute it and/or modify
+ * TileLess is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
- * NoTile is distributed in the hope that it will be useful,
+ * TileLess is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NoTile.  If not, see <http://www.gnu.org/licenses/>.
+ * along with TileLess.  If not, see <http://www.gnu.org/licenses/>.
  *
  **********************************************************************
  *
- * Copyright (C) 2016 Nicklas Avén
+ * Copyright (C) 2016-2017 Nicklas Avén
  *
  **********************************************************************/
 
@@ -552,7 +552,7 @@ int main(int argc, char *argv[])
   if(argc > 1)
     projectfile = argv[argc-1];
   else
-    projectfile = "norge_proj.sqlite";
+    projectfile = "norden_proj.sqlite";
 DEBUG_PRINT(("projectfile = %s\n",projectfile));
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -561,7 +561,7 @@ DEBUG_PRINT(("projectfile = %s\n",projectfile));
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
 */
-    SDL_Window* window = SDL_CreateWindow("noTile",
+    SDL_Window* window = SDL_CreateWindow("TileLess",
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           INIT_WIDTH,INIT_HEIGHT,
                                           SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);

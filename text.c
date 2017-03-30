@@ -230,7 +230,7 @@ void render_txt(SDL_Window* window)
 	
 	glUniform4fv(text_uniform_color, 1, red);
 	FT_Set_Pixel_Sizes(face, 0, 7);
-	render_text("The Tiny Font Sized Fox Jumps Over The Lazy Dog", -1 + 8 * sx, 1 - 250 * sy, sx, sy);
+	render_text_test("The Tiny Font Sized Fox Jumps Over The Lazy Dog", -1 + 8 * sx, 1 - 250 * sy, sx, sy);
 
 	//SDL_GL_SwapWindow(window);
 }
