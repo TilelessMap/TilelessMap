@@ -171,6 +171,8 @@ void print_opengl_info() {
 int init_text_resources() 
 {
     fontfilename = "FreeSans.ttf";
+    
+FT_Face face;
 	/* Initialize the FreeType2 library */
 	if (FT_Init_FreeType(&ft)) {
 		fprintf(stderr, "Could not init freetype library");
@@ -205,6 +207,13 @@ int init_text_resources()
 	// Create the vertex buffer object
 	glGenBuffers(1, &text_vbo);
 
+    
+    
+    create_atlas(atlases[0], face, 12);
+    create_atlas(atlases[1], face, 24);
+    create_atlas(atlases[2], face, 48);
+    
+    
 	return 0;
 }
 
@@ -235,3 +244,94 @@ void render_txt(SDL_Window* window)
 	//SDL_GL_SwapWindow(window);
 }
 
+
+
+	
+	 ATLAS* create_atlas(ATLAS *a, FT_Face face, int height) 
+     {
+		FT_Set_Pixel_Sizes(face, 0, height);
+		FT_GlyphSlot g = face->glyph;
+
+		unsigned int roww = 0;
+		unsigned int rowh = 0;
+		 a->w = 0;
+		 a->h = 0;
+
+		 memset(a->metrics, 0, sizeof(a->metrics));
+
+		/* Find minimum size for a texture holding all visible ASCII characters */
+		for (int i = 32; i < 256; i++) {
+			if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
+				fprintf(stderr, "Loading character %c failed!\n", i);
+				continue;
+			}
+			if (roww + g->bitmap.width + 1 >= MAXWIDTH) {
+				a->w = max(a->w, roww);
+				a->h += rowh;
+				roww = 0;
+				rowh = 0;
+			}
+			roww += g->bitmap.width + 1;
+			rowh = max(rowh, g->bitmap.rows);
+		}
+
+		a->w = max(a->w, roww);
+		a->h += rowh;
+
+		/* Create a texture that will be used to hold all ASCII glyphs */
+		glActiveTexture(GL_TEXTURE0);
+		glGenTextures(1, &(a->tex));
+		glBindTexture(GL_TEXTURE_2D, a->tex);
+		glUniform1i(uniform_tex, 0);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, a->w, a->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+
+		/* We require 1 byte alignment when uploading texture data */
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		/* Clamping to edges is important to prevent artifacts when scaling */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		/* Linear filtering usually looks best for text */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		/* Paste all glyph bitmaps into the texture, remembering the offset */
+		int ox = 0;
+		int oy = 0;
+
+		rowh = 0;
+
+		for (int i = 32; i < 256; i++) {
+			if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
+				fprintf(stderr, "Loading character %c failed!\n", i);
+				continue;
+			}
+
+			if (ox + g->bitmap.width + 1 >= MAXWIDTH) {
+				oy += rowh;
+				rowh = 0;
+				ox = 0;
+			}
+
+			glTexSubImage2D(GL_TEXTURE_2D, 0, ox, oy, g->bitmap.width, g->bitmap.rows, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
+			a->metrics[i].ax = g->advance.x >> 6;
+			a->metrics[i].ay = g->advance.y >> 6;
+
+			a->metrics[i].bw = g->bitmap.width;
+			a->metrics[i].bh = g->bitmap.rows;
+
+			a->metrics[i].bl = g->bitmap_left;
+			a->metrics[i].bt = g->bitmap_top;
+
+			a->metrics[i].tx = ox / (float)a->w;
+			a->metrics[i].ty = oy / (float)a->h;
+
+			rowh = max(rowh, g->bitmap.rows);
+			ox += g->bitmap.width + 1;
+		}
+
+		fprintf(stderr, "Generated a %d x %d (%d kb) texture atlas\n", a->w, a->h, a->w * a->h / 1024);
+        return a;
+	}

@@ -67,8 +67,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
     ts.thi->bbox=&bbox;
     LAYER_RUNTIME *theLayer = (LAYER_RUNTIME *) theL;
 
-    float rotation, size, anchor;
-
+    float rotation, anchor;
+    int size;
 //DEBUG_PRINT(("sqlite_error? %d\n",sqlite3_config(SQLITE_CONFIG_SERIALIZED )));
 
 
@@ -138,7 +138,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
 	{
 	  const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
 
-	  size = sqlite3_column_double(prepared_statement, 5);
+	  size = sqlite3_column_int(prepared_statement, 5);
 	  rotation = sqlite3_column_double(prepared_statement, 6);
 	  anchor = sqlite3_column_double(prepared_statement, 7);  
 	 

@@ -142,7 +142,7 @@ typedef struct
     uint32_t used_n_vals;
     uint32_t max_n_vals;
     float *rotation; //list if id to corresponding point array
-    float *size; //list if id to corresponding point array
+    int *size; //list if id to corresponding point array
     uint32_t *anchor;
     uint32_t *styleID; //array of styleID
 }
@@ -206,6 +206,36 @@ LAYER_RUNTIME;
 
 
 
+
+	typedef struct {
+		float ax;	// advance.x
+		float ay;	// advance.y
+
+		float bw;	// bitmap.width;
+		float bh;	// bitmap.height;
+
+		float bl;	// bitmap_left;
+		float bt;	// bitmap_top;
+
+		float tx;	// x offset of glyph in texture coordinates
+		float ty;	// y offset of glyph in texture coordinates
+	} C;		// character information
+
+	
+	typedef struct   {
+	GLuint tex;		// texture object
+
+	unsigned int w;			// width of texture in pixels
+	unsigned int h;			// height of texture in pixels
+    C metrics[256];
+    } ATLAS;
+    
+    typedef struct {
+	GLfloat x;
+	GLfloat y;
+	GLfloat s;
+	GLfloat t;
+} POINT_T;
 /***************************************************************
 			DECODING TWKB						*/
 /*Holds a buffer with the twkb-data during read*/
@@ -367,6 +397,8 @@ void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 uint32_t utf82unicode(const char *text,const char **the_rest);
 int init_text_resources();
 void render_txt(SDL_Window* window);
+
+ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 /*********************** Global variables*******************************/
 
 
@@ -387,7 +419,7 @@ int CURR_WIDTH;
 int CURR_HEIGHT;
 
 FT_Library ft;
-FT_Face face;
+ATLAS *atlases[3];
 
 const char *fontfilename;
 
