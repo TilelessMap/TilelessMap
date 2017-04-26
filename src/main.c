@@ -469,30 +469,42 @@ initialBBOX(230000, 6660000, 5000, newBBOX);
 		
                 copyNew2CurrentBBOX(newBBOX, currentBBOX);
                 break;
+                
+            case SDL_MOUSEMOTION:
+                               
+                
+        
+			
 
-      /*      case SDL_FINGERDOWN:        
-                register_touch_down(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
-                break;
-            case SDL_FINGERUP:	      
-                if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
-                {
-                    get_box_from_touches(touches, currentBBOX, newBBOX);                
-                    reset_touch_que(touches);
-                    matrixFromBBOX(newBBOX, theMatrix);
-                    get_data(window, newBBOX, theMatrix);
-                    copyNew2CurrentBBOX(newBBOX, currentBBOX);
+			if(mouse_down)
+            {
+		n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
+            		
+			if(n_events<2)
+            {    
+            
+			mouse_up_x = ev.motion.x;
+			mouse_up_y = ev.motion.y;
+
+            
+
+		       matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+		
+                render_data(window, theMatrix);
+	       //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
+			
+
             }
-*/
+		
                 
                 break;
            
-                
+            }   
                 
                 
 #endif                
 
             case SDL_FINGERDOWN:   
-		    log_this(10,"SDL_FINGERDOWN");
 		ti = ev.tfinger.touchId;
 		fi = ev.tfinger.fingerId;
 		tx = ev.tfinger.x;

@@ -347,9 +347,9 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
         }
         
         
-    SDL_GL_SwapWindow(window);
     }
 
+    SDL_GL_SwapWindow(window);
     
     //  pthread_mutex_destroy(&mutex);
 //render(window,res_buf);
