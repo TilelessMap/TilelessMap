@@ -35,7 +35,7 @@ int* decode_id_list(TWKB_PARSE_STATE *ts, int ngeoms);
 
 
 int
-decode_twkb(TWKB_PARSE_STATE *old_ts , GLESSTRUCT *res_buf)
+decode_twkb(TWKB_PARSE_STATE *old_ts, GLESSTRUCT *res_buf)
 {   TWKB_PARSE_STATE ts;
     init_decode(&ts, old_ts);
     read_header (&ts);

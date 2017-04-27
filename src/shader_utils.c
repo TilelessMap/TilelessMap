@@ -17,7 +17,7 @@ void print_log(GLuint object)
     } else if (glIsProgram(object)) {
         glGetProgramiv(object, GL_INFO_LOG_LENGTH, &log_length);
     } else {
-	     log_this(10, "printlog: Not a shader or a program");
+        log_this(10, "printlog: Not a shader or a program");
         return;
     }
 
@@ -28,7 +28,7 @@ void print_log(GLuint object)
     else if (glIsProgram(object))
         glGetProgramInfoLog(object, log_length, NULL, log);
 
-	     log_this(10, "Log: %s", log);
+    log_this(10, "Log: %s", log);
     free(log);
 }
 
@@ -45,52 +45,52 @@ GLuint create_shader(const char* source, GLenum type)
         fprintf(stderr, "Error opening %s, %s, error:", source, SDL_GetError());
         return 0;
     }
-	GLuint res = glCreateShader(type);
+    GLuint res = glCreateShader(type);
 
-	// GLSL version
-	const char* version;
-	int profile;
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &profile);
-	if (profile == SDL_GL_CONTEXT_PROFILE_ES)
-		version = "#version 100\n";  // OpenGL ES 2.0
-	else
-		version = "#version 120\n";  // OpenGL 2.1
+    // GLSL version
+    const char* version;
+    int profile;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &profile);
+    if (profile == SDL_GL_CONTEXT_PROFILE_ES)
+        version = "#version 100\n";  // OpenGL ES 2.0
+    else
+        version = "#version 120\n";  // OpenGL 2.1
 
-	// GLES2 precision specifiers
-	const char* precision;
-	precision =
-		"#ifdef GL_ES                        \n"
-		"#  ifdef GL_FRAGMENT_PRECISION_HIGH \n"
-		"     precision highp float;         \n"
-		"#  else                             \n"
-		"     precision mediump float;       \n"
-		"#  endif                            \n"
-		"#else                               \n"
-		// Ignore unsupported precision specifiers
-		"#  define lowp                      \n"
-		"#  define mediump                   \n"
-		"#  define highp                     \n"
-		"#endif                              \n";
+    // GLES2 precision specifiers
+    const char* precision;
+    precision =
+        "#ifdef GL_ES                        \n"
+        "#  ifdef GL_FRAGMENT_PRECISION_HIGH \n"
+        "     precision highp float;         \n"
+        "#  else                             \n"
+        "     precision mediump float;       \n"
+        "#  endif                            \n"
+        "#else                               \n"
+        // Ignore unsupported precision specifiers
+        "#  define lowp                      \n"
+        "#  define mediump                   \n"
+        "#  define highp                     \n"
+        "#endif                              \n";
 
-	const GLchar* sources[] = {
-		version,
-		precision,
-		source
-	};
-	glShaderSource(res, 3, sources, NULL);
-	//free((void*)source);
-	
-	glCompileShader(res);
-	GLint compile_ok = GL_FALSE;
-	glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
-	if (compile_ok == GL_FALSE) {
-		SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "glLinkProgram\n");
-		print_log(res);
-		glDeleteShader(res);
-		return 0;
-	}
-	
-	return res;
+    const GLchar* sources[] = {
+        version,
+        precision,
+        source
+    };
+    glShaderSource(res, 3, sources, NULL);
+    //free((void*)source);
+
+    glCompileShader(res);
+    GLint compile_ok = GL_FALSE;
+    glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
+    if (compile_ok == GL_FALSE) {
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "glLinkProgram\n");
+        print_log(res);
+        glDeleteShader(res);
+        return 0;
+    }
+
+    return res;
 }
 
 
@@ -152,14 +152,14 @@ GLuint create_shader(const char* source, GLenum type)
         ,
         source
     };
-    
+
     glShaderSource(res, 2, sources, NULL);
 
     glCompileShader(res);
     GLint compile_ok = GL_FALSE;
     glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
     if (compile_ok == GL_FALSE) {
-	    
+
 	    log_this(10, "Error %s, error:", source);
         print_log(res);
         glDeleteShader(res);
@@ -172,30 +172,30 @@ GLuint create_shader(const char* source, GLenum type)
 
 GLuint create_program(const unsigned char *vs_source,const unsigned char *fs_source, GLuint *vs, GLuint *fs)
 {
-      GLint link_ok = GL_FALSE;
-  GLuint program;
-        if ((*vs = create_shader((const char*) vs_source, GL_VERTEX_SHADER))   == 0) return 0;
-        if ((*fs = create_shader((const char*) fs_source, GL_FRAGMENT_SHADER)) == 0) return 0;
+    GLint link_ok = GL_FALSE;
+    GLuint program;
+    if ((*vs = create_shader((const char*) vs_source, GL_VERTEX_SHADER))   == 0) return 0;
+    if ((*fs = create_shader((const char*) fs_source, GL_FRAGMENT_SHADER)) == 0) return 0;
 
-       program = glCreateProgram();
-        glAttachShader(program, *vs);
-        glAttachShader(program, *fs);
-        glLinkProgram(program);
-        glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
-        if (!link_ok) {
-            fprintf(stderr, "glLinkProgram");
-            print_log(program);
-            return 0;
-        }
-        
-        return program;
-        
+    program = glCreateProgram();
+    glAttachShader(program, *vs);
+    glAttachShader(program, *fs);
+    glLinkProgram(program);
+    glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
+    if (!link_ok) {
+        fprintf(stderr, "glLinkProgram");
+        print_log(program);
+        return 0;
+    }
+
+    return program;
+
 }
 
 void reset_shaders(GLuint vs,GLuint fs, GLuint program)
 {
-        glDetachShader(program, vs);
-        glDetachShader(program, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);	
+    glDetachShader(program, vs);
+    glDetachShader(program, fs);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
 }

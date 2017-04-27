@@ -35,18 +35,18 @@ GLESSTRUCT* init_res_buf()
     size_t vertex_size = sizeof(float)*START_MAX_N_VERTEX; //in bytes
 
     res_buf = malloc(sizeof(GLESSTRUCT));
-    res_buf->vertex_array=malloc(vertex_size); 
-    res_buf->start_index = malloc(sizeof(uint32_t)*100); 
-    res_buf->npoints= malloc(sizeof(uint32_t)*100); 
-    res_buf->id= malloc(sizeof(uint32_t)*100); 
-    res_buf->styleID= malloc(sizeof(uint32_t)*100); 
+    res_buf->vertex_array=malloc(vertex_size);
+    res_buf->start_index = malloc(sizeof(uint32_t)*100);
+    res_buf->npoints= malloc(sizeof(uint32_t)*100);
+    res_buf->id= malloc(sizeof(uint32_t)*100);
+    res_buf->styleID= malloc(sizeof(uint32_t)*100);
     res_buf->total_npoints = 0;
     res_buf->used_n_pa = 0;
 
     res_buf->max_pa=100 ;
 
-    res_buf->polygon_offset = malloc(sizeof(size_t)*100); 
-//    res_buf->npoints_polygon= malloc(sizeof(int)*100); 
+    res_buf->polygon_offset = malloc(sizeof(size_t)*100);
+//    res_buf->npoints_polygon= malloc(sizeof(int)*100);
     res_buf->used_n_polygon = 0;
     res_buf->max_polygon=100 ;
 
@@ -166,12 +166,12 @@ int set_end_polygon(GLESSTRUCT *res_buf)
 
 void reset_buffer(GLESSTRUCT *res_buf)
 {
-  printf("ok, reset %p\n",res_buf);
+    printf("ok, reset %p\n",res_buf);
     res_buf->used_n_pa = 0;
     res_buf->used_n_polygon = 0;
     res_buf->total_npoints = 0;
     res_buf->first_free=res_buf->vertex_array;
-    
+
 }
 
 void destroy_buffer(GLESSTRUCT *res_buf)
@@ -193,11 +193,11 @@ ELEMENTSTRUCT* init_element_buf()
     size_t vertex_size = sizeof(GLushort)*START_MAX_N_VERTEX; //in bytes
 
     element_buf = malloc(sizeof(ELEMENTSTRUCT));
-    element_buf->index_array=malloc(vertex_size); 
-    element_buf->start_index = malloc(sizeof(int)*100); 
-    element_buf->npoints= malloc(sizeof(int)*100); 
-    element_buf->id= malloc(sizeof(int)*100); 
-    element_buf->styleID= malloc(sizeof(int)*100); 
+    element_buf->index_array=malloc(vertex_size);
+    element_buf->start_index = malloc(sizeof(int)*100);
+    element_buf->npoints= malloc(sizeof(int)*100);
+    element_buf->id= malloc(sizeof(int)*100);
+    element_buf->styleID= malloc(sizeof(int)*100);
     element_buf->total_npoints = 0;
     element_buf->used_n_pa = 0;
 
@@ -319,14 +319,14 @@ TEXTSTRUCT* init_text_buf()
     size_t char_size = sizeof(char)*START_MAX_CHARS; //in bytes
 
     text_buf = malloc(sizeof(TEXTSTRUCT));
-    text_buf->char_array = malloc(char_size); 
+    text_buf->char_array = malloc(char_size);
     text_buf->max_n_chars = START_MAX_CHARS;
     text_buf->used_n_chars = 0;
-    text_buf->rotation= malloc(sizeof(float)*START_MAX_labels); 
-    text_buf->size= malloc(sizeof(float)*START_MAX_labels); 
-    text_buf->styleID= malloc(sizeof(uint32_t)*START_MAX_labels); 
-    text_buf->anchor= malloc(sizeof(uint32_t)*START_MAX_labels); 
-    
+    text_buf->rotation= malloc(sizeof(float)*START_MAX_labels);
+    text_buf->size= malloc(sizeof(float)*START_MAX_labels);
+    text_buf->styleID= malloc(sizeof(uint32_t)*START_MAX_labels);
+    text_buf->anchor= malloc(sizeof(uint32_t)*START_MAX_labels);
+
     text_buf->used_n_vals = 0;
 
     text_buf->max_n_vals=START_MAX_labels ;
@@ -345,7 +345,7 @@ int text_write(const char *the_text,uint32_t styleID, float size, float rotation
 {
 
     size_t new_size, new_n_vals;
-    
+
     size_t len_of_str = strlen((const char*) the_text) + 1;
 
     char *new_array;
@@ -361,30 +361,30 @@ int text_write(const char *the_text,uint32_t styleID, float size, float rotation
         text_buf->char_array = new_array;
         text_buf->max_n_chars = new_size;
     }
-    
+
     strncpy(text_buf->char_array + text_buf->used_n_chars, the_text, len_of_str);
     text_buf->used_n_chars += len_of_str;
-    
+
     while(text_buf->max_n_vals - text_buf->used_n_vals < 1)
     {
-     new_n_vals = text_buf->max_n_vals * 2;
-     
-     text_buf->size = realloc(text_buf->size, new_n_vals * sizeof(float));
-     text_buf->rotation = realloc(text_buf->rotation, new_n_vals * sizeof(float));
-     text_buf->anchor = realloc(text_buf->anchor, new_n_vals * sizeof(uint32_t));
-     text_buf->styleID = realloc(text_buf->styleID, new_n_vals * sizeof(uint32_t));
-      text_buf->max_n_vals = new_n_vals;
+        new_n_vals = text_buf->max_n_vals * 2;
+
+        text_buf->size = realloc(text_buf->size, new_n_vals * sizeof(float));
+        text_buf->rotation = realloc(text_buf->rotation, new_n_vals * sizeof(float));
+        text_buf->anchor = realloc(text_buf->anchor, new_n_vals * sizeof(uint32_t));
+        text_buf->styleID = realloc(text_buf->styleID, new_n_vals * sizeof(uint32_t));
+        text_buf->max_n_vals = new_n_vals;
     }
-    
+
     *(text_buf->size + text_buf->used_n_vals) = size;
     *(text_buf->rotation + text_buf->used_n_vals) = rotation;
     *(text_buf->styleID + text_buf->used_n_vals) = styleID;
     *(text_buf->anchor + text_buf->used_n_vals) = anchor;
-    
+
     text_buf->used_n_vals++;
 
-    
-return 0;
+
+    return 0;
 }
 
 

@@ -27,7 +27,7 @@
 
 static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 {
-	
+
 
     /*twkb-buffer*/
     uint8_t *buf;
@@ -46,7 +46,7 @@ static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
     tb->start_pos = tb->read_pos=buf;
     tb->end_pos=buf+buf_len;
     //printf("allocate buffer at %p\n",tb->start_pos);
-	
+
     return 0;
 
 
@@ -92,19 +92,19 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
 
     log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
-    
+
     err = sqlite3_errcode(projectDB);
     if(err)
         log_this(1,"sqlite problem 2, %d\n",err);
 
-    
+
     while (sqlite3_step(prepared_statement)==SQLITE_ROW)
     {
         ts.id = sqlite3_column_int(prepared_statement, 2);
         ts.styleID = sqlite3_column_int(prepared_statement, 3);
         if(get_blob(&tb,prepared_statement,0))
         {
-                    log_this(1,"Failed to select data\n");
+            log_this(1,"Failed to select data\n");
 
             sqlite3_close(projectDB);
             return NULL;
@@ -139,15 +139,15 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
         }
         if(theLayer->show_text)
-	{
-	  const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
+        {
+            const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
 
-	  size = sqlite3_column_int(prepared_statement, 5);
-	  rotation = sqlite3_column_double(prepared_statement, 6);
-	  anchor = sqlite3_column_double(prepared_statement, 7);  
-	 
-	  text_write(txt,0, size, rotation,anchor, theLayer->text);
-	}
+            size = sqlite3_column_int(prepared_statement, 5);
+            rotation = sqlite3_column_double(prepared_statement, 6);
+            anchor = sqlite3_column_double(prepared_statement, 7);
+
+            text_write(txt,0, size, rotation,anchor, theLayer->text);
+        }
 
     }
     sqlite3_clear_bindings(prepared_statement);

@@ -98,7 +98,7 @@ int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_dow
 
     centerx += deltax;
     centery += deltay;
-	
+
     newBBOX[0] = currentBBOX[0]  + deltax;
     newBBOX[1] = currentBBOX[1]  + deltay;
     newBBOX[2] = currentBBOX[2]  + deltax;

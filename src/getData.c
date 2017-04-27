@@ -30,7 +30,7 @@
 int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 {
 
-    log_this(10, "Entering get_data\n");    
+    log_this(10, "Entering get_data\n");
     int i,t, rc;
     pthread_t threads[nLayers];
     LAYER_RUNTIME *oneLayer;
@@ -45,9 +45,9 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         if(oneLayer->geometryType == POLYGONTYPE)
             element_reset_buffer(oneLayer->tri_index);
 
-	if(oneLayer->show_text)
-	  text_reset_buffer(oneLayer->text);
-	
+        if(oneLayer->show_text)
+            text_reset_buffer(oneLayer->text);
+
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
 
@@ -57,19 +57,19 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
         }
     }
-    
+
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    for(t=0; t<nLayers; t++) 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    for(t=0; t<nLayers; t++)
     {
         oneLayer = layerRuntime + t;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-                log_this(10, "load nr %d\n", t);
+            log_this(10, "load nr %d\n", t);
             rc = pthread_join(threads[t], NULL);
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
@@ -89,7 +89,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
             }
         }
     }
-    
+
 //render_txt(window);
     SDL_GL_SwapWindow(window);
 //render(window,res_buf);

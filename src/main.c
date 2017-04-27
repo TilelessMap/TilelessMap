@@ -29,11 +29,11 @@
 
 int init_resources(char *dir)
 {
-     log_this(10, "Entering init_resources\n");
+    log_this(10, "Entering init_resources\n");
     int i, rc;
     char     *err_msg;
     GLint attribute_coord2d, uniform_theMatrix, uniform_color, uniform_coord2d, box4d;
-    
+
     LAYER_RUNTIME *oneLayer;
     char sql[2048];
     char *styleselect;
@@ -52,10 +52,10 @@ int init_resources(char *dir)
     sqlite3_stmt *preparedCountStyle;
     sqlite3_stmt * preparedStylesLoading;
 
-        
-     /********************************************************************************
-      Get information about all the layers in the project
-      */
+
+    /********************************************************************************
+     Get information about all the layers in the project
+     */
     char *sqlLayerLoading = "SELECT "
                             /*fields for attaching the database*/
                             "d.name dbname, d.source filename, "
@@ -73,28 +73,28 @@ int init_resources(char *dir)
                             "INNER JOIN programs p on l.program = p.programID "
                             "INNER JOIN shaders vs on p.vs = vs.name "
                             "INNER JOIN shaders fs on p.fs = fs.name "
-			    "LEFT JOIN text_conf tc on l.layerID=tc.layerID "
-			    "LEFT JOIN programs pt on tc.program=pt.programID "
-			    "LEFT JOIN shaders vt on pt.vs=vt.name "
-			    "LEFT JOIN shaders ft on pt.fs=ft.name "			    
-			    "order by l.orderby ;";
-			    
-			    
-			    
-			    
+                            "LEFT JOIN text_conf tc on l.layerID=tc.layerID "
+                            "LEFT JOIN programs pt on tc.program=pt.programID "
+                            "LEFT JOIN shaders vt on pt.vs=vt.name "
+                            "LEFT JOIN shaders ft on pt.fs=ft.name "
+                            "order by l.orderby ;";
+
+
+
+
     log_this(10, "Get Layer sql : %s\n",sqlLayerLoading);
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
     if (rc != SQLITE_OK ) {
-	log_this(1, "SQL error in %s\n",sqlLayerLoading);
+        log_this(1, "SQL error in %s\n",sqlLayerLoading);
         sqlite3_close(projectDB);
         return 1;
     }
-    
-    
-     /********************************************************************************
-      Count the layers in the project and get maximum styleID in the project
-      */
+
+
+    /********************************************************************************
+     Count the layers in the project and get maximum styleID in the project
+     */
     char *sqlCountStyles = "SELECT COUNT(*), MAX(styleID)   "
                            "FROM styles s ; ";
 
@@ -109,8 +109,8 @@ int init_resources(char *dir)
     int nStyles = sqlite3_column_int(preparedCountStyle, 0);
     int maxStyleID = sqlite3_column_int(preparedCountStyle, 1);
     sqlite3_finalize(preparedCountStyle);
-    
-    
+
+
     /********************************************************************************
       Put all the styles in an array of style structures
     */
@@ -132,7 +132,7 @@ int init_resources(char *dir)
         sqlite3_close(projectDB);
         return 1;
     }
-    
+
     for (i =0; i<nStyles; i++)
     {
         sqlite3_step(preparedStylesLoading);
@@ -149,8 +149,8 @@ int init_resources(char *dir)
     }
 
     sqlite3_finalize(preparedStylesLoading);
-    
-    
+
+
     /********************************************************************************
       Attach all databases with data for the project
     */
@@ -184,14 +184,14 @@ int init_resources(char *dir)
          fs_source = sqlite3_column_text(preparedLayerLoading, 4);*/
     }
     sqlite3_finalize(preparedDb2Attach);
-    
+
     /********************************************************************************
      Count how many layers we are dealing with
     */
     char *sqlCountLayers = "SELECT COUNT(*)   "
                            "FROM layers l ; ";
 
-    
+
     rc = sqlite3_prepare_v2(projectDB, sqlCountLayers, -1, &preparedCountLayers, 0);
 
     if (rc != SQLITE_OK ) {
@@ -203,14 +203,14 @@ int init_resources(char *dir)
     nLayers = sqlite3_column_int(preparedCountLayers, 0);
 
     sqlite3_finalize(preparedCountLayers);
-    
+
 
     /********************************************************************************
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
 
     layerRuntime = init_layer_runtime(nLayers);
-    
+
     for (i =0; i<nLayers; i++)
     {
         oneLayer=layerRuntime + i;
@@ -219,9 +219,9 @@ int init_resources(char *dir)
         const unsigned char * vs_source = sqlite3_column_text(preparedLayerLoading, 3);
         const unsigned char *  fs_source = sqlite3_column_text(preparedLayerLoading, 4);
 
-	
-	program = create_program(vs_source, fs_source, &vs, &fs);
-	
+
+        program = create_program(vs_source, fs_source, &vs, &fs);
+
         attribute_coord2d = glGetAttribLocation(program, "coord2d");
         if (attribute_coord2d == -1) {
             log_this(1, "Could not bind attribute : %s\n", "coord2d");
@@ -245,9 +245,9 @@ int init_resources(char *dir)
         oneLayer->uniform_theMatrix = uniform_theMatrix;
         oneLayer->uniform_color = uniform_color;
 
-	reset_shaders(vs, fs, program);
-	
-	
+        reset_shaders(vs, fs, program);
+
+
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *geometryfield = sqlite3_column_text(preparedLayerLoading, 5);
 
@@ -265,64 +265,64 @@ int init_resources(char *dir)
         oneLayer->minScale = sqlite3_column_int(preparedLayerLoading, 11);
         oneLayer->maxScale = sqlite3_column_int(preparedLayerLoading, 12);
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
-	
+
         oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 15);
-	
+
         const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,17);
         const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 18);
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 19);
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 20);
 //	oneLayer->has_text=0;
 
-	
-	if(oneLayer->show_text)
-	{
-	    const unsigned char *vt_source = sqlite3_column_text(preparedLayerLoading, 22);
-	    const unsigned char *ft_source = sqlite3_column_text(preparedLayerLoading, 23);
 
-	
-	program = create_program(vt_source, ft_source, &vs, &fs);
-	
-        uniform_coord2d = glGetUniformLocation(program, "coord2d");
-        if (uniform_coord2d == -1) {
-            fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
-            return 0;
+        if(oneLayer->show_text)
+        {
+            const unsigned char *vt_source = sqlite3_column_text(preparedLayerLoading, 22);
+            const unsigned char *ft_source = sqlite3_column_text(preparedLayerLoading, 23);
+
+
+            program = create_program(vt_source, ft_source, &vs, &fs);
+
+            uniform_coord2d = glGetUniformLocation(program, "coord2d");
+            if (uniform_coord2d == -1) {
+                fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
+                return 0;
+            }
+
+            box4d = glGetAttribLocation(program, "box");
+            if (box4d == -1) {
+                fprintf(stderr, "Could not bind attribute : %s\n", "box");
+                return 0;
+            }
+
+            uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
+            if (uniform_theMatrix == -1) {
+                fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+                return 0;
+            }
+
+            uniform_color = glGetUniformLocation(program, "color");
+            if (uniform_color == -1) {
+                fprintf(stderr, "Could not bind uniform : %s\n", "color");
+                return 0;
+            }
+
+            oneLayer->txt_program = program;
+            oneLayer->txt_coord2d = uniform_coord2d;
+            oneLayer->txt_theMatrix = uniform_theMatrix;
+            oneLayer->txt_color = uniform_color;
+            oneLayer->txt_box = box4d;
+            reset_shaders(vs, fs, program);
+
+
+
         }
 
-        box4d = glGetAttribLocation(program, "box");
-        if (box4d == -1) {
-            fprintf(stderr, "Could not bind attribute : %s\n", "box");
-            return 0;
-        }
 
-        uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
-        if (uniform_theMatrix == -1) {
-            fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-            return 0;
-        }
 
-        uniform_color = glGetUniformLocation(program, "color");
-        if (uniform_color == -1) {
-            fprintf(stderr, "Could not bind uniform : %s\n", "color");
-            return 0;
-        }
 
-        oneLayer->txt_program = program;
-        oneLayer->txt_coord2d = uniform_coord2d;
-        oneLayer->txt_theMatrix = uniform_theMatrix;
-        oneLayer->txt_color = uniform_color;
-      oneLayer->txt_box = box4d;
-	reset_shaders(vs, fs, program);
-	
-	  
-	  
-	}
-	
-	
-	
-	
-	
-	
+
+
         char tri_idx_fld[32];
         if(oneLayer->geometryType == POLYGONTYPE)
         {
@@ -352,7 +352,7 @@ int init_resources(char *dir)
             stylejoin[0] = '\0';
             stylewhere[0] =  '\0';
         }
-        
+
         if(oneLayer->show_text)
         {
             snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",txt_fld, size_fld, rotation_fld, anchor_fld);
@@ -392,8 +392,8 @@ int init_resources(char *dir)
         if (oneLayer->geometryType == POLYGONTYPE)
             oneLayer->tri_index =  init_element_buf();
 
-	if (oneLayer->show_text)
-	  oneLayer->text =  init_text_buf();
+        if (oneLayer->show_text)
+            oneLayer->text =  init_text_buf();
 
     }
 
@@ -401,17 +401,17 @@ int init_resources(char *dir)
     return 0;
 }
 
-void mainLoop(SDL_Window* window) 
+void mainLoop(SDL_Window* window)
 {
- log_this(10, "Entering mainLoop\n");
-	GLfloat dDist, tx,ty,pr;
-int ti, fi;
+    log_this(10, "Entering mainLoop\n");
+    GLfloat dDist, tx,ty,pr;
+    int ti, fi;
     GLfloat currentBBOX[4] = {0.0,0.0,0.0,0.0};
     GLfloat newBBOX[4] = {0.0,0.0,0.0,0.0};
     int mouse_down;
     int wheel_y;
     SDL_Event ev;
-    
+
     SDL_Event tmp_ev[10];
     int n_events;
     GLint px_x_clicked,px_y_clicked;
@@ -420,7 +420,7 @@ int ti, fi;
 
     GLfloat mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
-initialBBOX(380000, 6660000, 500000, newBBOX);
+    initialBBOX(380000, 6660000, 300000, newBBOX);
 //initialBBOX(230000, 6660000, 5000, newBBOX);
 //    initialBBOX(380000, 6644000, 1000, newBBOX);
 
@@ -452,7 +452,7 @@ initialBBOX(380000, 6660000, 500000, newBBOX);
                 mouse_up_x = ev.button.x;
                 mouse_up_y = ev.button.y;
                 matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-                
+
                 get_data(window, newBBOX, theMatrix);
                 copyNew2CurrentBBOX(newBBOX, currentBBOX);
                 break;
@@ -467,144 +467,144 @@ initialBBOX(380000, 6660000, 500000, newBBOX);
                     matrixFromBboxPointZoom(currentBBOX,newBBOX,px_x_clicked, px_y_clicked, 2, theMatrix);
 
                 get_data(window, newBBOX, theMatrix);
-		
+
                 copyNew2CurrentBBOX(newBBOX, currentBBOX);
                 break;
-                
+
             case SDL_MOUSEMOTION:
-                               
-                
-        
-			
 
-			if(mouse_down)
-            {
-		n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
-            		
-			if(n_events<2)
-            {    
-            
-			mouse_up_x = ev.motion.x;
-			mouse_up_y = ev.motion.y;
 
-            
 
-		       matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-		
-                render_data(window, theMatrix);
-	       //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
-			
 
-            }
-		
-                
-                break;
-           
-            }   
-                
-                
-#endif                
 
-            case SDL_FINGERDOWN:   
-		ti = ev.tfinger.touchId;
-		fi = ev.tfinger.fingerId;
-		tx = ev.tfinger.x;
-		ty = ev.tfinger.y;
-		pr = ev.tfinger.pressure;
-		//DEBUG_PRINT(("DOWN: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti));
-	    
+                if(mouse_down)
+                {
+                    n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
+
+                    if(n_events<2)
+                    {
+
+                        mouse_up_x = ev.motion.x;
+                        mouse_up_y = ev.motion.y;
+
+
+
+                        matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+
+                        render_data(window, theMatrix);
+                        //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
+
+
+                    }
+
+
+                    break;
+
+                }
+
+
+#endif
+
+            case SDL_FINGERDOWN:
+                ti = ev.tfinger.touchId;
+                fi = ev.tfinger.fingerId;
+                tx = ev.tfinger.x;
+                ty = ev.tfinger.y;
+                pr = ev.tfinger.pressure;
+                //DEBUG_PRINT(("DOWN: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti));
+
                 register_touch_down(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
                 break;
-            case SDL_FINGERUP:	
-		   log_this(10,"SDL_FINGERUP");
-  
-		 ti = ev.tfinger.touchId;
-		fi = ev.tfinger.fingerId;
-		tx = ev.tfinger.x;
-		ty = ev.tfinger.y;
-		pr = ev.tfinger.pressure;
-	    
-		if(touches[1].active) //check if at least 2 fingers are activated
-		{
-			log_this(10, "UP: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti);
-			if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
-			{
-				log_this(10, "OK, on the inside\n");
-			    get_box_from_touches(touches, currentBBOX, newBBOX);                
-			    reset_touch_que(touches);
-			    matrixFromBBOX(newBBOX, theMatrix);
-				log_this(10,"ok, go get data");
-			    get_data(window, newBBOX, theMatrix);
-			    copyNew2CurrentBBOX(newBBOX, currentBBOX);
-		    }
-		}
-		else
-		{
-		//	  mouse_down = 0;
-                mouse_up_x = tx * CURR_WIDTH;
-                mouse_up_y = ty * CURR_HEIGHT;
-		mouse_down_x = touches[0].x1 * CURR_WIDTH;
-		mouse_down_y = touches[0].y1 * CURR_HEIGHT;
-                matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-			reset_touch_que(touches);
-			
-		//render_data(window, newBBOX, theMatrix);
-              get_data(window, newBBOX, theMatrix);
-                copyNew2CurrentBBOX(newBBOX, currentBBOX);
-			
-		}
-                
+            case SDL_FINGERUP:
+                log_this(10,"SDL_FINGERUP");
+
+                ti = ev.tfinger.touchId;
+                fi = ev.tfinger.fingerId;
+                tx = ev.tfinger.x;
+                ty = ev.tfinger.y;
+                pr = ev.tfinger.pressure;
+
+                if(touches[1].active) //check if at least 2 fingers are activated
+                {
+                    log_this(10, "UP: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti);
+                    if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
+                    {
+                        log_this(10, "OK, on the inside\n");
+                        get_box_from_touches(touches, currentBBOX, newBBOX);
+                        reset_touch_que(touches);
+                        matrixFromBBOX(newBBOX, theMatrix);
+                        log_this(10,"ok, go get data");
+                        get_data(window, newBBOX, theMatrix);
+                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                    }
+                }
+                else
+                {
+                    //	  mouse_down = 0;
+                    mouse_up_x = tx * CURR_WIDTH;
+                    mouse_up_y = ty * CURR_HEIGHT;
+                    mouse_down_x = touches[0].x1 * CURR_WIDTH;
+                    mouse_down_y = touches[0].y1 * CURR_HEIGHT;
+                    matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+                    reset_touch_que(touches);
+
+                    //render_data(window, newBBOX, theMatrix);
+                    get_data(window, newBBOX, theMatrix);
+                    copyNew2CurrentBBOX(newBBOX, currentBBOX);
+
+                }
+
                 break;
-            
-		case SDL_FINGERMOTION:
-			   log_this(10,"SDL_FINGERMOTION");
-		n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
-			
-			if(touches[1].active) //check if at least 2 fingers are activated
-			{
-			    log_this(10, "m2");
 
-				register_motion(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
-				 log_this(10, "register_motion");
-				    get_box_from_touches(touches, currentBBOX, newBBOX);    
- log_this(10, "get_box_from_touches");				
-				    //reset_touch_que(touches);
-					matrixFromBBOX(newBBOX, theMatrix);
-				 log_this(10, "matrixFromBBOX");	
-				if(n_events<2)
-					 render_data(window, theMatrix);
-			    
-			    
-			}
-			else
-			{
-			    log_this(10, "m1");
-				//~ android_log_print(ANDROID_LOG_INFO, APPNAME, "m1");
-			 ti = ev.tfinger.touchId;
-			fi = ev.tfinger.fingerId;
-			tx = ev.tfinger.x;
-			ty = ev.tfinger.y;
-			pr = ev.tfinger.pressure;
-		    
+            case SDL_FINGERMOTION:
+                log_this(10,"SDL_FINGERMOTION");
+                n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
 
-			//	  mouse_down = 0;
-			mouse_up_x = tx * CURR_WIDTH;
-			mouse_up_y = ty * CURR_HEIGHT;
-			mouse_down_x = touches[0].x1 * CURR_WIDTH;
-			mouse_down_y = touches[0].y1 * CURR_HEIGHT;
-		       matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-				
-			if(n_events<2)
-		    render_data(window, theMatrix);
-	       //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
-			}	    
-		
-	    break;
-	    
-        
-        
-        
-        
+                if(touches[1].active) //check if at least 2 fingers are activated
+                {
+                    log_this(10, "m2");
+
+                    register_motion(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
+                    log_this(10, "register_motion");
+                    get_box_from_touches(touches, currentBBOX, newBBOX);
+                    log_this(10, "get_box_from_touches");
+                    //reset_touch_que(touches);
+                    matrixFromBBOX(newBBOX, theMatrix);
+                    log_this(10, "matrixFromBBOX");
+                    if(n_events<2)
+                        render_data(window, theMatrix);
+
+
+                }
+                else
+                {
+                    log_this(10, "m1");
+                    //~ android_log_print(ANDROID_LOG_INFO, APPNAME, "m1");
+                    ti = ev.tfinger.touchId;
+                    fi = ev.tfinger.fingerId;
+                    tx = ev.tfinger.x;
+                    ty = ev.tfinger.y;
+                    pr = ev.tfinger.pressure;
+
+
+                    //	  mouse_down = 0;
+                    mouse_up_x = tx * CURR_WIDTH;
+                    mouse_up_y = ty * CURR_HEIGHT;
+                    mouse_down_x = touches[0].x1 * CURR_WIDTH;
+                    mouse_down_y = touches[0].y1 * CURR_HEIGHT;
+                    matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+
+                    if(n_events<2)
+                        render_data(window, theMatrix);
+                    //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                }
+
+                break;
+
+
+
+
+
             case SDL_WINDOWEVENT:
                 if (ev.window.event  == SDL_WINDOWEVENT_RESIZED)
                 {
@@ -615,15 +615,15 @@ initialBBOX(380000, 6660000, 500000, newBBOX);
 
                 }
                 break;
-                
+
             case SDL_QUIT:
-	      free(touches);
+                free(touches);
                 return;
             }
         }
         //      render_data(window,currentBBOX,theMatrix);
     }
-	      free(touches);
+    free(touches);
     return ;
 }
 
@@ -643,7 +643,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
         }
         if(theLayer.show_text)
             text_destroy_buffer(theLayer.text);
- 
+
         sqlite3_finalize(theLayer.preparedStatement);
 
     }
@@ -659,32 +659,32 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
 
 int main(int argc, char **argv)
 {
-	
-	log_this(10, "OK, let's start \n");
- text_scale=2;
-  char projectfile[500];
-  char *dir;
-  if(argc > 1)
-    dir = argv[argc-1];
 
-  
- //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+    log_this(10, "OK, let's start \n");
+    text_scale=2;
+    char projectfile[500];
+    char *dir;
+    if(argc > 1)
+        dir = argv[argc-1];
 
-log_this(10, "project file = %s\n", projectfile);
+
+//snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
+    snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+
+    log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 
-/*
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
-*/
-  
-  SDL_Rect r;
-if (SDL_GetDisplayBounds(0, &r) != 0) {
-    SDL_Log("SDL_GetDisplayBounds failed: %s", SDL_GetError());
-    return 1;
-}
+    /*
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
+    */
+
+    SDL_Rect r;
+    if (SDL_GetDisplayBounds(0, &r) != 0) {
+        SDL_Log("SDL_GetDisplayBounds failed: %s", SDL_GetError());
+        return 1;
+    }
     SDL_Window* window = SDL_CreateWindow("TileLess",
                                           0, 0, r.w, r.h,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
@@ -694,7 +694,7 @@ if (SDL_GetDisplayBounds(0, &r) != 0) {
 
 //log_this(10, "width =  %d and height = %d\n",r.w, r.h);
     if (window == NULL) {
-log_this(1, "Error: can't create window:  : %s", SDL_GetError());
+        log_this(1, "Error: can't create window:  : %s", SDL_GetError());
         return EXIT_FAILURE;
     }
 
@@ -711,7 +711,7 @@ log_this(1, "Error: can't create window:  : %s", SDL_GetError());
 
     /*load the db into memory*/
     loadOrSaveDb(projectDB, projectfile,0);
-    
+
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (context == NULL) {
         log_this(1, "Error: SDL_GL_CreateContext : %s", SDL_GetError());
@@ -732,13 +732,13 @@ log_this(1, "Error: can't create window:  : %s", SDL_GetError());
     if (init_resources(dir))
         return EXIT_FAILURE;
 //if (init_text_resources())
-  //      return EXIT_FAILURE;
+    //      return EXIT_FAILURE;
 
-        if (init_text_resources(dir))   
-		{
-	     log_this(1,"Problems in init_text_resources");
+    if (init_text_resources(dir))
+    {
+        log_this(1,"Problems in init_text_resources");
         return EXIT_FAILURE;
-	    
+
     }
     mainLoop(window);
 

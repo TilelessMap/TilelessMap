@@ -25,12 +25,12 @@
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-  if(oneLayer->show_text)
-  {
-    
-render_text(oneLayer,theMatrix);
-return 0;
-  }
+    if(oneLayer->show_text)
+    {
+
+        render_text(oneLayer,theMatrix);
+        return 0;
+    }
     GLESSTRUCT *rb = oneLayer->res_buf;
 
     glGenBuffers(1, &(oneLayer->vbo));
@@ -45,10 +45,10 @@ return 0;
 
 int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-  int ndims = 2;
+    int ndims = 2;
     uint32_t i;//, np, pi;
     GLfloat *color;
-  //  GLenum err;
+    //  GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
     // glEnable(GL_PROGRAM_POINT_SIZE);
@@ -64,21 +64,21 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         0,                 // no extra data between each position
         0                  // offset of first element
     );
- /*   while ((err = glGetError()) != GL_NO_ERROR) {
-        log_this(10, "Problem1\n");
-        fprintf(stderr,"opengl error:%d\n", err);
-    }*/
+    /*   while ((err = glGetError()) != GL_NO_ERROR) {
+           log_this(10, "Problem1\n");
+           fprintf(stderr,"opengl error:%d\n", err);
+       }*/
 //    glUniform1fv(uniform_bbox, 4, bbox);
     glUniformMatrix4fv(oneLayer->uniform_theMatrix, 1, GL_FALSE,theMatrix );
 
-/*
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        log_this(10, "Problem3: %d\n", err);
-        fprintf(stderr,"opengl error:%d\n", err);
-    }*/
+    /*
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            log_this(10, "Problem3: %d\n", err);
+            fprintf(stderr,"opengl error:%d\n", err);
+        }*/
 
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
-      printf("There is a mismatch between number of labels and number of corresponding points\n");
+        printf("There is a mismatch between number of labels and number of corresponding points\n");
     int used=0;
     for (i=0; i<rb->used_n_pa; i++)
     {
@@ -90,21 +90,21 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         glUniform4fv(oneLayer->uniform_color,1,color );
         glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
 
-      //  log_this(10, "4render point p nr %d", i);
-	
-	  /*   if(oneLayer->show_text)
-	    {
-	      int antal = oneLayer->text->used_n_vals;
-	      
-	      printf("start, print text %d\n",antal);
+        //  log_this(10, "4render point p nr %d", i);
 
-		char *txt=oneLayer->text->char_array+used;
-		printf("text %s, x %f, y %f, startindex = %d\n",txt, *(rb->vertex_array+ *(rb->start_index+i)*ndims), *(rb->vertex_array+ *(rb->start_index+i)*ndims+1), *(rb->start_index+i));
-		used+=strlen(txt)+1;
-	      
-	      printf("printed %d texts\n",i);
-	      
-	    }*/
+        /*   if(oneLayer->show_text)
+          {
+            int antal = oneLayer->text->used_n_vals;
+
+            printf("start, print text %d\n",antal);
+
+        char *txt=oneLayer->text->char_array+used;
+        printf("text %s, x %f, y %f, startindex = %d\n",txt, *(rb->vertex_array+ *(rb->start_index+i)*ndims), *(rb->vertex_array+ *(rb->start_index+i)*ndims+1), *(rb->start_index+i));
+        used+=strlen(txt)+1;
+
+            printf("printed %d texts\n",i);
+
+          }*/
     }
     glDisableVertexAttribArray(oneLayer->attribute_coord2d);
 
@@ -133,7 +133,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
- //   GLenum err;
+//   GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
 
@@ -148,19 +148,19 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
         0,                 // no extra data between each position
         0                  // offset of first element
     );
- /*   while ((err = glGetError()) != GL_NO_ERROR) {
-        log_this(10, "Problem1\n");
-        fprintf(stderr,"opengl error:%d", err);
-    }*/
+    /*   while ((err = glGetError()) != GL_NO_ERROR) {
+           log_this(10, "Problem1\n");
+           fprintf(stderr,"opengl error:%d", err);
+       }*/
 //    glUniform1fv(uniform_bbox, 4, bbox);
     glUniformMatrix4fv(oneLayer->uniform_theMatrix, 1, GL_FALSE,theMatrix );
- /*   while ((err = glGetError()) != GL_NO_ERROR) {
-        log_this(10, "Problem 2\n");
-        fprintf(stderr,"opengl error:%d", err);
-    }*/
+    /*   while ((err = glGetError()) != GL_NO_ERROR) {
+           log_this(10, "Problem 2\n");
+           fprintf(stderr,"opengl error:%d", err);
+       }*/
 
-  
-    
+
+
     for (i=0; i<rb->used_n_pa; i++)
     {
         lw = 0;
@@ -247,19 +247,19 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             0,                 // no extra data between each position
             (GLvoid*) vertex_offset                  // offset of first element
         );
-    /*    while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem1\n");
-            fprintf(stderr,"opengl error:%d", err);
-        }*/
+        /*    while ((err = glGetError()) != GL_NO_ERROR) {
+                log_this(10, "Problem1\n");
+                fprintf(stderr,"opengl error:%d", err);
+            }*/
 
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
-	
+
         glUniformMatrix4fv(oneLayer->uniform_theMatrix, 1, GL_FALSE,theMatrix );
-      /*  while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem 2\n");
-            fprintf(stderr,"opengl error:%d", err);
-        }*/
+        /*  while ((err = glGetError()) != GL_NO_ERROR) {
+              log_this(10, "Problem 2\n");
+              fprintf(stderr,"opengl error:%d", err);
+          }*/
 
         Uint32 styleID = *(ti->styleID+i);
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
@@ -278,18 +278,18 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-/*
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem3: %d\n", err);
-            fprintf(stderr,"opengl error:%d", err);
-        }
-            np = *(ti->npoints+i);
-            pi = *(ti->start_index+i);
-            for (h=0;h<*(ti->npoints+i) * 3;h++)
-            {
-              int idx = *(ti->vertex_array + *(ti->start_index+i) * 3 + h);
-              double coord1 = *(oneLayer->res_buf->vertex_array + 2 *  idx);
-              double coord2 = *(oneLayer->res_buf->vertex_array + 2 *  idx + 1 );*/
+        /*
+                while ((err = glGetError()) != GL_NO_ERROR) {
+                    log_this(10, "Problem3: %d\n", err);
+                    fprintf(stderr,"opengl error:%d", err);
+                }
+                    np = *(ti->npoints+i);
+                    pi = *(ti->start_index+i);
+                    for (h=0;h<*(ti->npoints+i) * 3;h++)
+                    {
+                      int idx = *(ti->vertex_array + *(ti->start_index+i) * 3 + h);
+                      double coord1 = *(oneLayer->res_buf->vertex_array + 2 *  idx);
+                      double coord2 = *(oneLayer->res_buf->vertex_array + 2 *  idx + 1 );*/
         // log_this(10, "idx : %d, %lf, %lf\n", idx, coord1, coord2);
         //     log_this(10, "select 'point( %lf %lf)'::geometry geom union all\n",  coord1, coord2);
         //}
@@ -326,31 +326,31 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
         if(oneLayer->visible)
         {
 
- //~ log_this(10, "render : %d\n",oneLayer->geometryType);
+//~ log_this(10, "render : %d\n",oneLayer->geometryType);
             switch(oneLayer->geometryType) {
-                case POINTTYPE :
-               //     log_this(10, "render point");
-                    if (oneLayer->show_text) {
-                        render_text(oneLayer, theMatrix);
-                    } else {
+            case POINTTYPE :
+                //     log_this(10, "render point");
+                if (oneLayer->show_text) {
+                    render_text(oneLayer, theMatrix);
+                } else {
                     renderPoint(oneLayer, theMatrix);
-            }
+                }
                 break;
             case LINETYPE :
                 renderLine( oneLayer, theMatrix, 0);
                 break;
-	    case POLYGONTYPE :
-		renderPolygon( oneLayer, theMatrix);
-		renderLine(oneLayer, theMatrix,1);
-		break;
+            case POLYGONTYPE :
+                renderPolygon( oneLayer, theMatrix);
+                renderLine(oneLayer, theMatrix,1);
+                break;
             }
         }
-        
-        
+
+
     }
 
     SDL_GL_SwapWindow(window);
-    
+
     //  pthread_mutex_destroy(&mutex);
 //render(window,res_buf);
     return 0;
@@ -367,39 +367,39 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
  */
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-  
+
     log_this(10, "Entering renderText\n");
     char *rest;
     uint32_t i;
     GLfloat *color;
-  int ndims=2;
-	GLfloat x,y;
+    int ndims=2;
+    GLfloat x,y;
     uint32_t p;
     const char *u;
-	//FT_GlyphSlot g = face->glyph;
-	GLuint text_vbo;
+    //FT_GlyphSlot g = face->glyph;
+    GLuint text_vbo;
     glGenBuffers(1, &text_vbo);
-	/* Create a texture that will be used to hold one "glyph" */
-	GLuint tex;
+    /* Create a texture that will be used to hold one "glyph" */
+    GLuint tex;
 
-	GLESSTRUCT *rb = oneLayer->res_buf;
-	GLfloat point_coord[2];
-	glUseProgram(oneLayer->txt_program);
-	
-	glUniformMatrix4fv(oneLayer->txt_theMatrix, 1, GL_FALSE,theMatrix );
-	
-	
-	
+    GLESSTRUCT *rb = oneLayer->res_buf;
+    GLfloat point_coord[2];
+    glUseProgram(oneLayer->txt_program);
 
-	
-	
-	
-		float sx = 2.0 / CURR_WIDTH;
-	float sy = 2.0 / CURR_HEIGHT;
+    glUniformMatrix4fv(oneLayer->txt_theMatrix, 1, GL_FALSE,theMatrix );
 
-	
-	if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
-      printf("There is a mismatch between number of labels and number of corresponding points\n");
+
+
+
+
+
+
+    float sx = 2.0 / CURR_WIDTH;
+    float sy = 2.0 / CURR_HEIGHT;
+
+
+    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
+        printf("There is a mismatch between number of labels and number of corresponding points\n");
     int used=0;
     for (i=0; i<rb->used_n_pa; i++)
     {
@@ -422,23 +422,23 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         glUniform4fv(oneLayer->txt_color,1,color );
 
-	point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
-	point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
+        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
+        point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
 
         glUniform2fv(oneLayer->txt_coord2d,1,point_coord );
 
-	char *txt=oneLayer->text->char_array+used;
+        char *txt=oneLayer->text->char_array+used;
 
-	used+=strlen(txt)+1;
+        used+=strlen(txt)+1;
 
-	POINT_T coords[600];
-	int c = 0;
+        POINT_T coords[600];
+        int c = 0;
 
 
         x = 0;
         y = 0;
         /* Loop through all characters */
-       u = txt;
+        u = txt;
         while(*u) {
 
             p = utf82unicode(u,&u);
@@ -457,17 +457,23 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 continue;
 
             coords[c++] = (POINT_T) {
-                    x2, -y2, a->metrics[p].tx, a->metrics[p].ty};
+                x2, -y2, a->metrics[p].tx, a->metrics[p].ty
+            };
             coords[c++] = (POINT_T) {
-                    x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty};
+                x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty
+            };
             coords[c++] = (POINT_T) {
-                    x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h};
+                x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h
+            };
             coords[c++] = (POINT_T) {
-                    x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty};
+                x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty
+            };
             coords[c++] = (POINT_T) {
-                    x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h};
+                x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h
+            };
             coords[c++] = (POINT_T) {
-                    x2 + w, -y2 - h, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty + a->metrics[p].bh / a->h};
+                x2 + w, -y2 - h, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty + a->metrics[p].bh / a->h
+            };
         }
 
         /* Draw all the character on the screen in one go */
@@ -480,4 +486,4 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     return 0;
 }
- 
+

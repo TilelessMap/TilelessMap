@@ -20,8 +20,8 @@
  * Copyright (C) 2016-2017 Nicklas Avén
  *
  **********************************************************************
- 
- 
+
+
 
  ************************************************************************
 *This is the main header file where all exposed fuctions is declared
@@ -55,7 +55,7 @@
 
 
 #define APPNAME "TILELESS"
-#define LOGLEVEL 0
+#define LOGLEVEL 100
 
 
 
@@ -147,9 +147,9 @@ This is a structsimilar to the above, but instead keeping track text for labelin
 */
 typedef struct
 {
-    char *char_array; // a list characters. Each string is zeroterminated    
+    char *char_array; // a list characters. Each string is zeroterminated
     size_t used_n_chars;
-    size_t max_n_chars;  
+    size_t max_n_chars;
     uint32_t used_n_vals;
     uint32_t max_n_vals;
     float *rotation; //list if id to corresponding point array
@@ -171,7 +171,7 @@ typedef struct
     GLfloat color[4];
     GLfloat outlinecolor[4];
     GLfloat lineWidth;
-} 
+}
 STYLES_RUNTIME;
 
 /**
@@ -196,7 +196,7 @@ typedef struct
     /*values for what and how to render*/
     GLfloat *BBOX;
     uint8_t geometryType;
- //   uint8_t has_text;
+//   uint8_t has_text;
     GLint minScale;
     GLint maxScale;
     GLESSTRUCT *res_buf;
@@ -208,10 +208,10 @@ typedef struct
     GLint txt_theMatrix;
     GLint txt_color;
     GLint txt_box;
-    
+
     uint8_t show_text;
-    
- 
+
+
 }
 LAYER_RUNTIME;
 
@@ -231,7 +231,7 @@ typedef struct {
     float tx;	// x offset of glyph in texture coordinates
     float ty;	// y offset of glyph in texture coordinates
 } C;		// character information
-	
+
 typedef struct   {
     GLuint tex;		// texture object
 
@@ -415,7 +415,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 void log_this(int log_level, const char *log_txt, ... );
 
 /*********************** Global variables*******************************/
- 
+
 sqlite3 *projectDB;
 
 int nLayers;
@@ -445,11 +445,11 @@ GLint text_uniform_tex;
 GLint text_uniform_color;
 
 typedef struct  {
-	GLfloat x;
-	GLfloat y;
-	GLfloat s;
-	GLfloat t;
-}point;
+    GLfloat x;
+    GLfloat y;
+    GLfloat s;
+    GLfloat t;
+} point;
 
 GLuint text_vbo;
 
