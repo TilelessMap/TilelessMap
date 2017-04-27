@@ -420,7 +420,8 @@ int ti, fi;
 
     GLfloat mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
-initialBBOX(230000, 6660000, 5000, newBBOX);
+initialBBOX(380000, 6660000, 500000, newBBOX);
+//initialBBOX(230000, 6660000, 5000, newBBOX);
 //    initialBBOX(380000, 6644000, 1000, newBBOX);
 
 
@@ -667,7 +668,8 @@ int main(int argc, char **argv)
     dir = argv[argc-1];
 
   
-  snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
+ //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
+  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
 
 log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);
