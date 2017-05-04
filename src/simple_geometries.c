@@ -28,26 +28,26 @@
 
 int render_simple_Polygon()
 {
-    
+
     GLuint vbo;
     GLuint ebo;
     GLenum err;
-    
-    
+
+
     float sx = 2.0 / CURR_WIDTH;
     float sy = 2.0 / CURR_HEIGHT;
-    
-    
+
+
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
-  //  GLfloat theMatrix[16] = {1, 0,0,0,0,1,0,0,0,0,1,0,-0.5,0,0,1};
-    
-    
+    //  GLfloat theMatrix[16] = {1, 0,0,0,0,1,0,0,0,0,1,0,-0.5,0,0,1};
+
+
     GLfloat punkter[] = {5,75,5, 225,300,225,300,75};
-  //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
-     GLshort tri_index[] = {0,1,3,1,2,3};   
-     
- GLfloat color[] = {1,1,1,0.9};
-     
+    //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
+    GLshort tri_index[] = {0,1,3,1,2,3};
+
+    GLfloat color[] = {1,1,1,0.9};
+
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*8, punkter, GL_STATIC_DRAW);
@@ -56,60 +56,60 @@ int render_simple_Polygon()
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*6, tri_index, GL_STATIC_DRAW);
-            
-    
-    
-    
+
+
+
+
 
 //    GLenum err;
     glUseProgram(gen_program);
-    
-          
-        glUniform4fv(gen_color,1,color );
-        glUniformMatrix4fv(gen_theMatrix, 1, GL_FALSE,theMatrix );
+
+
+    glUniform4fv(gen_color,1,color );
+    glUniformMatrix4fv(gen_theMatrix, 1, GL_FALSE,theMatrix );
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    
+
     glEnableVertexAttribArray(gen_coord2d);
 
-        glVertexAttribPointer(
-            gen_coord2d, // attribute
-            2,                 // number of elements per vertex, here (x,y)
-            GL_FLOAT,          // the type of each element
-            GL_FALSE,          // take our values as-is
-            0,                 // no extra data between each position
-            0                  // offset of first element
-        );
-        /*    while ((err = glGetError()) != GL_NO_ERROR) {
-                log_this(10, "Problem1\n");
-                fprintf(stderr,"opengl error:%d", err);
-            }*/
-
-        
- //glDrawArrays(GL_TRIANGLES, 0, 3);
+    glVertexAttribPointer(
+        gen_coord2d, // attribute
+        2,                 // number of elements per vertex, here (x,y)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // take our values as-is
+        0,                 // no extra data between each position
+        0                  // offset of first element
+    );
+    /*    while ((err = glGetError()) != GL_NO_ERROR) {
+            log_this(10, "Problem1\n");
+            fprintf(stderr,"opengl error:%d", err);
+        }*/
 
 
-       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-          while ((err = glGetError()) != GL_NO_ERROR) {
-              fprintf(stderr,"opengl error 100:%d\n", err);
-          }
+//glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
-     
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr,"opengl error 100:%d\n", err);
+    }
 
 
 
 
-       
-         glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_SHORT,NULL);
 
-    
+
+
+
+    glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_SHORT,NULL);
+
+
     glDisableVertexAttribArray(gen_coord2d);
 
-          while ((err = glGetError()) != GL_NO_ERROR) {
-              fprintf(stderr,"opengl error 900:%d\n", err);
-          }
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr,"opengl error 900:%d\n", err);
+    }
     return 0;
 
 }

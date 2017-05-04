@@ -117,14 +117,14 @@ int init_text_resources(char *dir)
     FT_Face face;
     int len;
     char *font_data;
-    
-        GLuint vs, fs, program;
-    
-    
-    
-    
-    
-            const unsigned char vt_source[1024] = "attribute vec4 box; \
+
+    GLuint vs, fs, program;
+
+
+
+
+
+    const unsigned char vt_source[1024] = "attribute vec4 box; \
             uniform vec2 coord2d; \
             uniform mat4 theMatrix; \
             uniform vec4 color; \
@@ -133,9 +133,9 @@ int init_text_resources(char *dir)
             gl_Position = theMatrix * vec4(coord2d, 0.0, 1.0) + vec4(box.xy, 0.0, 0.0);  \
             texpos = box.zw; \
             }";
-            
-            
-            const unsigned char ft_source[1024] = "varying vec2 texpos; \
+
+
+    const unsigned char ft_source[1024] = "varying vec2 texpos; \
                     uniform sampler2D tex; \
                     uniform vec4 color; \
                     void main(void) { \
@@ -145,65 +145,65 @@ int init_text_resources(char *dir)
 
     gen_txt_program = create_program((unsigned char *) vt_source,(unsigned char *)  ft_source, &vs, &fs);
 
-        
+
     gen_txt_coord2d = glGetUniformLocation(gen_txt_program, "coord2d");
-    if (gen_txt_coord2d == -1) 
+    if (gen_txt_coord2d == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
         return 0;
     }
 
     gen_txt_box = glGetAttribLocation(gen_txt_program, "box");
-    if (gen_txt_box == -1) 
+    if (gen_txt_box == -1)
     {
         fprintf(stderr, "Could not bind attribute : %s\n", "box");
         return 0;
     }
 
     gen_txt_theMatrix = glGetUniformLocation(gen_txt_program, "theMatrix");
-    if (gen_txt_theMatrix == -1) 
+    if (gen_txt_theMatrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
         return 0;
     }
 
     gen_txt_color = glGetUniformLocation(gen_txt_program, "color");
-    if (gen_txt_color == -1) 
+    if (gen_txt_color == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "color");
         return 0;
     }
 
-    
-    
-	gen_txt_tex = glGetUniformLocation(gen_txt_program, "tex");
-    
-    if (gen_txt_tex == -1) 
+
+
+    gen_txt_tex = glGetUniformLocation(gen_txt_program, "tex");
+
+    if (gen_txt_tex == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "tex");
         return 0;
     }
-    
-            reset_shaders(vs, fs, gen_txt_program);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+    reset_shaders(vs, fs, gen_txt_program);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* Initialize the FreeType2 library */
     if (FT_Init_FreeType(&ft)) {
         fprintf(stderr, "Could not init freetype library");
@@ -246,7 +246,7 @@ int init_text_resources(char *dir)
 
 
     // Create the vertex buffer object
-  //  glGenBuffers(1, &text_vbo);
+    //  glGenBuffers(1, &text_vbo);
 
 
     atlases[0] = malloc(sizeof(ATLAS));
@@ -258,7 +258,7 @@ int init_text_resources(char *dir)
     create_atlas(atlases[0], face, 12);
     create_atlas(atlases[1], face, 16);
     create_atlas(atlases[2], face, 24);
-    
+
     sqlite3_finalize(preparedFonts);
     return 0;
 }
@@ -339,22 +339,22 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 
     /* Create a texture that will be used to hold all ASCII glyphs */
     glActiveTexture(GL_TEXTURE0);
-    
-    
-    
 
-    
+
+
+
+
     glGenTextures(1, &(a->tex));
-    
-    
 
-    
+
+
+
     glBindTexture(GL_TEXTURE_2D, a->tex);
-    
-    
 
-    
-    
+
+
+
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, a->w, a->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
     /* We require 1 byte alignment when uploading texture data */
@@ -363,7 +363,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
     /* Clamping to edges is important to prevent artifacts when scaling */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  
+
     /* Linear filtering usually looks best for text */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -414,49 +414,49 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 
 int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... )
 {
-    
-    
-        char txt_tot[1024];
+
+
+    char txt_tot[1024];
 
 
     va_list args;
     va_start (args, txt);
     vsnprintf (txt_tot,1024,txt, args);
     va_end (args);
-        float sx = 2.0 / CURR_WIDTH;
+    float sx = 2.0 / CURR_WIDTH;
     float sy = 2.0 / CURR_HEIGHT;
-    
-    
+
+
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
-glGenBuffers(1, &text_vbo);
- glUseProgram(gen_txt_program);
-    
- 
-GLfloat color[4];
+    glGenBuffers(1, &text_vbo);
+    glUseProgram(gen_txt_program);
 
-color[0] = r/255;
-color[1] = g/255;
-color[2] = b/255;
-color[3] = a/255;
 
-GLfloat point_coord[2];
+    GLfloat color[4];
 
-           point_coord[0]= x;
-           point_coord[1]= y;
-           glUniform4fv(gen_txt_color,1,color );
-           
+    color[0] = r/255;
+    color[1] = g/255;
+    color[2] = b/255;
+    color[3] = a/255;
+
+    GLfloat point_coord[2];
+
+    point_coord[0]= x;
+    point_coord[1]= y;
+    glUniform4fv(gen_txt_color,1,color );
+
     while ((err = glGetError()) != GL_NO_ERROR) {
-log_this(10, "Problem 2\n");
-fprintf(stderr,"opengl error wt:%d\n", err);
-}
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error wt:%d\n", err);
+    }
 
-glUniformMatrix4fv(gen_txt_theMatrix, 1, GL_FALSE,theMatrix );
-           draw_it(color,point_coord, size,gen_txt_box, gen_txt_color, gen_txt_coord2d, txt_tot, sx, sy);
-           
-           
+    glUniformMatrix4fv(gen_txt_theMatrix, 1, GL_FALSE,theMatrix );
+    draw_it(color,point_coord, size,gen_txt_box, gen_txt_color, gen_txt_coord2d, txt_tot, sx, sy);
+
+
     while ((err = glGetError()) != GL_NO_ERROR) {
-log_this(10, "Problem 2\n");
-fprintf(stderr,"opengl error wt2:%d\n", err);
-}
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error wt2:%d\n", err);
+    }
 }
 

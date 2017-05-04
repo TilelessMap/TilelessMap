@@ -275,55 +275,55 @@ int init_resources(char *dir)
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 20);
 //	oneLayer->has_text=0;
 
-/*
-        if(oneLayer->show_text)
-        {
-            const unsigned char *vt_source = sqlite3_column_text(preparedLayerLoading, 22);
-            const unsigned char *ft_source = sqlite3_column_text(preparedLayerLoading, 23);
+        /*
+                if(oneLayer->show_text)
+                {
+                    const unsigned char *vt_source = sqlite3_column_text(preparedLayerLoading, 22);
+                    const unsigned char *ft_source = sqlite3_column_text(preparedLayerLoading, 23);
 
 
-            program = create_program(vt_source, ft_source, &vs, &fs);
+                    program = create_program(vt_source, ft_source, &vs, &fs);
 
-            uniform_coord2d = glGetUniformLocation(program, "coord2d");
-            if (uniform_coord2d == -1) 
-            {
-                fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
-                return 0;
-            }
+                    uniform_coord2d = glGetUniformLocation(program, "coord2d");
+                    if (uniform_coord2d == -1)
+                    {
+                        fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
+                        return 0;
+                    }
 
-            box4d = glGetAttribLocation(program, "box");
-            if (box4d == -1) 
-            {
-                fprintf(stderr, "Could not bind attribute : %s\n", "box");
-                return 0;
-            }
+                    box4d = glGetAttribLocation(program, "box");
+                    if (box4d == -1)
+                    {
+                        fprintf(stderr, "Could not bind attribute : %s\n", "box");
+                        return 0;
+                    }
 
-            uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
-            if (uniform_theMatrix == -1) 
-            {
-                fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-                return 0;
-            }
+                    uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
+                    if (uniform_theMatrix == -1)
+                    {
+                        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+                        return 0;
+                    }
 
-            uniform_color = glGetUniformLocation(program, "color");
-            if (uniform_color == -1) 
-            {
-                fprintf(stderr, "Could not bind uniform : %s\n", "color");
-                return 0;
-            }
+                    uniform_color = glGetUniformLocation(program, "color");
+                    if (uniform_color == -1)
+                    {
+                        fprintf(stderr, "Could not bind uniform : %s\n", "color");
+                        return 0;
+                    }
 
-            oneLayer->txt_program = program;
-            oneLayer->txt_coord2d = uniform_coord2d;
-            oneLayer->txt_theMatrix = uniform_theMatrix;
-            oneLayer->txt_color = uniform_color;
-            oneLayer->txt_box = box4d;
-            reset_shaders(vs, fs, program);
+                    oneLayer->txt_program = program;
+                    oneLayer->txt_coord2d = uniform_coord2d;
+                    oneLayer->txt_theMatrix = uniform_theMatrix;
+                    oneLayer->txt_color = uniform_color;
+                    oneLayer->txt_box = box4d;
+                    reset_shaders(vs, fs, program);
 
 
 
-        }
+                }
 
-*/
+        */
 
 
 
@@ -403,17 +403,17 @@ int init_resources(char *dir)
     }
 
     sqlite3_finalize(preparedLayerLoading);
-    
-    
-/*For generic geometries, not belonging to any layer*/    
-    
-const unsigned char gen_vt[1024] =  "attribute vec2 coord2d; \
+
+
+    /*For generic geometries, not belonging to any layer*/
+
+    const unsigned char gen_vt[1024] =  "attribute vec2 coord2d; \
 uniform mat4 theMatrix;\
 void main(void) { \
   gl_Position =  theMatrix * vec4(coord2d, 0.0, 1.0);  \
 }";
-    
-const unsigned char gen_ft[1024] = "uniform vec4 color; \
+
+    const unsigned char gen_ft[1024] = "uniform vec4 color; \
 void main(void) { \
   gl_FragColor = color; \
 }";
@@ -421,36 +421,36 @@ void main(void) { \
     /*create a shader program for generic text, not belonging to a layer*/
     gen_program = create_program((unsigned char *) gen_vt,(unsigned char *)  gen_ft, &vs, &fs);
 
-        
+
 
     gen_coord2d = glGetAttribLocation(gen_program, "coord2d");
-    if (gen_coord2d == -1) 
+    if (gen_coord2d == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "coord2d");
         return 0;
     }
 
     gen_color = glGetUniformLocation(gen_program, "color");
-    if (gen_color == -1) 
+    if (gen_color == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "color");
         return 0;
     }
     gen_theMatrix = glGetUniformLocation(gen_program, "theMatrix");
-    if (gen_theMatrix == -1) 
+    if (gen_theMatrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "color");
         return 0;
     }
 
 
-        
+
     reset_shaders(vs, fs, gen_program);
 
-            
-            
-            
-            
+
+
+
+
     return 0;
 }
 
@@ -482,27 +482,27 @@ void mainLoop(SDL_Window* window)
 
     matrixFromBBOX(newBBOX, theMatrix);
 
-    
-while ((err = glGetError()) != GL_NO_ERROR) {
-    log_this(10, "Problem 2\n");
-    fprintf(stderr,"opengl error 65 :%d\n", err);
-}          
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error 65 :%d\n", err);
+    }
 
     get_data(window, newBBOX, theMatrix);
- while ((err = glGetError()) != GL_NO_ERROR) {
-log_this(10, "Problem 2\n");
-fprintf(stderr,"oerror on return: %d\n", err);
-}
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"oerror on return: %d\n", err);
+    }
     copyNew2CurrentBBOX(newBBOX, currentBBOX);
 
     while (1)
     {
         if (SDL_WaitEvent(&ev)) /* execution suspends here while waiting on an event */
         {
-    while ((err = glGetError()) != GL_NO_ERROR) {
-log_this(10, "Problem 2\n");
-fprintf(stderr,"opengl error aaa000: %d\n", err);
-}
+            while ((err = glGetError()) != GL_NO_ERROR) {
+                log_this(10, "Problem 2\n");
+                fprintf(stderr,"opengl error aaa000: %d\n", err);
+            }
             switch (ev.type)
             {
 #ifndef __ANDROID__
@@ -555,16 +555,16 @@ fprintf(stderr,"opengl error aaa000: %d\n", err);
 
                         matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-log_this(10, "Problem 2\n");
-fprintf(stderr,"opengl error aaa: %d\n", err);
-}
+                        while ((err = glGetError()) != GL_NO_ERROR) {
+                            log_this(10, "Problem 2\n");
+                            fprintf(stderr,"opengl error aaa: %d\n", err);
+                        }
                         render_data(window, theMatrix);
                         //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
-    while ((err = glGetError()) != GL_NO_ERROR) {
-log_this(10, "Problem 2\n");
-fprintf(stderr,"opengl error aaa999: %d\n", err);
-}
+                        while ((err = glGetError()) != GL_NO_ERROR) {
+                            log_this(10, "Problem 2\n");
+                            fprintf(stderr,"opengl error aaa999: %d\n", err);
+                        }
 
                     }
 
@@ -739,10 +739,10 @@ int main(int argc, char **argv)
         dir = argv[argc-1];
 
 
- //snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
+//snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/varmland_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-   snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+    snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
 
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);
@@ -759,18 +759,18 @@ int main(int argc, char **argv)
         SDL_Log("SDL_GetDisplayBounds failed: %s", SDL_GetError());
         return 1;
     }
-    
+
 
 #ifndef __ANDROID__
     SDL_Window* window = SDL_CreateWindow("TileLess",
                                           0, 0, r.w, r.h,
                                           SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 #else
- 
+
     SDL_Window* window = SDL_CreateWindow("TileLess",
                                           0, 0, r.w, r.h,
                                           SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
-    
+
 #endif
     CURR_WIDTH = r.w;
     CURR_HEIGHT = r.h;
@@ -814,14 +814,14 @@ int main(int argc, char **argv)
 #endif
 
 
-      
+
 
     if (init_resources(dir))
         return EXIT_FAILURE;
 //if (init_text_resources())
     //      return EXIT_FAILURE;
 
-       
+
 
 
     if (init_text_resources(dir))
@@ -830,9 +830,9 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
 
     }
-    
-    
-         
+
+
+
     mainLoop(window);
 
     sqlite3_close(projectDB);
