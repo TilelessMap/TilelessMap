@@ -76,12 +76,12 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             log_this(10, "Problem3: %d\n", err);
             fprintf(stderr,"opengl error:%d\n", err);
         }*/
-
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
         printf("There is a mismatch between number of labels and number of corresponding points\n");
     int used=0;
     for (i=0; i<rb->used_n_pa; i++)
     {
+        total_points += *(rb->npoints+i);
         Uint32 styleID = *(rb->styleID+i);
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
@@ -130,12 +130,18 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 {
+    
+    
+      
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
 //   GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
+
+    
+          
 
     glUseProgram(oneLayer->program);
     glEnableVertexAttribArray(oneLayer->attribute_coord2d);
@@ -159,40 +165,62 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
            fprintf(stderr,"opengl error:%d", err);
        }*/
 
-
-
+       
+    
+    n_lines += rb->used_n_pa;
     for (i=0; i<rb->used_n_pa; i++)
     {
-        lw = 0;
+        lw = 1;
         /*    np = *(rb->npoints+i);
             pi = *(rb->start_index+i);*/
 //	style = oneLayer->styles[*(rb->styleID+i)] ;
 
         Uint32 styleID = *(rb->styleID+i);
+        
+        
+        
+        total_points += *(rb->npoints+i);
+            
+
+            
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
+                     lw = global_styles[styleID].lineWidth;   
+           if(!lw)
+            continue; 
+           
+           glLineWidth(lw);
             if(outline)
+            {
                 color = global_styles[styleID].outlinecolor;
+                        glUniform4fv(oneLayer->uniform_color,1,color );
+            glDrawArrays(GL_LINE_LOOP, *(rb->start_index+i), *(rb->npoints+i));
+            }
             else
+            {
                 color = global_styles[styleID].color;
-
-            lw = global_styles[styleID].lineWidth;
+                        glUniform4fv(oneLayer->uniform_color,1,color );
+            glDrawArrays(GL_LINE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
+            }
 
         }
         else
         {
-            return 1;
+            continue;
 
         }
-        glLineWidth(lw);
-        if(lw)
-        {
-            glUniform4fv(oneLayer->uniform_color,1,color );
-            glDrawArrays(GL_LINE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
-        }
+     
+              
+        
+            
+            
+      
+
+        
     }
+           
     glDisableVertexAttribArray(oneLayer->attribute_coord2d);
-
+   
     return 0;
 
 }
@@ -202,6 +230,12 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 
 int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
+    
+    
+    
+   
+
+
     GLESSTRUCT *rb = oneLayer->res_buf;
 //	 int i,j, offset=0;
     glGenBuffers(1, &(oneLayer->vbo));
@@ -209,12 +243,17 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
 
+    
     ELEMENTSTRUCT *ti = oneLayer->tri_index;
 
     //   int size =  sizeof(GLshort)*(ti->first_free-ti->vertex_array);
     glGenBuffers(1, &(oneLayer->ebo));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*(ti->first_free-ti->index_array), ti->index_array, GL_STATIC_DRAW);
+    
+    
+    
+   
     renderPolygon( oneLayer, theMatrix);
     renderLine(oneLayer, theMatrix,1);
     return 0;
@@ -228,13 +267,21 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     uint32_t i;//, np, pi;
     GLfloat *color;
 //    GLenum err;
+    
+   
+
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    
+    
     GLESSTRUCT *rb = oneLayer->res_buf;
     ELEMENTSTRUCT *ti = oneLayer->tri_index;
 
+   
+
     glUseProgram(oneLayer->program);
     glEnableVertexAttribArray(oneLayer->attribute_coord2d);
-
+  
+    n_polys += ti->used_n_pa;
 
     for (i=0; i<ti->used_n_pa; i++)
     {
@@ -297,27 +344,29 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         size_t index_offset = *(ti->start_index+i) * 3 *sizeof(GLushort) ;
         //  offset = i * 100;
         //int n = *(ti->npoints+i) * 3 ;
+        n_tri += *(ti->npoints+i);
         glDrawElements(GL_TRIANGLES, *(ti->npoints+i) * 3,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
 
     }
     glDisableVertexAttribArray(oneLayer->attribute_coord2d);
-
+  
     return 0;
 
 }
 
 
-
-/*This is actually not used now, but van be called to render without fetching data from db*/
 int render_data(SDL_Window* window,GLfloat *theMatrix)
 {
     log_this(10, "Entering render_data\n");
     int i;
     LAYER_RUNTIME *oneLayer;
 
+   
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
+  
+total_points=0;
     for (i=0; i<nLayers; i++)
     {
         oneLayer = layerRuntime + i;
@@ -369,29 +418,23 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
     log_this(10, "Entering renderText\n");
-    char *rest;
     uint32_t i;
     GLfloat *color;
     int ndims=2;
-    GLfloat x,y;
-    uint32_t p;
-    const char *u;
     //FT_GlyphSlot g = face->glyph;
-    GLuint text_vbo;
-    glGenBuffers(1, &text_vbo);
+ //   GLuint text_vbo;
+    char *txt;
+ //   glGenBuffers(1, &text_vbo);
     /* Create a texture that will be used to hold one "glyph" */
     GLuint tex;
 
-    GLESSTRUCT *rb = oneLayer->res_buf;
+ glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
-    glUseProgram(oneLayer->txt_program);
+    
+    GLESSTRUCT *rb = oneLayer->res_buf;
+    glUseProgram(gen_txt_program);
 
-    glUniformMatrix4fv(oneLayer->txt_theMatrix, 1, GL_FALSE,theMatrix );
-
-
-
-
-
+    glUniformMatrix4fv(gen_txt_theMatrix, 1, GL_FALSE,theMatrix );
 
 
     float sx = 2.0 / CURR_WIDTH;
@@ -401,35 +444,65 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
         printf("There is a mismatch between number of labels and number of corresponding points\n");
     int used=0;
+    
+    n_words += rb->used_n_pa;
     for (i=0; i<rb->used_n_pa; i++)
     {
+        
+        total_points += 1;
         int psz =  *(oneLayer->text->size+i);
+        
 //log_this(10, "psz = %d \n",psz);
-        ATLAS *a = atlases[psz-1];
-        glBindTexture(GL_TEXTURE_2D, a->tex);
-        glUniform1i(text_uniform_tex, 0);
-
-        /* Set up the VBO for our vertex data */
-        glEnableVertexAttribArray(oneLayer->txt_box);
-        glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
-        glVertexAttribPointer(oneLayer->txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-        Uint32 styleID = *(rb->styleID+i);
+    
+          Uint32 styleID = *(rb->styleID+i);
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
             color = global_styles[styleID].color;
-        }
-
-        glUniform4fv(oneLayer->txt_color,1,color );
-
+        }      
+        
+        
         point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
         point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
-
-        glUniform2fv(oneLayer->txt_coord2d,1,point_coord );
-
-        char *txt=oneLayer->text->char_array+used;
-
+        txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
+        draw_it(color,point_coord, psz, gen_txt_box, gen_txt_color, gen_txt_coord2d, txt, sx, sy);
+        
+        
+        
+        
+
+    }
+
+
+    return 0;
+}
+
+
+
+int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d ,char *txt, float sx , float sy  )
+{
+    
+    
+    
+
+    ATLAS *a = atlases[atlas_nr-1];
+    const char *u;
+    GLfloat x,y;
+    uint32_t p;
+    
+        glBindTexture(GL_TEXTURE_2D, a->tex);
+    //    glUniform1i(text_uniform_tex, 0);
+        /* Set up the VBO for our vertex data */
+        glEnableVertexAttribArray(txt_box);
+        glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
+        glVertexAttribPointer(txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+
+        glUniform4fv(txt_color,1,color );
+
+        glUniform2fv(txt_coord2d,1,point_coord );
+
+  
 
         POINT_T coords[600];
         int c = 0;
@@ -439,6 +512,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         y = 0;
         /* Loop through all characters */
         u = txt;
+        n_letters += strlen(txt);
         while(*u) {
 
             p = utf82unicode(u,&u);
@@ -479,11 +553,8 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         /* Draw all the character on the screen in one go */
         glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);
         glDrawArrays(GL_TRIANGLES, 0, c);
-
-
-    }
-
-
-    return 0;
+          
+	glDisableVertexAttribArray(txt_box);
+       
+    
 }
-

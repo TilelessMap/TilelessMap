@@ -30,12 +30,17 @@
 int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 {
 
+gettimeofday(&tval_before, NULL);
     log_this(10, "Entering get_data\n");
     int i,t, rc;
     pthread_t threads[nLayers];
     LAYER_RUNTIME *oneLayer;
     GLfloat meterPerPixel = (bbox[2]-bbox[0])/CURR_WIDTH;
 
+while ((err = glGetError()) != GL_NO_ERROR) {
+    log_this(10, "Problem 2\n");
+    fprintf(stderr,"opengl error 70 :%d\n", err);
+}          
 
     for (i=0; i<nLayers; i++)
     {
@@ -63,9 +68,28 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+total_points=0;
+n_points=0;
+n_lines=0;
+n_polys=0;
+n_tri=0;
+n_words=0;
+n_letters=0;
 
-    for(t=0; t<nLayers; t++)
-    {
+
+
+while ((err = glGetError()) != GL_NO_ERROR) {
+log_this(10, "Problem 2\n");
+fprintf(stderr,"opengl error before p :%d\n", err);
+}
+ 
+ 
+for(t=0; t<nLayers; t++)
+ //     for(t=0; t<0; t++)
+  
+{
+    
+    
         oneLayer = layerRuntime + t;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
@@ -79,20 +103,54 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
             {
             case POINTTYPE :
                 loadPoint( oneLayer, theMatrix);
+while ((err = glGetError()) != GL_NO_ERROR) {
+log_this(10, "Problem 2\n");
+fprintf(stderr,"opengl error point layer nr %d  :%d\n",t, err);
+}
                 break;
             case LINETYPE :
                 loadLine( oneLayer, theMatrix);
+while ((err = glGetError()) != GL_NO_ERROR) {
+log_this(10, "Problem 2\n");
+fprintf(stderr,"opengl error line layer nr %d  :%d\n",t, err);
+}
                 break;
             case POLYGONTYPE :
                 loadPolygon( oneLayer, theMatrix);
+while ((err = glGetError()) != GL_NO_ERROR) {
+log_this(10, "Problem 2\n");
+fprintf(stderr,"opengl error polygon layer nr %d  :%d\n",t, err);
+}
                 break;
             }
         }
+        
+          while ((err = glGetError()) != GL_NO_ERROR) {
+              log_this(10, "Problem 2\n");
+              fprintf(stderr,"opengl error layer nr %d  :%d\n",t, err);
+          }
     }
+ render_simple_Polygon();
+print_txt(10,200,200,0,0,255,2, "n lines %d ", n_lines);
+print_txt(10,180,200,0,0,255,2, "n polygons %d ", n_polys);
+print_txt(10,160,200,0,0,255,2, "n triangels %d ", n_tri);
+print_txt(10,140,200,0,0,255,2, "n words %d ", n_words);
+print_txt(10,120,200,0,0,255,2, "n letters %d ", n_letters);
+print_txt(10,100,200,0,0,255,2, "Total points %d ", total_points);gettimeofday(&tval_after, NULL);
+
+timersub(&tval_after, &tval_before, &tval_result);
+print_txt(10,80,200,0,0,255,2, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+ 
+
+total_points=0;
 
 //render_txt(window);
     SDL_GL_SwapWindow(window);
+    
 //render(window,res_buf);
+    
+        printf("Fetched and rendered %d points\n", total_points);
+        
     return 0;
 }
 

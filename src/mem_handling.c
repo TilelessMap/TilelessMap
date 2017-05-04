@@ -166,7 +166,6 @@ int set_end_polygon(GLESSTRUCT *res_buf)
 
 void reset_buffer(GLESSTRUCT *res_buf)
 {
-    printf("ok, reset %p\n",res_buf);
     res_buf->used_n_pa = 0;
     res_buf->used_n_polygon = 0;
     res_buf->total_npoints = 0;
