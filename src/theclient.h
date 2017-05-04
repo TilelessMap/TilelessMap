@@ -204,13 +204,13 @@ typedef struct
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
     //Placeholders in text_shader
- /*   GLuint txt_program;
-    GLint txt_coord2d;
-    GLint txt_theMatrix;
-    GLint txt_color;
-    GLint txt_box;
-    GLint txt_tex;
-*/
+    /*   GLuint txt_program;
+       GLint txt_coord2d;
+       GLint txt_theMatrix;
+       GLint txt_color;
+       GLint txt_box;
+       GLint txt_tex;
+    */
     uint8_t show_text;
 
 
@@ -415,7 +415,7 @@ void render_txt(SDL_Window* window);
 ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 
 void log_this(int log_level, const char *log_txt, ... );
-int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d ,char *txt, float sx , float sy  );
+int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy  );
 int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
 int render_simple_Polygon();
 /*********************** Global variables*******************************/
@@ -450,19 +450,19 @@ GLint text_attribute_coord;
 GLint text_uniform_tex;
 //GLint text_uniform_color;
 
-    GLint gen_program;
-    GLint gen_coord2d;
-    GLint gen_theMatrix;
-    GLint gen_color;
-    GLuint gen_vbo;
-    
-    GLint gen_txt_program;
-    GLint gen_txt_coord2d;
-    GLint gen_txt_color;
-    GLint gen_txt_theMatrix;
-    GLint gen_txt_tex;
-    GLint gen_txt_box;
-    
+GLint gen_program;
+GLint gen_coord2d;
+GLint gen_theMatrix;
+GLint gen_color;
+GLuint gen_vbo;
+
+GLint gen_txt_program;
+GLint gen_txt_coord2d;
+GLint gen_txt_color;
+GLint gen_txt_theMatrix;
+GLint gen_txt_tex;
+GLint gen_txt_box;
+
 typedef struct  {
     GLfloat x;
     GLfloat y;
@@ -481,5 +481,5 @@ int n_tri;
 int n_words;
 int n_letters;
 
-    GLenum err;
+GLenum err;
 #endif
