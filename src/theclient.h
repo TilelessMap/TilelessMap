@@ -212,6 +212,7 @@ typedef struct
        GLint txt_tex;
     */
     uint8_t show_text;
+    int render_area; //This is a way to render only border of polygon. No triangels will be loadded
 
 
 }

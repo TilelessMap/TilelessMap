@@ -326,10 +326,11 @@ int init_resources(char *dir)
         */
 
 
+        oneLayer->render_area = strlen(tri_index_field)>0;
 
 
         char tri_idx_fld[32];
-        if(oneLayer->geometryType == POLYGONTYPE)
+        if(oneLayer->geometryType == POLYGONTYPE && oneLayer->render_area)
         {
             snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s", tri_index_field);
         }
@@ -739,10 +740,10 @@ int main(int argc, char **argv)
         dir = argv[argc-1];
 
 
-//snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
+snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/varmland_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-    snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+  //  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
 
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);

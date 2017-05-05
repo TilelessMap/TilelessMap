@@ -111,13 +111,14 @@ void *twkb_fromSQLiteBBOX(void *theL)
         }
         ts.tb=&tb;
 
+    
         while (ts.tb->read_pos<ts.tb->end_pos)
         {
             decode_twkb(&ts, theLayer->res_buf);
         }
 //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
         free(tb.start_pos);
-        if(theLayer->geometryType == POLYGONTYPE)
+        if(theLayer->geometryType == POLYGONTYPE && theLayer->render_area)
         {
             if(get_blob(&tb,prepared_statement,1))
             {

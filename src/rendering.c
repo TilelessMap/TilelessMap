@@ -253,8 +253,8 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-
-    renderPolygon( oneLayer, theMatrix);
+    if(oneLayer->render_area)
+        renderPolygon( oneLayer, theMatrix);
     renderLine(oneLayer, theMatrix,1);
     return 0;
 }
