@@ -98,6 +98,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
         log_this(1,"sqlite problem 2, %d\n",err);
 
 
+         
+    
     while (sqlite3_step(prepared_statement)==SQLITE_ROW)
     {
         ts.id = sqlite3_column_int(prepared_statement, 2);
@@ -110,8 +112,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
             return NULL;
         }
         ts.tb=&tb;
-
-    
+        ts.line_width = theLayer->line_width;
         while (ts.tb->read_pos<ts.tb->end_pos)
         {
             decode_twkb(&ts, theLayer->res_buf);

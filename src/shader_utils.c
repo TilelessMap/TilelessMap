@@ -94,82 +94,6 @@ GLuint create_shader(const char* source, GLenum type)
 }
 
 
-/*
-
-GLuint create_program(const char *vertexfile, const char *fragmentfile) {
-	GLuint text_program = glCreateProgram();
-	GLuint shader;
-
-	if(vertexfile) {
-		shader = text_create_shader(vertexfile, GL_VERTEX_SHADER);
-		if(!shader)
-			return 0;
-		glAttachShader(text_program, shader);
-	}
-
-	if(fragmentfile) {
-		shader = text_create_shader(fragmentfile, GL_FRAGMENT_SHADER);
-		if(!shader)
-			return 0;
-		glAttachShader(text_program, shader);
-	}
-
-	glLinkProgram(text_program);
-	GLint link_ok = GL_FALSE;
-	glGetProgramiv(text_program, GL_LINK_STATUS, &link_ok);
-	if (!link_ok) {
-		SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "glLinkProgram:");
-		print_log(text_program);
-		glDeleteProgram(text_program);
-		return 0;
-	}
-
-	return text_program;
-}
-
-
-*/
-
-
-
-
-/**
- * Compile the shader from file 'filename', with error handling
-
-GLuint create_shader(const char* source, GLenum type)
-{
-    if (source == NULL) {
-        fprintf(stderr, "Error opening %s, %s, error:", source, SDL_GetError());
-        return 0;
-    }
-    GLuint res = glCreateShader(type);
-    const GLchar* sources[] = {
-#ifdef GL_ES_VERSION_2_0
-        "#version 100\n"  // OpenGL ES 2.0
-#else
-        "#version 120\n"  // OpenGL 2.1
-#endif
-        ,
-        source
-    };
-
-    glShaderSource(res, 2, sources, NULL);
-
-    glCompileShader(res);
-    GLint compile_ok = GL_FALSE;
-    glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
-    if (compile_ok == GL_FALSE) {
-
-	    log_this(10, "Error %s, error:", source);
-        print_log(res);
-        glDeleteShader(res);
-        return 0;
-    }
-
-    return res;
-}
- */
-
 GLuint create_program(const unsigned char *vs_source,const unsigned char *fs_source, GLuint *vs, GLuint *fs)
 {
     GLint link_ok = GL_FALSE;
@@ -199,3 +123,193 @@ void reset_shaders(GLuint vs,GLuint fs, GLuint program)
     glDeleteShader(vs);
     glDeleteShader(fs);
 }
+
+
+
+int build_program()
+{
+ GLuint vs, fs;
+ 
+ 
+ 
+    /*Build standard program*/
+    
+    
+    
+const unsigned char gen_vstd[1024] =  "attribute vec2 coord2d; \
+uniform mat4 theMatrix;\
+void main(void) { \
+  gl_Position =  theMatrix * vec4(coord2d, 0.0, 1.0);  \
+}";
+
+const unsigned char gen_fstd[1024] = "uniform vec4 color; \
+void main(void) { \
+  gl_FragColor = color; \
+}";
+
+
+std_program = create_program(gen_vstd, gen_fstd, &vs, &fs);
+
+
+        std_coord2d = glGetAttribLocation(std_program, "coord2d");
+        if (std_coord2d == -1) {
+            log_this(1, "Could not bind attribute : %s\n", "coord2d");
+            return 0;
+        }
+
+        std_matrix = glGetUniformLocation(std_program, "theMatrix");
+        if (std_matrix == -1) {
+            log_this(1, "Could not bind uniform : %s\n", "theMatrix");
+            return 0;
+        }
+
+        std_color = glGetUniformLocation(std_program, "color");
+        if (std_color == -1) {
+            log_this(1, "Could not bind uniform : %s\n", "color");
+            return 0;
+        }
+
+
+        reset_shaders(vs, fs, std_program);
+
+
+    
+ 
+ 
+    /*Build standard text program*/
+    
+    
+    
+const unsigned char gen_vtxt[1024] =  "attribute vec4 box;\
+uniform vec2 coord2d; \
+uniform mat4 theMatrix; \
+uniform vec4 color; \
+varying vec2 texpos;\
+void main(void) {\
+  gl_Position = theMatrix * vec4(coord2d, 0.0, 1.0) + vec4(box.xy, 0.0, 0.0);\
+  texpos = box.zw;\
+    }";
+
+const unsigned char gen_ftxt[1024] = "varying vec2 texpos;\
+uniform sampler2D tex;\
+uniform vec4 color;\
+void main(void) {\
+  gl_FragColor = vec4(1, 1, 1, texture2D(tex, texpos).a) * color;\
+}\
+";
+
+txt_program = create_program(gen_vtxt, gen_ftxt, &vs, &fs);
+
+
+        txt_box = glGetAttribLocation(txt_program, "box");
+        if (txt_box == -1) {
+            log_this(1, "Could not bind attribute : %s\n", "box");
+            return 0;
+        }
+
+        txt_matrix = glGetUniformLocation(txt_program, "theMatrix");
+        if (txt_matrix == -1) {
+            log_this(1, "Could not bind uniform : %s\n", "theMatrix");
+            return 0;
+        }
+
+        txt_color = glGetUniformLocation(txt_program, "color");
+        if (txt_color == -1) {
+            log_this(1, "Could not bind uniform : %s\n", "color");
+            return 0;
+        }
+        
+        txt_coord2d = glGetUniformLocation(txt_program, "coord2d");
+        if (txt_coord2d == -1) {
+            log_this(1, "Could not bind uniform : %s\n", "coord2d");
+            return 0;
+        }
+    txt_tex = glGetUniformLocation(txt_program, "tex");
+
+    if (txt_tex == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "tex");
+        return 0;
+    }
+
+        reset_shaders(vs, fs, txt_program);
+
+
+    
+        
+        
+        
+    
+    
+    const unsigned char gen_vlw[1024] =  "attribute vec2 coord2d; \
+attribute vec2 norm;\
+uniform float linewidth;\
+uniform mat4 px_Matrix;\
+uniform mat4 theMatrix;\
+void main(void) { \
+vec4 delta = vec4(norm * linewidth,0,0); \
+vec4 npos = px_Matrix * delta; \
+vec4 pos = theMatrix * vec4(coord2d, 0.0, 1.0);  \
+  gl_Position = (pos + npos);\
+}";
+
+    const unsigned char gen_flw[1024] = "uniform vec4 color; \
+void main(void) { \
+  gl_FragColor = color; \
+}";
+
+    /*create a shader program for generic text, not belonging to a layer*/
+    lw_program = create_program((unsigned char *) gen_vlw,(unsigned char *)  gen_flw, &vs, &fs);
+
+	if(lw_program == 0)
+		return 0;
+
+
+    lw_coord2d = glGetAttribLocation(lw_program, "coord2d");
+    if (lw_coord2d == -1)
+    {
+        fprintf(stderr, "test: Could not bind attribute : %s\n", "coord2d");
+        return 0;
+    }
+
+    lw_norm = glGetAttribLocation(lw_program, "norm");
+    if (lw_norm == -1)
+    {
+        fprintf(stderr, "test: Could not bind attribute : %s\n", "norm");
+        return 0;
+    }
+
+   
+    lw_linewidth = glGetUniformLocation(lw_program, "linewidth");
+    if (lw_linewidth == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "linewidth");
+        return 0;
+    }
+
+    lw_color = glGetUniformLocation(lw_program, "color");
+    if (lw_color == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "color");
+        return 0;
+    }
+    lw_matrix = glGetUniformLocation(lw_program, "theMatrix");
+    if (lw_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+        return 0;
+    }
+    lw_px_matrix = glGetUniformLocation(lw_program, "px_Matrix");
+    if (lw_px_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "lw_px_matrix");
+        return 0;
+    }
+
+
+
+    reset_shaders(vs, fs, lw_program);
+
+   return 0; 
+}
+

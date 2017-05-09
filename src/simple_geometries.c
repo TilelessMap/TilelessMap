@@ -62,18 +62,18 @@ int render_simple_Polygon()
 
 
 //    GLenum err;
-    glUseProgram(gen_program);
+    glUseProgram(std_program);
 
 
-    glUniform4fv(gen_color,1,color );
-    glUniformMatrix4fv(gen_theMatrix, 1, GL_FALSE,theMatrix );
+    glUniform4fv(std_color,1,color );
+    glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glEnableVertexAttribArray(gen_coord2d);
+    glEnableVertexAttribArray(std_coord2d);
 
     glVertexAttribPointer(
-        gen_coord2d, // attribute
+        std_coord2d, // attribute
         2,                 // number of elements per vertex, here (x,y)
         GL_FLOAT,          // the type of each element
         GL_FALSE,          // take our values as-is
@@ -105,7 +105,7 @@ int render_simple_Polygon()
     glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_SHORT,NULL);
 
 
-    glDisableVertexAttribArray(gen_coord2d);
+    glDisableVertexAttribArray(std_coord2d);
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         fprintf(stderr,"opengl error 900:%d\n", err);

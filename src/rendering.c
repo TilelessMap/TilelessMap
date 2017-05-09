@@ -25,6 +25,8 @@
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
+    
+    
     if(oneLayer->show_text)
     {
 
@@ -53,11 +55,11 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLESSTRUCT *rb = oneLayer->res_buf;
     // glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(2);
-    glUseProgram(oneLayer->program);
-    glEnableVertexAttribArray(oneLayer->attribute_coord2d);
+    glUseProgram(std_program);
+    glEnableVertexAttribArray(std_coord2d);
     /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
     glVertexAttribPointer(
-        oneLayer->attribute_coord2d, // attribute
+        std_coord2d, // attribute
         ndims,                 // number of elements per vertex, here (x,y)
         GL_FLOAT,          // the type of each element
         GL_FALSE,          // take our values as-is
@@ -69,7 +71,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
            fprintf(stderr,"opengl error:%d\n", err);
        }*/
 //    glUniform1fv(uniform_bbox, 4, bbox);
-    glUniformMatrix4fv(oneLayer->uniform_theMatrix, 1, GL_FALSE,theMatrix );
+    glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
     /*
         while ((err = glGetError()) != GL_NO_ERROR) {
@@ -87,26 +89,12 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         {
             color = global_styles[styleID].color;
         }
-        glUniform4fv(oneLayer->uniform_color,1,color );
+        glUniform4fv(std_color,1,color );
         glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
 
-        //  log_this(10, "4render point p nr %d", i);
-
-        /*   if(oneLayer->show_text)
-          {
-            int antal = oneLayer->text->used_n_vals;
-
-            printf("start, print text %d\n",antal);
-
-        char *txt=oneLayer->text->char_array+used;
-        printf("text %s, x %f, y %f, startindex = %d\n",txt, *(rb->vertex_array+ *(rb->start_index+i)*ndims), *(rb->vertex_array+ *(rb->start_index+i)*ndims+1), *(rb->start_index+i));
-        used+=strlen(txt)+1;
-
-            printf("printed %d texts\n",i);
-
-          }*/
     }
-    glDisableVertexAttribArray(oneLayer->attribute_coord2d);
+    glDisableVertexAttribArray(std_coord2d
+    );
 
     return 0;
 
@@ -116,16 +104,137 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
+
+
     GLESSTRUCT *rb = oneLayer->res_buf;
 
     glGenBuffers(1, &(oneLayer->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
-    renderLine( oneLayer, theMatrix, 0);
+    if(oneLayer->line_width)
+        renderLineTri(oneLayer,theMatrix);  
+    else
+        renderLine( oneLayer, theMatrix, 0);
     return 0;
 }
 
+
+
+int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
+//void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb) 
+{
+    
+int  i;
+    GLfloat *color, lw;
+    float sx = 2.0 / CURR_WIDTH;
+    float sy = 2.0 / CURR_HEIGHT;
+
+    GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+    
+    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    GLESSTRUCT *rb = oneLayer->res_buf;
+    
+    
+    
+
+    
+	glUseProgram(lw_program);
+    
+    glEnableVertexAttribArray(lw_coord2d);
+
+    glEnableVertexAttribArray(lw_norm);
+   
+                while ((err = glGetError()) != GL_NO_ERROR) {
+            log_this(10, "Problem 2\n");
+            fprintf(stderr,"opengl error 1 :%d\n", err);
+        }
+
+    glVertexAttribPointer(
+    lw_coord2d, // attribute
+    2,                 // number of elements per vertex, here (x,y)
+    GL_FLOAT,          // the type of each element
+    GL_FALSE,          // take our values as-is
+    4 * sizeof(GLfloat),                 // no extra data between each position
+    0                  // offset of first element
+    );
+
+
+                while ((err = glGetError()) != GL_NO_ERROR) {
+            log_this(10, "Problem 2\n");
+            fprintf(stderr,"opengl error 2 :%d\n", err);
+        }
+
+    glVertexAttribPointer(
+    lw_norm, // attribute
+    2,                 // number of elements per vertex, here (x,y)
+    GL_FLOAT,          // the type of each element
+    GL_FALSE,          // take our values as-is
+    4 * sizeof(GLfloat),                 // no extra data between each position
+    (GLvoid*) (2 * sizeof(GLfloat))                  // offset of first element
+    );
+
+    
+                while ((err = glGetError()) != GL_NO_ERROR) {
+            log_this(10, "Problem 2\n");
+            fprintf(stderr,"opengl error 3 :%d\n", err);
+        }
+    
+    glUniformMatrix4fv(lw_matrix, 1, GL_FALSE,theMatrix );
+    glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
+    
+    
+    
+                while ((err = glGetError()) != GL_NO_ERROR) {
+            log_this(10, "Problem 2\n");
+            fprintf(stderr,"opengl error 4 :%d\n", err);
+        }
+        
+    for (i=0; i<rb->used_n_pa; i++)
+    {
+        lw = 10;
+
+
+        Uint32 styleID = *(rb->styleID+i);
+
+
+
+        total_points += *(rb->npoints+i);
+
+
+
+        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+        {
+            lw = global_styles[styleID].lineWidth;
+            if(!lw)
+                lw = 1;
+
+
+             
+            
+            color = global_styles[styleID].color;
+            glUniform4fv(lw_color,1,color );
+            
+             
+            
+            glUniform1fv(lw_linewidth,1,&lw );
+
+            
+            
+            glDrawArrays(GL_TRIANGLE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
+            
+            
+           // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+             
+            
+        }
+    }
+    glDisableVertexAttribArray(lw_norm);
+
+    glDisableVertexAttribArray(lw_coord2d);
+
+}
 
 
 int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
@@ -143,11 +252,11 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 
 
 
-    glUseProgram(oneLayer->program);
-    glEnableVertexAttribArray(oneLayer->attribute_coord2d);
+    glUseProgram(std_program);
+    glEnableVertexAttribArray(std_coord2d);
     /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
     glVertexAttribPointer(
-        oneLayer->attribute_coord2d, // attribute
+        std_coord2d, // attribute
         2,                 // number of elements per vertex, here (x,y)
         GL_FLOAT,          // the type of each element
         GL_FALSE,          // take our values as-is
@@ -159,7 +268,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
            fprintf(stderr,"opengl error:%d", err);
        }*/
 //    glUniform1fv(uniform_bbox, 4, bbox);
-    glUniformMatrix4fv(oneLayer->uniform_theMatrix, 1, GL_FALSE,theMatrix );
+    glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
     /*   while ((err = glGetError()) != GL_NO_ERROR) {
            log_this(10, "Problem 2\n");
            fprintf(stderr,"opengl error:%d", err);
@@ -171,9 +280,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
     for (i=0; i<rb->used_n_pa; i++)
     {
         lw = 1;
-        /*    np = *(rb->npoints+i);
-            pi = *(rb->start_index+i);*/
-//	style = oneLayer->styles[*(rb->styleID+i)] ;
+        
 
         Uint32 styleID = *(rb->styleID+i);
 
@@ -193,13 +300,13 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
             if(outline)
             {
                 color = global_styles[styleID].outlinecolor;
-                glUniform4fv(oneLayer->uniform_color,1,color );
+                glUniform4fv(std_color,1,color );
                 glDrawArrays(GL_LINE_LOOP, *(rb->start_index+i), *(rb->npoints+i));
             }
             else
             {
                 color = global_styles[styleID].color;
-                glUniform4fv(oneLayer->uniform_color,1,color );
+                glUniform4fv(std_color,1,color );
                 glDrawArrays(GL_LINE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
             }
 
@@ -219,7 +326,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 
     }
 
-    glDisableVertexAttribArray(oneLayer->attribute_coord2d);
+    glDisableVertexAttribArray(std_coord2d);
 
     return 0;
 
@@ -230,11 +337,6 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 
 int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-
-
-
-
-
 
     GLESSTRUCT *rb = oneLayer->res_buf;
 //	 int i,j, offset=0;
@@ -278,8 +380,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-    glUseProgram(oneLayer->program);
-    glEnableVertexAttribArray(oneLayer->attribute_coord2d);
+    glUseProgram(std_program);
+    glEnableVertexAttribArray(std_coord2d);
 
     n_polys += ti->used_n_pa;
 
@@ -287,7 +389,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
         size_t  vertex_offset = *(rb->polygon_offset+i)  ;
         glVertexAttribPointer(
-            oneLayer->attribute_coord2d, // attribute
+            std_coord2d, // attribute
             2,                 // number of elements per vertex, here (x,y)
             GL_FLOAT,          // the type of each element
             GL_FALSE,          // take our values as-is
@@ -302,7 +404,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
 
-        glUniformMatrix4fv(oneLayer->uniform_theMatrix, 1, GL_FALSE,theMatrix );
+        glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
         /*  while ((err = glGetError()) != GL_NO_ERROR) {
               log_this(10, "Problem 2\n");
               fprintf(stderr,"opengl error:%d", err);
@@ -318,29 +420,10 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             return 1;
         }
 
-        glUniform4fv(oneLayer->uniform_color,1,color );
+        glUniform4fv(std_color,1,color );
 
 
 
-
-
-
-        /*
-                while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(10, "Problem3: %d\n", err);
-                    fprintf(stderr,"opengl error:%d", err);
-                }
-                    np = *(ti->npoints+i);
-                    pi = *(ti->start_index+i);
-                    for (h=0;h<*(ti->npoints+i) * 3;h++)
-                    {
-                      int idx = *(ti->vertex_array + *(ti->start_index+i) * 3 + h);
-                      double coord1 = *(oneLayer->res_buf->vertex_array + 2 *  idx);
-                      double coord2 = *(oneLayer->res_buf->vertex_array + 2 *  idx + 1 );*/
-        // log_this(10, "idx : %d, %lf, %lf\n", idx, coord1, coord2);
-        //     log_this(10, "select 'point( %lf %lf)'::geometry geom union all\n",  coord1, coord2);
-        //}
-        //  int start =  * (ti->start_index+i);
         size_t index_offset = *(ti->start_index+i) * 3 *sizeof(GLushort) ;
         //  offset = i * 100;
         //int n = *(ti->npoints+i) * 3 ;
@@ -348,7 +431,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         glDrawElements(GL_TRIANGLES, *(ti->npoints+i) * 3,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
 
     }
-    glDisableVertexAttribArray(oneLayer->attribute_coord2d);
+    glDisableVertexAttribArray(std_coord2d);
 
     return 0;
 
@@ -386,7 +469,11 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
                 }
                 break;
             case LINETYPE :
-                renderLine( oneLayer, theMatrix, 0);
+                    if(oneLayer->line_width)
+                        renderLineTri(oneLayer,theMatrix);  
+                    else
+                        renderLine( oneLayer, theMatrix, 0);
+                //renderLine( oneLayer, theMatrix, 0);
                 break;
             case POLYGONTYPE :
                 renderPolygon( oneLayer, theMatrix);
@@ -432,9 +519,9 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat point_coord[2];
 
     GLESSTRUCT *rb = oneLayer->res_buf;
-    glUseProgram(gen_txt_program);
+    glUseProgram(txt_program);
 
-    glUniformMatrix4fv(gen_txt_theMatrix, 1, GL_FALSE,theMatrix );
+    glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
 
 
     float sx = 2.0 / CURR_WIDTH;
@@ -465,7 +552,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
         txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
-        draw_it(color,point_coord, psz, gen_txt_box, gen_txt_color, gen_txt_coord2d, txt, sx, sy);
+        draw_it(color,point_coord, psz, txt_box, txt_color, txt_coord2d, txt, sx, sy);
 
 
 
@@ -556,5 +643,5 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
 
     glDisableVertexAttribArray(txt_box);
 
-
+return 0;
 }

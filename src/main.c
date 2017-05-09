@@ -52,7 +52,7 @@ int init_resources(char *dir)
     sqlite3_stmt *preparedCountStyle;
     sqlite3_stmt * preparedStylesLoading;
 
-
+ build_program();
     /********************************************************************************
       Attach all databases with data for the project
     */
@@ -99,7 +99,7 @@ int init_resources(char *dir)
                             /*fields for creating the prepared statement to get data later*/
                             "l.geometryField,l.triIndexField, l.idField, l.name layername, l.geometryindex, "
                             /*fields to inform comming processes about how and when to render*/
-                            " l.defaultVisible, l.minScale, l.maxScale, geometryType,styleField,showText, l.layerID, "
+                            " l.defaultVisible, l.minScale, l.maxScale, geometryType,styleField,showText,linewidth, l.layerID, "
                             "tc.size_fld, rotation_fld, anchor_fld, txt_fld,pt.programID , vt.source vtSource, ft.source ftSource "
                             " FROM layers l "
                             "INNER JOIN dbs d on l.source = d.name "
@@ -260,7 +260,7 @@ int init_resources(char *dir)
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,8);
         const unsigned char *geometryindex = sqlite3_column_text(preparedLayerLoading, 9);
         const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 14);
-        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 16);
+        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 17);
 
         oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 10);
         oneLayer->minScale = sqlite3_column_int(preparedLayerLoading, 11);
@@ -268,62 +268,15 @@ int init_resources(char *dir)
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
 
         oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 15);
+        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 16);
+        oneLayer->layer_id =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 17);
 
-        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,17);
-        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 18);
-        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 19);
-        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 20);
-//	oneLayer->has_text=0;
+        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,18);
+        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 19);
+        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 20);
+        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 21);
 
-        /*
-                if(oneLayer->show_text)
-                {
-                    const unsigned char *vt_source = sqlite3_column_text(preparedLayerLoading, 22);
-                    const unsigned char *ft_source = sqlite3_column_text(preparedLayerLoading, 23);
-
-
-                    program = create_program(vt_source, ft_source, &vs, &fs);
-
-                    uniform_coord2d = glGetUniformLocation(program, "coord2d");
-                    if (uniform_coord2d == -1)
-                    {
-                        fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
-                        return 0;
-                    }
-
-                    box4d = glGetAttribLocation(program, "box");
-                    if (box4d == -1)
-                    {
-                        fprintf(stderr, "Could not bind attribute : %s\n", "box");
-                        return 0;
-                    }
-
-                    uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
-                    if (uniform_theMatrix == -1)
-                    {
-                        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-                        return 0;
-                    }
-
-                    uniform_color = glGetUniformLocation(program, "color");
-                    if (uniform_color == -1)
-                    {
-                        fprintf(stderr, "Could not bind uniform : %s\n", "color");
-                        return 0;
-                    }
-
-                    oneLayer->txt_program = program;
-                    oneLayer->txt_coord2d = uniform_coord2d;
-                    oneLayer->txt_theMatrix = uniform_theMatrix;
-                    oneLayer->txt_color = uniform_color;
-                    oneLayer->txt_box = box4d;
-                    reset_shaders(vs, fs, program);
-
-
-
-                }
-
-        */
+        
 
 
         oneLayer->render_area = strlen(tri_index_field)>0;
@@ -384,7 +337,7 @@ int init_resources(char *dir)
                  "where ",
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
-
+printf("sql = %s\n", sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
         if (rc != SQLITE_OK ) {
@@ -406,47 +359,6 @@ int init_resources(char *dir)
     sqlite3_finalize(preparedLayerLoading);
 
 
-    /*For generic geometries, not belonging to any layer*/
-
-    const unsigned char gen_vt[1024] =  "attribute vec2 coord2d; \
-uniform mat4 theMatrix;\
-void main(void) { \
-  gl_Position =  theMatrix * vec4(coord2d, 0.0, 1.0);  \
-}";
-
-    const unsigned char gen_ft[1024] = "uniform vec4 color; \
-void main(void) { \
-  gl_FragColor = color; \
-}";
-
-    /*create a shader program for generic text, not belonging to a layer*/
-    gen_program = create_program((unsigned char *) gen_vt,(unsigned char *)  gen_ft, &vs, &fs);
-
-
-
-    gen_coord2d = glGetAttribLocation(gen_program, "coord2d");
-    if (gen_coord2d == -1)
-    {
-        fprintf(stderr, "test: Could not bind uniform : %s\n", "coord2d");
-        return 0;
-    }
-
-    gen_color = glGetUniformLocation(gen_program, "color");
-    if (gen_color == -1)
-    {
-        fprintf(stderr, "Could not bind uniform : %s\n", "color");
-        return 0;
-    }
-    gen_theMatrix = glGetUniformLocation(gen_program, "theMatrix");
-    if (gen_theMatrix == -1)
-    {
-        fprintf(stderr, "Could not bind uniform : %s\n", "color");
-        return 0;
-    }
-
-
-
-    reset_shaders(vs, fs, gen_program);
 
 
 
@@ -740,10 +652,10 @@ int main(int argc, char **argv)
         dir = argv[argc-1];
 
 
-snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
+//snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj2.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/varmland_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-  //  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+    snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
 
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);

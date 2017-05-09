@@ -57,7 +57,10 @@ GLESSTRUCT* init_res_buf()
     return res_buf;
 }
 
-
+int floats_left(GLESSTRUCT *res_buf)
+{
+    return res_buf->buffer_end - res_buf->first_free;
+}
 
 float* get_start(uint32_t npoints, uint8_t ndims, GLESSTRUCT *res_buf)
 {
@@ -83,6 +86,31 @@ float* get_start(uint32_t npoints, uint8_t ndims, GLESSTRUCT *res_buf)
         res_buf->buffer_end = res_buf->vertex_array + new_size;
         //printf("max_va increased to %ld from va_buf %p\n",(res_buf->buffer_end - res_buf->vertex_array),res_buf->vertex_array);
     }
+
+    return res_buf->first_free;
+}
+
+
+
+GLfloat* increase_buffer(GLESSTRUCT *res_buf)
+{
+
+    size_t new_size, used_n_values, old_size;
+    float *new_array;
+
+
+        used_n_values = res_buf->first_free - res_buf->vertex_array; //number of floats
+        old_size = (res_buf->buffer_end - res_buf->vertex_array); // number of floats
+        new_size = old_size*2;					//number of floats
+        log_this(10, "Ok, increase space for vertex_array from  %d bytes\n",(int) old_size);
+        new_array = realloc(res_buf->vertex_array,new_size*sizeof(float)); //In bytes
+
+        if (!new_array)
+            return NULL;
+        res_buf->vertex_array = new_array;
+        res_buf->first_free = res_buf->vertex_array + used_n_values;
+        res_buf->buffer_end = res_buf->vertex_array + new_size;
+
 
     return res_buf->first_free;
 }

@@ -142,8 +142,8 @@ int init_text_resources(char *dir)
                     gl_FragColor = vec4(1, 1, 1, texture2D(tex, texpos).a) * color; \
                     }";
 
-
-    gen_txt_program = create_program((unsigned char *) vt_source,(unsigned char *)  ft_source, &vs, &fs);
+/*
+    txt_program = create_program((unsigned char *) vt_source,(unsigned char *)  ft_source, &vs, &fs);
 
 
     gen_txt_coord2d = glGetUniformLocation(gen_txt_program, "coord2d");
@@ -187,7 +187,7 @@ int init_text_resources(char *dir)
     reset_shaders(vs, fs, gen_txt_program);
 
 
-
+*/
 
 
 
@@ -429,7 +429,7 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
 
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     glGenBuffers(1, &text_vbo);
-    glUseProgram(gen_txt_program);
+    glUseProgram(txt_program);
 
 
     GLfloat color[4];
@@ -443,15 +443,15 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
 
     point_coord[0]= x;
     point_coord[1]= y;
-    glUniform4fv(gen_txt_color,1,color );
+    glUniform4fv(txt_color,1,color );
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
         fprintf(stderr,"opengl error wt:%d\n", err);
     }
 
-    glUniformMatrix4fv(gen_txt_theMatrix, 1, GL_FALSE,theMatrix );
-    draw_it(color,point_coord, size,gen_txt_box, gen_txt_color, gen_txt_coord2d, txt_tot, sx, sy);
+    glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
+    draw_it(color,point_coord, size,txt_box, txt_color, txt_coord2d, txt_tot, sx, sy);
 
 
     while ((err = glGetError()) != GL_NO_ERROR) {

@@ -33,7 +33,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     gettimeofday(&tval_before, NULL);
     log_this(10, "Entering get_data\n");
     int i,t, rc;
-    pthread_t threads[nLayers];
+    pthread_t threads[255];
     LAYER_RUNTIME *oneLayer;
     GLfloat meterPerPixel = (bbox[2]-bbox[0])/CURR_WIDTH;
 
@@ -55,10 +55,12 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-
+            log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = bbox;
             rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
-            //twkb_fromSQLiteBBOX("veger_ea2.sqlite","veger","id",(float*) bbox, res_buf);
+            
+            
+           // twkb_fromSQLiteBBOX((void *) oneLayer);
 
         }
     }
@@ -95,6 +97,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         {
             log_this(10, "load nr %d\n", t);
             rc = pthread_join(threads[t], NULL);
+          //  rc = 0;
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);

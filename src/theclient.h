@@ -56,7 +56,7 @@
 
 
 #define APPNAME "TILELESS"
-#define LOGLEVEL 100
+#define LOGLEVEL 0
 
 
 
@@ -212,6 +212,8 @@ typedef struct
        GLint txt_tex;
     */
     uint8_t show_text;
+    uint8_t line_width;
+    int layer_id;
     int render_area; //This is a way to render only border of polygon. No triangels will be loadded
 
 
@@ -304,10 +306,22 @@ typedef struct
     sqlite3_stmt *prepared_statement;
     uint32_t id;  //the current styleID
     uint32_t styleID;  //the current styleID
+    uint8_t line_width;  //If we shall calculate triangels to get line width
 } TWKB_PARSE_STATE;
 
 
 
+typedef struct {
+    GLfloat coord[4];
+    void *next;
+} POINT_CIRCLE;
+
+typedef struct
+{
+    GLfloat x;
+    GLfloat y;
+}
+vec2; 
 /*************Memory handling***********/
 
 
@@ -326,7 +340,7 @@ void element_destroy_buffer(ELEMENTSTRUCT *element_buf);
 int element_check_and_increase_max_pa(size_t needed, ELEMENTSTRUCT *element_buf);
 GLushort* element_get_start(uint32_t npoints, uint8_t ndims, ELEMENTSTRUCT *element_buf);
 int element_set_end(uint32_t npoints, uint8_t ndims,uint32_t styleID, ELEMENTSTRUCT *element_buf);
-
+GLfloat* increase_buffer(GLESSTRUCT *res_buf);
 
 TEXTSTRUCT* init_text_buf();
 int text_write(const char *the_text,uint32_t styleID, float size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf);
@@ -390,6 +404,7 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline);
+int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 
 void render_txt(SDL_Window* window) ;
 int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
@@ -419,6 +434,14 @@ void log_this(int log_level, const char *log_txt, ... );
 int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy  );
 int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
 int render_simple_Polygon();
+
+
+void calc_start(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal);
+void calc_join(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal);
+void calc_end(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal);
+
+int build_program();
+int floats_left(GLESSTRUCT *res_buf);
 /*********************** Global variables*******************************/
 
 struct timeval tval_before, tval_after, tval_result;
@@ -444,25 +467,37 @@ ATLAS *atlases[3];
 
 const char *fontfilename;
 
+/*shader programs*/
 
+//Standard geometryprogram
+GLuint std_program;
+GLint std_coord2d;
+GLint std_matrix;
+GLint std_color;
 
-GLuint text_program;
-GLint text_attribute_coord;
-GLint text_uniform_tex;
-//GLint text_uniform_color;
+//Standard textprogram
+GLuint txt_program;
+GLint txt_coord2d;
+GLint txt_matrix;
+GLint txt_box;
+GLint txt_tex;
+GLint txt_texpos;
+GLint txt_color;
 
-GLint gen_program;
-GLint gen_coord2d;
-GLint gen_theMatrix;
-GLint gen_color;
 GLuint gen_vbo;
 
-GLint gen_txt_program;
-GLint gen_txt_coord2d;
-GLint gen_txt_color;
-GLint gen_txt_theMatrix;
-GLint gen_txt_tex;
-GLint gen_txt_box;
+
+//Standard geometryprogram
+GLuint lw_program;
+GLint lw_coord2d;
+GLint lw_matrix;
+GLint lw_px_matrix;
+GLint lw_linewidth;
+GLint lw_norm;
+GLint lw_color;
+
+
+
 
 typedef struct  {
     GLfloat x;
