@@ -98,8 +98,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
         log_this(1,"sqlite problem 2, %d\n",err);
 
 
-         
-    
+
+
     while (sqlite3_step(prepared_statement)==SQLITE_ROW)
     {
         ts.id = sqlite3_column_int(prepared_statement, 2);

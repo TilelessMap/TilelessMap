@@ -269,32 +269,32 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     int c=0;
     int has_m=ts->thi->has_m;
 
-if(ts->line_width)
+    if(ts->line_width)
 //if (1 == 2)
-{
-   log_this(10, "linewidth, npoints = %d\n", npoints);
-    vec2 last_normal;
-    POINT_CIRCLE p[3];
-    p->next = (void*) p+sizeof(POINT_CIRCLE);
-    (p+1)->next = (void*) p+sizeof(POINT_CIRCLE)*2;
-    (p+2)->next = (void*) p;
-    
-    POINT_CIRCLE *p_akt = p;
-    //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
+    {
+        log_this(10, "linewidth, npoints = %d\n", npoints);
+        vec2 last_normal;
+        POINT_CIRCLE p[3];
+        p->next = (void*) p+sizeof(POINT_CIRCLE);
+        (p+1)->next = (void*) p+sizeof(POINT_CIRCLE)*2;
+        (p+2)->next = (void*) p;
+
+        POINT_CIRCLE *p_akt = p;
+        //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
         dlist = get_start(npoints*3, ndims,res_buf);
-        
+
         for( i = 0; i < npoints; i++ )
         {
-            
-   //         float* increase_buffer(GLESSTRUCT *res_buf, float *old_buf)
+
+            //         float* increase_buffer(GLESSTRUCT *res_buf, float *old_buf)
             for( j = 0; j < ndims; j++ )
             {
                 val = buffer_read_svarint(ts->tb);
                 ts->thi->coords[j] += val;
                 new_val = (float) ts->thi->coords[j] / ts->thi->factors[j];
                 p_akt->coord[j] = new_val;
-              //  dlist[c++] = new_val;
-                
+                //  dlist[c++] = new_val;
+
             }
             if(i==1)
             {
@@ -306,21 +306,21 @@ if(ts->line_width)
             {
                 if(floats_left(res_buf)<12)
                     dlist = increase_buffer(res_buf);
-                
+
                 calc_join(p_akt, dlist, &c,&last_normal);
                 if(i==npoints-1)
                     calc_end(p_akt->next, dlist, &c,&last_normal);
             }
-            
+
             p_akt = p_akt->next;
-            
+
         }
         set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
-}
-else
-{
+    }
+    else
+    {
         // log_this(10, "ikke linewidth, npoints = %d\n", npoints);
-            dlist = get_start(npoints, ndims,res_buf);
+        dlist = get_start(npoints, ndims,res_buf);
         for( i = 0; i < npoints; i++ )
         {
             for( j = 0; j < ndims; j++ )
@@ -332,11 +332,11 @@ else
                 dlist[c++] = new_val;
             }
         }
-       // log_this(10, "klar med n points = %d\n", c);
+        // log_this(10, "klar med n points = %d\n", c);
         set_end(npoints, ndims,ts->id, ts->styleID,res_buf);
-    
-    
-}
+
+
+    }
     return 0;
 }
 

@@ -128,59 +128,59 @@ void reset_shaders(GLuint vs,GLuint fs, GLuint program)
 
 int build_program()
 {
- GLuint vs, fs;
- 
- 
- 
+    GLuint vs, fs;
+
+
+
     /*Build standard program*/
-    
-    
-    
-const unsigned char gen_vstd[1024] =  "attribute vec2 coord2d; \
+
+
+
+    const unsigned char gen_vstd[1024] =  "attribute vec2 coord2d; \
 uniform mat4 theMatrix;\
 void main(void) { \
   gl_Position =  theMatrix * vec4(coord2d, 0.0, 1.0);  \
 }";
 
-const unsigned char gen_fstd[1024] = "uniform vec4 color; \
+    const unsigned char gen_fstd[1024] = "uniform vec4 color; \
 void main(void) { \
   gl_FragColor = color; \
 }";
 
 
-std_program = create_program(gen_vstd, gen_fstd, &vs, &fs);
+    std_program = create_program(gen_vstd, gen_fstd, &vs, &fs);
 
 
-        std_coord2d = glGetAttribLocation(std_program, "coord2d");
-        if (std_coord2d == -1) {
-            log_this(1, "Could not bind attribute : %s\n", "coord2d");
-            return 0;
-        }
+    std_coord2d = glGetAttribLocation(std_program, "coord2d");
+    if (std_coord2d == -1) {
+        log_this(1, "Could not bind attribute : %s\n", "coord2d");
+        return 0;
+    }
 
-        std_matrix = glGetUniformLocation(std_program, "theMatrix");
-        if (std_matrix == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "theMatrix");
-            return 0;
-        }
+    std_matrix = glGetUniformLocation(std_program, "theMatrix");
+    if (std_matrix == -1) {
+        log_this(1, "Could not bind uniform : %s\n", "theMatrix");
+        return 0;
+    }
 
-        std_color = glGetUniformLocation(std_program, "color");
-        if (std_color == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "color");
-            return 0;
-        }
-
-
-        reset_shaders(vs, fs, std_program);
+    std_color = glGetUniformLocation(std_program, "color");
+    if (std_color == -1) {
+        log_this(1, "Could not bind uniform : %s\n", "color");
+        return 0;
+    }
 
 
-    
- 
- 
+    reset_shaders(vs, fs, std_program);
+
+
+
+
+
     /*Build standard text program*/
-    
-    
-    
-const unsigned char gen_vtxt[1024] =  "attribute vec4 box;\
+
+
+
+    const unsigned char gen_vtxt[1024] =  "attribute vec4 box;\
 uniform vec2 coord2d; \
 uniform mat4 theMatrix; \
 uniform vec4 color; \
@@ -190,7 +190,7 @@ void main(void) {\
   texpos = box.zw;\
     }";
 
-const unsigned char gen_ftxt[1024] = "varying vec2 texpos;\
+    const unsigned char gen_ftxt[1024] = "varying vec2 texpos;\
 uniform sampler2D tex;\
 uniform vec4 color;\
 void main(void) {\
@@ -198,32 +198,32 @@ void main(void) {\
 }\
 ";
 
-txt_program = create_program(gen_vtxt, gen_ftxt, &vs, &fs);
+    txt_program = create_program(gen_vtxt, gen_ftxt, &vs, &fs);
 
 
-        txt_box = glGetAttribLocation(txt_program, "box");
-        if (txt_box == -1) {
-            log_this(1, "Could not bind attribute : %s\n", "box");
-            return 0;
-        }
+    txt_box = glGetAttribLocation(txt_program, "box");
+    if (txt_box == -1) {
+        log_this(1, "Could not bind attribute : %s\n", "box");
+        return 0;
+    }
 
-        txt_matrix = glGetUniformLocation(txt_program, "theMatrix");
-        if (txt_matrix == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "theMatrix");
-            return 0;
-        }
+    txt_matrix = glGetUniformLocation(txt_program, "theMatrix");
+    if (txt_matrix == -1) {
+        log_this(1, "Could not bind uniform : %s\n", "theMatrix");
+        return 0;
+    }
 
-        txt_color = glGetUniformLocation(txt_program, "color");
-        if (txt_color == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "color");
-            return 0;
-        }
-        
-        txt_coord2d = glGetUniformLocation(txt_program, "coord2d");
-        if (txt_coord2d == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "coord2d");
-            return 0;
-        }
+    txt_color = glGetUniformLocation(txt_program, "color");
+    if (txt_color == -1) {
+        log_this(1, "Could not bind uniform : %s\n", "color");
+        return 0;
+    }
+
+    txt_coord2d = glGetUniformLocation(txt_program, "coord2d");
+    if (txt_coord2d == -1) {
+        log_this(1, "Could not bind uniform : %s\n", "coord2d");
+        return 0;
+    }
     txt_tex = glGetUniformLocation(txt_program, "tex");
 
     if (txt_tex == -1)
@@ -232,15 +232,15 @@ txt_program = create_program(gen_vtxt, gen_ftxt, &vs, &fs);
         return 0;
     }
 
-        reset_shaders(vs, fs, txt_program);
+    reset_shaders(vs, fs, txt_program);
 
 
-    
-        
-        
-        
-    
-    
+
+
+
+
+
+
     const unsigned char gen_vlw[1024] =  "attribute vec2 coord2d; \
 attribute vec2 norm;\
 uniform float linewidth;\
@@ -261,8 +261,8 @@ void main(void) { \
     /*create a shader program for generic text, not belonging to a layer*/
     lw_program = create_program((unsigned char *) gen_vlw,(unsigned char *)  gen_flw, &vs, &fs);
 
-	if(lw_program == 0)
-		return 0;
+    if(lw_program == 0)
+        return 0;
 
 
     lw_coord2d = glGetAttribLocation(lw_program, "coord2d");
@@ -279,7 +279,7 @@ void main(void) { \
         return 0;
     }
 
-   
+
     lw_linewidth = glGetUniformLocation(lw_program, "linewidth");
     if (lw_linewidth == -1)
     {
@@ -310,6 +310,6 @@ void main(void) { \
 
     reset_shaders(vs, fs, lw_program);
 
-   return 0; 
+    return 0;
 }
 

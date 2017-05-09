@@ -25,8 +25,8 @@
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-    
-    
+
+
     if(oneLayer->show_text)
     {
 
@@ -94,7 +94,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     }
     glDisableVertexAttribArray(std_coord2d
-    );
+                              );
 
     return 0;
 
@@ -113,7 +113,7 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
     if(oneLayer->line_width)
-        renderLineTri(oneLayer,theMatrix);  
+        renderLineTri(oneLayer,theMatrix);
     else
         renderLine( oneLayer, theMatrix, 0);
     return 0;
@@ -122,74 +122,74 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
-//void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb) 
+//void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb)
 {
-    
-int  i;
+
+    int  i;
     GLfloat *color, lw;
     float sx = 2.0 / CURR_WIDTH;
     float sy = 2.0 / CURR_HEIGHT;
 
     GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
-    
-    
-    
 
-    
-	glUseProgram(lw_program);
-    
+
+
+
+
+    glUseProgram(lw_program);
+
     glEnableVertexAttribArray(lw_coord2d);
 
     glEnableVertexAttribArray(lw_norm);
-   
-                while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem 2\n");
-            fprintf(stderr,"opengl error 1 :%d\n", err);
-        }
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error 1 :%d\n", err);
+    }
 
     glVertexAttribPointer(
-    lw_coord2d, // attribute
-    2,                 // number of elements per vertex, here (x,y)
-    GL_FLOAT,          // the type of each element
-    GL_FALSE,          // take our values as-is
-    4 * sizeof(GLfloat),                 // no extra data between each position
-    0                  // offset of first element
+        lw_coord2d, // attribute
+        2,                 // number of elements per vertex, here (x,y)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // take our values as-is
+        4 * sizeof(GLfloat),                 // no extra data between each position
+        0                  // offset of first element
     );
 
 
-                while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem 2\n");
-            fprintf(stderr,"opengl error 2 :%d\n", err);
-        }
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error 2 :%d\n", err);
+    }
 
     glVertexAttribPointer(
-    lw_norm, // attribute
-    2,                 // number of elements per vertex, here (x,y)
-    GL_FLOAT,          // the type of each element
-    GL_FALSE,          // take our values as-is
-    4 * sizeof(GLfloat),                 // no extra data between each position
-    (GLvoid*) (2 * sizeof(GLfloat))                  // offset of first element
+        lw_norm, // attribute
+        2,                 // number of elements per vertex, here (x,y)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // take our values as-is
+        4 * sizeof(GLfloat),                 // no extra data between each position
+        (GLvoid*) (2 * sizeof(GLfloat))                  // offset of first element
     );
 
-    
-                while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem 2\n");
-            fprintf(stderr,"opengl error 3 :%d\n", err);
-        }
-    
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error 3 :%d\n", err);
+    }
+
     glUniformMatrix4fv(lw_matrix, 1, GL_FALSE,theMatrix );
     glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
-    
-    
-    
-                while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem 2\n");
-            fprintf(stderr,"opengl error 4 :%d\n", err);
-        }
-        
+
+
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error 4 :%d\n", err);
+    }
+
     for (i=0; i<rb->used_n_pa; i++)
     {
         lw = 10;
@@ -210,24 +210,24 @@ int  i;
                 lw = 1;
 
 
-             
-            
+
+
             color = global_styles[styleID].color;
             glUniform4fv(lw_color,1,color );
-            
-             
-            
+
+
+
             glUniform1fv(lw_linewidth,1,&lw );
 
-            
-            
+
+
             glDrawArrays(GL_TRIANGLE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
-            
-            
-           // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+
+            // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-             
-            
+
+
         }
     }
     glDisableVertexAttribArray(lw_norm);
@@ -280,7 +280,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
     for (i=0; i<rb->used_n_pa; i++)
     {
         lw = 1;
-        
+
 
         Uint32 styleID = *(rb->styleID+i);
 
@@ -469,10 +469,10 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
                 }
                 break;
             case LINETYPE :
-                    if(oneLayer->line_width)
-                        renderLineTri(oneLayer,theMatrix);  
-                    else
-                        renderLine( oneLayer, theMatrix, 0);
+                if(oneLayer->line_width)
+                    renderLineTri(oneLayer,theMatrix);
+                else
+                    renderLine( oneLayer, theMatrix, 0);
                 //renderLine( oneLayer, theMatrix, 0);
                 break;
             case POLYGONTYPE :
@@ -643,5 +643,5 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
 
     glDisableVertexAttribArray(txt_box);
 
-return 0;
+    return 0;
 }

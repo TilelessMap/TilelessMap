@@ -52,7 +52,7 @@ int init_resources(char *dir)
     sqlite3_stmt *preparedCountStyle;
     sqlite3_stmt * preparedStylesLoading;
 
- build_program();
+    build_program();
     /********************************************************************************
       Attach all databases with data for the project
     */
@@ -276,7 +276,7 @@ int init_resources(char *dir)
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 20);
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 21);
 
-        
+
 
 
         oneLayer->render_area = strlen(tri_index_field)>0;
@@ -337,7 +337,7 @@ int init_resources(char *dir)
                  "where ",
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
-printf("sql = %s\n", sql);
+        printf("sql = %s\n", sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
         if (rc != SQLITE_OK ) {

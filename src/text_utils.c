@@ -142,52 +142,52 @@ int init_text_resources(char *dir)
                     gl_FragColor = vec4(1, 1, 1, texture2D(tex, texpos).a) * color; \
                     }";
 
-/*
-    txt_program = create_program((unsigned char *) vt_source,(unsigned char *)  ft_source, &vs, &fs);
+    /*
+        txt_program = create_program((unsigned char *) vt_source,(unsigned char *)  ft_source, &vs, &fs);
 
 
-    gen_txt_coord2d = glGetUniformLocation(gen_txt_program, "coord2d");
-    if (gen_txt_coord2d == -1)
-    {
-        fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
-        return 0;
-    }
+        gen_txt_coord2d = glGetUniformLocation(gen_txt_program, "coord2d");
+        if (gen_txt_coord2d == -1)
+        {
+            fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
+            return 0;
+        }
 
-    gen_txt_box = glGetAttribLocation(gen_txt_program, "box");
-    if (gen_txt_box == -1)
-    {
-        fprintf(stderr, "Could not bind attribute : %s\n", "box");
-        return 0;
-    }
+        gen_txt_box = glGetAttribLocation(gen_txt_program, "box");
+        if (gen_txt_box == -1)
+        {
+            fprintf(stderr, "Could not bind attribute : %s\n", "box");
+            return 0;
+        }
 
-    gen_txt_theMatrix = glGetUniformLocation(gen_txt_program, "theMatrix");
-    if (gen_txt_theMatrix == -1)
-    {
-        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
-    }
+        gen_txt_theMatrix = glGetUniformLocation(gen_txt_program, "theMatrix");
+        if (gen_txt_theMatrix == -1)
+        {
+            fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+            return 0;
+        }
 
-    gen_txt_color = glGetUniformLocation(gen_txt_program, "color");
-    if (gen_txt_color == -1)
-    {
-        fprintf(stderr, "Could not bind uniform : %s\n", "color");
-        return 0;
-    }
-
-
-
-    gen_txt_tex = glGetUniformLocation(gen_txt_program, "tex");
-
-    if (gen_txt_tex == -1)
-    {
-        fprintf(stderr, "Could not bind uniform : %s\n", "tex");
-        return 0;
-    }
-
-    reset_shaders(vs, fs, gen_txt_program);
+        gen_txt_color = glGetUniformLocation(gen_txt_program, "color");
+        if (gen_txt_color == -1)
+        {
+            fprintf(stderr, "Could not bind uniform : %s\n", "color");
+            return 0;
+        }
 
 
-*/
+
+        gen_txt_tex = glGetUniformLocation(gen_txt_program, "tex");
+
+        if (gen_txt_tex == -1)
+        {
+            fprintf(stderr, "Could not bind uniform : %s\n", "tex");
+            return 0;
+        }
+
+        reset_shaders(vs, fs, gen_txt_program);
+
+
+    */
 
 
 

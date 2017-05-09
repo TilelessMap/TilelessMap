@@ -99,17 +99,17 @@ GLfloat* increase_buffer(GLESSTRUCT *res_buf)
     float *new_array;
 
 
-        used_n_values = res_buf->first_free - res_buf->vertex_array; //number of floats
-        old_size = (res_buf->buffer_end - res_buf->vertex_array); // number of floats
-        new_size = old_size*2;					//number of floats
-        log_this(10, "Ok, increase space for vertex_array from  %d bytes\n",(int) old_size);
-        new_array = realloc(res_buf->vertex_array,new_size*sizeof(float)); //In bytes
+    used_n_values = res_buf->first_free - res_buf->vertex_array; //number of floats
+    old_size = (res_buf->buffer_end - res_buf->vertex_array); // number of floats
+    new_size = old_size*2;					//number of floats
+    log_this(10, "Ok, increase space for vertex_array from  %d bytes\n",(int) old_size);
+    new_array = realloc(res_buf->vertex_array,new_size*sizeof(float)); //In bytes
 
-        if (!new_array)
-            return NULL;
-        res_buf->vertex_array = new_array;
-        res_buf->first_free = res_buf->vertex_array + used_n_values;
-        res_buf->buffer_end = res_buf->vertex_array + new_size;
+    if (!new_array)
+        return NULL;
+    res_buf->vertex_array = new_array;
+    res_buf->first_free = res_buf->vertex_array + used_n_values;
+    res_buf->buffer_end = res_buf->vertex_array + new_size;
 
 
     return res_buf->first_free;

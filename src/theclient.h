@@ -321,7 +321,7 @@ typedef struct
     GLfloat x;
     GLfloat y;
 }
-vec2; 
+vec2;
 /*************Memory handling***********/
 
 
@@ -436,9 +436,9 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
 int render_simple_Polygon();
 
 
-void calc_start(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal);
-void calc_join(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal);
-void calc_end(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal);
+void calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
+void calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
+void calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
 
 int build_program();
 int floats_left(GLESSTRUCT *res_buf);

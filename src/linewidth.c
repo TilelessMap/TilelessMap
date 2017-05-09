@@ -28,26 +28,26 @@
 
 
 
-static inline float vec2Length(vec2 v)  
+static inline float vec2Length(vec2 v)
 {
     return sqrtf(v.x * v.x + v.y * v.y);
 }
 
 
 static inline vec2 normal(GLfloat Ax, GLfloat Ay, GLfloat Bx, GLfloat By)
-{ 
+{
     GLfloat len;
     vec2 v;
     GLfloat deltax = Bx-Ax;
-    GLfloat deltay = By-Ay;  
-        
-        v.x = -deltay;
-        v.y = deltax;
+    GLfloat deltay = By-Ay;
+
+    v.x = -deltay;
+    v.y = deltax;
 
     len = vec2Length(v);
     v.x /= len;
     v.y /= len;
-    
+
     return v;
 }
 
@@ -55,26 +55,26 @@ static inline vec2 normal(GLfloat Ax, GLfloat Ay, GLfloat Bx, GLfloat By)
 
 static inline vec2 add_vec(vec2 *v1, vec2 *v2)
 {
- vec2 v;
- v.x=v1->x+v2->x;
- v.y=v1->y+v2->y;
- return v;
+    vec2 v;
+    v.x=v1->x+v2->x;
+    v.y=v1->y+v2->y;
+    return v;
 }
 
 void
-calc_start(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal)
+calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 {
-    int n=0;    
+    int n=0;
     GLfloat p1x, p1y, p2x, p2y;
-    
+
     p1x = p[0].coord[0];
     p1y = p[0].coord[1];
     p2x = p[1].coord[0];
     p2y = p[1].coord[1];
-    
+
     vec2 norm = normal(p1x,p1y, p2x,p2y);
-    
-    
+
+
 
     *(ut + n++) = p1x;
     *(ut + n++) = p1y;
@@ -88,136 +88,136 @@ calc_start(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal)
 
     *c = n;
     *last_normal = norm;
-    
-    return; 
+
+    return;
 }
 
 void
-calc_join(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal)
+calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 {
-     int n = *c;
+    int n = *c;
     POINT_CIRCLE *p_akt = p->next;
-    
+
     GLfloat p1x, p1y, p2x, p2y, p3x, p3y;
-    
+
     GLfloat Ax, Ay, Bx, By,Cx, Cy, Dx, Dy;
-    
+
     p1x = p_akt->coord[0];
     p1y = p_akt->coord[1];
-    
+
     p_akt = p_akt->next;
     p2x = p_akt->coord[0];
     p2y = p_akt->coord[1];
-    
+
     p_akt = p_akt->next;
     p3x = p_akt->coord[0];
     p3y = p_akt->coord[1];
-    
-    
+
+
     GLfloat r_top, r_bot,r, d;
-    
+
     vec2 norm = normal(p2x, p2y, p3x, p3y);
-  
-       
-    
-d=(p3x - p1x) * (p2y - p1y) - (p3y - p1y) * (p2x - p1x);
+
+
+
+    d=(p3x - p1x) * (p2y - p1y) - (p3y - p1y) * (p2x - p1x);
 
 
 
 //d=(x−x1)(y2−y1)−(y−y1)(x2−x1)
 
     vec2  avg_vec = add_vec(&norm, last_normal);
-    
+
     Ax = p2x;
     Ay = p2y;
     Bx = p2x + avg_vec.x;
     By = p2y + avg_vec.y;
-    
+
     Cx = p1x + last_normal->x;
     Cy = p1y + last_normal->y;
     Dx = p2x + last_normal->x;
     Dy = p2y + last_normal->y;
 
-        
-      r_top = ((Ay - Cy) * (Dx-Cx)-(Ax-Cx) * (Dy-Cy));  
-      r_bot = ((Bx-Ax) * (Dy-Cy)-(By-Ay) * (Dx-Cx));
-      
-      if(r_bot == 0)
-          r = 1;
-      else
-          r = r_top/r_bot;
-      
-  //      r = ((l1.p1.y - l2.p1.y) * (l2.p2.x - l2.p1.x) - (l1.p1.x - l2.p1.x) * (l2.p2.y - l2.p1.y)) / ((l1.p2.x - l1.p1.x) * (l2.p2.y - l2.p1.y) - (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x));
 
-   //     printf("r: %f\n", r);
-            
+    r_top = ((Ay - Cy) * (Dx-Cx)-(Ax-Cx) * (Dy-Cy));
+    r_bot = ((Bx-Ax) * (Dy-Cy)-(By-Ay) * (Dx-Cx));
+
+    if(r_bot == 0)
+        r = 1;
+    else
+        r = r_top/r_bot;
+
+    //      r = ((l1.p1.y - l2.p1.y) * (l2.p2.x - l2.p1.x) - (l1.p1.x - l2.p1.x) * (l2.p2.y - l2.p1.y)) / ((l1.p2.x - l1.p1.x) * (l2.p2.y - l2.p1.y) - (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x));
+
+    //     printf("r: %f\n", r);
+
     if(fabs(r)>1.4)
     {
-     //   printf("d: %f\n", d);
-     if(d == 0)
-    {
-        return;
-    }
-    else if (d < 0)
-    {
-               
+        //   printf("d: %f\n", d);
+        if(d == 0)
+        {
+            return;
+        }
+        else if (d < 0)
+        {
 
-        *(ut + n++) = p1x;
-        *(ut + n++) = p1y;
-        *(ut + n++) = r * avg_vec.x;
-        *(ut + n++) = r * avg_vec.y;
-  
-        *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = -last_normal->x;
-        *(ut + n++) = -last_normal->y;        
-        
-        *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = r * avg_vec.x;
-        *(ut + n++) = r * avg_vec.y;
-        
-        *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = -norm.x;
-        *(ut + n++) = -norm.y;      
-         
-    }       
-     else
-     {   
-         *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = last_normal->x;
-        *(ut + n++) = last_normal->y;   
-        
-        *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = -r * avg_vec.x;
-        *(ut + n++) = -r * avg_vec.y;
 
-        *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = norm.x;
-        *(ut + n++) = norm.y;
-        
-        *(ut + n++) = p2x;
-        *(ut + n++) = p2y;
-        
-        *(ut + n++) = -r * avg_vec.x;
-        *(ut + n++) = -r * avg_vec.y;
-              
-        
-    }
+            *(ut + n++) = p1x;
+            *(ut + n++) = p1y;
+            *(ut + n++) = r * avg_vec.x;
+            *(ut + n++) = r * avg_vec.y;
+
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = -last_normal->x;
+            *(ut + n++) = -last_normal->y;
+
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = r * avg_vec.x;
+            *(ut + n++) = r * avg_vec.y;
+
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = -norm.x;
+            *(ut + n++) = -norm.y;
+
+        }
+        else
+        {
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = last_normal->x;
+            *(ut + n++) = last_normal->y;
+
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = -r * avg_vec.x;
+            *(ut + n++) = -r * avg_vec.y;
+
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = norm.x;
+            *(ut + n++) = norm.y;
+
+            *(ut + n++) = p2x;
+            *(ut + n++) = p2y;
+
+            *(ut + n++) = -r * avg_vec.x;
+            *(ut + n++) = -r * avg_vec.y;
+
+
+        }
     }
     else
     {
-        
+
         *(ut + n++) = p2x;
         *(ut + n++) = p2y;
         *(ut + n++) = r * avg_vec.x;
@@ -227,42 +227,42 @@ d=(p3x - p1x) * (p2y - p1y) - (p3y - p1y) * (p2x - p1x);
         *(ut + n++) = p2y;
         *(ut + n++) = -r * avg_vec.x;
         *(ut + n++) = -r * avg_vec.y;
-               
+
     }
-           
-           printf("\n");
+
+    printf("\n");
     int i;
-  
-    
-    
-           printf("\n");
-           
-           
+
+
+
+    printf("\n");
+
+
     *c = n;
     *last_normal = norm;
-    
-   
-    return;     
+
+
+    return;
 }
 
 
 void
-calc_end(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal)
+calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 {
     int n = *c;
-    
-     GLfloat p1x, p1y, p2x, p2y;
-    
+
+    GLfloat p1x, p1y, p2x, p2y;
+
     POINT_CIRCLE *p_akt = p->next;
-    
+
     p1x = p_akt->coord[0];
     p1y = p_akt->coord[1];
-    
+
     p_akt = p_akt->next;
     p2x = p_akt->coord[0];
     p2y = p_akt->coord[1];
-    
-  
+
+
 
     *(ut + n++) = p2x;
     *(ut + n++) = p2y;
@@ -272,11 +272,11 @@ calc_end(POINT_CIRCLE *p,GLfloat *ut ,int *c, vec2 *last_normal)
     *(ut + n++) = p2y;
     *(ut + n++) = -last_normal->x;
     *(ut + n++) = -last_normal->y;
-    
+
     int i;
 
-    
+
     *c = n;
 
-    return; 
+    return;
 }
