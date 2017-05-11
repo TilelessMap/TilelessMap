@@ -298,16 +298,20 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             }
             if(i==1)
             {
-                if(floats_left(res_buf)<4)
+                if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
                     dlist = increase_buffer(res_buf);
                 calc_start(p, dlist, &c, &last_normal);
             }
+            
+            
             if(i>1)
             {
                 if(floats_left(res_buf)<12)
                     dlist = increase_buffer(res_buf);
-
                 calc_join(p_akt, dlist, &c,&last_normal);
+            }
+            if(i==npoints-1)
+            {
                 if(i==npoints-1)
                     calc_end(p_akt->next, dlist, &c,&last_normal);
             }

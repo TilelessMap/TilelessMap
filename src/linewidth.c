@@ -154,11 +154,7 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
     if(fabs(r)>1.4)
     {
         //   printf("d: %f\n", d);
-        if(d == 0)
-        {
-            return;
-        }
-        else if (d < 0)
+        if (d < 0)
         {
 
 
@@ -229,13 +225,6 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
         *(ut + n++) = -r * avg_vec.y;
 
     }
-
-    printf("\n");
-    int i;
-
-
-
-    printf("\n");
 
 
     *c = n;
