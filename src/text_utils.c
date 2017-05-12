@@ -255,9 +255,9 @@ int init_text_resources(char *dir)
 
 
 
-    create_atlas(atlases[0], face, 12);
-    create_atlas(atlases[1], face, 16);
-    create_atlas(atlases[2], face, 24);
+    create_atlas(atlases[0], face, 20);
+    create_atlas(atlases[1], face, 26);
+    create_atlas(atlases[2], face, 32);
 
     sqlite3_finalize(preparedFonts);
     return 0;

@@ -181,14 +181,9 @@ Information about all the layers in the project is loaded in an array of this st
 */
 typedef struct
 {
-    char* name[63];
+    char *name;
     uint8_t visible;
     sqlite3_stmt *preparedStatement;
-    GLuint program;
-    /*Placeholders in shaders*/
-    GLint attribute_coord2d;
-    GLint uniform_theMatrix;
-    GLint uniform_color;
     /*Buffers*/
     GLuint vbo;
     GLuint ebo;
@@ -203,14 +198,7 @@ typedef struct
     GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
-    //Placeholders in text_shader
-    /*   GLuint txt_program;
-       GLint txt_coord2d;
-       GLint txt_theMatrix;
-       GLint txt_color;
-       GLint txt_box;
-       GLint txt_tex;
-    */
+
     uint8_t show_text;
     uint8_t line_width;
     int layer_id;
@@ -397,6 +385,8 @@ int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat px_x_c
 int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
 
 LAYER_RUNTIME* init_layer_runtime(int n);
+void destroy_layer_runtime(LAYER_RUNTIME *lr, int n);
+
 int  matrixFromBBOX(GLfloat *newBBOX, GLfloat *theMatrix );
 int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
 

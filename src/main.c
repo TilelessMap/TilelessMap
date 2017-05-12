@@ -44,7 +44,6 @@ int init_resources(char *dir)
     //char stylewhere[128];
 
 
-    GLuint vs, fs, program;
     sqlite3_stmt *preparedLayerLoading;
     sqlite3_stmt *preparedCountLayers;
     sqlite3_stmt *preparedDb2Attach;
@@ -86,44 +85,6 @@ int init_resources(char *dir)
          fs_source = sqlite3_column_text(preparedLayerLoading, 4);*/
     }
     sqlite3_finalize(preparedDb2Attach);
-    /********************************************************************************
-     Get information about all the layers in the project
-     */
-    char *sqlLayerLoading = "SELECT "
-                            /*fields for attaching the database*/
-                            "d.name dbname, d.source filename, "
-                            /*fields used to find if program is already compiled*/
-                            "p.programID, "
-                            /*fields for compilation if not already done*/
-                            " vs.source vsSource, fs.source fsSource, "
-                            /*fields for creating the prepared statement to get data later*/
-                            "l.geometryField,l.triIndexField, l.idField, l.name layername, l.geometryindex, "
-                            /*fields to inform comming processes about how and when to render*/
-                            " l.defaultVisible, l.minScale, l.maxScale, geometryType,styleField,showText,linewidth, l.layerID, "
-                            "tc.size_fld, rotation_fld, anchor_fld, txt_fld,pt.programID , vt.source vtSource, ft.source ftSource "
-                            " FROM layers l "
-                            "INNER JOIN dbs d on l.source = d.name "
-                            "INNER JOIN programs p on l.program = p.programID "
-                            "INNER JOIN shaders vs on p.vs = vs.name "
-                            "INNER JOIN shaders fs on p.fs = fs.name "
-                            "LEFT JOIN text_conf tc on l.layerID=tc.layerID "
-                            "LEFT JOIN programs pt on tc.program=pt.programID "
-                            "LEFT JOIN shaders vt on pt.vs=vt.name "
-                            "LEFT JOIN shaders ft on pt.fs=ft.name "
-                            "order by l.orderby ;";
-
-
-
-
-    log_this(10, "Get Layer sql : %s\n",sqlLayerLoading);
-    rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
-
-    if (rc != SQLITE_OK ) {
-        log_this(1, "SQL error in %s\n",sqlLayerLoading);
-        sqlite3_close(projectDB);
-        return 1;
-    }
-
 
     /********************************************************************************
      Count the layers in the project and get maximum styleID in the project
@@ -142,6 +103,29 @@ int init_resources(char *dir)
     int nStyles = sqlite3_column_int(preparedCountStyle, 0);
     int maxStyleID = sqlite3_column_int(preparedCountStyle, 1);
     sqlite3_finalize(preparedCountStyle);
+
+
+
+
+
+    /********************************************************************************
+     Count how many layers we are dealing with
+    */
+    char *sqlCountLayers = "SELECT COUNT(*)   "
+                           "FROM layers l ; ";
+
+
+    rc = sqlite3_prepare_v2(projectDB, sqlCountLayers, -1, &preparedCountLayers, 0);
+
+    if (rc != SQLITE_OK ) {
+        log_this(1, "SQL error in %s\n",sqlCountLayers );
+        sqlite3_close(projectDB);
+        return 1;
+    }
+    sqlite3_step(preparedCountLayers);
+    nLayers = sqlite3_column_int(preparedCountLayers, 0);
+
+    sqlite3_finalize(preparedCountLayers);
 
 
     /********************************************************************************
@@ -183,28 +167,48 @@ int init_resources(char *dir)
     }
 
     sqlite3_finalize(preparedStylesLoading);
-
-
-
     /********************************************************************************
-     Count how many layers we are dealing with
-    */
-    char *sqlCountLayers = "SELECT COUNT(*)   "
-                           "FROM layers l ; ";
+     Get information about all the layers in the project
+     */
+    char *sqlLayerLoading = "SELECT "
+                            /*fields for attaching the database*/
+                            "d.name dbname, "   // 0
+                            /*fields for creating the prepared statement to get data later*/
+                            "l.geometryField,"  // 1
+                            "l.triIndexField,"  // 2
+                            "l.idField,"  // 3
+                            "l.name layername,"  // 4
+                            "l.geometryindex, "  // 5
+                            /*fields to inform comming processes about how and when to render*/
+                            " l.defaultVisible,"  // 6
+                            "l.minScale,"  // 7
+                            "l.maxScale,"  // 8
+                            "geometryType,"  // 9
+                            "styleField,"  // 10
+                            "showText,"  // 11
+                            "linewidth,"  // 12
+                            "l.layerID, "  // 13
+                            "tc.size_fld,"  // 14
+                            "rotation_fld,"  // 15
+                            "anchor_fld,"  // 16
+                            "txt_fld"  // 17
+                            
+                            " FROM layers l "
+                            "INNER JOIN dbs d on l.source = d.name "
+                            "LEFT JOIN text_conf tc on l.layerID=tc.layerID "
+                            "order by l.orderby ;";
 
 
-    rc = sqlite3_prepare_v2(projectDB, sqlCountLayers, -1, &preparedCountLayers, 0);
+
+
+    log_this(10, "Get Layer sql : %s\n",sqlLayerLoading);
+    rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
     if (rc != SQLITE_OK ) {
-        log_this(1, "SQL error in %s\n",sqlCountLayers );
+        log_this(1, "SQL error in %s\n",sqlLayerLoading);
         sqlite3_close(projectDB);
         return 1;
     }
-    sqlite3_step(preparedCountLayers);
-    nLayers = sqlite3_column_int(preparedCountLayers, 0);
-
-    sqlite3_finalize(preparedCountLayers);
-
 
     /********************************************************************************
      Time to iterate all layers in the project and add data about them in struct layerRuntime
@@ -217,69 +221,43 @@ int init_resources(char *dir)
         oneLayer=layerRuntime + i;
         sqlite3_step(preparedLayerLoading);
 
-        const unsigned char * vs_source = sqlite3_column_text(preparedLayerLoading, 3);
-        const unsigned char *  fs_source = sqlite3_column_text(preparedLayerLoading, 4);
-
-
-        program = create_program(vs_source, fs_source, &vs, &fs);
-
-        attribute_coord2d = glGetAttribLocation(program, "coord2d");
-        if (attribute_coord2d == -1) {
-            log_this(1, "Could not bind attribute : %s\n", "coord2d");
-            return 0;
-        }
-
-        uniform_theMatrix = glGetUniformLocation(program, "theMatrix");
-        if (uniform_theMatrix == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "theMatrix");
-            return 0;
-        }
-
-        uniform_color = glGetUniformLocation(program, "color");
-        if (uniform_color == -1) {
-            log_this(1, "Could not bind uniform : %s\n", "color");
-            return 0;
-        }
-
-        oneLayer->program = program;
-        oneLayer->attribute_coord2d = attribute_coord2d;
-        oneLayer->uniform_theMatrix = uniform_theMatrix;
-        oneLayer->uniform_color = uniform_color;
-
-        reset_shaders(vs, fs, program);
-
-
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
-        const unsigned char *geometryfield = sqlite3_column_text(preparedLayerLoading, 5);
+        const unsigned char *geometryfield = sqlite3_column_text(preparedLayerLoading, 1);
 
 
-        const unsigned char *tri_index_field = sqlite3_column_text(preparedLayerLoading, 6);
+        const unsigned char *tri_index_field = sqlite3_column_text(preparedLayerLoading, 2);
 
 
-        const unsigned char *idfield = sqlite3_column_text(preparedLayerLoading, 7);
-        const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,8);
-        const unsigned char *geometryindex = sqlite3_column_text(preparedLayerLoading, 9);
-        const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 14);
-        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 17);
+        const unsigned char *idfield = sqlite3_column_text(preparedLayerLoading, 3);
+        const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,4);
+        const unsigned char *geometryindex = sqlite3_column_text(preparedLayerLoading, 5);
+        const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 10);
+        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
 
-        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 10);
-        oneLayer->minScale = sqlite3_column_int(preparedLayerLoading, 11);
-        oneLayer->maxScale = sqlite3_column_int(preparedLayerLoading, 12);
-        oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
+        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 6);
+        oneLayer->minScale = sqlite3_column_int(preparedLayerLoading, 7);
+        oneLayer->maxScale = sqlite3_column_int(preparedLayerLoading, 8);
+        oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 9);
 
-        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 15);
-        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 16);
-        oneLayer->layer_id =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 17);
+        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 11);
+        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 12);
 
-        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,18);
-        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 19);
-        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 20);
-        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 21);
+        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,14);
+        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 15);
+        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 16);
+        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 17);
 
+        
+        //TODO free this
+    //    oneLayer->name = malloc(strlen(layername)+1);
+        
+      //  strcpy(oneLayer->name,layername);
+        
+        
+        //printf("name = %s\n", oneLayer->name);
+        oneLayer->layer_id =  (uint8_t) layerid;
 
-
-
-        oneLayer->render_area = strlen(tri_index_field)>0;
+        oneLayer->render_area =! NULL;
 
 
         char tri_idx_fld[32];
@@ -338,6 +316,7 @@ int init_resources(char *dir)
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
         printf("sql = %s\n", sql);
+        
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
         if (rc != SQLITE_OK ) {
@@ -386,9 +365,9 @@ void mainLoop(SDL_Window* window)
 
     GLfloat mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
-    initialBBOX(380000, 6660000, 300000, newBBOX);
+//     initialBBOX(380000, 6660000, 300000, newBBOX);
 //initialBBOX(230000, 6660000, 5000, newBBOX);
-//    initialBBOX(380000, 6644000, 1000, newBBOX);
+   initialBBOX(325000, 6800000, 800000, newBBOX);
 
 
     GLfloat theMatrix[16];
@@ -616,22 +595,12 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     log_this(10, "Entering free_resources\n");
 
     LAYER_RUNTIME theLayer;
-    for (t=0; t<nLayers; t++)
-    {
-        theLayer = layerRuntime[t];
-        glDeleteProgram(theLayer.program);
-        destroy_buffer(theLayer.res_buf);
-        if (theLayer.geometryType == POLYGONTYPE)
-        {
-            element_destroy_buffer(theLayer.tri_index);
-        }
-        if(theLayer.show_text)
-            text_destroy_buffer(theLayer.text);
+        glDeleteProgram(std_program);
+        glDeleteProgram(txt_program);
+        glDeleteProgram(lw_program);
+        
+        void destroy_layer_runtime(layerRuntime,nLayers);
 
-        sqlite3_finalize(theLayer.preparedStatement);
-
-    }
-    free(layerRuntime);
     free(global_styles);
     sqlite3_close_v2(projectDB);
     SDL_GL_DeleteContext(context);
@@ -651,11 +620,12 @@ int main(int argc, char **argv)
     if(argc > 1)
         dir = argv[argc-1];
 
-
+snprintf(projectfile, 500, "%s%s",dir, "/hedmark.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj2.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/varmland_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-    snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+  
+//  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
 
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);

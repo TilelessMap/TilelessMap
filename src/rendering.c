@@ -192,7 +192,6 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     for (i=0; i<rb->used_n_pa; i++)
     {
-        lw = 10;
 
 
         Uint32 styleID = *(rb->styleID+i);
@@ -205,9 +204,9 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
-            lw = global_styles[styleID].lineWidth;
+            lw = global_styles[styleID].lineWidth * 0.5;
             if(!lw)
-                lw = 1;
+                lw = 0.5;
 
 
 
@@ -296,7 +295,6 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
             if(!lw)
                 continue;
 
-            glLineWidth(lw);
             if(outline)
             {
                 color = global_styles[styleID].outlinecolor;
