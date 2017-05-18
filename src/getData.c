@@ -37,15 +37,11 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     LAYER_RUNTIME *oneLayer;
     GLfloat meterPerPixel = (bbox[2]-bbox[0])/CURR_WIDTH;
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        log_this(10, "Problem 2\n");
-        fprintf(stderr,"opengl error 70 :%d\n", err);
-    }
 
     for (i=0; i<nLayers; i++)
     {
         oneLayer = layerRuntime + i;
-
+       
         reset_buffer(oneLayer->res_buf);
         if(oneLayer->geometryType == POLYGONTYPE)
             element_reset_buffer(oneLayer->tri_index);
@@ -55,13 +51,10 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-            log_this(10, "decode nr %d\n", i);
+          //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = bbox;
-            rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
-
-
-            // twkb_fromSQLiteBBOX((void *) oneLayer);
-
+           rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
+           //   twkb_fromSQLiteBBOX((void *) oneLayer);
         }
     }
 
@@ -79,13 +72,6 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     n_letters=0;
 
 
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        log_this(10, "Problem 2\n");
-        fprintf(stderr,"opengl error before p :%d\n", err);
-    }
-
-
     for(t=0; t<nLayers; t++)
 //     for(t=0; t<0; t++)
 
@@ -95,9 +81,8 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         oneLayer = layerRuntime + t;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-            log_this(10, "load nr %d\n", t);
-            rc = pthread_join(threads[t], NULL);
-            //  rc = 0;
+             rc = pthread_join(threads[t], NULL);
+           //  rc = 0;
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);
@@ -107,43 +92,39 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
             case POINTTYPE :
                 loadPoint( oneLayer, theMatrix);
                 while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(10, "Problem 2\n");
+                    log_this(50, "Problem 2\n");
                     fprintf(stderr,"opengl error point layer nr %d  :%d\n",t, err);
                 }
                 break;
             case LINETYPE :
                 loadLine( oneLayer, theMatrix);
                 while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(10, "Problem 2\n");
+                    log_this(50, "Problem 2\n");
                     fprintf(stderr,"opengl error line layer nr %d  :%d\n",t, err);
                 }
                 break;
             case POLYGONTYPE :
                 loadPolygon( oneLayer, theMatrix);
                 while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(10, "Problem 2\n");
+                    log_this(50, "Problem 2\n");
                     fprintf(stderr,"opengl error polygon layer nr %d  :%d\n",t, err);
                 }
                 break;
             }
         }
 
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem 2\n");
-            fprintf(stderr,"opengl error layer nr %d  :%d\n",t, err);
-        }
     }
     render_simple_Polygon();
-    print_txt(10,200,200,0,0,255,2, "n lines %d ", n_lines);
-    print_txt(10,180,200,0,0,255,2, "n polygons %d ", n_polys);
-    print_txt(10,160,200,0,0,255,2, "n triangels %d ", n_tri);
-    print_txt(10,140,200,0,0,255,2, "n words %d ", n_words);
-    print_txt(10,120,200,0,0,255,2, "n letters %d ", n_letters);
-    print_txt(10,100,200,0,0,255,2, "Total points %d ", total_points);
+    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);
+    print_txt(10,180,200,0,0,255,1, "n polygons %d ", n_polys);
+    print_txt(10,160,200,0,0,255,1, "n triangels %d ", n_tri);
+    print_txt(10,140,200,0,0,255,1, "n words %d ", n_words);
+    print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
+    print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);
     gettimeofday(&tval_after, NULL);
 
     timersub(&tval_after, &tval_before, &tval_result);
-    print_txt(10,80,200,0,0,255,2, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+    print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
 
 
     total_points=0;
@@ -152,9 +133,6 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     SDL_GL_SwapWindow(window);
 
 //render(window,res_buf);
-
-    printf("Fetched and rendered %d points\n", total_points);
-
     return 0;
 }
 

@@ -272,7 +272,6 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     if(ts->line_width)
 //if (1 == 2)
     {
-        log_this(10, "linewidth, npoints = %d\n", npoints);
         vec2 last_normal;
         POINT_CIRCLE p[3];
         p->next = (void*) p+sizeof(POINT_CIRCLE);
@@ -323,7 +322,6 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     }
     else
     {
-        // log_this(10, "ikke linewidth, npoints = %d\n", npoints);
         dlist = get_start(npoints, ndims,res_buf);
         for( i = 0; i < npoints; i++ )
         {

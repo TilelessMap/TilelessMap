@@ -69,3 +69,29 @@ LAYER_RUNTIME* init_layer_runtime(int n)
 
     return lr;
 }
+
+void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
+{
+ int i;
+ LAYER_RUNTIME *theLayer;
+ for (i=0;i<n;i++)
+ {
+    theLayer = lr+i;
+    
+        destroy_buffer(theLayer->res_buf);
+        if (theLayer->geometryType == POLYGONTYPE)
+        {
+            element_destroy_buffer(theLayer->tri_index);
+        }
+        if(theLayer->show_text)
+            text_destroy_buffer(theLayer->text);
+
+    free(theLayer->name); 
+        sqlite3_finalize(theLayer->preparedStatement);
+        
+        
+ }
+    free(lr);
+   
+    return;
+}

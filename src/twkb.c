@@ -56,7 +56,7 @@ static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 
 void *twkb_fromSQLiteBBOX(void *theL)
 {
-    log_this(10, "Entering twkb_fromSQLiteBBOX\n");
+    log_this(10, "Entering twkb_fromSQLiteBBOX, prepared = %p\n", ((LAYER_RUNTIME*) theL)->preparedStatement);
     /*twkb structures*/
     TWKB_HEADER_INFO thi;
     TWKB_PARSE_STATE ts;
