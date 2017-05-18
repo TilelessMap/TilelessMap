@@ -156,5 +156,5 @@ void *twkb_fromSQLiteBBOX(void *theL)
     sqlite3_reset(prepared_statement);
 
 
-    pthread_exit(NULL);
+//    pthread_exit(NULL);
 }
