@@ -87,7 +87,7 @@ int init_resources(char *dir)
             dbname_len = strlen(dbname);
             if(used_bytes + dbname_len + 3 >=1024)
             {
-             log_this(10, "This is a hard day. You are missing so many databases so I cannot keep track of them \n%s\n",missing_db );   
+             log_this(100, "This is a hard day. You are missing so many databases so I cannot keep track of them \n%s\n",missing_db );   
              return 1;
             }
             if(used_bytes)
@@ -388,7 +388,7 @@ int check_layer(char *dbname, char *layername)
     char sql[1024];
     int rc;
     sqlite3_stmt *prepared_sql;
-    snprintf(sql, 1024, "select name from %s.sqlite_master where type = 'table' and name = '%s'", dbname, layername);
+    snprintf(sql, 1024, "select name from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
     
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
