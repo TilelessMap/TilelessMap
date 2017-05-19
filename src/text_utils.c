@@ -38,6 +38,9 @@ extern void print_opengl_info();
            typeof (b) _b = (b); \
          _a > _b ? _a : _b; })
 
+       
+       
+       
 /**
  * Store all the file's contents in memory, useful to pass shaders
  * source code to OpenGL.  Using SDL_RWops for Android asset support.
@@ -107,7 +110,7 @@ void print_opengl_info() {
 
 
 
-int init_text_resources(char *dir)
+int init_text_resources()
 {
     char *sql_txt;
     int rc;
@@ -117,86 +120,6 @@ int init_text_resources(char *dir)
     FT_Face face;
     int len;
     char *font_data;
-
-    GLuint vs, fs, program;
-
-
-
-
-
-    const unsigned char vt_source[1024] = "attribute vec4 box; \
-            uniform vec2 coord2d; \
-            uniform mat4 theMatrix; \
-            uniform vec4 color; \
-            varying vec2 texpos; \
-            void main(void) { \
-            gl_Position = theMatrix * vec4(coord2d, 0.0, 1.0) + vec4(box.xy, 0.0, 0.0);  \
-            texpos = box.zw; \
-            }";
-
-
-    const unsigned char ft_source[1024] = "varying vec2 texpos; \
-                    uniform sampler2D tex; \
-                    uniform vec4 color; \
-                    void main(void) { \
-                    gl_FragColor = vec4(1, 1, 1, texture2D(tex, texpos).a) * color; \
-                    }";
-
-    /*
-        txt_program = create_program((unsigned char *) vt_source,(unsigned char *)  ft_source, &vs, &fs);
-
-
-        gen_txt_coord2d = glGetUniformLocation(gen_txt_program, "coord2d");
-        if (gen_txt_coord2d == -1)
-        {
-            fprintf(stderr, "Could not bind uniform : %s\n", "coord2d");
-            return 0;
-        }
-
-        gen_txt_box = glGetAttribLocation(gen_txt_program, "box");
-        if (gen_txt_box == -1)
-        {
-            fprintf(stderr, "Could not bind attribute : %s\n", "box");
-            return 0;
-        }
-
-        gen_txt_theMatrix = glGetUniformLocation(gen_txt_program, "theMatrix");
-        if (gen_txt_theMatrix == -1)
-        {
-            fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-            return 0;
-        }
-
-        gen_txt_color = glGetUniformLocation(gen_txt_program, "color");
-        if (gen_txt_color == -1)
-        {
-            fprintf(stderr, "Could not bind uniform : %s\n", "color");
-            return 0;
-        }
-
-
-
-        gen_txt_tex = glGetUniformLocation(gen_txt_program, "tex");
-
-        if (gen_txt_tex == -1)
-        {
-            fprintf(stderr, "Could not bind uniform : %s\n", "tex");
-            return 0;
-        }
-
-        reset_shaders(vs, fs, gen_txt_program);
-
-
-    */
-
-
-
-
-
-
-
-
-
 
 
 
@@ -211,7 +134,6 @@ int init_text_resources(char *dir)
     }
 
     /* Load a font */
-    int fontsize;
 
     // font_data = file_read(fontfilename, &len);
 
@@ -458,5 +380,6 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
         log_this(10, "Problem 2\n");
         fprintf(stderr,"opengl error wt2:%d\n", err);
     }
+    return 0;
 }
 

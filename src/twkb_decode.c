@@ -265,9 +265,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     int64_t val;
     GLfloat *dlist;
     float new_val;
-    double f;
     int c=0;
-    int has_m=ts->thi->has_m;
 
     if(ts->line_width)
 //if (1 == 2)

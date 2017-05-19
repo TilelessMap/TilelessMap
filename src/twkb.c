@@ -155,6 +155,6 @@ void *twkb_fromSQLiteBBOX(void *theL)
     sqlite3_clear_bindings(prepared_statement);
     sqlite3_reset(prepared_statement);
 
-
+return NULL;
 //    pthread_exit(NULL);
 }

@@ -43,8 +43,6 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     return 0;
 }
 
-
-
 int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     int ndims = 2;
@@ -80,7 +78,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         }*/
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
         printf("There is a mismatch between number of labels and number of corresponding points\n");
-    int used=0;
+    
     for (i=0; i<rb->used_n_pa; i++)
     {
         total_points += *(rb->npoints+i);
@@ -125,7 +123,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 //void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb)
 {
 
-    int  i;
+    uint32_t  i;
     GLfloat *color, lw;
     float sx = 2.0 / CURR_WIDTH;
     float sy = 2.0 / CURR_HEIGHT;
@@ -233,6 +231,8 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     glDisableVertexAttribArray(lw_coord2d);
 
+    return 0;
+    
 }
 
 
@@ -505,13 +505,13 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     log_this(10, "Entering renderText\n");
     uint32_t i;
     GLfloat *color;
+    GLfloat c[4];
     int ndims=2;
     //FT_GlyphSlot g = face->glyph;
 //   GLuint text_vbo;
     char *txt;
 //   glGenBuffers(1, &text_vbo);
     /* Create a texture that will be used to hold one "glyph" */
-    GLuint tex;
 
     glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
@@ -541,10 +541,13 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         Uint32 styleID = *(rb->styleID+i);
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
-        {
             color = global_styles[styleID].color;
+        else
+        {
+            c[0] = c[1] = c[2] = 100;
+            c[3] = 255;
+            color = c;
         }
-
 
         point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
         point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);

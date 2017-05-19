@@ -56,7 +56,7 @@
 
 
 #define APPNAME "TILELESS"
-#define LOGLEVEL 100
+#define LOGLEVEL 80
 
 
 
@@ -310,6 +310,8 @@ typedef struct
     GLfloat y;
 }
 vec2;
+
+int init_resources(char *dir);
 /*************Memory handling***********/
 
 
@@ -415,7 +417,7 @@ void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 
 //uint32_t utf82unicode(char *text, char **the_rest);
 uint32_t utf82unicode(const char *text,const char **the_rest);
-int init_text_resources(char *dir);
+int init_text_resources();
 void render_txt(SDL_Window* window);
 
 ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
@@ -432,7 +434,7 @@ void calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
 
 int build_program();
 int floats_left(GLESSTRUCT *res_buf);
-int check_layer(char *dbname, char *layername);
+int check_layer(const unsigned char *dbname, const unsigned char  *layername);
 /*********************** Global variables*******************************/
 
 struct timeval tval_before, tval_after, tval_result;

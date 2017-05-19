@@ -114,7 +114,6 @@ int register_motion(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y
 {
     int i = 0;
     FINGEREVENT *fie;
-    int all_finnished = 1;
     for (i=0; i<MAX_ZOOM_FINGERS; i++)
     {
         fie = &(touches[i]);

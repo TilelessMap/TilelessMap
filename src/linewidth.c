@@ -243,12 +243,9 @@ calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
  //    log_this(10, "Entering %s\n",__func__);
     int n = *c;
 
-    GLfloat p1x, p1y, p2x, p2y;
+    GLfloat  p2x, p2y;
 
     POINT_CIRCLE *p_akt = p->next;
-
-    p1x = p_akt->coord[0];
-    p1y = p_akt->coord[1];
 
     p_akt = p_akt->next;
     p2x = p_akt->coord[0];
@@ -265,7 +262,7 @@ calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
     *(ut + n++) = -last_normal->x;
     *(ut + n++) = -last_normal->y;
 
-    int i;
+
 
 
     *c = n;
