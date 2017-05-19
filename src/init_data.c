@@ -27,36 +27,16 @@
 
 
 
-int init_resources(char *dir)
+/********************************************************************************
+  Attach all databases with data for the project
+*/
+static int attach_db(char *dir, TEXT *missing_db)
 {
-    log_this(10, "Entering init_resources\n");
-    int i, rc;
-    char     *err_msg;
 
-    LAYER_RUNTIME *oneLayer;
-    char sql[2048];
-    char *styleselect;
-    char stylejoin[128];
-    char stylewhere[128];
-    char textselect[128];
-    
-    char missing_db[1024]; //just a string where we put names of db taht we cannot find. Then we use that for avoiding those layers. quite hackish
-    int dbname_len;
-    //char stylewhere[128];
-
-
-    sqlite3_stmt *preparedLayerLoading;
-    sqlite3_stmt *preparedCountLayers;
+    int rc;
+    char *err_msg;
     sqlite3_stmt *preparedDb2Attach;
-    sqlite3_stmt *preparedLayer;
-    sqlite3_stmt *preparedCountStyle;
-    sqlite3_stmt * preparedStylesLoading;
-
-    build_program();
-    /********************************************************************************
-      Attach all databases with data for the project
-    */
-
+    char sql[2048];
     char *sqlDb2Attach = " select distinct d.source, d.name from dbs d inner join layers l on d.name=l.source;";
 
     rc = sqlite3_prepare_v2(projectDB, sqlDb2Attach, -1, &preparedDb2Attach, 0);
@@ -65,44 +45,72 @@ int init_resources(char *dir)
         sqlite3_close(projectDB);
         return 1;
     }
-    int used_bytes = 0;
+
     while(sqlite3_step(preparedDb2Attach)==SQLITE_ROW)
     {
 
         const unsigned char *dbsource = sqlite3_column_text(preparedDb2Attach, 0);
         const unsigned char * dbname= sqlite3_column_text(preparedDb2Attach, 1);
-
-
-
-
         char sqlAttachDb[128];
         snprintf(sqlAttachDb,sizeof(sql), "ATTACH '%s//%s' AS %s;", dir, dbsource, dbname);
         log_this(10, "attachsql = %s\n",sqlAttachDb );
         rc = sqlite3_exec(projectDB,sqlAttachDb,NULL, NULL, &err_msg);
         if (rc != 0)
         {
-            log_this(90, "failed to load db: %s. rc = %d errcode = %s, sql = %s\n",dbsource, rc,err_msg);  
-            dbname_len = strlen((char *) dbname);
-            if(used_bytes + dbname_len + 3 >=1024)
-            {
-             log_this(100, "This is a hard day. You are missing so many databases so I cannot keep track of them \n%s\n",missing_db );   
-             return 1;
-            }
-            if(used_bytes)
-            {
-                used_bytes += strlen((char*) dbname) + 4;
-                snprintf(missing_db, 1024-used_bytes,"%s, '%s'", missing_db, dbname);
-            }
-            else            
-            {
-                used_bytes += strlen((char*) dbname)+2;               
-                snprintf(missing_db, 1024-used_bytes,"'%s'", dbname);
-            }
+            log_this(90, "failed to load db: %s. rc = %d errcode = %s, sql = %s\n",dbsource, rc,err_msg);
+
+            if(missing_db->used)
+                add_txt(missing_db, ",");
+
+            add_txt(missing_db, "'");
+            add_txt(missing_db,(const char*) dbname);
+            add_txt(missing_db, "'");
+
+            sqlite3_free(err_msg);
         }
         /* vs_source = sqlite3_column_text(preparedLayerLoading, 3);
          fs_source = sqlite3_column_text(preparedLayerLoading, 4);*/
     }
     sqlite3_finalize(preparedDb2Attach);
+    return 0;
+}
+
+
+
+/********************************************************************************
+    Count how many layers we are dealing with
+*/
+
+static int count_layers()
+{
+    int n, rc;
+    sqlite3_stmt *preparedCountLayers;
+    char *sqlCountLayers = "SELECT COUNT(*) FROM layers l ; ";
+
+    rc = sqlite3_prepare_v2(projectDB, sqlCountLayers, -1, &preparedCountLayers, 0);
+
+    if (rc != SQLITE_OK ) {
+        log_this(1, "SQL error in %s\n",sqlCountLayers );
+        sqlite3_close(projectDB);
+        return 1;
+    }
+    sqlite3_step(preparedCountLayers);
+    n = sqlite3_column_int(preparedCountLayers, 0);
+    sqlite3_finalize(preparedCountLayers);
+    return n;
+}
+
+
+/******************************************************
+ * Load Styles
+ * ***************************************************/
+static int load_styles()
+{
+
+    int rc, i;
+    sqlite3_stmt *preparedCountStyle;
+    sqlite3_stmt * preparedStylesLoading;
+
 
     /********************************************************************************
      Count the layers in the project and get maximum styleID in the project
@@ -122,28 +130,6 @@ int init_resources(char *dir)
     int maxStyleID = sqlite3_column_int(preparedCountStyle, 1);
     sqlite3_finalize(preparedCountStyle);
 
-
-
-
-
-    /********************************************************************************
-     Count how many layers we are dealing with
-    */
-    char *sqlCountLayers = "SELECT COUNT(*)   "
-                           "FROM layers l ; ";
-
-
-    rc = sqlite3_prepare_v2(projectDB, sqlCountLayers, -1, &preparedCountLayers, 0);
-
-    if (rc != SQLITE_OK ) {
-        log_this(1, "SQL error in %s\n",sqlCountLayers );
-        sqlite3_close(projectDB);
-        return 1;
-    }
-    sqlite3_step(preparedCountLayers);
-    nLayers = sqlite3_column_int(preparedCountLayers, 0);
-
-    sqlite3_finalize(preparedCountLayers);
 
 
     /********************************************************************************
@@ -185,39 +171,61 @@ int init_resources(char *dir)
     }
 
     sqlite3_finalize(preparedStylesLoading);
+    return 0;
+}
+
+static int load_layers(TEXT *missing_db)
+{
+
+
     /********************************************************************************
      Get information about all the layers in the project
      */
+    int rc, i;
+
+    sqlite3_stmt *preparedLayerLoading;
+    sqlite3_stmt *preparedLayer;
+
+    LAYER_RUNTIME *oneLayer;
+
+    char *styleselect;
+    char stylejoin[128];
+    char stylewhere[128];
+    char textselect[128];
+
+    char sql[2048];
+
+
     char sqlLayerLoading[2048];
     char *sqlLayerLoading1 = "SELECT "
-                            /*fields for attaching the database*/
-                            "d.name dbname, "   // 0
-                            /*fields for creating the prepared statement to get data later*/
-                            "l.geometryField,"  // 1
-                            "l.triIndexField,"  // 2
-                            "l.idField,"  // 3
-                            "l.name layername,"  // 4
-                            "l.geometryindex, "  // 5
-                            /*fields to inform comming processes about how and when to render*/
-                            " l.defaultVisible,"  // 6
-                            "l.minScale,"  // 7
-                            "l.maxScale,"  // 8
-                            "geometryType,"  // 9
-                            "styleField,"  // 10
-                            "showText,"  // 11
-                            "linewidth,"  // 12
-                            "l.layerID, "  // 13
-                            "tc.size_fld,"  // 14
-                            "rotation_fld,"  // 15
-                            "anchor_fld,"  // 16
-                            "txt_fld"  // 17
-                            
-                            " FROM layers l "
-                            "INNER JOIN dbs d on l.source = d.name "
-                            "LEFT JOIN text_conf tc on l.layerID=tc.layerID ";
-                            
-    if(used_bytes)
-        snprintf(sqlLayerLoading, 2048, "%s where d.name not in (%s) order by l.orderby ;",sqlLayerLoading1, missing_db);
+                             /*fields for attaching the database*/
+                             "d.name dbname, "   // 0
+                             /*fields for creating the prepared statement to get data later*/
+                             "l.geometryField,"  // 1
+                             "l.triIndexField,"  // 2
+                             "l.idField,"  // 3
+                             "l.name layername,"  // 4
+                             "l.geometryindex, "  // 5
+                             /*fields to inform comming processes about how and when to render*/
+                             " l.defaultVisible,"  // 6
+                             "l.minScale,"  // 7
+                             "l.maxScale,"  // 8
+                             "geometryType,"  // 9
+                             "styleField,"  // 10
+                             "showText,"  // 11
+                             "linewidth,"  // 12
+                             "l.layerID, "  // 13
+                             "tc.size_fld,"  // 14
+                             "rotation_fld,"  // 15
+                             "anchor_fld,"  // 16
+                             "txt_fld"  // 17
+
+                             " FROM layers l "
+                             "INNER JOIN dbs d on l.source = d.name "
+                             "LEFT JOIN text_conf tc on l.layerID=tc.layerID ";
+
+    if(missing_db->used)
+        snprintf(sqlLayerLoading, 2048, "%s where d.name not in (%s) order by l.orderby ;",sqlLayerLoading1, get_txt(missing_db));
     else
         snprintf(sqlLayerLoading, 2048, "%s order by l.orderby ;",sqlLayerLoading1);
 
@@ -235,13 +243,13 @@ int init_resources(char *dir)
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
 
-    layerRuntime = init_layer_runtime(nLayers);
-  //  for (i =0; i<nLayers; i++)
+    layerRuntime = init_layer_runtime(count_layers());
+    //  for (i =0; i<nLayers; i++)
     i=0;
-while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
+    while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
     {
         oneLayer=layerRuntime + i;
-     //   sqlite3_step(preparedLayerLoading);
+        //   sqlite3_step(preparedLayerLoading);
 
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *geometryfield = sqlite3_column_text(preparedLayerLoading, 1);
@@ -268,8 +276,8 @@ while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 16);
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 17);
 
-        
-        
+
+
         if (check_layer(dbname, layername))
         {
             i++;
@@ -278,13 +286,13 @@ while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
         {
             log_this(90, "Cannot use layer %s",layername);
             continue;
-        }        
+        }
         //TODO free this
-       oneLayer->name = malloc(strlen((char*) layername)+1);
-        
+        oneLayer->name = malloc(strlen((char*) layername)+1);
+
         strcpy(oneLayer->name,(char*) layername);
-        
-        
+
+
         //printf("name = %s\n", oneLayer->name);
         oneLayer->layer_id =  (uint8_t) layerid;
 
@@ -347,7 +355,7 @@ while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
         printf("sql = %s\n", sql);
-        
+
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
         if (rc != SQLITE_OK ) {
@@ -365,8 +373,28 @@ while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
             oneLayer->text =  init_text_buf();
 
     }
-nLayers = i;
+    nLayers = i;
     sqlite3_finalize(preparedLayerLoading);
+
+    return 0;
+}
+int init_resources(char *dir)
+{
+    log_this(10, "Entering init_resources\n");
+
+    TEXT *missing_db = init_txt(1024); //just a string where we put names of db taht we cannot find. Then we use that for avoiding those layers. quite hackish
+
+    //char stylewhere[128];
+
+
+    build_program();
+
+    attach_db(dir, missing_db);
+
+    load_styles();
+
+    load_layers(missing_db);
+    destroy_txt(missing_db);
 
     return 0;
 }

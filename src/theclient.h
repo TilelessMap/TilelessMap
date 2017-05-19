@@ -53,10 +53,9 @@
 #endif
 /* Using SDL2 for the base window and OpenGL context init */
 #include "SDL.h"
-
+#include "text.h"
 
 #define APPNAME "TILELESS"
-#define LOGLEVEL 80
 
 
 
@@ -78,13 +77,7 @@ can hold according to the specification*/
 #define DEFAULT_TEXT_BUF 1024
 
 #define MAX_ZOOM_FINGERS 2
-#define DEBUG 1
 
-#if DEBUG
-# define DEBUG_PRINT(x) printf x
-#else
-# define DEBUG_PRINT(x) do {} while (0)
-#endif
 
 #define INIT_PS_POOL_SIZE 10
 
@@ -435,6 +428,7 @@ void calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
 int build_program();
 int floats_left(GLESSTRUCT *res_buf);
 int check_layer(const unsigned char *dbname, const unsigned char  *layername);
+
 /*********************** Global variables*******************************/
 
 struct timeval tval_before, tval_after, tval_result;

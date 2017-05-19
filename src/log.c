@@ -1,7 +1,7 @@
 
-#include "theclient.h"
+#include <stdio.h>
 #include <stdarg.h>
-
+#include "log.h"
 void log_this(int log_level, const char *log_txt, ... )
 {
 
@@ -22,7 +22,7 @@ void log_this(int log_level, const char *log_txt, ... )
     __android_log_print(ANDROID_LOG_INFO, APPNAME,"%s\n",log_txt_tot);
 #else
 
-    DEBUG_PRINT(("%s\n",log_txt_tot));
+    printf("%s\n",log_txt_tot);
 
 #endif
 
