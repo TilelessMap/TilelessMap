@@ -34,8 +34,8 @@ int render_simple_Polygon()
     GLenum err;
 
 
-    float sx = 2.0 / CURR_WIDTH;
-    float sy = 2.0 / CURR_HEIGHT;
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+	GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
 
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
@@ -46,7 +46,7 @@ int render_simple_Polygon()
     //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
     GLshort tri_index[] = {0,1,3,1,2,3};
 
-    GLfloat color[] = {1,1,1,0.9};
+    GLfloat color[] = {(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 0.9};
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

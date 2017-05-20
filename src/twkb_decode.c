@@ -100,11 +100,11 @@ read_header (TWKB_PARSE_STATE *ts)
     int8_t precision;
     uint8_t has_ext_dims;
     ts->thi->ndims=2;
-    uint i;
+    unsigned int i;
     /*Here comes a byte containing type info and precission*/
     flag = buffer_read_byte(ts->tb);
     ts->thi->type=flag&0x0F;
-    precision=unzigzag64((flag&0xF0)>>4);
+    precision= (int8_t) unzigzag64((flag&0xF0)>>4);
     ts->thi->factors[0]=ts->thi->factors[1]= pow(10, (double)precision);
     ts->thi->n_decimals[0]=ts->thi->n_decimals[1]= precision>0?precision:0; /*We save number of decimals too, to get it right in text based formats in a simple way*/
 
@@ -145,7 +145,7 @@ read_header (TWKB_PARSE_STATE *ts)
     {
         /*We need to first read the value and then add the position of the cursor in the file.
         The size we get from the twkb-file is the size from after the size-info to the end of the twkb*/
-        ts->thi->next_offset = buffer_read_uvarint(ts->tb);
+        ts->thi->next_offset = (size_t) buffer_read_uvarint(ts->tb);
         ts->thi->next_offset+= getReadPos(ts->tb);
     }
 
@@ -154,8 +154,8 @@ read_header (TWKB_PARSE_STATE *ts)
     {
         for (i=0; i<ts->thi->ndims; i++)
         {
-            ts->thi->bbox->bbox_min[i]=buffer_read_svarint(ts->tb)/ts->thi->factors[i];
-            ts->thi->bbox->bbox_max[i]=buffer_read_svarint(ts->tb)/ts->thi->factors[i] + ts->thi->bbox->bbox_min[i];
+            ts->thi->bbox->bbox_min[i] = (GLfloat) (buffer_read_svarint(ts->tb)/ts->thi->factors[i]);
+            ts->thi->bbox->bbox_max[i] = (GLfloat) (buffer_read_svarint(ts->tb)/ts->thi->factors[i] + ts->thi->bbox->bbox_min[i]);
         }
     }
 
@@ -272,9 +272,9 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     {
         vec2 last_normal;
         POINT_CIRCLE p[3];
-        p->next = (void*) p+sizeof(POINT_CIRCLE);
-        (p+1)->next = (void*) p+sizeof(POINT_CIRCLE)*2;
-        (p+2)->next = (void*) p;
+        p->next = (POINT_CIRCLE*) p+1;
+        (p+1)->next = (POINT_CIRCLE*) p+2;
+        (p+2)->next = (POINT_CIRCLE*) p;
 
         POINT_CIRCLE *p_akt = p;
         //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
@@ -288,7 +288,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             {
                 val = buffer_read_svarint(ts->tb);
                 ts->thi->coords[j] += val;
-                new_val = (float) ts->thi->coords[j] / ts->thi->factors[j];
+                new_val = (float) (ts->thi->coords[j] / ts->thi->factors[j]);
                 p_akt->coord[j] = new_val;
                 //  dlist[c++] = new_val;
 
@@ -327,7 +327,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             {
                 val = buffer_read_svarint(ts->tb);
                 ts->thi->coords[j] += val;
-                new_val = (float) ts->thi->coords[j] / ts->thi->factors[j];
+                new_val = (GLfloat) (ts->thi->coords[j] / ts->thi->factors[j]);
 
                 dlist[c++] = new_val;
             }
@@ -394,7 +394,7 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
         {
             val = buffer_read_svarint(ts.tb);
             ts.thi->coords[j] += val;
-            dlist[3 * i + j] = ts.thi->coords[j];
+            dlist[3 * i + j] = (GLushort) ts.thi->coords[j];
         }
     }
     element_set_end(npoints, 3, ts.styleID,index_buf);

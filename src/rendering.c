@@ -48,6 +48,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     int ndims = 2;
     uint32_t i;//, np, pi;
     GLfloat *color;
+	GLfloat c[4];
     //  GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
@@ -86,7 +87,13 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
             color = global_styles[styleID].color;
-        }
+        } 
+		else
+		{
+			c[0] = c[1] = c[2] = 100;
+			c[3] = 255;
+			color = c;
+		}
         glUniform4fv(std_color,1,color );
         glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
 
@@ -125,8 +132,9 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     uint32_t  i;
     GLfloat *color, lw;
-    float sx = 2.0 / CURR_WIDTH;
-    float sy = 2.0 / CURR_HEIGHT;
+	GLfloat c[4];
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
 
     GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
 
@@ -202,14 +210,20 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
-            lw = global_styles[styleID].lineWidth * 0.5;
+            lw = (GLfloat) (global_styles[styleID].lineWidth * 0.5);
             if(!lw)
                 lw = 0.5;
-
-
-
-
             color = global_styles[styleID].color;
+
+		}
+		else
+		{
+			c[0] = c[1] = c[2] = 100;
+			c[3] = 255;
+			color = c;
+		}
+
+
             glUniform4fv(lw_color,1,color );
 
 
@@ -225,7 +239,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 
-        }
+       
     }
     glDisableVertexAttribArray(lw_norm);
 
@@ -244,6 +258,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
+	GLfloat c[4];
 //   GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
@@ -311,7 +326,20 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
         }
         else
         {
-            continue;
+			c[0] = c[1] = c[2] = 100;
+			c[3] = 255;
+			color = c;
+
+			if (outline)
+			{
+				glUniform4fv(std_color, 1, color);
+				glDrawArrays(GL_LINE_LOOP, *(rb->start_index + i), *(rb->npoints + i));
+			}
+			else
+			{
+				glUniform4fv(std_color, 1, color);
+				glDrawArrays(GL_LINE_STRIP, *(rb->start_index + i), *(rb->npoints + i));
+			}
 
         }
 
@@ -365,7 +393,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     log_this(10, "Entering renderPolygon\n");
     uint32_t i;//, np, pi;
-    GLfloat *color;
+	GLfloat *color;
+	GLfloat c[4];
 //    GLenum err;
 
 
@@ -413,10 +442,12 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         {
             color = global_styles[styleID].color;
         }
-        else
-        {
-            return 1;
-        }
+		else
+		{
+			c[0] = c[1] = c[2] = 100;
+			c[3] = 255;
+			color = c;
+		}
 
         glUniform4fv(std_color,1,color );
 
@@ -522,8 +553,8 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
 
 
-    float sx = 2.0 / CURR_WIDTH;
-    float sy = 2.0 / CURR_HEIGHT;
+    GLfloat sx = (GLfloat)(2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
 
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)

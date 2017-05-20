@@ -85,7 +85,7 @@ int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix)
 }
 
 
-int px2m(GLfloat *bbox,GLfloat px_x,GLfloat px_y,GLfloat *w_x,GLfloat *w_y)
+int px2m(GLfloat *bbox,GLint px_x,GLint px_y,GLfloat *w_x,GLfloat *w_y)
 {
 
     log_this(10, "Entering get_bbox\n");
@@ -125,11 +125,11 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 
     memset(scale, 0,sizeof(float)*16);
 
-    int width = bbox[2]-bbox[0];
-    int height = bbox[3]-bbox[1];
+    GLfloat width = bbox[2]-bbox[0];
+	GLfloat height = bbox[3]-bbox[1];
 
-    scale[0] = 2.0/width/zoom;
-    scale[5] = 2.0/height/zoom;
+    scale[0] = (GLfloat) 2.0/width/zoom;
+    scale[5] = (GLfloat) 2.0/height/zoom;
     scale[15] = 1;
     return 0;
 }

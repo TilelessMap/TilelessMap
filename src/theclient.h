@@ -37,7 +37,9 @@
 #include <string.h>
 
 #include <time.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include<pthread.h>
 #include "ext/sqlite/sqlite3.h"
 //#include <sqlite3.h>
@@ -147,7 +149,7 @@ typedef struct
     uint32_t used_n_vals;
     uint32_t max_n_vals;
     float *rotation; //list if id to corresponding point array
-    int *size; //list if id to corresponding point array
+    GLshort *size; //list if id to corresponding point array
     uint32_t *anchor;
     uint32_t *styleID; //array of styleID
 }
@@ -326,7 +328,7 @@ int element_set_end(uint32_t npoints, uint8_t ndims,uint32_t styleID, ELEMENTSTR
 GLfloat* increase_buffer(GLESSTRUCT *res_buf);
 
 TEXTSTRUCT* init_text_buf();
-int text_write(const char *the_text,uint32_t styleID, float size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf);
+int text_write(const char *the_text,uint32_t styleID, GLshort size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf);
 void text_reset_buffer(TEXTSTRUCT *text_buf);
 void text_destroy_buffer(TEXTSTRUCT *text_buf);
 
@@ -369,16 +371,16 @@ void copyNew2CurrentBBOX(GLfloat *newBBOX,GLfloat *currentBBOX);
 int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix);
 
 /*This is functions for manipulating bbox, translations and zoom*/
-int px2m(GLfloat *bbox,GLfloat px_x,GLfloat px_y,GLfloat *w_x,GLfloat *w_y);
+int px2m(GLfloat *bbox,GLint px_x,GLint px_y,GLfloat *w_x,GLfloat *w_y);
 int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl);
 int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale);
 void windowResize(int newWidth,int newHeight,GLfloat *currentBBOX, GLfloat *newBBOX);
 void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX);
 
 /*event handling*/
-int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat px_x_clicked,GLfloat px_y_clicked, GLfloat zoom, GLfloat *theMatrix);
-int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
-
+int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLint px_x_clicked,GLint px_y_clicked, GLfloat zoom, GLfloat *theMatrix);
+//int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
+int matrixFromDeltaMouse(GLfloat *currentBBOX, GLfloat *newBBOX, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y, GLfloat *theMatrix);
 LAYER_RUNTIME* init_layer_runtime(int n);
 void destroy_layer_runtime(LAYER_RUNTIME *lr, int n);
 
@@ -431,7 +433,10 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername);
 
 /*********************** Global variables*******************************/
 
+
+#ifndef _WIN32
 struct timeval tval_before, tval_after, tval_result;
+#endif
 
 sqlite3 *projectDB;
 

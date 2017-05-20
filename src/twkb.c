@@ -71,7 +71,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
 
 
-    float rotation, anchor;
+	GLfloat rotation;
+	GLint anchor;
     int size;
 //log_this(10, "sqlite_error? %d\n",sqlite3_config(SQLITE_CONFIG_SERIALIZED ));
 
@@ -145,10 +146,10 @@ void *twkb_fromSQLiteBBOX(void *theL)
             const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
 
             size = sqlite3_column_int(prepared_statement, 5);
-            rotation = sqlite3_column_double(prepared_statement, 6);
-            anchor = sqlite3_column_double(prepared_statement, 7);
+            rotation = (GLfloat) sqlite3_column_double(prepared_statement, 6);
+            anchor = (GLint) sqlite3_column_double(prepared_statement, 7);
 
-            text_write(txt,0, size, rotation,anchor, theLayer->text);
+            text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
         }
 
     }

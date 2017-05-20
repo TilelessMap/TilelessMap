@@ -31,8 +31,8 @@ int  matrixFromBBOX(GLfloat *newBBOX, GLfloat *theMatrix )
     GLfloat scale[16];
     GLfloat centerx, centery;
 
-    centerx=newBBOX[0] + (newBBOX[2]-newBBOX[0]) * 0.5;
-    centery=newBBOX[1] + (newBBOX[3]-newBBOX[1]) * 0.5;
+    centerx= (GLfloat) (newBBOX[0] + (newBBOX[2]-newBBOX[0]) * 0.5);
+    centery= (GLfloat)(newBBOX[1] + (newBBOX[3]-newBBOX[1]) * 0.5);
 
     calc_scale(newBBOX,1, scale);
     calc_translate(centerx,centery, transl);
@@ -40,7 +40,7 @@ int  matrixFromBBOX(GLfloat *newBBOX, GLfloat *theMatrix )
     return 0;
 }
 
-int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat px_x_clicked,GLfloat px_y_clicked, GLfloat zoom, GLfloat *theMatrix)
+int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX, GLint px_x_clicked, GLint px_y_clicked, GLfloat zoom, GLfloat *theMatrix)
 {
 
     log_this(10, "Entering get_bbox\n");
@@ -55,21 +55,21 @@ int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat px_x_c
     GLfloat original_w_width = (currentBBOX[2]-currentBBOX[0]);
     GLfloat original_w_height = (currentBBOX[3]-currentBBOX[1]);
 
-    GLfloat original_w_x_dist2center = w_x_clicked - currentBBOX[0] - original_w_width * 0.5 ;
-    GLfloat original_w_y_dist2center = w_y_clicked - currentBBOX[1] - original_w_height * 0.5;
+    GLfloat original_w_x_dist2center = (GLfloat) (w_x_clicked - currentBBOX[0] - original_w_width * 0.5);
+    GLfloat original_w_y_dist2center = (GLfloat)(w_y_clicked - currentBBOX[1] - original_w_height * 0.5);
 
-    GLfloat new_w_x_dist2center = original_w_x_dist2center * zoom;
-    GLfloat new_w_y_dist2center = original_w_y_dist2center * zoom;
+    GLfloat new_w_x_dist2center = (GLfloat)(original_w_x_dist2center * zoom);
+    GLfloat new_w_y_dist2center = (GLfloat)(original_w_y_dist2center * zoom);
 
     w_x_center = w_x_clicked - new_w_x_dist2center;
     w_y_center = w_y_clicked - new_w_y_dist2center;
 
 
 
-    newBBOX[0]= w_x_center - original_w_width * 0.5 * zoom;
-    newBBOX[1]= w_y_center - original_w_height * 0.5 * zoom;
-    newBBOX[2]= w_x_center + original_w_width * 0.5 * zoom;
-    newBBOX[3]= w_y_center + original_w_height * 0.5 * zoom;
+    newBBOX[0]= (GLfloat)(w_x_center - original_w_width * 0.5 * zoom);
+    newBBOX[1]= (GLfloat)(w_y_center - original_w_height * 0.5 * zoom);
+    newBBOX[2]= (GLfloat)(w_x_center + original_w_width * 0.5 * zoom);
+    newBBOX[3]= (GLfloat)(w_y_center + original_w_height * 0.5 * zoom);
 
     calc_scale(newBBOX,1, scale);
     calc_translate(w_x_center,w_y_center, transl);
@@ -79,7 +79,7 @@ int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat px_x_c
 }
 
 
-int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix)
+int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y, GLfloat *theMatrix)
 {
 
 //GLfloat newBBOX[4] = {0.0,0.0,0.0,0.0};
@@ -93,8 +93,8 @@ int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_dow
     GLfloat deltax = - (mouse_up_x - mouse_down_x) * width/CURR_WIDTH;
     GLfloat deltay =  -(mouse_down_y - mouse_up_y) * height/CURR_HEIGHT;
 
-    centerx=currentBBOX[0] + (currentBBOX[2]-currentBBOX[0]) * 0.5;
-    centery=currentBBOX[1] + (currentBBOX[3]-currentBBOX[1]) * 0.5;
+    centerx= (GLfloat)(currentBBOX[0] + (currentBBOX[2]-currentBBOX[0]) * 0.5);
+    centery= (GLfloat)(currentBBOX[1] + (currentBBOX[3]-currentBBOX[1]) * 0.5);
 
     centerx += deltax;
     centery += deltay;

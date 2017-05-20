@@ -133,30 +133,31 @@ int get_box_from_touches(FINGEREVENT *touches,GLfloat *currentBBOX,GLfloat *newB
 {
     GLfloat w_x1,w_y1,w_x2,w_y2;
     GLfloat w_dist, px_dist;
-    GLfloat p1x1, p1x2, p1y1, p1y2;
-    GLfloat p2x1, p2x2, p2y1, p2y2;
+    GLint p1x1, p1x2, p1y1, p1y2;
+	GLint p2x1, p2x2, p2y1, p2y2;
 
-    GLfloat deltax, deltay, ratio;
-    p1x1 = touches[0].x1 * CURR_WIDTH;
-    p1x2 = touches[0].x2 * CURR_WIDTH;
-    p1y1 = touches[0].y1 * CURR_HEIGHT;
-    p1y2 = touches[0].y2 * CURR_HEIGHT;
+    GLint deltax_px, deltay_px;
+	GLfloat deltax_w, deltay_w, ratio;
+    p1x1 = (GLint) (touches[0].x1 * CURR_WIDTH);
+    p1x2 = (GLint)(touches[0].x2 * CURR_WIDTH);
+    p1y1 = (GLint)(touches[0].y1 * CURR_HEIGHT);
+    p1y2 = (GLint)(touches[0].y2 * CURR_HEIGHT);
 
-    p2x1 = touches[1].x1 * CURR_WIDTH;
-    p2x2 = touches[1].x2 * CURR_WIDTH;
-    p2y1 = touches[1].y1 * CURR_HEIGHT;
-    p2y2 = touches[1].y2 * CURR_HEIGHT;
+    p2x1 = (GLint)(touches[1].x1 * CURR_WIDTH);
+    p2x2 = (GLint)(touches[1].x2 * CURR_WIDTH);
+    p2y1 = (GLint)(touches[1].y1 * CURR_HEIGHT);
+    p2y2 = (GLint)(touches[1].y2 * CURR_HEIGHT);
 
 
     px2m(currentBBOX,p1x1,p1y1,&w_x1,&w_y1);
     px2m(currentBBOX,p2x1,p2y1,&w_x2,&w_y2);
 
-    deltax = w_x2 - w_x1;
-    deltay = w_y2 - w_y1;
-    w_dist = sqrtf(deltax * deltax + deltay * deltay);
-    deltax = p2x2 - p1x2;
-    deltay = p2y2 - p1y2;
-    px_dist = sqrtf(deltax * deltax + deltay * deltay);
+    deltax_w = w_x2 - w_x1;
+    deltay_w = w_y2 - w_y1;
+    w_dist = sqrtf(deltax_w * deltax_w + deltay_w * deltay_w);
+    deltax_px = p2x2 - p1x2;
+    deltay_px = p2y2 - p1y2;
+    px_dist = sqrtf((float) (1.0 * deltax_px * deltax_px + deltay_px * deltay_px));
 
     ratio = w_dist/px_dist;
 

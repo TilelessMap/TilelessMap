@@ -44,7 +44,7 @@ void mainLoop(SDL_Window* window)
 
     FINGEREVENT *touches = init_touch_que();
 
-    GLfloat mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
+    int mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
 //     initialBBOX(380000, 6660000, 300000, newBBOX);
 //initialBBOX(230000, 6660000, 5000, newBBOX);
@@ -150,8 +150,8 @@ void mainLoop(SDL_Window* window)
 #endif
 
             case SDL_FINGERDOWN:
-                ti = ev.tfinger.touchId;
-                fi = ev.tfinger.fingerId;
+                ti = (int) ev.tfinger.touchId;
+                fi = (int) ev.tfinger.fingerId;
                 tx = ev.tfinger.x;
                 ty = ev.tfinger.y;
                 pr = ev.tfinger.pressure;
@@ -162,8 +162,8 @@ void mainLoop(SDL_Window* window)
             case SDL_FINGERUP:
                 log_this(10,"SDL_FINGERUP");
 
-                ti = ev.tfinger.touchId;
-                fi = ev.tfinger.fingerId;
+                ti = (int) ev.tfinger.touchId;
+                fi = (int) ev.tfinger.fingerId;
                 tx = ev.tfinger.x;
                 ty = ev.tfinger.y;
                 pr = ev.tfinger.pressure;
@@ -185,10 +185,10 @@ void mainLoop(SDL_Window* window)
                 else
                 {
                     //	  mouse_down = 0;
-                    mouse_up_x = tx * CURR_WIDTH;
-                    mouse_up_y = ty * CURR_HEIGHT;
-                    mouse_down_x = touches[0].x1 * CURR_WIDTH;
-                    mouse_down_y = touches[0].y1 * CURR_HEIGHT;
+                    mouse_up_x = (GLint) (tx * CURR_WIDTH);
+                    mouse_up_y = (GLint)(ty * CURR_HEIGHT);
+                    mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
+                    mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
                     matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
                     reset_touch_que(touches);
 
@@ -224,18 +224,18 @@ void mainLoop(SDL_Window* window)
                 {
                     log_this(10, "m1");
                     //~ android_log_print(ANDROID_LOG_INFO, APPNAME, "m1");
-                    ti = ev.tfinger.touchId;
-                    fi = ev.tfinger.fingerId;
+                    ti = (int) ev.tfinger.touchId;
+                    fi = (int) ev.tfinger.fingerId;
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
                     pr = ev.tfinger.pressure;
 
 
                     //	  mouse_down = 0;
-                    mouse_up_x = tx * CURR_WIDTH;
-                    mouse_up_y = ty * CURR_HEIGHT;
-                    mouse_down_x = touches[0].x1 * CURR_WIDTH;
-                    mouse_down_y = touches[0].y1 * CURR_HEIGHT;
+                    mouse_up_x = (GLint) (tx * CURR_WIDTH);
+                    mouse_up_y = (GLint)(ty * CURR_HEIGHT);
+                    mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
+                    mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
                     matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
 
                     if(n_events<2)

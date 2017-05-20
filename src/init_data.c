@@ -167,7 +167,7 @@ static int load_styles()
         global_styles[styleID].outlinecolor[1] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 6)/255.0);
         global_styles[styleID].outlinecolor[2] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 7)/255.0);
         global_styles[styleID].outlinecolor[3] = 1.0;
-        global_styles[styleID].lineWidth =  sqlite3_column_int(preparedStylesLoading, 8);
+        global_styles[styleID].lineWidth =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 8);
     }
 
     sqlite3_finalize(preparedStylesLoading);

@@ -32,13 +32,14 @@ extern void print_opengl_info();
 
 
 
+static inline uint32_t max_i(int a, int b)
+{
+	if (b > a)
+		return b;
+	else
+		return a;
+}
 
-#define max(a,b) \
-       ({ typeof (a) _a = (a); \
-           typeof (b) _b = (b); \
-         _a > _b ? _a : _b; })
-
-       
        
        
 /**
@@ -49,10 +50,10 @@ char* file_read(const char* filename, int* size) {
     SDL_RWops *rw = SDL_RWFromFile(filename, "rb");
     if (rw == NULL) return NULL;
 
-    Sint64 res_size = SDL_RWsize(rw);
+    size_t res_size = (size_t) SDL_RWsize(rw);
     char* res = (char*)malloc(res_size + 1);
 
-    Sint64 nb_read_total = 0, nb_read = 1;
+    size_t nb_read_total = 0, nb_read = 1;
     char* buf = res;
     while (nb_read_total < res_size && nb_read != 0) {
         nb_read = SDL_RWread(rw, buf, 1, (res_size - nb_read_total));
@@ -246,17 +247,18 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
             fprintf(stderr, "Loading character %c failed!\n", i);
             continue;
         }
-        if (roww + g->bitmap.width + 1 >= MAXWIDTH) {
-            a->w = max(a->w, roww);
+        if (roww + g->bitmap.width + 1 >= MAXWIDTH) 
+		{
+            a->w = max_i(a->w, roww);
             a->h += rowh;
             roww = 0;
             rowh = 0;
         }
         roww += g->bitmap.width + 1;
-        rowh = max(rowh, g->bitmap.rows);
+        rowh = max_i(rowh, g->bitmap.rows);
     }
 
-    a->w = max(a->w, roww);
+    a->w = max_i(a->w, roww);
     a->h += rowh;
 
     /* Create a texture that will be used to hold all ASCII glyphs */
@@ -312,14 +314,14 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 
         //     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, g->bitmap.width, g->bitmap.rows, 0, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
 
-        a->metrics[i].ax = g->advance.x >> 6;
-        a->metrics[i].ay = g->advance.y >> 6;
+        a->metrics[i].ax = (float) (g->advance.x >> 6);
+        a->metrics[i].ay = (float) (g->advance.y >> 6);
 
-        a->metrics[i].bw = g->bitmap.width;
-        a->metrics[i].bh = g->bitmap.rows;
+        a->metrics[i].bw = (float) (1.0 * g->bitmap.width);
+        a->metrics[i].bh = (float)(1.0 * g->bitmap.rows);
 
-        a->metrics[i].bl = g->bitmap_left;
-        a->metrics[i].bt = g->bitmap_top;
+        a->metrics[i].bl = (float)(g->bitmap_left);
+        a->metrics[i].bt = (float)(g->bitmap_top);
 
         a->metrics[i].tx = ox / (float)a->w;
         a->metrics[i].ty = oy / (float)a->h;
@@ -345,8 +347,8 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
     va_start (args, txt);
     vsnprintf (txt_tot,1024,txt, args);
     va_end (args);
-    float sx = 2.0 / CURR_WIDTH;
-    float sy = 2.0 / CURR_HEIGHT;
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
 
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};

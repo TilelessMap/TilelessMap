@@ -369,7 +369,7 @@ TEXTSTRUCT* init_text_buf()
 
 
 
-int text_write(const char *the_text,uint32_t styleID, float size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf)
+int text_write(const char *the_text,uint32_t styleID, GLshort size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf)
 {
 // log_this(10, "Entering %s with text = %s\n",__func__, the_text);
  

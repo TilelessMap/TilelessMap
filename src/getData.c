@@ -30,7 +30,10 @@
 int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 {
 
-    gettimeofday(&tval_before, NULL);
+
+#ifndef _WIN32
+	gettimeofday(&tval_before, NULL);
+#endif
     log_this(10, "Entering get_data\n");
     int i,t, rc;
     pthread_t threads[255];
@@ -121,11 +124,14 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     print_txt(10,140,200,0,0,255,1, "n words %d ", n_words);
     print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
     print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);
+
+
+#ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 
     timersub(&tval_after, &tval_before, &tval_result);
     print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
-
+#endif
 
     total_points=0;
 
