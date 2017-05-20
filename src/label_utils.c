@@ -326,7 +326,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
         a->metrics[i].tx = ox / (float)a->w;
         a->metrics[i].ty = oy / (float)a->h;
 
-        rowh = max(rowh, g->bitmap.rows);
+        rowh = max_i(rowh, g->bitmap.rows);
         ox += g->bitmap.width + 1;
     }
 
