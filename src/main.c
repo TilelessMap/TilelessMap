@@ -738,12 +738,13 @@ int main(int argc, char **argv)
     char *dir;
     if(argc > 1)
         dir = argv[argc-1];
+	else
+		dir = ".";
 
-
-snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
+ // snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/varmland_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-  //  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
+  snprintf(projectfile, 500, "%s", "C:/Users/nicklas/Documents/demo.sqlite");
 
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);
@@ -762,17 +763,10 @@ snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
     }
 
 
-#ifndef __ANDROID__
     SDL_Window* window = SDL_CreateWindow("TileLess",
-                                          0, 0, r.w, r.h,
+                                          0, 0, r.w/2, r.h/2,
                                           SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-#else
 
-    SDL_Window* window = SDL_CreateWindow("TileLess",
-                                          0, 0, r.w, r.h,
-                                          SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
-
-#endif
     CURR_WIDTH = r.w;
     CURR_HEIGHT = r.h;
 
@@ -788,7 +782,8 @@ snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj.sqlite");
     int rc = sqlite3_open_v2(projectfile, &projectDB,SQLITE_OPEN_READONLY, NULL );
 
     if (rc != SQLITE_OK) {
-        log_this(1, "Cannot open database: %s\n", sqlite3_errmsg(projectDB));
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(projectDB));
+    //    log_this(1, "Cannot open database: %s\n", sqlite3_errmsg(projectDB));
         sqlite3_close(projectDB);
         return 1;
     }

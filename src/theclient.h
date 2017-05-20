@@ -37,9 +37,15 @@
 #include <string.h>
 
 #include <time.h>
+#ifndef _WIN32
 #include <sys/time.h>
-#include<pthread.h>
+#endif
+
+
+#include <pthread.h>
+
 #include "ext/sqlite/sqlite3.h"
+
 //#include <sqlite3.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -421,7 +427,10 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
 int render_simple_Polygon();
 /*********************** Global variables*******************************/
 
+
+#ifndef _WIN32
 struct timeval tval_before, tval_after, tval_result;
+#endif
 
 sqlite3 *projectDB;
 

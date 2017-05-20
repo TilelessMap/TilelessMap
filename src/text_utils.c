@@ -32,11 +32,14 @@ extern void print_opengl_info();
 
 
 
+uint32_t max_i(int a, int b)
+{
+	if (b > a)
+		return b;
+	else
+		return a;
+}
 
-#define max(a,b) \
-       ({ typeof (a) _a = (a); \
-           typeof (b) _b = (b); \
-         _a > _b ? _a : _b; })
 
 /**
  * Store all the file's contents in memory, useful to pass shaders
@@ -324,17 +327,18 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
             fprintf(stderr, "Loading character %c failed!\n", i);
             continue;
         }
-        if (roww + g->bitmap.width + 1 >= MAXWIDTH) {
-            a->w = max(a->w, roww);
+        if (roww + g->bitmap.width + 1 >= MAXWIDTH) 
+		{
+            a->w = max_i(a->w, roww);
             a->h += rowh;
             roww = 0;
             rowh = 0;
         }
         roww += g->bitmap.width + 1;
-        rowh = max(rowh, g->bitmap.rows);
+        rowh = max_i(rowh, g->bitmap.rows);
     }
 
-    a->w = max(a->w, roww);
+    a->w = max_i(a->w, roww);
     a->h += rowh;
 
     /* Create a texture that will be used to hold all ASCII glyphs */
@@ -402,7 +406,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
         a->metrics[i].tx = ox / (float)a->w;
         a->metrics[i].ty = oy / (float)a->h;
 
-        rowh = max(rowh, g->bitmap.rows);
+        rowh = max_i(rowh, g->bitmap.rows);
         ox += g->bitmap.width + 1;
     }
 

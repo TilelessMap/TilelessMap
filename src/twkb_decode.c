@@ -99,11 +99,11 @@ read_header (TWKB_PARSE_STATE *ts)
     int8_t precision;
     uint8_t has_ext_dims;
     ts->thi->ndims=2;
-    uint i;
+    int i;
     /*Here comes a byte containing type info and precission*/
     flag = buffer_read_byte(ts->tb);
     ts->thi->type=flag&0x0F;
-    precision=unzigzag64((flag&0xF0)>>4);
+    precision=(uint8_t) unzigzag64((flag&0xF0)>>4);
     ts->thi->factors[0]=ts->thi->factors[1]= pow(10, (double)precision);
     ts->thi->n_decimals[0]=ts->thi->n_decimals[1]= precision>0?precision:0; /*We save number of decimals too, to get it right in text based formats in a simple way*/
 

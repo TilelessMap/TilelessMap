@@ -86,10 +86,10 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
             color = global_styles[styleID].color;
-        }
+       
         glUniform4fv(oneLayer->uniform_color,1,color );
         glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
-
+		 }
         //  log_this(10, "4render point p nr %d", i);
 
         /*   if(oneLayer->show_text)
