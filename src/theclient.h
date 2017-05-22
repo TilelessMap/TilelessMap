@@ -49,15 +49,13 @@
 /* Use glew.h instead of gl.h to get all the GL prototypes declared */
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>
-#include <android/log.h>
 #else
 #include <GL/glew.h>
 #endif
 /* Using SDL2 for the base window and OpenGL context init */
 #include "SDL.h"
 #include "text.h"
-
-#define APPNAME "TILELESS"
+#include "global.h"
 
 
 

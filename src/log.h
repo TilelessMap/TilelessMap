@@ -1,5 +1,9 @@
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
 
+#include "global.h"
 #include <stdarg.h>
 #define LOGLEVEL 90
 
