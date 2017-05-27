@@ -52,7 +52,7 @@ void mainLoop(SDL_Window* window)
     //  initialBBOX(234000, 895000, 5000, newBBOX);
     initialBBOX(init_x, init_y, init_box_width, newBBOX);
 
-    GLfloat theMatrix[16];
+ GLfloat theMatrix[16];
 
     matrixFromBBOX(newBBOX, theMatrix);
 
@@ -350,12 +350,14 @@ int main(int argc, char **argv)
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    glDisable (GL_DEPTH_TEST);;
+    
+    
+    glDisable (GL_DEPTH_TEST);
 
-
+/*
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
-
+*/
 
     SDL_Rect r;
     if (SDL_GetDisplayBounds(0, &r) != 0) {

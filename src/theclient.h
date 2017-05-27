@@ -165,6 +165,8 @@ typedef struct
     GLfloat color[4];
     GLfloat outlinecolor[4];
     GLfloat lineWidth;
+    GLfloat lineWidth2;
+    GLfloat z;
 }
 STYLES_RUNTIME;
 
@@ -186,8 +188,8 @@ typedef struct
     GLfloat *BBOX;
     uint8_t geometryType;
 //   uint8_t has_text;
-    GLint minScale;
-    GLint maxScale;
+    GLfloat minScale;
+    GLfloat maxScale;
     GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
@@ -488,6 +490,7 @@ GLint lw_px_matrix;
 GLint lw_linewidth;
 GLint lw_norm;
 GLint lw_color;
+GLint lw_z;
 
 
 

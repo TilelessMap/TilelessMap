@@ -74,8 +74,6 @@ int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix)
             val = 0;
             for (m1 = 0; m1<4; m1++)
             {
-                //~ m1o = matrix1[m2 + m1*4];
-                //~ m2o = matrix2[m1+4*i];
                 val +=  matrix1[m2 + m1*4] * matrix2[m1 + 4 * i];
             }
             theMatrix[m2 + 4 * i] = val;
@@ -130,6 +128,7 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 
     scale[0] = (GLfloat) 2.0/width/zoom;
     scale[5] = (GLfloat) 2.0/height/zoom;
+    scale[10] = (GLfloat) 1; //we set z-scaling 10 0.01 so we can give z-values from 0 to 100
     scale[15] = 1;
     return 0;
 }

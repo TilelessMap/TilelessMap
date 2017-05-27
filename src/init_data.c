@@ -143,7 +143,7 @@ static int load_styles()
 
     char *sqlStyles = "SELECT "
                       /*fields for attaching the database*/
-                      "styleID, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w "
+                      "styleID, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z "
                       "from styles;";
 
     rc = sqlite3_prepare_v2(projectDB, sqlStyles, -1, &preparedStylesLoading, 0);
@@ -168,6 +168,8 @@ static int load_styles()
         global_styles[styleID].outlinecolor[2] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 7)/255.0);
         global_styles[styleID].outlinecolor[3] = 1.0;
         global_styles[styleID].lineWidth =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 8);
+        global_styles[styleID].lineWidth2 =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 9);
+        global_styles[styleID].z =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 10);
     }
 
     sqlite3_finalize(preparedStylesLoading);
@@ -265,8 +267,8 @@ static int load_layers(TEXT *missing_db)
         int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
 
         oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 6);
-        oneLayer->minScale = sqlite3_column_int(preparedLayerLoading, 7);
-        oneLayer->maxScale = sqlite3_column_int(preparedLayerLoading, 8);
+        oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 7);
+        oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 8);
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 9);
 
         oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 11);

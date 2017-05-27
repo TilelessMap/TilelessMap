@@ -139,7 +139,7 @@ int build_program()
     const unsigned char gen_vstd[1024] =  "attribute vec2 coord2d; \
 uniform mat4 theMatrix;\
 void main(void) { \
-  gl_Position =  theMatrix * vec4(coord2d, 0.0, 1.0);  \
+  gl_Position =  theMatrix * vec4(coord2d,  1.0, 1.0);  \
 }";
 
     const unsigned char gen_fstd[1024] = "uniform vec4 color; \
@@ -186,7 +186,7 @@ uniform mat4 theMatrix; \
 uniform vec4 color; \
 varying vec2 texpos;\
 void main(void) {\
-  gl_Position = theMatrix * vec4(coord2d, 0.0, 1.0) + vec4(box.xy, 0.0, 0.0);\
+  gl_Position = theMatrix * vec4(coord2d, 1.0, 1.0) + vec4(box.xy, 0.0, 0.0);\
   texpos = box.zw;\
     }";
 
@@ -239,17 +239,18 @@ void main(void) {\
 
 
 
-
+    /*create a shader program lines with width*/
 
     const unsigned char gen_vlw[1024] =  "attribute vec2 coord2d; \
 attribute vec2 norm;\
 uniform float linewidth;\
+uniform float z;\
 uniform mat4 px_Matrix;\
 uniform mat4 theMatrix;\
 void main(void) { \
 vec4 delta = vec4(norm * linewidth,0,0); \
 vec4 npos = px_Matrix * delta; \
-vec4 pos = theMatrix * vec4(coord2d, 0.0, 1.0);  \
+vec4 pos = theMatrix * vec4(coord2d, z, 1.0);  \
   gl_Position = (pos + npos);\
 }";
 
@@ -258,7 +259,7 @@ void main(void) { \
   gl_FragColor = color; \
 }";
 
-    /*create a shader program for generic text, not belonging to a layer*/
+
     lw_program = create_program((unsigned char *) gen_vlw,(unsigned char *)  gen_flw, &vs, &fs);
 
     if(lw_program == 0)
@@ -284,6 +285,13 @@ void main(void) { \
     if (lw_linewidth == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "linewidth");
+        return 0;
+    }
+
+    lw_z = glGetUniformLocation(lw_program, "z");
+    if (lw_z == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "z");
         return 0;
     }
 
