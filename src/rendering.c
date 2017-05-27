@@ -598,10 +598,8 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy  )
+int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy)
 {
-
-
 
 
     ATLAS *a = atlases[atlas_nr-1];
@@ -617,9 +615,9 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
     glVertexAttribPointer(txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 
-    glUniform4fv(txt_color,1,color );
+    glUniform4fv(txt_color,1,color);
 
-    glUniform2fv(txt_coord2d,1,point_coord );
+    glUniform2fv(txt_coord2d,1,point_coord);
 
 
 

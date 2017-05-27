@@ -57,7 +57,7 @@ static int attach_db(char *dir, TEXT *missing_db)
         rc = sqlite3_exec(projectDB,sqlAttachDb,NULL, NULL, &err_msg);
         if (rc != 0)
         {
-            log_this(90, "failed to load db: %s. rc = %d errcode = %s, sql = %s\n",dbsource, rc,err_msg);
+            log_this(90, "failed to load db: %s. rc = %d errcode = %s, sql = %s\n",dbsource, rc,err_msg, sqlAttachDb);
 
             if(missing_db->used)
                 add_txt(missing_db, ",");
@@ -239,6 +239,7 @@ static int load_layers(TEXT *missing_db)
         return 1;
     }
 
+    
     /********************************************************************************
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
@@ -376,13 +377,45 @@ static int load_layers(TEXT *missing_db)
     nLayers = i;
     sqlite3_finalize(preparedLayerLoading);
 
+    
+    /*get init_bbox*/
+    if (check_layer((const unsigned char *) "main", (const unsigned char *)  "init_box"))
+    {
+        
+    int rc;
+    sqlite3_stmt *preparedinitBox;
+
+      char *sql = "select x,y,box_width from main.init_box;";
+
+    rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinitBox, 0);
+
+    if (rc != SQLITE_OK ) {
+        log_this(1, "SQL error in %s\n",sql );
+        sqlite3_close(projectDB);
+        return 1;
+    }
+        sqlite3_step(preparedinitBox);
+        init_x = sqlite3_column_double(preparedinitBox, 0);
+        init_y = sqlite3_column_double(preparedinitBox, 1);
+        init_box_width = sqlite3_column_double(preparedinitBox, 2);
+        sqlite3_finalize(preparedinitBox);
+    }
+    else
+    {
+        init_x = 325000;
+        init_y = 6800000;
+        init_box_width = 800000;
+    
+    }
+        
+        
     return 0;
 }
 int init_resources(char *dir)
 {
     log_this(10, "Entering init_resources\n");
 
-    TEXT *missing_db = init_txt(1024); //just a string where we put names of db taht we cannot find. Then we use that for avoiding those layers. quite hackish
+    TEXT *missing_db = init_txt(1024); 
 
     //char stylewhere[128];
 

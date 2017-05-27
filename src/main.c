@@ -48,8 +48,9 @@ void mainLoop(SDL_Window* window)
 
 //     initialBBOX(380000, 6660000, 300000, newBBOX);
 //initialBBOX(230000, 6660000, 5000, newBBOX);
-   initialBBOX(325000, 6800000, 800000, newBBOX);
-
+ //  initialBBOX(325000, 6800000, 800000, newBBOX);
+  //  initialBBOX(234000, 895000, 5000, newBBOX);
+  initialBBOX(init_x, init_y, init_box_width, newBBOX);
 
     GLfloat theMatrix[16];
 

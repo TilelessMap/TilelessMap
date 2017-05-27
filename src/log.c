@@ -6,15 +6,15 @@ void log_this(int log_level, const char *log_txt, ... )
 {
 
 
-    if(log_level <= LOGLEVEL)
+    if(log_level < LOGLEVEL)
         return;
 
-    char log_txt_tot[1024];
+    char log_txt_tot[2048];
 
 
     va_list args;
     va_start (args, log_txt);
-    vsnprintf (log_txt_tot,1024,log_txt, args);
+    vsnprintf (log_txt_tot,2048,log_txt, args);
     va_end (args);
 
 #ifdef __ANDROID__

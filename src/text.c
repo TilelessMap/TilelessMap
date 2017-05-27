@@ -80,8 +80,7 @@ int add_txt(TEXT *t,const char *in)
         if(realloc_txt(t, t->used + len + 1))
             return 1;
         
-    
-        strncpy(t->txt + t->used,  in, t->alloced - t->used);
+    strncpy(t->txt + t->used,  in, t->alloced - t->used);
     
     return 0;
 }

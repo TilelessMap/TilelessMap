@@ -438,6 +438,9 @@ struct timeval tval_before, tval_after, tval_result;
 
 sqlite3 *projectDB;
 
+GLfloat init_x;
+GLfloat init_y;
+GLfloat init_box_width;
 int nLayers;
 int text_scale;
 

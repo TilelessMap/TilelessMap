@@ -48,9 +48,10 @@ if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
     return 1;
 }
 else
-{   return 0;
-
+{
+ 
     sqlite3_finalize(prepared_sql);
+    return 0;
 }
 
 }
