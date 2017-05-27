@@ -48,7 +48,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     int ndims = 2;
     uint32_t i;//, np, pi;
     GLfloat *color;
-	GLfloat c[4];
+    GLfloat c[4];
     //  GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
@@ -79,7 +79,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         }*/
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
         printf("There is a mismatch between number of labels and number of corresponding points\n");
-    
+
     for (i=0; i<rb->used_n_pa; i++)
     {
         total_points += *(rb->npoints+i);
@@ -87,13 +87,13 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
             color = global_styles[styleID].color;
-        } 
-		else
-		{
-			c[0] = c[1] = c[2] = 100;
-			c[3] = 255;
-			color = c;
-		}
+        }
+        else
+        {
+            c[0] = c[1] = c[2] = 100;
+            c[3] = 255;
+            color = c;
+        }
         glUniform4fv(std_color,1,color );
         glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
 
@@ -132,7 +132,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     uint32_t  i;
     GLfloat *color, lw;
-	GLfloat c[4];
+    GLfloat c[4];
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
 
@@ -215,38 +215,38 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 lw = 0.5;
             color = global_styles[styleID].color;
 
-		}
-		else
-		{
-			c[0] = c[1] = c[2] = 100;
-			c[3] = 255;
-			color = c;
-		}
+        }
+        else
+        {
+            c[0] = c[1] = c[2] = 100;
+            c[3] = 255;
+            color = c;
+        }
 
 
-            glUniform4fv(lw_color,1,color );
-
-
-
-            glUniform1fv(lw_linewidth,1,&lw );
+        glUniform4fv(lw_color,1,color );
 
 
 
-            glDrawArrays(GL_TRIANGLE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
+        glUniform1fv(lw_linewidth,1,&lw );
 
 
-            // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        glDrawArrays(GL_TRIANGLE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
 
 
-       
+        // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+
+
     }
     glDisableVertexAttribArray(lw_norm);
 
     glDisableVertexAttribArray(lw_coord2d);
 
     return 0;
-    
+
 }
 
 
@@ -258,7 +258,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
-	GLfloat c[4];
+    GLfloat c[4];
 //   GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
@@ -326,20 +326,20 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
         }
         else
         {
-			c[0] = c[1] = c[2] = 100;
-			c[3] = 255;
-			color = c;
+            c[0] = c[1] = c[2] = 100;
+            c[3] = 255;
+            color = c;
 
-			if (outline)
-			{
-				glUniform4fv(std_color, 1, color);
-				glDrawArrays(GL_LINE_LOOP, *(rb->start_index + i), *(rb->npoints + i));
-			}
-			else
-			{
-				glUniform4fv(std_color, 1, color);
-				glDrawArrays(GL_LINE_STRIP, *(rb->start_index + i), *(rb->npoints + i));
-			}
+            if (outline)
+            {
+                glUniform4fv(std_color, 1, color);
+                glDrawArrays(GL_LINE_LOOP, *(rb->start_index + i), *(rb->npoints + i));
+            }
+            else
+            {
+                glUniform4fv(std_color, 1, color);
+                glDrawArrays(GL_LINE_STRIP, *(rb->start_index + i), *(rb->npoints + i));
+            }
 
         }
 
@@ -393,8 +393,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     log_this(10, "Entering renderPolygon\n");
     uint32_t i;//, np, pi;
-	GLfloat *color;
-	GLfloat c[4];
+    GLfloat *color;
+    GLfloat c[4];
 //    GLenum err;
 
 
@@ -442,12 +442,12 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         {
             color = global_styles[styleID].color;
         }
-		else
-		{
-			c[0] = c[1] = c[2] = 100;
-			c[3] = 255;
-			color = c;
-		}
+        else
+        {
+            c[0] = c[1] = c[2] = 100;
+            c[3] = 255;
+            color = c;
+        }
 
         glUniform4fv(std_color,1,color );
 

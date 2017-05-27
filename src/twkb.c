@@ -71,8 +71,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
 
 
-	GLfloat rotation;
-	GLint anchor;
+    GLfloat rotation;
+    GLint anchor;
     int size;
 //log_this(10, "sqlite_error? %d\n",sqlite3_config(SQLITE_CONFIG_SERIALIZED ));
 
@@ -156,6 +156,6 @@ void *twkb_fromSQLiteBBOX(void *theL)
     sqlite3_clear_bindings(prepared_statement);
     sqlite3_reset(prepared_statement);
 
-return NULL;
+    return NULL;
 //    pthread_exit(NULL);
 }

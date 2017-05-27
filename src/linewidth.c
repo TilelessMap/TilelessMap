@@ -64,7 +64,7 @@ static inline vec2 add_vec(vec2 *v1, vec2 *v2)
 void
 calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 {
- //    log_this(10, "Entering %s\n",__func__);
+//    log_this(10, "Entering %s\n",__func__);
     int n=0;
     GLfloat p1x, p1y, p2x, p2y;
 
@@ -89,14 +89,14 @@ calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 
     *c = n;
     *last_normal = norm;
- //log_this(5, "Leaving %s\n",__func__);
+//log_this(5, "Leaving %s\n",__func__);
     return;
 }
 
 void
 calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 {
-  //   log_this(10, "Entering %s\n",__func__);
+    //   log_this(10, "Entering %s\n",__func__);
     int n = *c;
     POINT_CIRCLE *p_akt = p->next;
 
@@ -240,7 +240,7 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 void
 calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 {
- //    log_this(10, "Entering %s\n",__func__);
+//    log_this(10, "Entering %s\n",__func__);
     int n = *c;
 
     GLfloat  p2x, p2y;
@@ -266,6 +266,6 @@ calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 
 
     *c = n;
- //log_this(5, "Leaving %s\n",__func__);
+//log_this(5, "Leaving %s\n",__func__);
     return;
 }

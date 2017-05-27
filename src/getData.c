@@ -32,7 +32,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
 
 #ifndef _WIN32
-	gettimeofday(&tval_before, NULL);
+    gettimeofday(&tval_before, NULL);
 #endif
     log_this(10, "Entering get_data\n");
     int i,t, rc;
@@ -44,7 +44,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     for (i=0; i<nLayers; i++)
     {
         oneLayer = layerRuntime + i;
-       
+
         reset_buffer(oneLayer->res_buf);
         if(oneLayer->geometryType == POLYGONTYPE)
             element_reset_buffer(oneLayer->tri_index);
@@ -54,10 +54,10 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-          //  log_this(10, "decode nr %d\n", i);
+            //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = bbox;
-           rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
-           //   twkb_fromSQLiteBBOX((void *) oneLayer);
+            rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
+            //   twkb_fromSQLiteBBOX((void *) oneLayer);
         }
     }
 
@@ -84,8 +84,8 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         oneLayer = layerRuntime + t;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-             rc = pthread_join(threads[t], NULL);
-           //  rc = 0;
+            rc = pthread_join(threads[t], NULL);
+            //  rc = 0;
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);

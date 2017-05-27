@@ -239,7 +239,7 @@ static int load_layers(TEXT *missing_db)
         return 1;
     }
 
-    
+
     /********************************************************************************
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
@@ -375,24 +375,24 @@ static int load_layers(TEXT *missing_db)
     nLayers = i;
     sqlite3_finalize(preparedLayerLoading);
 
-    
+
     /*get init_bbox*/
     if (check_layer((const unsigned char *) "main", (const unsigned char *)  "init_box"))
     {
-        
-    int rc;
-    sqlite3_stmt *preparedinitBox;
 
-      char *sql = "select x,y,box_width from init_box;";
+        int rc;
+        sqlite3_stmt *preparedinitBox;
 
-    rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinitBox, 0);
+        char *sql = "select x,y,box_width from init_box;";
 
-      
-    if (rc != SQLITE_OK ) {
-        log_this(100, "SQL error in %s\n",sql );
-        sqlite3_close(projectDB);
-        return 1;
-    }
+        rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinitBox, 0);
+
+
+        if (rc != SQLITE_OK ) {
+            log_this(100, "SQL error in %s\n",sql );
+            sqlite3_close(projectDB);
+            return 1;
+        }
         sqlite3_step(preparedinitBox);
         init_x = sqlite3_column_double(preparedinitBox, 0);
         init_y = sqlite3_column_double(preparedinitBox, 1);
@@ -404,17 +404,17 @@ static int load_layers(TEXT *missing_db)
         init_x = 325000;
         init_y = 6800000;
         init_box_width = 800000;
-    
+
     }
-        
-        
+
+
     return 0;
 }
 int init_resources(char *dir)
 {
     log_this(10, "Entering init_resources\n");
 
-    TEXT *missing_db = init_txt(1024); 
+    TEXT *missing_db = init_txt(1024);
 
     //char stylewhere[128];
 

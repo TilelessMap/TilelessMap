@@ -35,7 +35,7 @@ int render_simple_Polygon()
 
 
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
-	GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
+    GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
 
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};

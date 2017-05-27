@@ -126,7 +126,7 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
     memset(scale, 0,sizeof(float)*16);
 
     GLfloat width = bbox[2]-bbox[0];
-	GLfloat height = bbox[3]-bbox[1];
+    GLfloat height = bbox[3]-bbox[1];
 
     scale[0] = (GLfloat) 2.0/width/zoom;
     scale[5] = (GLfloat) 2.0/height/zoom;

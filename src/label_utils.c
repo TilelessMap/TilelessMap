@@ -34,14 +34,14 @@ extern void print_opengl_info();
 
 static inline uint32_t max_i(int a, int b)
 {
-	if (b > a)
-		return b;
-	else
-		return a;
+    if (b > a)
+        return b;
+    else
+        return a;
 }
 
-       
-       
+
+
 /**
  * Store all the file's contents in memory, useful to pass shaders
  * source code to OpenGL.  Using SDL_RWops for Android asset support.
@@ -247,8 +247,8 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
             fprintf(stderr, "Loading character %c failed!\n", i);
             continue;
         }
-        if (roww + g->bitmap.width + 1 >= MAXWIDTH) 
-		{
+        if (roww + g->bitmap.width + 1 >= MAXWIDTH)
+        {
             a->w = max_i(a->w, roww);
             a->h += rowh;
             roww = 0;

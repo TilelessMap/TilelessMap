@@ -25,7 +25,7 @@
 
 #include <string.h>
 #define NULL ((void *)0)
- 
+
 typedef struct
 {
     char *txt;

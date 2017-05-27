@@ -28,13 +28,13 @@
 
 int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 {
-    
+
     char sql[1024];
     int rc;
     sqlite3_stmt *prepared_sql;
     snprintf(sql, 1024, "select name from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
-    
-        rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
+
+    rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
     if (rc != SQLITE_OK ) {
         log_this(110, "SQL error in %s\n",sql);
@@ -42,16 +42,16 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     }
 
 
-if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
-{
-    sqlite3_finalize(prepared_sql);
-    return 1;
-}
-else
-{
- 
-    sqlite3_finalize(prepared_sql);
-    return 0;
-}
+    if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
+    {
+        sqlite3_finalize(prepared_sql);
+        return 1;
+    }
+    else
+    {
+
+        sqlite3_finalize(prepared_sql);
+        return 0;
+    }
 
 }

@@ -299,8 +299,8 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                     dlist = increase_buffer(res_buf);
                 calc_start(p, dlist, &c, &last_normal);
             }
-            
-            
+
+
             if(i>1)
             {
                 if(floats_left(res_buf)<12)

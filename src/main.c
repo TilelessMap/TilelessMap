@@ -48,9 +48,9 @@ void mainLoop(SDL_Window* window)
 
 //     initialBBOX(380000, 6660000, 300000, newBBOX);
 //initialBBOX(230000, 6660000, 5000, newBBOX);
- //  initialBBOX(325000, 6800000, 800000, newBBOX);
-  //  initialBBOX(234000, 895000, 5000, newBBOX);
-  initialBBOX(init_x, init_y, init_box_width, newBBOX);
+//  initialBBOX(325000, 6800000, 800000, newBBOX);
+    //  initialBBOX(234000, 895000, 5000, newBBOX);
+    initialBBOX(init_x, init_y, init_box_width, newBBOX);
 
     GLfloat theMatrix[16];
 
@@ -275,11 +275,11 @@ void mainLoop(SDL_Window* window)
 void free_resources(SDL_Window* window,SDL_GLContext context) {
     log_this(10, "Entering free_resources\n");
 
-        glDeleteProgram(std_program);
-        glDeleteProgram(txt_program);
-        glDeleteProgram(lw_program);
-        
-        destroy_layer_runtime(layerRuntime,nLayers);
+    glDeleteProgram(std_program);
+    glDeleteProgram(txt_program);
+    glDeleteProgram(lw_program);
+
+    destroy_layer_runtime(layerRuntime,nLayers);
 
     free(global_styles);
     sqlite3_close_v2(projectDB);
@@ -297,7 +297,7 @@ int main(int argc, char **argv)
     text_scale=2;
     char projectfile[500];
     char *the_file=NULL, *dir=NULL;
-    
+
     while(--argc>0)
     {
         argv++;
@@ -317,45 +317,45 @@ int main(int argc, char **argv)
         if(!strcmp(*argv,"-d") || !strcmp(*argv,"--directory"))
         {
             argc--;
-              if(argc > 0)
+            if(argc > 0)
                 dir=*++argv;
             else
             {
                 log_this(110, "Too few arguments \n");
                 return 1;
             }
-            
+
             continue;
         }
     }
-    
+
     if (!(the_file && dir))
     {
-                log_this(110, "Too few arguments \n");
-                return 1;
-            }
-            
-            
-            log_this(110, "file = %s and dir = %s \n",the_file, dir );
+        log_this(110, "Too few arguments \n");
+        return 1;
+    }
+
+
+    log_this(110, "file = %s and dir = %s \n",the_file, dir );
 //snprintf(projectfile, 500, "%s", "hedmark.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/gsd_proj2.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/varmland_proj.sqlite");
 //snprintf(projectfile, 500, "%s%s",dir, "/norden_proj.sqlite");
-  
+
 //  snprintf(projectfile, 500, "%s%s",dir, "/demo.sqlite");
-    
-            
-            
-snprintf(projectfile, 500, "%s",the_file);
+
+
+
+    snprintf(projectfile, 500, "%s",the_file);
     log_this(10, "project file = %s\n", projectfile);
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     glDisable (GL_DEPTH_TEST);;
 
-    
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
-    
+
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
+
 
     SDL_Rect r;
     if (SDL_GetDisplayBounds(0, &r) != 0) {
