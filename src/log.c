@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "log.h"
-void log_this(int log_level, const char *log_txt, ... )
+void log_this(int message_log_level, const char *log_txt, ... )
 {
 
 
-    if(log_level < LOGLEVEL)
+    if(message_log_level < LOGLEVEL)
         return;
 
     char log_txt_tot[2048];

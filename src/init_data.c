@@ -230,7 +230,7 @@ static int load_layers(TEXT *missing_db)
         snprintf(sqlLayerLoading, 2048, "%s order by l.orderby ;",sqlLayerLoading1);
 
 
-    log_this(10, "Get Layer sql : %s\n",sqlLayerLoading);
+    log_this(100, "Get Layer sql : %s\n",sqlLayerLoading);
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
     if (rc != SQLITE_OK ) {
@@ -355,12 +355,10 @@ static int load_layers(TEXT *missing_db)
                  "where ",
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
-        printf("sql = %s\n", sql);
-
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
         if (rc != SQLITE_OK ) {
-            log_this(1, "SQL error in %s\n",sql );
+            log_this(100, "SQL error in %s\n",sql );
             sqlite3_close(projectDB);
             return 1;
         }
@@ -385,12 +383,13 @@ static int load_layers(TEXT *missing_db)
     int rc;
     sqlite3_stmt *preparedinitBox;
 
-      char *sql = "select x,y,box_width from main.init_box;";
+      char *sql = "select x,y,box_width from init_box;";
 
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinitBox, 0);
 
+      
     if (rc != SQLITE_OK ) {
-        log_this(1, "SQL error in %s\n",sql );
+        log_this(100, "SQL error in %s\n",sql );
         sqlite3_close(projectDB);
         return 1;
     }
