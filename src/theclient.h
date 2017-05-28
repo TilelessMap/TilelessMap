@@ -81,6 +81,9 @@ can hold according to the specification*/
 
 #define INIT_PS_POOL_SIZE 10
 
+#define PIXELUNIT 0
+#define MAPUNIT 1
+
 typedef struct
 {
     int active;
@@ -167,6 +170,7 @@ typedef struct
     GLfloat lineWidth;
     GLfloat lineWidth2;
     GLfloat z;
+    GLint unit;
 }
 STYLES_RUNTIME;
 

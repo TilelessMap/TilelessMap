@@ -137,7 +137,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
     
     GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
-
+    GLint unit = -1;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
 
@@ -169,7 +169,6 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
  
 log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
     glUniformMatrix4fv(lw_matrix, 1, GL_FALSE,theMatrix );
-    glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
 
   SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE,16);
     glEnable (GL_DEPTH_TEST);
@@ -197,7 +196,14 @@ log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix
             if(!z)
                 z = 0;
             
-        glUniform1fv(lw_z,1,&z );
+            if(unit != (GLfloat) (global_styles[styleID].unit))
+            {       unit = (GLfloat) (global_styles[styleID].unit);
+                if(unit == PIXELUNIT)
+                    glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
+                else
+                    glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,theMatrix );
+            }
+            glUniform1fv(lw_z,1,&z );
             color = global_styles[styleID].color;
 
             lw2 = (GLfloat) (global_styles[styleID].lineWidth2 * 0.5);

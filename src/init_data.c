@@ -143,7 +143,7 @@ static int load_styles()
 
     char *sqlStyles = "SELECT "
                       /*fields for attaching the database*/
-                      "styleID, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z "
+                      "styleID, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
                       "from styles;";
 
     rc = sqlite3_prepare_v2(projectDB, sqlStyles, -1, &preparedStylesLoading, 0);
@@ -170,6 +170,7 @@ static int load_styles()
         global_styles[styleID].lineWidth =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 8);
         global_styles[styleID].lineWidth2 =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 9);
         global_styles[styleID].z =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 10);
+        global_styles[styleID].unit =  (GLfloat) sqlite3_column_int(preparedStylesLoading, 11);
     }
 
     sqlite3_finalize(preparedStylesLoading);
