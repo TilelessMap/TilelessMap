@@ -39,14 +39,12 @@ To install all dependencies on a clean debian system:
 
 #### Compile ####
 
-just compile:
 
 
     make
 
 #### Get map data ####
 
-to download a map for testing:
 
     wget http://twkb.jordogskog.no/boston.tileless
 
