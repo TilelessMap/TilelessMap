@@ -110,7 +110,7 @@ static int load_styles()
     int rc, i;
     sqlite3_stmt *preparedCountStyle;
     sqlite3_stmt * preparedStylesLoading;
-
+    GLfloat z;
 
     /********************************************************************************
      Count the layers in the project and get maximum styleID in the project
@@ -169,7 +169,17 @@ static int load_styles()
         global_styles[styleID].outlinecolor[3] = 1.0;
         global_styles[styleID].lineWidth =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 8);
         global_styles[styleID].lineWidth2 =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 9);
-        global_styles[styleID].z =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 10);
+        z = (GLfloat) sqlite3_column_double(preparedStylesLoading, 10);
+        if(z)
+        {
+            if(z>100)
+                z = 100;
+            if(z < 0)
+                z = 0;
+            global_styles[styleID].z = 1-z*0.01;
+        }
+        else
+            global_styles[styleID].z = 0;
         global_styles[styleID].unit =  (GLfloat) sqlite3_column_int(preparedStylesLoading, 11);
     }
 
