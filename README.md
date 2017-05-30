@@ -20,7 +20,7 @@ Some map data and android apk can be found at:
 http://twkb.jordogskog.no/
 
 
-Licensce GPL v2
+
 
 ## Install and run ##
 
@@ -48,7 +48,12 @@ wget http://twkb.jordogskog.no/boston.tileless
 
 #### Run ###
 
-./tileless -f boston.tileless -d ./
+    ./tileless -f boston.tileless -d ./
 
 the -d option is to set the working directory. Since a map project can be spread over many sqlite files the working directory is where the client searches for the other data-bases.
 
+## Some notes ##
+
+The map data is packed in sqlite databases. Databases with project information (like layers and styles) are called .tileless as a convention. Pure map data dataabses are called .sqlite.
+
+Licensce GPL v2
