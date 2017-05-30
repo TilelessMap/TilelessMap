@@ -354,10 +354,10 @@ int main(int argc, char **argv)
     
     glDisable (GL_DEPTH_TEST);
 
-/*
+
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
-*/
+
 
     SDL_Rect r;
     if (SDL_GetDisplayBounds(0, &r) != 0) {
