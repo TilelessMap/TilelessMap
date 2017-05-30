@@ -34,17 +34,21 @@ glew
 sqlite is part of the source-code for simplicity.
 
 To install all dependencies on a clean debian system:
-apt-get install git build-essential pkg-config libfreetype6-dev libsdl2-dev libglew-dev
+
+    apt-get install git build-essential pkg-config libfreetype6-dev libsdl2-dev libglew-dev
 
 #### Compile ####
 
 just compile:
-make
+
+
+    make
 
 #### Get map data ####
 
 to download a map for testing:
-wget http://twkb.jordogskog.no/boston.tileless
+
+    wget http://twkb.jordogskog.no/boston.tileless
 
 #### Run ###
 
