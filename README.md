@@ -1,6 +1,8 @@
 # TileLess
 a map client for offline usage
 
+This is just about the client.
+Packaging the mapdata in PostGIS is a separate project: https://github.com/nicklasaven/pg_tileless 
 
 #### What is this? ####
 
