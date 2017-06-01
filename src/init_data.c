@@ -423,6 +423,16 @@ static int load_layers(TEXT *missing_db)
 
     return 0;
 }
+int init_gps()
+{
+    gps_npoints = 32;
+ GLfloat *gps_circle = create_circle(gps_npoints);  
+loadGPS(gps_circle);
+return 0;
+}
+
+
+
 int init_resources(char *dir)
 {
     log_this(10, "Entering init_resources\n");
@@ -440,7 +450,7 @@ int init_resources(char *dir)
 
     load_layers(missing_db);
     destroy_txt(missing_db);
-
+    init_gps();
     return 0;
 }
 

@@ -509,7 +509,8 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
 
 
     }
-
+    renderGPS(theMatrix);
+    
     SDL_GL_SwapWindow(window);
 
     //  pthread_mutex_destroy(&mutex);
@@ -671,3 +672,103 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
 
     return 0;
 }
+
+
+
+
+
+
+int loadGPS(GLfloat *gps_circle)
+{
+
+    glGenBuffers(1, &gps_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, gps_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*((gps_npoints+2) * 2), gps_circle, GL_STATIC_DRAW);
+
+    
+    return 0;
+}
+
+
+
+
+int renderGPS(GLfloat *theMatrix)
+//void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb)
+{
+    
+    log_this(100,"rendering gps with x=%f, y = %f",gps_point.x,gps_point.y);
+    uint32_t  i;
+    GLfloat z, radius1=0, radius2=0, radius3 = 0;
+    GLfloat color1[4] = {0.5,0.5,0.5,0.2};
+    GLfloat color2[4] = {0,0,0,1};
+    GLfloat color3[4] = {0,1,0,1};
+    GLfloat p[2];
+    
+    GLfloat c[4];
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
+    
+    GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+    
+    GLint unit = -1;
+    
+    glBindBuffer(GL_ARRAY_BUFFER, gps_vbo);
+
+    glUseProgram(gps_program);
+
+
+    glEnableVertexAttribArray(gps_norm);
+
+
+    glVertexAttribPointer(
+        gps_norm, // attribute
+        2,                 // number of elements per vertex, here (x,y)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // take our values as-is
+        0,                 // no extra data between each position
+        0                 // offset of first element
+    );
+ 
+log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
+
+
+glUniformMatrix4fv(gps_matrix, 1, GL_FALSE,theMatrix );
+
+
+
+
+        radius1 = gps_point.s;
+        radius2 = 11;
+        radius3 = 10;
+        p[0] = gps_point.x;
+        p[1] = gps_point.y;
+        glUniform2fv(gps_coord2d,1,p);
+        glUniformMatrix4fv(gps_px_matrix, 1, GL_FALSE,theMatrix );
+        glUniform4fv(gps_color,1,color1 );
+        glUniform1fv(gps_radius,1,&radius1 );
+        glDrawArrays(GL_TRIANGLE_FAN, 0, (gps_npoints+2) * 2);
+
+        glUniformMatrix4fv(gps_px_matrix, 1, GL_FALSE,px_Matrix );
+        glUniform4fv(gps_color,1,color2 );
+        glUniform1fv(gps_radius,1,&radius2 );
+        glDrawArrays(GL_TRIANGLE_FAN, 0, (gps_npoints+2) * 2);
+        
+        glUniformMatrix4fv(gps_px_matrix, 1, GL_FALSE,px_Matrix );
+        glUniform4fv(gps_color,1,color3 );
+        glUniform1fv(gps_radius,1,&radius3 );
+        glDrawArrays(GL_TRIANGLE_FAN, 0, (gps_npoints+2) * 2);
+
+
+
+        // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+
+
+    
+    glDisableVertexAttribArray(gps_norm);
+
+    return 0;
+
+}
+

@@ -435,6 +435,11 @@ int build_program();
 int floats_left(GLESSTRUCT *res_buf);
 int check_layer(const unsigned char *dbname, const unsigned char  *layername);
 
+
+void gps_in(double latitude, double longitude, double acc);
+int renderGPS(GLfloat *theMatrix);
+int loadGPS(GLfloat *theMatrix);
+GLfloat* create_circle(int npoints);
 /*********************** Global variables*******************************/
 
 
@@ -496,7 +501,15 @@ GLint lw_norm;
 GLint lw_color;
 GLint lw_z;
 
+//gps-void calc_end(POINT_CIRCLE* p, GLfloat* ut, int* c, vec2* last_normal)
 
+GLint gps_program;
+GLint gps_norm;
+GLint gps_coord2d;
+GLint gps_radius;
+GLint gps_color;
+GLint gps_matrix;
+GLint gps_px_matrix;
 
 
 typedef struct  {
@@ -506,8 +519,11 @@ typedef struct  {
     GLfloat t;
 } point;
 
+point gps_point;
+Uint32 GPSEventType;
 GLuint text_vbo;
-
+int gps_npoints;
+GLuint gps_vbo;
 
 int total_points;
 int n_points;

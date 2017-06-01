@@ -28,7 +28,7 @@ void print_log(GLuint object)
     else if (glIsProgram(object))
         glGetProgramInfoLog(object, log_length, NULL, log);
 
-    log_this(10, "Log: %s", log);
+    log_this(100, "Log: %s", log);
     free(log);
 }
 
@@ -85,6 +85,7 @@ GLuint create_shader(const char* source, GLenum type)
     glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
     if (compile_ok == GL_FALSE) {
         SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "glLinkProgram\n");
+    log_this(100,"problem with shader src : %s", source);
         print_log(res);
         glDeleteShader(res);
         return 0;
@@ -318,6 +319,84 @@ void main(void) { \
 
     reset_shaders(vs, fs, lw_program);
 
+    
+    
+
+
+    /*create a shader program gps-point*/
+
+    const unsigned char gen_vgps[1024] =  "attribute vec2 norm; \
+uniform float radius; \
+uniform vec2 coord2d;  \
+uniform mat4 px_Matrix; \
+uniform mat4 theMatrix; \
+void main(void) {  \
+vec4 delta = vec4(norm * radius,0,0); \
+vec4 npos = px_Matrix * delta; \
+vec4 pos = theMatrix * vec4(coord2d, 0, 1.0);  \
+  gl_Position = (pos + npos); \
+}";
+
+    const unsigned char gen_fgps[1024] = "uniform vec4 color; \
+void main(void) { \
+  gl_FragColor = color; \
+}";
+
+
+    gps_program = create_program((unsigned char *) gen_vgps,(unsigned char *)  gen_fgps, &vs, &fs);
+
+    if(gps_program == 0)
+    {
+     log_this(100,"problem compiling gps-program");
+        return 0;
+    }
+
+    gps_norm = glGetAttribLocation(gps_program, "norm");
+    if (gps_norm == -1)
+    {
+        fprintf(stderr, "test: Could not bind attribute : %s\n", "norm");
+        return 0;
+    }
+
+
+    gps_coord2d = glGetUniformLocation(gps_program, "coord2d");
+    if (gps_coord2d == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "coord2d");
+        return 0;
+    }
+
+     gps_radius = glGetUniformLocation(gps_program, "radius");
+    if (gps_radius == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "radius");
+        return 0;
+    }
+
+ 
+    gps_color = glGetUniformLocation(gps_program, "color");
+    if (gps_color == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "color");
+        return 0;
+    }
+    gps_matrix = glGetUniformLocation(gps_program, "theMatrix");
+    if (gps_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+        return 0;
+    }
+    gps_px_matrix = glGetUniformLocation(gps_program, "px_Matrix");
+    if (gps_px_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "gps_px_matrix");
+        return 0;
+    }
+
+
+
+    reset_shaders(vs, fs, gps_program);   
+    
     return 0;
 }
 

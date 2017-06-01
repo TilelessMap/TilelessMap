@@ -30,20 +30,24 @@
 void mainLoop(SDL_Window* window)
 {
     log_this(10, "Entering mainLoop\n");
-    GLfloat tx,ty,pr;
+    GLfloat tx,ty,pr, gps_x, gps_y;
     int ti, fi;
     GLfloat currentBBOX[4] = {0.0,0.0,0.0,0.0};
     GLfloat newBBOX[4] = {0.0,0.0,0.0,0.0};
     int mouse_down = 0;
     int wheel_y;
     SDL_Event ev;
-
+GPSEventType = ((Uint32)-1);
     SDL_Event tmp_ev[10];
     int n_events;
     GLint px_x_clicked,px_y_clicked;
-
+    
     FINGEREVENT *touches = init_touch_que();
 
+    gps_point.x = 0;
+    gps_point.y = 0;
+    gps_point.s = 0;
+    
     int mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
 //     initialBBOX(380000, 6660000, 300000, newBBOX);
@@ -73,10 +77,15 @@ void mainLoop(SDL_Window* window)
     {
         if (SDL_WaitEvent(&ev)) /* execution suspends here while waiting on an event */
         {
-            while ((err = glGetError()) != GL_NO_ERROR) {
-                log_this(10, "Problem 2\n");
-                fprintf(stderr,"opengl error aaa000: %d\n", err);
-            }
+
+                if(ev.type == GPSEventType)
+                {
+                    
+                    render_data(window, theMatrix); 
+                    
+                }
+                else
+                {
             switch (ev.type)
             {
 #ifndef __ANDROID__
@@ -265,6 +274,7 @@ void mainLoop(SDL_Window* window)
                 free(touches);
                 return;
             }
+                }
         }
         //      render_data(window,currentBBOX,theMatrix);
     }
