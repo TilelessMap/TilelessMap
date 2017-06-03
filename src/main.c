@@ -30,7 +30,7 @@
 void mainLoop(SDL_Window* window)
 {
     log_this(10, "Entering mainLoop\n");
-    GLfloat tx,ty,pr, gps_x, gps_y;
+    GLfloat tx,ty,pr;
     int ti, fi;
     GLfloat currentBBOX[4] = {0.0,0.0,0.0,0.0};
     GLfloat newBBOX[4] = {0.0,0.0,0.0,0.0};

@@ -198,6 +198,7 @@ static int load_layers(TEXT *missing_db)
 
     sqlite3_stmt *preparedLayerLoading;
     sqlite3_stmt *preparedLayer;
+    sqlite3_stmt *prepared_geo_col;
 
     LAYER_RUNTIME *oneLayer;
 
@@ -214,24 +215,19 @@ static int load_layers(TEXT *missing_db)
                              /*fields for attaching the database*/
                              "d.name dbname, "   // 0
                              /*fields for creating the prepared statement to get data later*/
-                             "l.geometryField,"  // 1
-                             "l.triIndexField,"  // 2
-                             "l.idField,"  // 3
-                             "l.name layername,"  // 4
-                             "l.geometryindex, "  // 5
+                             "l.name layername,"  // 1
                              /*fields to inform comming processes about how and when to render*/
-                             " l.defaultVisible,"  // 6
-                             "l.minScale,"  // 7
-                             "l.maxScale,"  // 8
-                             "geometryType,"  // 9
-                             "styleField,"  // 10
-                             "showText,"  // 11
-                             "linewidth,"  // 12
-                             "l.layerID, "  // 13
-                             "tc.size_fld,"  // 14
-                             "rotation_fld,"  // 15
-                             "anchor_fld,"  // 16
-                             "txt_fld"  // 17
+                             " l.defaultVisible,"  // 2
+                             "l.minScale,"  // 3
+                             "l.maxScale,"  // 4
+                             "styleField,"  // 5
+                             "showText,"  // 6
+                             "linewidth,"  // 7
+                             "l.layerID, "  // 8
+                             "tc.size_fld,"  // 9
+                             "rotation_fld,"  // 10
+                             "anchor_fld,"  // 11
+                             "txt_fld"  // 12
 
                              " FROM layers l "
                              "INNER JOIN dbs d on l.source = d.name "
@@ -243,7 +239,7 @@ static int load_layers(TEXT *missing_db)
         snprintf(sqlLayerLoading, 2048, "%s order by l.orderby ;",sqlLayerLoading1);
 
 
-    log_this(100, "Get Layer sql : %s\n",sqlLayerLoading);
+    log_this(50, "Get Layer sql : %s\n",sqlLayerLoading);
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
     if (rc != SQLITE_OK ) {
@@ -266,33 +262,24 @@ static int load_layers(TEXT *missing_db)
         //   sqlite3_step(preparedLayerLoading);
 
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
-        const unsigned char *geometryfield = sqlite3_column_text(preparedLayerLoading, 1);
-
-
-        const unsigned char *tri_index_field = sqlite3_column_text(preparedLayerLoading, 2);
-
-        const unsigned char *idfield = sqlite3_column_text(preparedLayerLoading, 3);
-        const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,4);
-        const unsigned char *geometryindex = sqlite3_column_text(preparedLayerLoading, 5);
-        const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 10);
-        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 13);
-
-        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 6);
-        oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 7);
-        oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 8);
-        oneLayer->geometryType =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 9);
-
-        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 11);
-        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 12);
-
-        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,14);
-        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 15);
-        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 16);
-        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 17);
+        const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
+        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);
+        oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 3);
+        oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 4);
+        const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 5);
+        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 6);
+        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 7);
+        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
 
 
 
-        if (check_layer(dbname, layername))
+        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,9);
+        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 10);
+        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 11);
+        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
+
+
+         if (check_layer(dbname, layername))
         {
             i++;
         }
@@ -300,7 +287,35 @@ static int load_layers(TEXT *missing_db)
         {
             log_this(90, "Cannot use layer %s",layername);
             continue;
+        }       
+        
+        
+        //Get the basic layer info from geometry columns table in data db
+        snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere from %s.geometry_columns where layer_name='%s';", dbname, layername);
+        
+        log_this(100, "Get info from geometry_columns : %s\n",sql);
+        rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
+
+        if (rc != SQLITE_OK ) {
+            log_this(110, "SQL error in %s\n",sql);
+            sqlite3_close(projectDB);
+            return 1;
         }
+        if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
+        { 
+            log_this(100, "Cannot use layer %s",layername);
+            continue;
+        }
+        oneLayer->geometryType =  (uint8_t) sqlite3_column_int(prepared_geo_col, 0);
+        const unsigned char *geometryfield = sqlite3_column_text(prepared_geo_col, 1);
+        const unsigned char *idfield = sqlite3_column_text(prepared_geo_col, 2);
+        const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 3);
+        const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 4);
+        oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 5);
+        oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
+        
+        
+
         //TODO free this
         oneLayer->name = malloc(strlen((char*) layername)+1);
 
@@ -352,7 +367,22 @@ static int load_layers(TEXT *missing_db)
             textselect[0] = '\0';
         }
 
-
+        snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id %s where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? %s",
+                 geometryfield,
+                 tri_idx_fld,
+                 idfield,
+                 styleselect,
+                 textselect,
+                 dbname,
+                 layername,
+                 dbname,
+                 geometryindex,
+                 idfield,
+                 stylejoin,
+                 stylewhere );
+        
+        /*
+        
         snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
                  "select ",
                  geometryfield,
@@ -368,6 +398,8 @@ static int load_layers(TEXT *missing_db)
                  "where ",
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
+                 
+                 */
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
         if (rc != SQLITE_OK ) {
@@ -384,6 +416,7 @@ static int load_layers(TEXT *missing_db)
         if (oneLayer->show_text)
             oneLayer->text =  init_text_buf();
 
+        sqlite3_finalize(prepared_geo_col);
     }
     nLayers = i;
     sqlite3_finalize(preparedLayerLoading);
@@ -396,7 +429,7 @@ static int load_layers(TEXT *missing_db)
         int rc;
         sqlite3_stmt *preparedinitBox;
 
-        char *sql = "select x,y,box_width from init_box;";
+        char *sql = "select x,y,box_width, utm_zone, hemisphere from init_box;";
 
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinitBox, 0);
 
@@ -410,6 +443,8 @@ static int load_layers(TEXT *missing_db)
         init_x = sqlite3_column_double(preparedinitBox, 0);
         init_y = sqlite3_column_double(preparedinitBox, 1);
         init_box_width = sqlite3_column_double(preparedinitBox, 2);
+        curr_utm = sqlite3_column_double(preparedinitBox, 3);
+        curr_hemi = sqlite3_column_double(preparedinitBox, 4);
         sqlite3_finalize(preparedinitBox);
     }
     else

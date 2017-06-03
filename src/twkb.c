@@ -86,11 +86,71 @@ void *twkb_fromSQLiteBBOX(void *theL)
     if(err)
         log_this(1,"sqlite problem, %d\n",err);
 
-    sqlite3_bind_double(prepared_statement, 1,(float) ext[2]); //maxX
-    sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
-    sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY
-    sqlite3_bind_double(prepared_statement, 4,(float) ext[1]); //minY
+    if((theLayer->utm_zone != curr_utm) || (theLayer->hemisphere != curr_hemi))
+    {
+        int layer_utm = theLayer->utm_zone;
+        GLfloat reproj_coord[2];
+        GLfloat maxx;
+        GLfloat maxy;
+        GLfloat minx;
+        GLfloat miny;        
+        
+        
+        
 
+            reproj_coord[0] = ext[0];   
+            reproj_coord[1] = ext[1];
+            
+            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+            minx = reproj_coord[0];
+            miny = reproj_coord[1];
+            
+            reproj_coord[0] = ext[0];   
+            reproj_coord[1] = ext[3];
+            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+            
+            if(minx>reproj_coord[0])
+                minx = reproj_coord[0];
+            
+            maxy = reproj_coord[1];
+            
+            
+            reproj_coord[0] = ext[2];   
+            reproj_coord[1] = ext[3];
+            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+            
+            if(maxy<reproj_coord[1])
+                maxy = reproj_coord[1];
+            
+            maxx = reproj_coord[0];
+            
+            reproj_coord[0] = ext[2];   
+            reproj_coord[1] = ext[1];
+            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+            
+            if(maxx<reproj_coord[0])
+                maxx = reproj_coord[0];
+            
+            if(miny > reproj_coord[1])
+                miny = reproj_coord[1];
+            
+            
+            sqlite3_bind_double(prepared_statement, 1,(float) maxx); //minX
+            sqlite3_bind_double(prepared_statement, 2,(float) minx); //minY
+            sqlite3_bind_double(prepared_statement, 3,(float) maxy); //maxX
+            sqlite3_bind_double(prepared_statement, 4,(float) miny); //maxY
+        
+        
+    }
+    else
+    {
+    
+    
+        sqlite3_bind_double(prepared_statement, 1,(float) ext[2]); //maxX
+        sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
+        sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY
+        sqlite3_bind_double(prepared_statement, 4,(float) ext[1]); //minY
+    }
 
     log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
 
@@ -114,6 +174,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
         }
         ts.tb=&tb;
         ts.line_width = theLayer->line_width;
+        ts.utm_zone = theLayer->utm_zone;
+        ts.hemisphere = theLayer->hemisphere;
         while (ts.tb->read_pos<ts.tb->end_pos)
         {
             decode_twkb(&ts, theLayer->res_buf);

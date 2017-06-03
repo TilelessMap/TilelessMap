@@ -202,6 +202,8 @@ typedef struct
     uint8_t line_width;
     int layer_id;
     int render_area; //This is a way to render only border of polygon. No triangels will be loadded
+    int utm_zone;
+    int hemisphere; //1 is southern hemisphere and 0 is northern
 
 
 }
@@ -294,6 +296,8 @@ typedef struct
     uint32_t id;  //the current styleID
     uint32_t styleID;  //the current styleID
     uint8_t line_width;  //If we shall calculate triangels to get line width
+    uint8_t utm_zone;  
+    uint8_t hemisphere;  
 } TWKB_PARSE_STATE;
 
 
@@ -440,6 +444,7 @@ void gps_in(double latitude, double longitude, double acc);
 int renderGPS(GLfloat *theMatrix);
 int loadGPS(GLfloat *theMatrix);
 GLfloat* create_circle(int npoints);
+void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, uint8_t hemi_out);
 /*********************** Global variables*******************************/
 
 
@@ -451,9 +456,12 @@ sqlite3 *projectDB;
 
 GLfloat init_x;
 GLfloat init_y;
+GLint curr_utm;
+GLint curr_hemi;
 GLfloat init_box_width;
 int nLayers;
 int text_scale;
+
 
 LAYER_RUNTIME *layerRuntime;
 

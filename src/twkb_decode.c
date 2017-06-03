@@ -71,6 +71,8 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
 
     ts->tb = old_ts->tb;
     ts->line_width = old_ts->line_width;
+    ts->utm_zone = old_ts->utm_zone;
+    ts->hemisphere = old_ts->hemisphere;
     ts->styleID = old_ts->styleID;
     //~ ts->rb = old_ts->rb;
     ts->thi = old_ts->thi;
@@ -259,14 +261,21 @@ decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
 static int
 read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 {
-
+//TODO, handle more than 2 coordinates. Now they are just read into the buffer which will give failur in opengl since it doesn't get that info
     uint32_t i, j;
     uint32_t ndims = ts->thi->ndims;
     int64_t val;
     GLfloat *dlist;
     float new_val;
     int c=0;
-
+    int repr = 0;
+    uint8_t utm_in, utm_out, hemi_in, hemi_out;
+    if((ts->utm_zone != curr_utm) || (ts->hemisphere != curr_hemi))
+    {
+        repr = 1;
+        utm_in = ts->utm_zone;
+        hemi_in = ts->hemisphere;        
+    }
     if(ts->line_width)
 //if (1 == 2)
     {
@@ -291,8 +300,9 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 new_val = (float) (ts->thi->coords[j] / ts->thi->factors[j]);
                 p_akt->coord[j] = new_val;
                 //  dlist[c++] = new_val;
-
             }
+            if(repr)
+                reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi); 
             if(i==1)
             {
                 if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
@@ -331,6 +341,9 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
                 dlist[c++] = new_val;
             }
+            
+            if(repr)
+                reproject((dlist + c-j),utm_in,curr_utm,hemi_in,  curr_hemi); 
         }
         // log_this(10, "klar med n points = %d\n", c);
         set_end(npoints, ndims,ts->id, ts->styleID,res_buf);
