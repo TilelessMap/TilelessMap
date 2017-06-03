@@ -117,7 +117,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         }
 
     }
-    
+
     renderGPS(theMatrix);
     render_simple_Polygon();
     print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);

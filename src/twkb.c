@@ -93,59 +93,59 @@ void *twkb_fromSQLiteBBOX(void *theL)
         GLfloat maxx;
         GLfloat maxy;
         GLfloat minx;
-        GLfloat miny;        
-        
-        
-        
+        GLfloat miny;
 
-            reproj_coord[0] = ext[0];   
-            reproj_coord[1] = ext[1];
-            
-            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+
+
+
+        reproj_coord[0] = ext[0];
+        reproj_coord[1] = ext[1];
+
+        reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+        minx = reproj_coord[0];
+        miny = reproj_coord[1];
+
+        reproj_coord[0] = ext[0];
+        reproj_coord[1] = ext[3];
+        reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+
+        if(minx>reproj_coord[0])
             minx = reproj_coord[0];
-            miny = reproj_coord[1];
-            
-            reproj_coord[0] = ext[0];   
-            reproj_coord[1] = ext[3];
-            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
-            
-            if(minx>reproj_coord[0])
-                minx = reproj_coord[0];
-            
+
+        maxy = reproj_coord[1];
+
+
+        reproj_coord[0] = ext[2];
+        reproj_coord[1] = ext[3];
+        reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+
+        if(maxy<reproj_coord[1])
             maxy = reproj_coord[1];
-            
-            
-            reproj_coord[0] = ext[2];   
-            reproj_coord[1] = ext[3];
-            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
-            
-            if(maxy<reproj_coord[1])
-                maxy = reproj_coord[1];
-            
+
+        maxx = reproj_coord[0];
+
+        reproj_coord[0] = ext[2];
+        reproj_coord[1] = ext[1];
+        reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
+
+        if(maxx<reproj_coord[0])
             maxx = reproj_coord[0];
-            
-            reproj_coord[0] = ext[2];   
-            reproj_coord[1] = ext[1];
-            reproject(reproj_coord,curr_utm, theLayer->utm_zone,curr_hemi, theLayer->hemisphere);
-            
-            if(maxx<reproj_coord[0])
-                maxx = reproj_coord[0];
-            
-            if(miny > reproj_coord[1])
-                miny = reproj_coord[1];
-            
-            
-            sqlite3_bind_double(prepared_statement, 1,(float) maxx); //minX
-            sqlite3_bind_double(prepared_statement, 2,(float) minx); //minY
-            sqlite3_bind_double(prepared_statement, 3,(float) maxy); //maxX
-            sqlite3_bind_double(prepared_statement, 4,(float) miny); //maxY
-        
-        
+
+        if(miny > reproj_coord[1])
+            miny = reproj_coord[1];
+
+
+        sqlite3_bind_double(prepared_statement, 1,(float) maxx); //minX
+        sqlite3_bind_double(prepared_statement, 2,(float) minx); //minY
+        sqlite3_bind_double(prepared_statement, 3,(float) maxy); //maxX
+        sqlite3_bind_double(prepared_statement, 4,(float) miny); //maxY
+
+
     }
     else
     {
-    
-    
+
+
         sqlite3_bind_double(prepared_statement, 1,(float) ext[2]); //maxX
         sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
         sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY

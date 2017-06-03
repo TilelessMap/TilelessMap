@@ -47,14 +47,14 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
         //We don't check if layer actually is represented. That will be found without db-error when loading layer
         if(sqlite3_column_int(prepared_sql, 0)==2) //should be 2 rows, 1 for the layer and 1 for geometry_columns
         {
-        sqlite3_finalize(prepared_sql);
-        return 1;
+            sqlite3_finalize(prepared_sql);
+            return 1;
         }
     }
-    
-        log_this(110, "we cannot use %s from %s database\n",layername, dbname);
-        sqlite3_finalize(prepared_sql);
-        return 0;
-    
+
+    log_this(110, "we cannot use %s from %s database\n",layername, dbname);
+    sqlite3_finalize(prepared_sql);
+    return 0;
+
 
 }

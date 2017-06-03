@@ -279,7 +279,7 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
 
 
-         if (check_layer(dbname, layername))
+        if (check_layer(dbname, layername))
         {
             i++;
         }
@@ -287,12 +287,12 @@ static int load_layers(TEXT *missing_db)
         {
             log_this(90, "Cannot use layer %s",layername);
             continue;
-        }       
-        
-        
+        }
+
+
         //Get the basic layer info from geometry columns table in data db
         snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere from %s.geometry_columns where layer_name='%s';", dbname, layername);
-        
+
         log_this(100, "Get info from geometry_columns : %s\n",sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
@@ -302,7 +302,7 @@ static int load_layers(TEXT *missing_db)
             return 1;
         }
         if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
-        { 
+        {
             log_this(100, "Cannot use layer %s",layername);
             continue;
         }
@@ -313,8 +313,8 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 4);
         oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 5);
         oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
-        
-        
+
+
 
         //TODO free this
         oneLayer->name = malloc(strlen((char*) layername)+1);
@@ -380,9 +380,9 @@ static int load_layers(TEXT *missing_db)
                  idfield,
                  stylejoin,
                  stylewhere );
-        
+
         /*
-        
+
         snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
                  "select ",
                  geometryfield,
@@ -398,7 +398,7 @@ static int load_layers(TEXT *missing_db)
                  "where ",
                  " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
                  stylewhere );
-                 
+
                  */
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
 
@@ -461,9 +461,9 @@ static int load_layers(TEXT *missing_db)
 int init_gps()
 {
     gps_npoints = 32;
- GLfloat *gps_circle = create_circle(gps_npoints);  
-loadGPS(gps_circle);
-return 0;
+    GLfloat *gps_circle = create_circle(gps_npoints);
+    loadGPS(gps_circle);
+    return 0;
 }
 
 

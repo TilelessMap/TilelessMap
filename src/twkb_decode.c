@@ -274,7 +274,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     {
         repr = 1;
         utm_in = ts->utm_zone;
-        hemi_in = ts->hemisphere;        
+        hemi_in = ts->hemisphere;
     }
     if(ts->line_width)
 //if (1 == 2)
@@ -302,7 +302,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 //  dlist[c++] = new_val;
             }
             if(repr)
-                reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi); 
+                reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi);
             if(i==1)
             {
                 if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
@@ -341,9 +341,9 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
                 dlist[c++] = new_val;
             }
-            
+
             if(repr)
-                reproject((dlist + c-j),utm_in,curr_utm,hemi_in,  curr_hemi); 
+                reproject((dlist + c-j),utm_in,curr_utm,hemi_in,  curr_hemi);
         }
         // log_this(10, "klar med n points = %d\n", c);
         set_end(npoints, ndims,ts->id, ts->styleID,res_buf);

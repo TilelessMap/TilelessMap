@@ -85,7 +85,7 @@ GLuint create_shader(const char* source, GLenum type)
     glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
     if (compile_ok == GL_FALSE) {
         SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "glLinkProgram\n");
-    log_this(100,"problem with shader src : %s", source);
+        log_this(100,"problem with shader src : %s", source);
         print_log(res);
         glDeleteShader(res);
         return 0;
@@ -319,8 +319,8 @@ void main(void) { \
 
     reset_shaders(vs, fs, lw_program);
 
-    
-    
+
+
 
 
     /*create a shader program gps-point*/
@@ -347,7 +347,7 @@ void main(void) { \
 
     if(gps_program == 0)
     {
-     log_this(100,"problem compiling gps-program");
+        log_this(100,"problem compiling gps-program");
         return 0;
     }
 
@@ -366,14 +366,14 @@ void main(void) { \
         return 0;
     }
 
-     gps_radius = glGetUniformLocation(gps_program, "radius");
+    gps_radius = glGetUniformLocation(gps_program, "radius");
     if (gps_radius == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "radius");
         return 0;
     }
 
- 
+
     gps_color = glGetUniformLocation(gps_program, "color");
     if (gps_color == -1)
     {
@@ -395,8 +395,8 @@ void main(void) { \
 
 
 
-    reset_shaders(vs, fs, gps_program);   
-    
+    reset_shaders(vs, fs, gps_program);
+
     return 0;
 }
 

@@ -296,8 +296,8 @@ typedef struct
     uint32_t id;  //the current styleID
     uint32_t styleID;  //the current styleID
     uint8_t line_width;  //If we shall calculate triangels to get line width
-    uint8_t utm_zone;  
-    uint8_t hemisphere;  
+    uint8_t utm_zone;
+    uint8_t hemisphere;
 } TWKB_PARSE_STATE;
 
 

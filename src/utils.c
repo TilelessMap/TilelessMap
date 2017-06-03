@@ -121,32 +121,32 @@ int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl)
 
 GLfloat* create_circle(int npoints)
 {
- GLfloat *res = malloc((npoints + 2) * 2 * sizeof(GLfloat));
- 
- 	double rad, x, y;
-	int i, res_pos = 0;
-    
+    GLfloat *res = malloc((npoints + 2) * 2 * sizeof(GLfloat));
+
+    double rad, x, y;
+    int i, res_pos = 0;
+
     //add center of point at 0,0
     res[res_pos++] = 0;
     res[res_pos++] = 0;
-	for (i = 0;i<npoints/2;i++)
-	{
-		rad = i * M_PI/(npoints/2);
-		res[res_pos++] = sin(rad);
-		res[res_pos++] = cos(rad);
-	}
-	for (i = npoints/2;i>0;i--)
-	{
-		rad = i * M_PI/(npoints/2);
-		res[res_pos++] = -sin(rad);
-		res[res_pos++] = cos(rad);
-	}
-	//add first point again
-		res[res_pos++] = sin(0);
-		res[res_pos++] = cos(0);
-	
+    for (i = 0; i<npoints/2; i++)
+    {
+        rad = i * M_PI/(npoints/2);
+        res[res_pos++] = sin(rad);
+        res[res_pos++] = cos(rad);
+    }
+    for (i = npoints/2; i>0; i--)
+    {
+        rad = i * M_PI/(npoints/2);
+        res[res_pos++] = -sin(rad);
+        res[res_pos++] = cos(rad);
+    }
+    //add first point again
+    res[res_pos++] = sin(0);
+    res[res_pos++] = cos(0);
+
     return  res;
-    
+
 }
 int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 {
@@ -169,12 +169,12 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 
 #ifdef __ANDROID__
 JNIEXPORT void JNICALL Java_no_jordogskog_app_gps_onNativeGPS(
-                                    JNIEnv* env, jclass jcls,
-                                    double latitude, double longitude, double acc)
+    JNIEnv* env, jclass jcls,
+    double latitude, double longitude, double acc)
 {
     gps_in(latitude, longitude, acc);
-    
+
 }
-#endif 
+#endif
 
 
