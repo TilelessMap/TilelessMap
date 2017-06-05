@@ -32,7 +32,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     char sql[1024];
     int rc;
     sqlite3_stmt *prepared_sql;
-    snprintf(sql, 1024, "select count(*) from %s.sqlite_master where type in ('table','view') and name in ('%s', 'geometry_columns')", dbname, layername);
+    snprintf(sql, 1024, "select count(*) from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
 
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
@@ -45,7 +45,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
     {
         //We don't check if layer actually is represented. That will be found without db-error when loading layer
-        if(sqlite3_column_int(prepared_sql, 0)==2) //should be 2 rows, 1 for the layer and 1 for geometry_columns
+        if(sqlite3_column_int(prepared_sql, 0)==1) //should be 2 rows, 1 for the layer and 1 for geometry_columns
         {
             sqlite3_finalize(prepared_sql);
             return 1;
