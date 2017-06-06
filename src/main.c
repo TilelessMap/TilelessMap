@@ -399,7 +399,7 @@ int main(int argc, char **argv)
     /* Open db-connection*/
     sqlite3_initialize();
 
-    int rc = sqlite3_open_v2(projectfile, &projectDB,SQLITE_OPEN_READONLY, NULL );
+    int rc = sqlite3_open_v2(projectfile, &projectDB,SQLITE_OPEN_READWRITE, NULL );
 
     if (rc != SQLITE_OK) {
         log_this(1, "Cannot open database: %s\n", sqlite3_errmsg(projectDB));

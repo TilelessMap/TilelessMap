@@ -195,6 +195,7 @@ static int load_layers(TEXT *missing_db)
      Get information about all the layers in the project
      */
     int rc, i;
+    char *err_msg;
 
     sqlite3_stmt *preparedLayerLoading;
     sqlite3_stmt *preparedLayer;
@@ -208,8 +209,23 @@ static int load_layers(TEXT *missing_db)
     char textselect[128];
     uint8_t override_type;
     char sql[2048];
+    
+    
+    if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
+    {    
+     
+             rc = sqlite3_exec(projectDB,"alter table layers add column override_type integer;",NULL, NULL, &err_msg);
+        if (rc != 0)
+        {
+            log_this(90, "failed to add missing column in layers table: %s\n", err_msg);
 
-
+            sqlite3_free(err_msg);
+        }
+        
+        
+        
+        
+    }
     char sqlLayerLoading[2048];
     char *sqlLayerLoading1 = "SELECT "
                              /*fields for attaching the database*/

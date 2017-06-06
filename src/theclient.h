@@ -446,6 +446,8 @@ int renderGPS(GLfloat *theMatrix);
 int loadGPS(GLfloat *theMatrix);
 GLfloat* create_circle(int npoints);
 void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, uint8_t hemi_out);
+int check_column(const unsigned char *dbname,const unsigned char * layername, const unsigned char  *col_name);
+
 /*********************** Global variables*******************************/
 
 
