@@ -204,7 +204,7 @@ typedef struct
     int render_area; //This is a way to render only border of polygon. No triangels will be loadded
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
-
+    uint8_t close_ring; //when rendering polygon border we need to close the ring since last point is missing
 
 }
 LAYER_RUNTIME;
@@ -298,6 +298,7 @@ typedef struct
     uint8_t line_width;  //If we shall calculate triangels to get line width
     uint8_t utm_zone;
     uint8_t hemisphere;
+    uint8_t close_ring;
 } TWKB_PARSE_STATE;
 
 

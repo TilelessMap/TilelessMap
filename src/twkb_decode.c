@@ -73,6 +73,7 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
     ts->line_width = old_ts->line_width;
     ts->utm_zone = old_ts->utm_zone;
     ts->hemisphere = old_ts->hemisphere;
+    ts->close_ring = old_ts->close_ring;
     ts->styleID = old_ts->styleID;
     //~ ts->rb = old_ts->rb;
     ts->thi = old_ts->thi;
@@ -267,6 +268,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     int64_t val;
     GLfloat *dlist;
     float new_val;
+    GLfloat start_x, start_y;
     int c=0;
     int repr = 0;
     uint8_t utm_in, utm_out, hemi_in, hemi_out;
@@ -303,8 +305,15 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             }
             if(repr)
                 reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi);
+
             if(i==1)
             {
+                if(ts->close_ring)
+                {
+                    start_x = p->coord[0];
+                    start_y = p->coord[1];
+                }
+                
                 if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
                     dlist = increase_buffer(res_buf);
                 calc_start(p, dlist, &c, &last_normal);
@@ -317,14 +326,25 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                     dlist = increase_buffer(res_buf);
                 calc_join(p_akt, dlist, &c,&last_normal);
             }
-            if(i==npoints-1)
-            {
-                if(i==npoints-1)
-                    calc_end(p_akt->next, dlist, &c,&last_normal);
-            }
 
-            p_akt = p_akt->next;
+            if(i==npoints-1 && !(ts->close_ring))
+                calc_end(p_akt->next, dlist, &c,&last_normal);
+            
+           
 
+            p_akt = p_akt->next; //take a step in the ring
+
+        }
+        if(ts->close_ring)
+        {           
+             p_akt->coord[0] = start_x;
+            p_akt->coord[1] = start_y;
+            
+             if(floats_left(res_buf)<12)
+                dlist = increase_buffer(res_buf);
+            calc_join(p_akt, dlist, &c,&last_normal);
+           
+            calc_end(p_akt->next, dlist, &c,&last_normal);
         }
         set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
     }

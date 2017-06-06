@@ -56,8 +56,8 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         {
             //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = bbox;
-            rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
-            //   twkb_fromSQLiteBBOX((void *) oneLayer);
+             rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
+            //  twkb_fromSQLiteBBOX((void *) oneLayer);
         }
     }
 
@@ -84,8 +84,8 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         oneLayer = layerRuntime + t;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-            rc = pthread_join(threads[t], NULL);
-            //  rc = 0;
+             rc = pthread_join(threads[t], NULL);
+           //  rc = 0;
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);
