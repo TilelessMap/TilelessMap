@@ -68,7 +68,7 @@ int add2glfloat_list(GLFLOAT_LIST *list, GLfloat val)
 int addbatch2glfloat_list(GLFLOAT_LIST *list,GLuint n_vals, GLfloat *vals)
 {
     increase_glfloat_list(list, n_vals);
-    memcpy(list->list, vals, n_vals);
+    memcpy(list->list + list->used, vals, n_vals * sizeof(GLfloat));
     list->used += n_vals;
     return 0;
 }
@@ -203,7 +203,7 @@ int add2glushort_list(GLUSHORT_LIST *list, GLshort val)
 int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals)
 {
     increase_glushort_list(list, n_vals);
-    memcpy(list->list, vals, n_vals);
+    memcpy(list->list + list->used, vals, n_vals * sizeof(GLushort));
     list->used += n_vals;
     return 0;
 }
@@ -212,6 +212,7 @@ static POINT_LIST* init_point_list()
 {
     POINT_LIST *res = st_malloc(sizeof(POINT_LIST));
     res->points = init_glfloat_list();
+    res->style_id = init_gluint_list();
     return res;
 }
 
@@ -220,6 +221,7 @@ static LINESTRING_LIST* init_linestring_list()
     LINESTRING_LIST *res = st_malloc(sizeof(LINESTRING_LIST));
     res->vertex_array = init_glfloat_list();
     res->line_start_indexes = init_gluint_list();
+    res->style_id = init_gluint_list();
     
     return res;    
 }
@@ -232,6 +234,8 @@ static POLYGON_LIST* init_polygon_list()
     res->polygon_start_indexes = init_gluint_list();
     res->element_array = init_glushort_list();
     res->element_start_indexes = init_gluint_list();
+    res->outline_style_id = init_gluint_list();
+    res->area_style_id = init_gluint_list();
     return res;    
 }
 
@@ -240,6 +244,7 @@ static POLYGON_LIST* init_polygon_list()
 static int reset_point_list(POINT_LIST *l)
 {
     reset_glfloat_list(l->points);
+    reset_gluint_list(l->style_id);
     return 0;
 }
 
@@ -247,6 +252,7 @@ static int reset_linestring_list(LINESTRING_LIST *l)
 {
     reset_glfloat_list(l->vertex_array);
     reset_gluint_list(l->line_start_indexes);
+    reset_gluint_list(l->style_id);
     
     return 0;    
 }
@@ -258,6 +264,8 @@ static int reset_polygon_list(POLYGON_LIST *l)
     reset_gluint_list(l->polygon_start_indexes);
     reset_glushort_list(l->element_array);
     reset_gluint_list(l->element_start_indexes);
+    reset_gluint_list(l->outline_style_id);
+    reset_gluint_list(l->area_style_id);
     return 0;    
 }
 
@@ -286,7 +294,7 @@ int init_buffers(LAYER_RUNTIME *layer)
     else
         layer->polygons = NULL;
     
-    layer->style_id = init_gluint_list();
+  //  layer->style_id = init_gluint_list();
     return 0;
 }
 
@@ -302,25 +310,28 @@ int reset_buffers(LAYER_RUNTIME *layer)
     if(layer->polygons)
         reset_polygon_list(layer->polygons);    
     
-    reset_gluint_list(layer->style_id);
+  //  reset_gluint_list(layer->style_id);
     return 0;
 }
 
 
 GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
 {
-    add2gluint_list(l->style_id, style_id);  
+ //   add2gluint_list(l->style_id, style_id);  
     int type = l->type;
     if(type & 224)
+    {
+        add2gluint_list(l->points->style_id, style_id);
         return l->points->points;
+    }
     else if(type & 24)
     {
-     //   add2gluint_list(l->lines->line_start_indexes, l->lines->vertex_array->used);
+        add2gluint_list(l->lines->style_id, style_id);
         return l->lines->vertex_array;
     }
     else if(type & 6)
     {
-     //   add2gluint_list(l->polygons->pa_start_indexes, l->polygons->vertex_array->used);
+        add2gluint_list(l->polygons->outline_style_id, style_id);
         return l->polygons->vertex_array;
     }
     else

@@ -448,6 +448,8 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
     npoints = (uint32_t) buffer_read_uvarint(ts.tb);
     element_check_and_increase_max_pa(1,index_buf);
 
+    
+    add2gluint_list(theLayer->polygons->area_style_id, old_ts->styleID);
 
     dlist = element_get_start(npoints, 3,index_buf);
     for( i = 0; i < npoints; i++ )

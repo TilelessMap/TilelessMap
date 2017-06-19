@@ -124,6 +124,8 @@ GLUINT_LIST;
 typedef struct
 {
     GLFLOAT_LIST *points;
+    GLUINT_LIST *style_id;
+
 }
 POINT_LIST;
 
@@ -132,6 +134,8 @@ typedef struct
 {
     GLFLOAT_LIST *vertex_array;
     GLUINT_LIST *line_start_indexes;
+    GLUINT_LIST *style_id;
+
 }
 LINESTRING_LIST;
 
@@ -141,7 +145,9 @@ typedef struct
     GLUINT_LIST *pa_start_indexes; //start index in vertex array above of each point array
     GLUINT_LIST *polygon_start_indexes; //start index in vertex_array above for each polygon 
     GLUSHORT_LIST *element_array;    // a long array of triangle indexes 
-    GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
+    GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts    
+    GLUINT_LIST *area_style_id;
+    GLUINT_LIST *outline_style_id;
 }
 POLYGON_LIST;
 
@@ -251,7 +257,6 @@ typedef struct
     LINESTRING_LIST *lines;
     LINESTRING_LIST *wide_lines;
     POLYGON_LIST *polygons;
-    GLUINT_LIST *style_id;
     GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
