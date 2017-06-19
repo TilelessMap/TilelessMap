@@ -67,11 +67,12 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
       char sql[1024];
     int rc;
     sqlite3_stmt *prepared_sql;
-    snprintf(sql, 1024, "select * from %s.sqlite_master where type in ('table','view') and name = '%s' and sql ilike '%%`%s`%%'", dbname, layername, col_name);
+    snprintf(sql, 1024, "select * from %s.sqlite_master where type in ('table','view') and name = '%s' and sql like '%%`%s`%%'", dbname, layername, col_name);
 
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
     if (rc != SQLITE_OK ) {
+        log_this(90, "failed run sql: %s, error_code: %d\n",sql,  rc);
         return 0;
     }
 

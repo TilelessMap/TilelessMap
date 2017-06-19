@@ -361,10 +361,16 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
     GLESSTRUCT *rb = oneLayer->res_buf;
+    
+    POLYGON_LIST *poly = oneLayer->polygons;
+    
 //	 int i,j, offset=0;
     glGenBuffers(1, &(oneLayer->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*poly->vertex_array->used,poly->vertex_array->list, GL_STATIC_DRAW);
+    
+    
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
 
 
@@ -373,11 +379,14 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     //   int size =  sizeof(GLshort)*(ti->first_free-ti->vertex_array);
     glGenBuffers(1, &(oneLayer->ebo));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*(ti->first_free-ti->index_array), ti->index_array, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*poly->element_array->used, poly->element_array->list, GL_STATIC_DRAW);
+    
+    
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*(ti->first_free-ti->index_array), ti->index_array, GL_STATIC_DRAW);
 
 
 
-    if(oneLayer->render_area)
+    if(oneLayer->type & 4)
         renderPolygon( oneLayer, theMatrix);
     renderLine(oneLayer, theMatrix,1);
     return 0;
@@ -393,24 +402,27 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat c[4];
 //    GLenum err;
 
-
+    POLYGON_LIST *poly = oneLayer->polygons;
+    unsigned int ndims = oneLayer->n_dims;
 
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-
+    unsigned int n_vals = 0;
 
     GLESSTRUCT *rb = oneLayer->res_buf;
     ELEMENTSTRUCT *ti = oneLayer->tri_index;
 
+    unsigned int used_n_pa = poly->polygon_start_indexes->used;
 
 
     glUseProgram(std_program);
     glEnableVertexAttribArray(std_coord2d);
 
-    n_polys += ti->used_n_pa;
+    n_polys += used_n_pa;
 
-    for (i=0; i<ti->used_n_pa; i++)
+    for (i=0; i<used_n_pa; i++)
     {
-        size_t  vertex_offset = *(rb->polygon_offset+i)  ;
+        size_t  vertex_offset = sizeof(GLfloat) * *(poly->polygon_start_indexes->list + i);
+        //        size_t  vertex_offset = *(rb->polygon_offset+i)  ;
         glVertexAttribPointer(
             std_coord2d, // attribute
             2,                 // number of elements per vertex, here (x,y)
@@ -419,10 +431,10 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             0,                 // no extra data between each position
             (GLvoid*) vertex_offset                  // offset of first element
         );
-        /*    while ((err = glGetError()) != GL_NO_ERROR) {
+            while ((err = glGetError()) != GL_NO_ERROR) {
                 log_this(10, "Problem1\n");
                 fprintf(stderr,"opengl error:%d", err);
-            }*/
+            }
 
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
@@ -433,7 +445,9 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
               fprintf(stderr,"opengl error:%d", err);
           }*/
 
-        Uint32 styleID = *(ti->styleID+i);
+        //Uint32 styleID = *(ti->styleID+i);
+        Uint32 styleID = *(oneLayer->style_id->list+i);
+        
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
             color = global_styles[styleID].color;
@@ -446,14 +460,18 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         }
 
         glUniform4fv(std_color,1,color );
-
-
-
-        size_t index_offset = *(ti->start_index+i) * 3 *sizeof(GLushort) ;
+        
+            
+        n_vals = *(poly->pa_start_indexes->list + i) - n_vals;
+        size_t index_offset = sizeof(GLushort) * *(poly->element_start_indexes->list + i);
+//        size_t index_offset = *(ti->start_index+i) * 3 *sizeof(GLushort) ;
         //  offset = i * 100;
         //int n = *(ti->npoints+i) * 3 ;
-        n_tri += *(ti->npoints+i);
-        glDrawElements(GL_TRIANGLES, *(ti->npoints+i) * 3,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
+        
+        
+    //    n_tri += *(ti->npoints+i);
+        glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
+ //       glDrawElements(GL_TRIANGLES, *(ti->npoints+i) * 3,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
 
     }
     glDisableVertexAttribArray(std_coord2d);

@@ -22,7 +22,7 @@
  **********************************************************************/
 
 
-
+#include "buffer_handling.h"
 #include "theclient.h"
 
 
@@ -209,7 +209,7 @@ static int load_layers(TEXT *missing_db)
     char textselect[128];
     uint8_t override_type;
     char sql[2048];
-    
+    uint8_t type = 0;
     
     if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
     {    
@@ -327,6 +327,30 @@ static int load_layers(TEXT *missing_db)
             continue;
         }
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(prepared_geo_col, 0);
+        type = 0;
+        
+        if(oneLayer->geometryType == POINTTYPE)
+        {
+            type = type | 128;
+         if (oneLayer->show_text)   
+            type = type | 32;
+        }
+        else if(oneLayer->geometryType == LINETYPE)
+        {
+            if(oneLayer->line_width)
+                type = type | 8;
+            else
+                type = type | 16;
+        }       
+        else if(oneLayer->geometryType == POLYGONTYPE)
+        {
+            type = type | 4;
+            if(oneLayer->line_width)
+                type = type | 8;
+
+        }       
+        oneLayer->type = type;        
+        
         if(override_type)
         {
             if(oneLayer->geometryType == 3)
@@ -435,6 +459,10 @@ log_this(100, "sql %s\n",sql );
             return 1;
         }
         oneLayer->preparedStatement = preparedLayer;
+        
+        init_buffers(oneLayer);
+        
+        
         oneLayer->res_buf =  init_res_buf();
 
         if (oneLayer->geometryType == POLYGONTYPE)
@@ -442,7 +470,8 @@ log_this(100, "sql %s\n",sql );
 
         if (oneLayer->show_text)
             oneLayer->text =  init_text_buf();
-
+        
+        
         sqlite3_finalize(prepared_geo_col);
     }
     nLayers = i;

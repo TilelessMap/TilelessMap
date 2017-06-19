@@ -62,7 +62,7 @@ static inline vec2 add_vec(vec2 *v1, vec2 *v2)
 }
 
 void
-calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
+calc_start(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal)
 {
 //    log_this(10, "Entering %s\n",__func__);
     int n=0;
@@ -76,15 +76,23 @@ calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
     vec2 norm = normal(p1x,p1y, p2x,p2y);
 
 
-
-    *(ut + n++) = p1x;
+    add2glfloat_list(ut, p1x);
+    add2glfloat_list(ut, p1y);
+    add2glfloat_list(ut, norm.x);
+    add2glfloat_list(ut, norm.y);
+    add2glfloat_list(ut, p1x);
+    add2glfloat_list(ut, p1y);
+    add2glfloat_list(ut, -norm.x);
+    add2glfloat_list(ut, -norm.y);
+    
+   /* *(ut + n++) = p1x;
     *(ut + n++) = p1y;
     *(ut + n++) = norm.x;
     *(ut + n++) = norm.y;
     *(ut + n++) = p1x;
     *(ut + n++) = p1y;
     *(ut + n++) = -norm.x;
-    *(ut + n++) = -norm.y;
+    *(ut + n++) = -norm.y;*/
 
 
     *c = n;
@@ -94,7 +102,7 @@ calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 }
 
 void
-calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
+calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal)
 {
     //   log_this(10, "Entering %s\n",__func__);
     int n = *c;
@@ -158,9 +166,24 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
         //   printf("d: %f\n", d);
         if (d < 0)
         {
+            add2glfloat_list(ut, p1x);
+            add2glfloat_list(ut, p1y);
+            add2glfloat_list(ut, r * avg_vec.x);
+            add2glfloat_list(ut, r * avg_vec.y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, -last_normal->x);
+            add2glfloat_list(ut, -last_normal->y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, r * avg_vec.x);
+            add2glfloat_list(ut, r * avg_vec.y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, -norm.x);
+            add2glfloat_list(ut, -norm.y);
 
-
-            *(ut + n++) = p1x;
+   /*         *(ut + n++) = p1x;
             *(ut + n++) = p1y;
             *(ut + n++) = r * avg_vec.x;
             *(ut + n++) = r * avg_vec.y;
@@ -181,12 +204,30 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
             *(ut + n++) = p2y;
 
             *(ut + n++) = -norm.x;
-            *(ut + n++) = -norm.y;
+            *(ut + n++) = -norm.y;*/
 
         }
         else
         {
-            *(ut + n++) = p2x;
+            
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, last_normal->x);
+            add2glfloat_list(ut, last_normal->y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, - r * avg_vec.x);
+            add2glfloat_list(ut, - r * avg_vec.y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, norm.x);
+            add2glfloat_list(ut, norm.y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
+            add2glfloat_list(ut, - r * avg_vec.x);
+            add2glfloat_list(ut, - r * avg_vec.y);
+            
+            /**(ut + n++) = p2x;
             *(ut + n++) = p2y;
 
             *(ut + n++) = last_normal->x;
@@ -208,15 +249,22 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
             *(ut + n++) = p2y;
 
             *(ut + n++) = -r * avg_vec.x;
-            *(ut + n++) = -r * avg_vec.y;
+            *(ut + n++) = -r * avg_vec.y;*/
 
 
         }
     }
     else
     {
-
-        *(ut + n++) = p2x;
+            add2glfloat_list(ut, p1x);
+            add2glfloat_list(ut, p1y);
+            add2glfloat_list(ut, r * avg_vec.x);
+            add2glfloat_list(ut, r * avg_vec.y);
+            add2glfloat_list(ut, p1x);
+            add2glfloat_list(ut, p1y);
+            add2glfloat_list(ut, -r * avg_vec.x);
+            add2glfloat_list(ut, -r * avg_vec.y);
+       /* *(ut + n++) = p2x;
         *(ut + n++) = p2y;
         *(ut + n++) = r * avg_vec.x;
         *(ut + n++) = r * avg_vec.y;
@@ -224,7 +272,7 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
         *(ut + n++) = p2x;
         *(ut + n++) = p2y;
         *(ut + n++) = -r * avg_vec.x;
-        *(ut + n++) = -r * avg_vec.y;
+        *(ut + n++) = -r * avg_vec.y;*/
 
     }
 
@@ -238,7 +286,7 @@ calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
 
 
 void
-calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
+calc_end(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal)
 {
 //    log_this(10, "Entering %s\n",__func__);
     int n = *c;
@@ -251,16 +299,23 @@ calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal)
     p2x = p_akt->coord[0];
     p2y = p_akt->coord[1];
 
+    add2glfloat_list(ut, p2x);
+    add2glfloat_list(ut, p2y);
+    add2glfloat_list(ut, last_normal->x);
+    add2glfloat_list(ut, last_normal->y);
+    add2glfloat_list(ut, p2x);
+    add2glfloat_list(ut, p2y);
+    add2glfloat_list(ut, -last_normal->x);
+    add2glfloat_list(ut, -last_normal->y);
 
-
-    *(ut + n++) = p2x;
+    /**(ut + n++) = p2x;
     *(ut + n++) = p2y;
     *(ut + n++) = last_normal->x;
     *(ut + n++) = last_normal->y;
     *(ut + n++) = p2x;
     *(ut + n++) = p2y;
     *(ut + n++) = -last_normal->x;
-    *(ut + n++) = -last_normal->y;
+    *(ut + n++) = -last_normal->y;*/
 
 
 

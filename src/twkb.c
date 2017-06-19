@@ -69,7 +69,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
     ts.thi->bbox=&bbox;
     LAYER_RUNTIME *theLayer = (LAYER_RUNTIME *) theL;
 
-
+    ts.theLayer = (LAYER_RUNTIME *) theL;
 
     GLfloat rotation;
     GLint anchor;
@@ -184,7 +184,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
         }
 //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
         free(tb.start_pos);
-        if(theLayer->geometryType == POLYGONTYPE && theLayer->render_area)
+        if(theLayer->type & 4)
         {
             if(get_blob(&tb,prepared_statement,1))
             {
@@ -205,7 +205,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
 
         }
-        if(theLayer->show_text)
+        if(theLayer->type & 32)
         {
             const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
 

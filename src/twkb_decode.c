@@ -23,6 +23,7 @@
 
 
 #include "theclient.h"
+#include "buffer_handling.h"
 
 static void init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts);
 static int decode_point(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf);
@@ -75,6 +76,7 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
     ts->hemisphere = old_ts->hemisphere;
     ts->close_ring = old_ts->close_ring;
     ts->styleID = old_ts->styleID;
+    ts->theLayer = old_ts->theLayer;
     //~ ts->rb = old_ts->rb;
     ts->thi = old_ts->thi;
     ts->thi->has_bbox=0;
@@ -161,7 +163,8 @@ read_header (TWKB_PARSE_STATE *ts)
             ts->thi->bbox->bbox_max[i] = (GLfloat) (buffer_read_svarint(ts->tb)/ts->thi->factors[i] + ts->thi->bbox->bbox_min[i]);
         }
     }
-
+    
+    
     return 0;
 }
 
@@ -223,6 +226,10 @@ decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
     check_and_increase_max_polygon(2, res_buf);// Here we add one extra since we register start offset for the comming polygon. So we need space for that
 
     set_end_polygon( res_buf);
+    
+    if(ts->theLayer->type & 6)
+        add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->vertex_array->used);
+    
     //int type;
     parseFunctions_p pf;
 //    type = COLLECTIONTYPE;
@@ -267,19 +274,29 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     uint32_t ndims = ts->thi->ndims;
     int64_t val;
     GLfloat *dlist;
+    GLFLOAT_LIST *vertex_list, *wide_line;
     float new_val;
     GLfloat start_x, start_y;
     int c=0;
-    int repr = 0;
+    int reprpject = 0;
     uint8_t utm_in, utm_out, hemi_in, hemi_out;
+    
+    LAYER_RUNTIME *theLayer = ts->theLayer;
+    uint type = theLayer->type;
+    
+    //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
+    theLayer->n_dims = ndims;
+    
     if((ts->utm_zone != curr_utm) || (ts->hemisphere != curr_hemi))
     {
-        repr = 1;
+        reprpject = 1;
         utm_in = ts->utm_zone;
         hemi_in = ts->hemisphere;
     }
-    if(ts->line_width)
-//if (1 == 2)
+    
+    vertex_list = get_coord_list(theLayer, ts->styleID);
+    
+    if(type & 8)
     {
         vec2 last_normal;
         POINT_CIRCLE p[3];
@@ -289,8 +306,10 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
         POINT_CIRCLE *p_akt = p;
         //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
-        dlist = get_start(npoints*3, ndims,res_buf);
-
+    //    dlist = get_start(npoints*3, ndims,res_buf);
+        
+        GLFLOAT_LIST *wide_line = theLayer->wide_lines->vertex_array;
+        
         for( i = 0; i < npoints; i++ )
         {
 
@@ -303,9 +322,11 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 p_akt->coord[j] = new_val;
                 //  dlist[c++] = new_val;
             }
-            if(repr)
+            if(reprpject)
                 reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi);
-
+            
+            addbatch2glfloat_list(vertex_list, ndims, p_akt->coord);
+            
             if(i==1)
             {
                 if(ts->close_ring)
@@ -315,20 +336,20 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 }
                 
                 if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
-                    dlist = increase_buffer(res_buf);
-                calc_start(p, dlist, &c, &last_normal);
+                    //dlist = increase_buffer(res_buf);
+                calc_start(p, wide_line, &c, &last_normal);
             }
 
 
             if(i>1)
             {
                 if(floats_left(res_buf)<12)
-                    dlist = increase_buffer(res_buf);
-                calc_join(p_akt, dlist, &c,&last_normal);
+                    //dlist = increase_buffer(res_buf);
+                calc_join(p_akt, wide_line, &c,&last_normal);
             }
 
             if(i==npoints-1 && !(ts->close_ring))
-                calc_end(p_akt->next, dlist, &c,&last_normal);
+                calc_end(p_akt->next, wide_line, &c,&last_normal);
             
            
 
@@ -341,16 +362,18 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             p_akt->coord[1] = start_y;
             
              if(floats_left(res_buf)<12)
-                dlist = increase_buffer(res_buf);
-            calc_join(p_akt, dlist, &c,&last_normal);
+                //dlist = increase_buffer(res_buf);
+            calc_join(p_akt, wide_line, &c,&last_normal);
            
-            calc_end(p_akt->next, dlist, &c,&last_normal);
+            calc_end(p_akt->next, wide_line, &c,&last_normal);
         }
-        set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
+        //set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
+        add2gluint_list(theLayer->wide_lines->line_start_indexes, theLayer->wide_lines->vertex_array->used);
     }
     else
     {
-        dlist = get_start(npoints, ndims,res_buf);
+        GLfloat coords[4];
+        //dlist = get_start(npoints, ndims,res_buf);
         for( i = 0; i < npoints; i++ )
         {
             for( j = 0; j < ndims; j++ )
@@ -359,17 +382,20 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 ts->thi->coords[j] += val;
                 new_val = (GLfloat) (ts->thi->coords[j] / ts->thi->factors[j]);
 
-                dlist[c++] = new_val;
+                coords[j] = new_val;
             }
 
-            if(repr)
-                reproject((dlist + c-j),utm_in,curr_utm,hemi_in,  curr_hemi);
+            if(reprpject)
+                reproject(coords,utm_in,curr_utm,hemi_in,  curr_hemi);
+            addbatch2glfloat_list(vertex_list, ndims, coords);
         }
+        
         // log_this(10, "klar med n points = %d\n", c);
-        set_end(npoints, ndims,ts->id, ts->styleID,res_buf);
+        //set_end(npoints, ndims,ts->id, ts->styleID,res_buf);
 
 
     }
+    pa_end(theLayer);
     return 0;
 }
 
@@ -406,13 +432,16 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
     int64_t val;
     GLushort *dlist;
 
+    GLushort val_list[3];
 //jump over header
     buffer_read_byte(ts.tb);
     buffer_read_byte(ts.tb);
 //jump over2nd header byte since more than 2 dims
     buffer_read_byte(ts.tb);
-
-
+    
+    LAYER_RUNTIME *theLayer = old_ts->theLayer;
+    
+    GLUSHORT_LIST *element_list = theLayer->polygons->element_array;
 
 
     //  read_header (&ts);
@@ -428,8 +457,11 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
             val = buffer_read_svarint(ts.tb);
             ts.thi->coords[j] += val;
             dlist[3 * i + j] = (GLushort) ts.thi->coords[j];
+            val_list[j] = (GLushort) ts.thi->coords[j];
         }
+        addbatch2glushort_list(element_list,3, val_list);
     }
+    add2gluint_list(theLayer->polygons->element_start_indexes,element_list->used);
     element_set_end(npoints, 3, ts.styleID,index_buf);
 
     return 0;

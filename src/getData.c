@@ -23,6 +23,7 @@
 
 
 #include "theclient.h"
+#include "buffer_handling.h"
 
 
 
@@ -45,6 +46,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     {
         oneLayer = layerRuntime + i;
 
+	    reset_buffers(oneLayer);
         reset_buffer(oneLayer->res_buf);
         if(oneLayer->geometryType == POLYGONTYPE)
             element_reset_buffer(oneLayer->tri_index);

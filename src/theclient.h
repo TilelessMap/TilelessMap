@@ -58,7 +58,6 @@
 #include "global.h"
 
 
-
 #define INIT_WIDTH 1000
 #define INIT_HEIGHT 500
 
@@ -94,6 +93,58 @@ typedef struct
     GLfloat y2;
 }
 FINGEREVENT;
+
+
+
+typedef struct
+{
+    GLfloat *list;
+    size_t alloced;
+    size_t used;
+}
+GLFLOAT_LIST;
+
+
+typedef struct
+{
+    GLushort *list;
+    size_t alloced;
+    size_t used;
+}
+GLUSHORT_LIST;
+
+typedef struct
+{
+    GLuint *list;
+    size_t alloced;
+    size_t used;
+}
+GLUINT_LIST;
+
+typedef struct
+{
+    GLFLOAT_LIST *points;
+}
+POINT_LIST;
+
+
+typedef struct
+{
+    GLFLOAT_LIST *vertex_array;
+    GLUINT_LIST *line_start_indexes;
+}
+LINESTRING_LIST;
+
+typedef struct
+{
+    GLFLOAT_LIST *vertex_array;  //all vertex coordinates in a long array
+    GLUINT_LIST *pa_start_indexes; //start index in vertex array above of each point array
+    GLUINT_LIST *polygon_start_indexes; //start index in vertex_array above for each polygon 
+    GLUSHORT_LIST *element_array;    // a long array of triangle indexes 
+    GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
+}
+POLYGON_LIST;
+
 
 /**
 
@@ -191,9 +242,16 @@ typedef struct
     /*values for what and how to render*/
     GLfloat *BBOX;
     uint8_t geometryType;
+    uint8_t type; //8 on/off switches: point simple, point symbol, point text, line simple, line width, poly
+    uint8_t n_dims;
 //   uint8_t has_text;
     GLfloat minScale;
     GLfloat maxScale;
+    POINT_LIST *points;
+    LINESTRING_LIST *lines;
+    LINESTRING_LIST *wide_lines;
+    POLYGON_LIST *polygons;
+    GLUINT_LIST *style_id;
     GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
@@ -292,6 +350,7 @@ typedef struct
     //~ buffer_collection *rb;
     TWKB_HEADER_INFO *thi;
     GLESSTRUCT *res_buf;
+    LAYER_RUNTIME *theLayer;
     sqlite3_stmt *prepared_statement;
     uint32_t id;  //the current styleID
     uint32_t styleID;  //the current styleID
@@ -432,9 +491,9 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
 int render_simple_Polygon();
 
 
-void calc_start(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
-void calc_join(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
-void calc_end(POINT_CIRCLE *p,GLfloat *ut,int *c, vec2 *last_normal);
+void calc_start(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal);
+void calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal);
+void calc_end(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal);
 
 int build_program();
 int floats_left(GLESSTRUCT *res_buf);
