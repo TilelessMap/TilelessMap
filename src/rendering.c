@@ -230,7 +230,14 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             c[3] = 255;
             color = c;
         }
-        if(lw2)
+        
+        if(oneLayer->type & 6)
+        {
+            color = color2;
+            lw2 = 0;
+            
+        }
+        else if(lw2)
         {
             glUniform4fv(lw_color,1,color2 );
             glUniform1fv(lw_linewidth,1,&lw2 );
@@ -369,103 +376,108 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     unsigned int n_vals = 0, n_vals_acc = 0;
 
     unsigned int used_n_pa;
-    used_n_pa = poly->polygon_start_indexes->used;
-
-    glUseProgram(std_program);
-    glEnableVertexAttribArray(std_coord2d);
-
-    n_polys += used_n_pa;
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
-    glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
-    for (i=0; i<used_n_pa; i++)
+    
+    
+    if(oneLayer->type & 4)
     {
-        size_t  vertex_offset = sizeof(GLuint) * *(poly->polygon_start_indexes->list + i);
+        used_n_pa = poly->polygon_start_indexes->used;
 
+        glUseProgram(std_program);
+        glEnableVertexAttribArray(std_coord2d);
+
+        n_polys += used_n_pa;
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
+        glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
+        for (i=0; i<used_n_pa; i++)
+        {
+            size_t  vertex_offset = sizeof(GLuint) * *(poly->polygon_start_indexes->list + i);
+
+            glVertexAttribPointer(
+                std_coord2d, // attribute
+                2,                 // number of elements per vertex, here (x,y)
+                GL_FLOAT,          // the type of each element
+                GL_FALSE,          // take our values as-is
+                0,                 // no extra data between each position
+                (GLvoid*) vertex_offset                  // offset of first element
+            );
+
+            styleID = *(poly->area_style_id->list+i);
+
+            if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+            {
+                color = global_styles[styleID].color;
+            }
+            else
+            {
+                c[0] = c[1] = c[2] = 100;
+                c[3] = 255;
+                color = c;
+            }
+
+
+            glUniform4fv(std_color,1,color );
+
+
+            n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
+            n_vals_acc = *(poly->element_start_indexes->list + i);
+
+            glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
+            index_offset = sizeof(GLushort) * *(poly->element_start_indexes->list + i);
+
+        }
+        n_vals = n_vals_acc = 0;
+        glDisableVertexAttribArray(std_coord2d);
+    }
+    if(!(oneLayer->type & 8))
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+
+
+
+
+        glUseProgram(std_program);
+        glEnableVertexAttribArray(std_coord2d);
+        /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
         glVertexAttribPointer(
             std_coord2d, // attribute
             2,                 // number of elements per vertex, here (x,y)
             GL_FLOAT,          // the type of each element
             GL_FALSE,          // take our values as-is
             0,                 // no extra data between each position
-            (GLvoid*) vertex_offset                  // offset of first element
+            0                  // offset of first element
         );
 
-        styleID = *(poly->area_style_id->list+i);
+        glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
-        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+        used_n_pa = poly->pa_start_indexes->used;
+
+        for (i=0; i<used_n_pa; i++)
         {
-            color = global_styles[styleID].color;
-        }
-        else
-        {
-            c[0] = c[1] = c[2] = 100;
-            c[3] = 255;
-            color = c;
-        }
 
+            styleID = *(poly->outline_style_id->list+i);
 
-        glUniform4fv(std_color,1,color );
-
-
-        n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
-        n_vals_acc = *(poly->element_start_indexes->list + i);
-
-        glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
-        index_offset = sizeof(GLushort) * *(poly->element_start_indexes->list + i);
-
-    }
-    n_vals = n_vals_acc = 0;
-    glDisableVertexAttribArray(std_coord2d);
-
-
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-
-
-
-
-    glUseProgram(std_program);
-    glEnableVertexAttribArray(std_coord2d);
-    /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
-    glVertexAttribPointer(
-        std_coord2d, // attribute
-        2,                 // number of elements per vertex, here (x,y)
-        GL_FLOAT,          // the type of each element
-        GL_FALSE,          // take our values as-is
-        0,                 // no extra data between each position
-        0                  // offset of first element
-    );
-
-    glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
-
-    used_n_pa = poly->pa_start_indexes->used;
-
-    for (i=0; i<used_n_pa; i++)
-    {
-
-        styleID = *(poly->outline_style_id->list+i);
-
-        n_vals = *(poly->pa_start_indexes->list + i)/ndims - n_vals_acc;
-        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
-        {
-            color = global_styles[styleID].outlinecolor;
-            lw = global_styles[styleID].lineWidth;
-
-
-
-            if(lw)
+            n_vals = *(poly->pa_start_indexes->list + i)/ndims - n_vals_acc;
+            if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
             {
-                glUniform4fv(std_color,1,color );
+                color = global_styles[styleID].outlinecolor;
+                lw = global_styles[styleID].lineWidth;
 
 
-                glDrawArrays(GL_LINE_LOOP, n_vals_acc, n_vals);
+
+                if(lw)
+                {
+                    glUniform4fv(std_color,1,color );
+
+
+                    glDrawArrays(GL_LINE_LOOP, n_vals_acc, n_vals);
+                }
             }
+            n_vals_acc = *(poly->pa_start_indexes->list + i)/ndims;
+
         }
-        n_vals_acc = *(poly->pa_start_indexes->list + i)/ndims;
-
+        glDisableVertexAttribArray(std_coord2d);
     }
-    glDisableVertexAttribArray(std_coord2d);
-
     return 0;
 
 }
@@ -494,8 +506,8 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
 //~ log_this(10, "render : %d\n",oneLayer->geometryType);
 
             //     log_this(10, "render point");
-            //   if (oneLayer->show_text) {
-            //      render_text(oneLayer, theMatrix);
+              if (type & 32) 
+                 render_text(oneLayer, theMatrix);
 
             //   renderPoint(oneLayer, theMatrix);
 
@@ -540,6 +552,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     int ndims=oneLayer->n_dims;
     //FT_GlyphSlot g = face->glyph;
 //   GLuint text_vbo;
+    int offset = 0;;
     char *txt;
 //   glGenBuffers(1, &text_vbo);
     /* Create a texture that will be used to hold one "glyph" */
@@ -560,14 +573,14 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 //    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
-    if(oneLayer->show_text && oneLayer->text->used_n_vals!=point->points->used/ndims)
+    if(oneLayer->show_text && oneLayer->text->used_n_vals!=point->point_start_indexes->used)
     {
         printf("There is a mismatch between number of labels and number of corresponding points\n");
-        printf("%d vs %d\n",oneLayer->text->used_n_vals, point->points->used/ndims);
+        printf("%d vs %d\n",oneLayer->text->used_n_vals, point->point_start_indexes->used);
     }
     int used=0;
 
-    n_words += point->points->used/ndims;
+    n_words = point->point_start_indexes->used;
     for (i=0; i<n_words; i++)
     {
 
@@ -588,11 +601,16 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         /*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
                 point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
-        */
+        
         point_coord[0] =  *(point->points->list + i*ndims);
         point_coord[1] =  *(point->points->list + i*ndims + 1);
-
-
+ */
+        point_coord[0] =  *(point->points->list + offset);
+        point_coord[1] =  *(point->points->list + offset + 1);
+        
+        offset = *(point->point_start_indexes->list + i);
+     //  printf("c1 = %f, c2 = %f\n", point_coord[0], point_coord[1]);
+        
         txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
         draw_it(color,point_coord, psz, txt_box, txt_color, txt_coord2d, txt, sx, sy);

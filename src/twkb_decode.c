@@ -280,7 +280,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     int c=0;
     int reprpject = 0;
     uint8_t utm_in, utm_out, hemi_in, hemi_out;
-
+    uint8_t close_ring = 0;
     LAYER_RUNTIME *theLayer = ts->theLayer;
     uint type = theLayer->type;
 
@@ -303,7 +303,9 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
         p->next = (POINT_CIRCLE*) p+1;
         (p+1)->next = (POINT_CIRCLE*) p+2;
         (p+2)->next = (POINT_CIRCLE*) p;
-
+        
+        if(type & 6)
+            close_ring = 1;
         POINT_CIRCLE *p_akt = p;
         //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
         //    dlist = get_start(npoints*3, ndims,res_buf);
@@ -330,7 +332,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
             if(i==1)
             {
-                if(ts->close_ring)
+                if(close_ring)
                 {
                     start_x = p->coord[0];
                     start_y = p->coord[1];
@@ -349,7 +351,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 calc_join(p_akt, wide_line, &c,&last_normal);
             }
 
-            if(i==npoints-1 && !(ts->close_ring))
+            if(i==npoints-1 && !(close_ring))
                 calc_end(p_akt->next, wide_line, &c,&last_normal);
 
 
@@ -357,7 +359,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             p_akt = p_akt->next; //take a step in the ring
 
         }
-        if(ts->close_ring)
+        if(close_ring)
         {
             p_akt->coord[0] = start_x;
             p_akt->coord[1] = start_y;
@@ -380,6 +382,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             for( j = 0; j < ndims; j++ )
             {
                 val = buffer_read_svarint(ts->tb);
+                //printf("val=%d\n", val);
                 ts->thi->coords[j] += val;
                 new_val = (GLfloat) (ts->thi->coords[j] / ts->thi->factors[j]);
 

@@ -124,6 +124,7 @@ GLUINT_LIST;
 typedef struct
 {
     GLFLOAT_LIST *points;
+    GLUINT_LIST *point_start_indexes;
     GLUINT_LIST *style_id;
 
 }
@@ -244,7 +245,7 @@ typedef struct
     GLuint vbo;
     GLuint ebo;
     /*Values for shaders*/
-    GLfloat theMatrix[16];
+  //  GLfloat theMatrix[16];
     /*values for what and how to render*/
     GLfloat *BBOX;
     uint8_t geometryType;

@@ -40,18 +40,18 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     pthread_t threads[255];
     LAYER_RUNTIME *oneLayer;
     GLfloat meterPerPixel = (bbox[2]-bbox[0])/CURR_WIDTH;
-
+    uint8_t type;
 
     for (i=0; i<nLayers; i++)
     {
         oneLayer = layerRuntime + i;
-
+        type = oneLayer->type;
         reset_buffers(oneLayer);
         //   reset_buffer(oneLayer->res_buf);
         /*    if(oneLayer->geometryType == POLYGONTYPE)
                 element_reset_buffer(oneLayer->tri_index);
         */
-        if(oneLayer->show_text)
+        if(type & 32)
             text_reset_buffer(oneLayer->text);
 
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
@@ -84,8 +84,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
 
         oneLayer = layerRuntime + t;
-        int type = oneLayer->type;
-        printf("type = %d, poly = %p and wide_lines = %p\n", type, oneLayer->polygons, oneLayer->wide_lines);
+        type = oneLayer->type;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
             rc = pthread_join(threads[t], NULL);
@@ -94,28 +93,15 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);
             }
-            switch(oneLayer->geometryType)
-            {
-            case POINTTYPE :
+            if(type & 224)
                 loadPoint( oneLayer, theMatrix);
-                while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(50, "Problem 2\n");
-                    fprintf(stderr,"opengl error point layer nr %d  :%d\n",t, err);
-                }
-                break;
-            case LINETYPE :
-                loadLine( oneLayer, theMatrix);
-                while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(50, "Problem 2\n");
-                    fprintf(stderr,"opengl error line layer nr %d  :%d\n",t, err);
-                }
-                break;
-            case POLYGONTYPE :
+  
+            if(type & 24)
+                loadLine( oneLayer, theMatrix);            
+            if(type & 6)
                 loadPolygon( oneLayer, theMatrix);
                 while ((err = glGetError()) != GL_NO_ERROR) {
-                    log_this(50, "Problem 2\n");
-                    fprintf(stderr,"opengl error polygon layer nr %d  :%d\n",t, err);
-                }
+               
                 break;
             }
         }

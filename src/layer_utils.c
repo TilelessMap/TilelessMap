@@ -88,3 +88,75 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 
 
 }
+
+
+
+LAYER_RUNTIME* init_layer_runtime(int n)
+{
+    LAYER_RUNTIME *lr, *theLayer;
+    int i;
+    lr = malloc(n * sizeof(LAYER_RUNTIME));
+
+    for (i = 0; i<n; i++)
+    {
+        theLayer = lr+i;
+        theLayer->name = NULL;
+        theLayer->visible = 0;
+        theLayer->preparedStatement = NULL;
+        /*Buffers*/
+        theLayer->vbo = 0;
+        theLayer->ebo = 0;
+        /*Values for shaders*/
+        //theLayer->theMatrix[16];
+        /*values for what and how to render*/
+        theLayer->BBOX = NULL;
+        theLayer->geometryType = 0;
+        theLayer->type = 0; //8 on/off switches: point simple, point symbol, point text, line simple, line width, poly
+        theLayer->n_dims = 0;;
+        //   uint8_t has_text;
+        theLayer->minScale = 0;
+        theLayer->maxScale = 0;
+        theLayer->points = NULL;
+        theLayer->lines = NULL;
+        theLayer->wide_lines = NULL;
+        theLayer->polygons = NULL;
+        theLayer->res_buf = NULL;
+        theLayer->tri_index = NULL;
+        theLayer->text = NULL;
+
+        theLayer->show_text = 0;
+        theLayer->line_width = 0;
+        theLayer->layer_id = 0;
+        theLayer->render_area = 0; //This is a way to render only border of polygon. No triangels will be loadded
+        theLayer->utm_zone = 0;
+        theLayer->hemisphere = 0; //1 is southern hemisphere and 0 is northern
+        theLayer->close_ring = 0;
+    }
+    return lr;
+}
+
+void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
+{
+    int i;
+    LAYER_RUNTIME *theLayer;
+    for (i=0; i<n; i++)
+    {
+        theLayer = lr+i;
+
+        destroy_buffer(theLayer->res_buf);
+        if (theLayer->type & 4)
+        {
+            element_destroy_buffer(theLayer->tri_index);
+        }
+        if(theLayer->type & 32)
+            text_destroy_buffer(theLayer->text);
+
+        free(theLayer->name);
+        sqlite3_finalize(theLayer->preparedStatement);
+
+
+    }
+    free(lr);
+
+    return;
+}

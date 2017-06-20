@@ -213,6 +213,7 @@ static POINT_LIST* init_point_list()
     POINT_LIST *res = st_malloc(sizeof(POINT_LIST));
     res->points = init_glfloat_list();
     res->style_id = init_gluint_list();
+    res->point_start_indexes = init_gluint_list();
     return res;
 }
 
@@ -244,6 +245,7 @@ static POLYGON_LIST* init_polygon_list()
 static int reset_point_list(POINT_LIST *l)
 {
     reset_glfloat_list(l->points);
+    reset_gluint_list(l->point_start_indexes);
     reset_gluint_list(l->style_id);
     return 0;
 }
@@ -351,6 +353,8 @@ GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id)
 int pa_end(LAYER_RUNTIME *l)
 {
     int type = l->type;
+    if(type & 224)
+        add2gluint_list(l->points->point_start_indexes, l->points->points->used);
     if(type & 16)
         add2gluint_list(l->lines->line_start_indexes, l->lines->vertex_array->used);
     if(type & 8)

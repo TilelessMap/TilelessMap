@@ -351,13 +351,7 @@ static int load_layers(TEXT *missing_db)
         }
         oneLayer->type = type;
 
-        if(override_type)
-        {
-            if(oneLayer->geometryType == 3)
-                oneLayer->close_ring = 1;
 
-            oneLayer->geometryType = override_type;
-        }
         const unsigned char *geometryfield = sqlite3_column_text(prepared_geo_col, 1);
         const unsigned char *idfield = sqlite3_column_text(prepared_geo_col, 2);
         const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 3);
@@ -380,7 +374,7 @@ static int load_layers(TEXT *missing_db)
 
 
         char tri_idx_fld[32];
-        if(oneLayer->geometryType == POLYGONTYPE && oneLayer->render_area)
+        if(oneLayer->type & 4)
         {
             snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s", tri_index_field);
         }
@@ -465,10 +459,10 @@ static int load_layers(TEXT *missing_db)
 
         oneLayer->res_buf =  init_res_buf();
 
-        if (oneLayer->geometryType == POLYGONTYPE)
+        if (oneLayer->type & 4)
             oneLayer->tri_index =  init_element_buf();
 
-        if (oneLayer->show_text)
+        if (oneLayer->type & 32)
             oneLayer->text =  init_text_buf();
 
 
