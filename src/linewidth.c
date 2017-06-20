@@ -23,6 +23,7 @@
 
 
 #include "theclient.h"
+#include "buffer_handling.h"
 
 
 
@@ -256,12 +257,12 @@ calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal)
     }
     else
     {
-            add2glfloat_list(ut, p1x);
-            add2glfloat_list(ut, p1y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
             add2glfloat_list(ut, r * avg_vec.x);
             add2glfloat_list(ut, r * avg_vec.y);
-            add2glfloat_list(ut, p1x);
-            add2glfloat_list(ut, p1y);
+            add2glfloat_list(ut, p2x);
+            add2glfloat_list(ut, p2y);
             add2glfloat_list(ut, -r * avg_vec.x);
             add2glfloat_list(ut, -r * avg_vec.y);
        /* *(ut + n++) = p2x;

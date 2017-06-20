@@ -111,27 +111,33 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     GLESSTRUCT *rb = oneLayer->res_buf;
     
-    LINESTRING_LIST *line = oneLayer->lines;
     
-    int i;
+    int i;   
+    
+    if(oneLayer->type & 8)
+    {
+    LINESTRING_LIST *line = oneLayer->wide_lines;
+    glGenBuffers(1, &(oneLayer->vbo));
+    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
+        renderLineTri(oneLayer,theMatrix);
+    /*    for(i=0;i<line->vertex_array->used;i++)
+        {
+         printf("i = %d, val = %f\n",i, *(line->vertex_array->list + i)   );
+        }
+      */  
+        
+    }
+  else
+  {
+    LINESTRING_LIST *line = oneLayer->lines;
 //	 int i,j, offset=0;
     glGenBuffers(1, &(oneLayer->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
-    
-    
-/*
-    GLESSTRUCT *rb = oneLayer->res_buf;
-
-    glGenBuffers(1, &(oneLayer->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
-*/
- //   if(oneLayer->line_width)
-   //     renderLineTri(oneLayer,theMatrix);
-  //else
-        renderLine( oneLayer, theMatrix, 0);
-   // return 0;
+   renderLine( oneLayer, theMatrix, 0);
+  }
+    return 0;
 }
 
 
@@ -140,8 +146,12 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 //void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb)
 {
 
+       LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
     GLfloat *color,*color2,z, lw=0, lw2=0;
+    unsigned int n_vals = 0, n_vals_acc = 0;
+    uint8_t ndims = oneLayer->n_dims;
+    uint8_t vals_per_point = ndims*2;
     GLfloat c[4];
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
@@ -149,7 +159,6 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     GLint unit = -1;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-    GLESSTRUCT *rb = oneLayer->res_buf;
 
     glUseProgram(lw_program);
 
@@ -183,18 +192,20 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE,16);
     glEnable (GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
-    for (i=0; i<rb->used_n_pa; i++)
+    for (i=0; i<line->line_start_indexes->used; i++)
     {
 
 
-        Uint32 styleID = *(rb->styleID+i);
+    //    Uint32 styleID = *(rb->styleID+i);
+       Uint32 styleID = *(line->style_id->list+i);
 
 
 
-        total_points += *(rb->npoints+i);
+     //   total_points += *(rb->npoints+i);
 
 
 
+        n_vals = *(line->line_start_indexes->list + i)/vals_per_point - n_vals_acc;
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
         {
             lw = (GLfloat) (global_styles[styleID].lineWidth * 0.5);
@@ -230,21 +241,22 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         {
             glUniform4fv(lw_color,1,color2 );
             glUniform1fv(lw_linewidth,1,&lw2 );
-            glDrawArrays(GL_TRIANGLE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
+            glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
         }
 
         z = z-0.01;
         glUniform1fv(lw_z,1,&z );
         glUniform4fv(lw_color,1,color );
         glUniform1fv(lw_linewidth,1,&lw );
-        glDrawArrays(GL_TRIANGLE_STRIP, *(rb->start_index+i), *(rb->npoints+i));
+        glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
 
 
-
+printf("i = %d, startindex = %d, npoints = %d\n", i, n_vals_acc, n_vals);
         // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 
+          n_vals_acc = *(line->line_start_indexes->list + i)/vals_per_point;
 
     }
     glDisableVertexAttribArray(lw_norm);
@@ -258,9 +270,6 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 {
-
-
-
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
@@ -473,7 +482,6 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
     int i;
     LAYER_RUNTIME *oneLayer;
 
-
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -483,32 +491,29 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
     {
         oneLayer = layerRuntime + i;
 
-
+    int type = oneLayer->type;
+        printf("type = %d, poly = %p and wide_lines = %p\n", type, oneLayer->polygons, oneLayer->wide_lines);
+        printf("ok\n");
         if(oneLayer->visible)
         {
 
 //~ log_this(10, "render : %d\n",oneLayer->geometryType);
-            switch(oneLayer->geometryType) {
-            case POINTTYPE :
+            
                 //     log_this(10, "render point");
-                if (oneLayer->show_text) {
-                    render_text(oneLayer, theMatrix);
-                } else {
-                    renderPoint(oneLayer, theMatrix);
-                }
-                break;
-            case LINETYPE :
-                if(oneLayer->line_width)
+             //   if (oneLayer->show_text) {
+              //      render_text(oneLayer, theMatrix);
+               
+                 //   renderPoint(oneLayer, theMatrix);
+                
+                if(type & 8)
                     renderLineTri(oneLayer,theMatrix);
-                else
+                if (type & 18) 
                     renderLine( oneLayer, theMatrix, 0);
-                //renderLine( oneLayer, theMatrix, 0);
-                break;
-            case POLYGONTYPE :
+                if(type & 4)
                 renderPolygon( oneLayer, theMatrix);
                 //renderLine(oneLayer, theMatrix,1);
-                break;
-            }
+            
+            
         }
 
 

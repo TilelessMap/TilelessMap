@@ -47,10 +47,10 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         oneLayer = layerRuntime + i;
 
 	    reset_buffers(oneLayer);
-        reset_buffer(oneLayer->res_buf);
-        if(oneLayer->geometryType == POLYGONTYPE)
+     //   reset_buffer(oneLayer->res_buf);
+    /*    if(oneLayer->geometryType == POLYGONTYPE)
             element_reset_buffer(oneLayer->tri_index);
-
+*/
         if(oneLayer->show_text)
             text_reset_buffer(oneLayer->text);
 
@@ -84,6 +84,8 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
 
         oneLayer = layerRuntime + t;
+        int type = oneLayer->type;
+        printf("type = %d, poly = %p and wide_lines = %p\n", type, oneLayer->polygons, oneLayer->wide_lines);
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
              rc = pthread_join(threads[t], NULL);

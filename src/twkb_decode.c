@@ -308,7 +308,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
         //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
     //    dlist = get_start(npoints*3, ndims,res_buf);
         
-        GLFLOAT_LIST *wide_line = theLayer->wide_lines->vertex_array;
+        wide_line = get_wide_line_list(theLayer, ts->styleID);
         
         for( i = 0; i < npoints; i++ )
         {
@@ -325,7 +325,8 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             if(reprpject)
                 reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi);
             
-            addbatch2glfloat_list(vertex_list, ndims, p_akt->coord);
+            if(type & 4)
+                addbatch2glfloat_list(vertex_list, ndims, p_akt->coord);
             
             if(i==1)
             {
@@ -335,7 +336,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                     start_y = p->coord[1];
                 }
                 
-                if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
+                //if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
                     //dlist = increase_buffer(res_buf);
                 calc_start(p, wide_line, &c, &last_normal);
             }
@@ -343,7 +344,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
             if(i>1)
             {
-                if(floats_left(res_buf)<12)
+               // if(floats_left(res_buf)<12)
                     //dlist = increase_buffer(res_buf);
                 calc_join(p_akt, wide_line, &c,&last_normal);
             }
@@ -361,14 +362,14 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
              p_akt->coord[0] = start_x;
             p_akt->coord[1] = start_y;
             
-             if(floats_left(res_buf)<12)
+            /// if(floats_left(res_buf)<12)
                 //dlist = increase_buffer(res_buf);
             calc_join(p_akt, wide_line, &c,&last_normal);
            
             calc_end(p_akt->next, wide_line, &c,&last_normal);
         }
         //set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
-        add2gluint_list(theLayer->wide_lines->line_start_indexes, theLayer->wide_lines->vertex_array->used);
+      //  add2gluint_list(theLayer->wide_lines->line_start_indexes, theLayer->wide_lines->vertex_array->used);
     }
     else
     {

@@ -285,7 +285,7 @@ int init_buffers(LAYER_RUNTIME *layer)
         layer->lines = init_linestring_list();
     else
         layer->lines = NULL;
-    if(layer->type & 16)
+    if(layer->type & 8)
         layer->wide_lines = init_linestring_list();
     else
         layer->wide_lines = NULL;
@@ -324,11 +324,12 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
         add2gluint_list(l->points->style_id, style_id);
         return l->points->points;
     }
-    else if(type & 24)
+    else if(type & 16)
     {
         add2gluint_list(l->lines->style_id, style_id);
         return l->lines->vertex_array;
     }
+   
     else if(type & 6)
     {
         add2gluint_list(l->polygons->outline_style_id, style_id);
@@ -339,13 +340,22 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
 }
 
 
+GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id)
+{
+
+        add2gluint_list(l->wide_lines->style_id, style_id);
+        return l->wide_lines->vertex_array;
+ 
+ }
 
 int pa_end(LAYER_RUNTIME *l)
 {
     int type = l->type;
-    if(type & 24)
+    if(type & 16)
         add2gluint_list(l->lines->line_start_indexes, l->lines->vertex_array->used);
-    else if(type & 6)
+    if(type & 8)
+        add2gluint_list(l->wide_lines->line_start_indexes, l->wide_lines->vertex_array->used);
+    if(type & 6)
         add2gluint_list(l->polygons->pa_start_indexes, l->polygons->vertex_array->used);
 
     
