@@ -64,7 +64,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 
 int check_column(const unsigned char *dbname,const unsigned char * layername, const unsigned char  *col_name)
 {
-      char sql[1024];
+    char sql[1024];
     int rc;
     sqlite3_stmt *prepared_sql;
     snprintf(sql, 1024, "select * from %s.sqlite_master where type in ('table','view') and name = '%s' and sql like '%%`%s`%%'", dbname, layername, col_name);

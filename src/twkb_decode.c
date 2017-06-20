@@ -163,8 +163,8 @@ read_header (TWKB_PARSE_STATE *ts)
             ts->thi->bbox->bbox_max[i] = (GLfloat) (buffer_read_svarint(ts->tb)/ts->thi->factors[i] + ts->thi->bbox->bbox_min[i]);
         }
     }
-    
-    
+
+
     return 0;
 }
 
@@ -226,10 +226,10 @@ decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
     check_and_increase_max_polygon(2, res_buf);// Here we add one extra since we register start offset for the comming polygon. So we need space for that
 
     set_end_polygon( res_buf);
-    
+
     if(ts->theLayer->type & 6)
         add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->vertex_array->used);
-    
+
     //int type;
     parseFunctions_p pf;
 //    type = COLLECTIONTYPE;
@@ -280,22 +280,22 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     int c=0;
     int reprpject = 0;
     uint8_t utm_in, utm_out, hemi_in, hemi_out;
-    
+
     LAYER_RUNTIME *theLayer = ts->theLayer;
     uint type = theLayer->type;
-    
+
     //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
     theLayer->n_dims = ndims;
-    
+
     if((ts->utm_zone != curr_utm) || (ts->hemisphere != curr_hemi))
     {
         reprpject = 1;
         utm_in = ts->utm_zone;
         hemi_in = ts->hemisphere;
     }
-    
+
     vertex_list = get_coord_list(theLayer, ts->styleID);
-    
+
     if(type & 8)
     {
         vec2 last_normal;
@@ -306,10 +306,10 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
         POINT_CIRCLE *p_akt = p;
         //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
-    //    dlist = get_start(npoints*3, ndims,res_buf);
-        
+        //    dlist = get_start(npoints*3, ndims,res_buf);
+
         wide_line = get_wide_line_list(theLayer, ts->styleID);
-        
+
         for( i = 0; i < npoints; i++ )
         {
 
@@ -324,10 +324,10 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             }
             if(reprpject)
                 reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi);
-            
+
             if(type & 4)
                 addbatch2glfloat_list(vertex_list, ndims, p_akt->coord);
-            
+
             if(i==1)
             {
                 if(ts->close_ring)
@@ -335,41 +335,41 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                     start_x = p->coord[0];
                     start_y = p->coord[1];
                 }
-                
+
                 //if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
-                    //dlist = increase_buffer(res_buf);
+                //dlist = increase_buffer(res_buf);
                 calc_start(p, wide_line, &c, &last_normal);
             }
 
 
             if(i>1)
             {
-               // if(floats_left(res_buf)<12)
-                    //dlist = increase_buffer(res_buf);
+                // if(floats_left(res_buf)<12)
+                //dlist = increase_buffer(res_buf);
                 calc_join(p_akt, wide_line, &c,&last_normal);
             }
 
             if(i==npoints-1 && !(ts->close_ring))
                 calc_end(p_akt->next, wide_line, &c,&last_normal);
-            
-           
+
+
 
             p_akt = p_akt->next; //take a step in the ring
 
         }
         if(ts->close_ring)
-        {           
-             p_akt->coord[0] = start_x;
+        {
+            p_akt->coord[0] = start_x;
             p_akt->coord[1] = start_y;
-            
+
             /// if(floats_left(res_buf)<12)
-                //dlist = increase_buffer(res_buf);
+            //dlist = increase_buffer(res_buf);
             calc_join(p_akt, wide_line, &c,&last_normal);
-           
+
             calc_end(p_akt->next, wide_line, &c,&last_normal);
         }
         //set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
-      //  add2gluint_list(theLayer->wide_lines->line_start_indexes, theLayer->wide_lines->vertex_array->used);
+        //  add2gluint_list(theLayer->wide_lines->line_start_indexes, theLayer->wide_lines->vertex_array->used);
     }
     else
     {
@@ -390,7 +390,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 reproject(coords,utm_in,curr_utm,hemi_in,  curr_hemi);
             addbatch2glfloat_list(vertex_list, ndims, coords);
         }
-        
+
         // log_this(10, "klar med n points = %d\n", c);
         //set_end(npoints, ndims,ts->id, ts->styleID,res_buf);
 
@@ -439,9 +439,9 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
     buffer_read_byte(ts.tb);
 //jump over2nd header byte since more than 2 dims
     buffer_read_byte(ts.tb);
-    
+
     LAYER_RUNTIME *theLayer = old_ts->theLayer;
-    
+
     GLUSHORT_LIST *element_list = theLayer->polygons->element_array;
 
 
@@ -449,7 +449,7 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
     npoints = (uint32_t) buffer_read_uvarint(ts.tb);
     element_check_and_increase_max_pa(1,index_buf);
 
-    
+
     add2gluint_list(theLayer->polygons->area_style_id, old_ts->styleID);
 
     dlist = element_get_start(npoints, 3,index_buf);

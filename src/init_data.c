@@ -210,21 +210,21 @@ static int load_layers(TEXT *missing_db)
     uint8_t override_type;
     char sql[2048];
     uint8_t type = 0;
-    
+
     if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
-    {    
-     
-             rc = sqlite3_exec(projectDB,"alter table layers add column override_type integer;",NULL, NULL, &err_msg);
+    {
+
+        rc = sqlite3_exec(projectDB,"alter table layers add column override_type integer;",NULL, NULL, &err_msg);
         if (rc != 0)
         {
             log_this(90, "failed to add missing column in layers table: %s\n", err_msg);
 
             sqlite3_free(err_msg);
         }
-        
-        
-        
-        
+
+
+
+
     }
     char sqlLayerLoading[2048];
     char *sqlLayerLoading1 = "SELECT "
@@ -298,7 +298,7 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 12);
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 13);
 
-        
+
         if (check_layer(dbname, layername))
         {
             i++;
@@ -328,12 +328,12 @@ static int load_layers(TEXT *missing_db)
         }
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(prepared_geo_col, 0);
         type = 0;
-        
+
         if(oneLayer->geometryType == POINTTYPE)
         {
             type = type | 128;
-         if (oneLayer->show_text)   
-            type = type | 32;
+            if (oneLayer->show_text)
+                type = type | 32;
         }
         else if(oneLayer->geometryType == LINETYPE)
         {
@@ -341,21 +341,21 @@ static int load_layers(TEXT *missing_db)
                 type = type | 8;
             else
                 type = type | 16;
-        }       
+        }
         else if(oneLayer->geometryType == POLYGONTYPE)
         {
             type = type | 4;
             if(oneLayer->line_width)
                 type = type | 8;
 
-        }       
-        oneLayer->type = type;        
-        
+        }
+        oneLayer->type = type;
+
         if(override_type)
         {
             if(oneLayer->geometryType == 3)
                 oneLayer->close_ring = 1;
-            
+
             oneLayer->geometryType = override_type;
         }
         const unsigned char *geometryfield = sqlite3_column_text(prepared_geo_col, 1);
@@ -452,17 +452,17 @@ static int load_layers(TEXT *missing_db)
 
                  */
         rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
-log_this(100, "sql %s\n",sql );
+        log_this(100, "sql %s\n",sql );
         if (rc != SQLITE_OK ) {
             log_this(100, "SQL error in %s\n",sql );
             sqlite3_close(projectDB);
             return 1;
         }
         oneLayer->preparedStatement = preparedLayer;
-        
+
         init_buffers(oneLayer);
-        
-        
+
+
         oneLayer->res_buf =  init_res_buf();
 
         if (oneLayer->geometryType == POLYGONTYPE)
@@ -470,8 +470,8 @@ log_this(100, "sql %s\n",sql );
 
         if (oneLayer->show_text)
             oneLayer->text =  init_text_buf();
-        
-        
+
+
         sqlite3_finalize(prepared_geo_col);
     }
     nLayers = i;

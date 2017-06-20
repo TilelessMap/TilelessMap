@@ -143,9 +143,9 @@ typedef struct
 {
     GLFLOAT_LIST *vertex_array;  //all vertex coordinates in a long array
     GLUINT_LIST *pa_start_indexes; //start index in vertex array above of each point array
-    GLUINT_LIST *polygon_start_indexes; //start index in vertex_array above for each polygon 
-    GLUSHORT_LIST *element_array;    // a long array of triangle indexes 
-    GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts    
+    GLUINT_LIST *polygon_start_indexes; //start index in vertex_array above for each polygon
+    GLUSHORT_LIST *element_array;    // a long array of triangle indexes
+    GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
     GLUINT_LIST *area_style_id;
     GLUINT_LIST *outline_style_id;
 }

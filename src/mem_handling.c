@@ -156,7 +156,7 @@ int set_end(uint32_t npoints, uint8_t ndims,uint32_t id, uint32_t styleID, GLESS
     *(res_buf->start_index + res_buf->used_n_pa) =res_buf->total_npoints; //preceeding number of points in array (gives startposition for VBO to OpenGL)
     *(res_buf->npoints + res_buf->used_n_pa) = npoints; // Number of points in current point array
     *(res_buf->id + res_buf->used_n_pa) = id;
-    *(res_buf->styleID + res_buf->used_n_pa) = styleID; 
+    *(res_buf->styleID + res_buf->used_n_pa) = styleID;
     (res_buf->used_n_pa)++;	//Number of point arrays stored
     res_buf->first_free += npoints*ndims; //advance first free position for comming point arrays
     res_buf->total_npoints += npoints;  //add npoints to total number of points in whole VBO

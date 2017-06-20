@@ -153,7 +153,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
     }
 
     log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
-    
+
 
     err = sqlite3_errcode(projectDB);
     if(err)
@@ -221,5 +221,5 @@ void *twkb_fromSQLiteBBOX(void *theL)
     sqlite3_reset(prepared_statement);
 
     return NULL;
-   // pthread_exit(NULL);
+    // pthread_exit(NULL);
 }
