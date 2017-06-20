@@ -109,34 +109,27 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-    GLESSTRUCT *rb = oneLayer->res_buf;
     
     
     int i;   
     
     if(oneLayer->type & 8)
     {
-    LINESTRING_LIST *line = oneLayer->wide_lines;
-    glGenBuffers(1, &(oneLayer->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
+        LINESTRING_LIST *line = oneLayer->wide_lines;
+        glGenBuffers(1, &(oneLayer->vbo));
+        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
         renderLineTri(oneLayer,theMatrix);
-    /*    for(i=0;i<line->vertex_array->used;i++)
-        {
-         printf("i = %d, val = %f\n",i, *(line->vertex_array->list + i)   );
-        }
-      */  
-        
     }
-  else
-  {
-    LINESTRING_LIST *line = oneLayer->lines;
-//	 int i,j, offset=0;
-    glGenBuffers(1, &(oneLayer->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
-   renderLine( oneLayer, theMatrix, 0);
-  }
+    else
+    {
+        LINESTRING_LIST *line = oneLayer->lines;
+        //	 int i,j, offset=0;
+        glGenBuffers(1, &(oneLayer->vbo));
+        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
+        renderLine( oneLayer, theMatrix, 0);
+    }
     return 0;
 }
 
@@ -251,7 +244,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
 
 
-printf("i = %d, startindex = %d, npoints = %d\n", i, n_vals_acc, n_vals);
+//printf("i = %d, startindex = %d, npoints = %d\n", i, n_vals_acc, n_vals);
         // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         //   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -492,8 +485,7 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
         oneLayer = layerRuntime + i;
 
     int type = oneLayer->type;
-        printf("type = %d, poly = %p and wide_lines = %p\n", type, oneLayer->polygons, oneLayer->wide_lines);
-        printf("ok\n");
+      
         if(oneLayer->visible)
         {
 
@@ -540,20 +532,22 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
     log_this(10, "Entering renderText\n");
-    uint32_t i;
+    int i;
     GLfloat *color;
     GLfloat c[4];
-    int ndims=2;
+    int ndims=oneLayer->n_dims;
     //FT_GlyphSlot g = face->glyph;
 //   GLuint text_vbo;
     char *txt;
 //   glGenBuffers(1, &text_vbo);
     /* Create a texture that will be used to hold one "glyph" */
-
+    
     glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
 
     GLESSTRUCT *rb = oneLayer->res_buf;
+    
+    POINT_LIST *point = oneLayer->points;
     glUseProgram(txt_program);
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
@@ -563,12 +557,16 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
 
-    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
+//    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
+      if(oneLayer->show_text && oneLayer->text->used_n_vals!=point->points->used/ndims)
+      {
         printf("There is a mismatch between number of labels and number of corresponding points\n");
-    int used=0;
+      printf("%d vs %d\n",oneLayer->text->used_n_vals, point->points->used/ndims);         
+    }
+        int used=0;
 
-    n_words += rb->used_n_pa;
-    for (i=0; i<rb->used_n_pa; i++)
+    n_words += point->points->used/ndims;
+    for (i=0; i<n_words; i++)
     {
 
         total_points += 1;
@@ -576,7 +574,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 //log_this(10, "psz = %d \n",psz);
 
-        Uint32 styleID = *(rb->styleID+i);
+        Uint32 styleID = *(point->style_id->list+i);
         if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
             color = global_styles[styleID].color;
         else
@@ -586,9 +584,14 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             color = c;
         }
 
-        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
+/*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
         point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
-        txt = oneLayer->text->char_array+used;
+*/
+        point_coord[0] =  *(point->points->list + i*ndims);
+        point_coord[1] =  *(point->points->list + i*ndims + 1);
+
+
+txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
         draw_it(color,point_coord, psz, txt_box, txt_color, txt_coord2d, txt, sx, sy);
 
