@@ -126,6 +126,7 @@ typedef struct
     GLFLOAT_LIST *points;
     GLUINT_LIST *point_start_indexes;
     GLUINT_LIST *style_id;
+    GLuint vbo;
 
 }
 POINT_LIST;
@@ -136,6 +137,7 @@ typedef struct
     GLFLOAT_LIST *vertex_array;
     GLUINT_LIST *line_start_indexes;
     GLUINT_LIST *style_id;
+    GLuint vbo;
 
 }
 LINESTRING_LIST;
@@ -149,6 +151,8 @@ typedef struct
     GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
     GLUINT_LIST *area_style_id;
     GLUINT_LIST *outline_style_id;
+    GLuint vbo;
+    GLuint ebo;
 }
 POLYGON_LIST;
 
@@ -242,8 +246,8 @@ typedef struct
     uint8_t visible;
     sqlite3_stmt *preparedStatement;
     /*Buffers*/
-    GLuint vbo;
-    GLuint ebo;
+   // GLuint vbo;
+    //GLuint ebo;
     /*Values for shaders*/
   //  GLfloat theMatrix[16];
     /*values for what and how to render*/

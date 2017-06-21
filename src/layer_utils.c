@@ -104,8 +104,6 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->visible = 0;
         theLayer->preparedStatement = NULL;
         /*Buffers*/
-        theLayer->vbo = 0;
-        theLayer->ebo = 0;
         /*Values for shaders*/
         //theLayer->theMatrix[16];
         /*values for what and how to render*/

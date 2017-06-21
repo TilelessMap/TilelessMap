@@ -35,8 +35,8 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
     GLESSTRUCT *rb = oneLayer->res_buf;
 
-    glGenBuffers(1, &(oneLayer->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glGenBuffers(1, &(oneLayer->points->vbo));
+    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
     renderPoint( oneLayer, theMatrix);
@@ -50,7 +50,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat *color;
     GLfloat c[4];
     //  GLenum err;
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
     GLESSTRUCT *rb = oneLayer->res_buf;
     // glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(2);
@@ -112,12 +112,17 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
     int i;
-
+    
+  /*  printf(".............................................................\n");   
+for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
+{    
+ printf("load, i = %d, v = %f\n", i,*(oneLayer->wide_lines->vertex_array->list+i));   
+}*/
     if(oneLayer->type & 8)
     {
         LINESTRING_LIST *line = oneLayer->wide_lines;
-        glGenBuffers(1, &(oneLayer->vbo));
-        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+        glGenBuffers(1, &(line->vbo));
+        glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
         renderLineTri(oneLayer,theMatrix);
     }
@@ -125,8 +130,8 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
         LINESTRING_LIST *line = oneLayer->lines;
         //	 int i,j, offset=0;
-        glGenBuffers(1, &(oneLayer->vbo));
-        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+        glGenBuffers(1, &(line->vbo));
+        glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
         renderLine( oneLayer, theMatrix, 0);
     }
@@ -151,7 +156,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     GLint unit = -1;
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
 
     glUseProgram(lw_program);
 
@@ -185,6 +190,15 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE,16);
     glEnable (GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
+//    n_lines += line->line_start_indexes->used;
+  //  total_points += line->vertex_array->used/ndims;
+    
+    
+  /*  printf("------------------------------------------------------\n");   
+for (i=0;i<line->vertex_array->used; i++)
+{    
+ printf("load, i = %d, v = %f\n", i,*(line->vertex_array->list+i));   
+}*/
     for (i=0; i<line->line_start_indexes->used; i++)
     {
 
@@ -279,7 +293,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 
     unsigned int n_vals = 0, n_vals_acc = 0;
     uint8_t ndims = oneLayer->n_dims;
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
 
 
     Uint32 styleID;
@@ -301,6 +315,8 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
 
     unsigned int used_n_pa = line->line_start_indexes->used;
 
+    n_lines += used_n_pa;
+    total_points += line->vertex_array->used/ndims;
     printf("used_lines = %d\n",used_n_pa);
     for (i=0; i<used_n_pa; i++)
     {
@@ -344,13 +360,13 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     POLYGON_LIST *poly = oneLayer->polygons;
 
     int i;
-    glGenBuffers(1, &(oneLayer->vbo));
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glGenBuffers(1, &(poly->vbo));
+    glBindBuffer(GL_ARRAY_BUFFER, poly->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*poly->vertex_array->used,poly->vertex_array->list, GL_STATIC_DRAW);
 
 
-    glGenBuffers(1, &(oneLayer->ebo));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
+    glGenBuffers(1, &(poly->ebo));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*poly->element_array->used, poly->element_array->list, GL_STATIC_DRAW);
 
     if(oneLayer->type & 4)
@@ -372,7 +388,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     size_t index_offset = 0;
     POLYGON_LIST *poly = oneLayer->polygons;
 
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, poly->vbo);
     unsigned int n_vals = 0, n_vals_acc = 0;
 
     unsigned int used_n_pa;
@@ -387,8 +403,12 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         n_polys += used_n_pa;
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oneLayer->ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->ebo);
         glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
+        
+   // n_polys += poly->pa_start_indexes->used;
+    //total_points += poly->vertex_array->used/ndims;
+    //n_tri += poly->element_array->used/3;
         for (i=0; i<used_n_pa; i++)
         {
             size_t  vertex_offset = sizeof(GLuint) * *(poly->polygon_start_indexes->list + i);
@@ -431,7 +451,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
     if(!(oneLayer->type & 8))
     {
-        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->polygons->vbo);
 
 
 
@@ -513,7 +533,7 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
 
             if(type & 8)
                 renderLineTri(oneLayer,theMatrix);
-            if (type & 18)
+            if (type & 16)
                 renderLine( oneLayer, theMatrix, 0);
             if(type & 4)
                 renderPolygon( oneLayer, theMatrix);
@@ -580,8 +600,14 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
     int used=0;
 
-    n_words = point->point_start_indexes->used;
-    for (i=0; i<n_words; i++)
+    int nw = point->point_start_indexes->used;
+    
+    
+    n_words += nw;
+    total_points += nw;
+    
+    
+    for (i=0; i<nw; i++)
     {
 
         total_points += 1;
