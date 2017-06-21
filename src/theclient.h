@@ -85,6 +85,13 @@ can hold according to the specification*/
 
 typedef struct
 {
+    double x;
+    double y;
+}
+t_vec2;
+
+typedef struct
+{
     int active;
     int64_t fingerid;
     GLfloat x1;
@@ -377,12 +384,7 @@ typedef struct {
     void *next;
 } POINT_CIRCLE;
 
-typedef struct
-{
-    GLfloat x;
-    GLfloat y;
-}
-vec2;
+
 
 int init_resources(char *dir);
 /*************Memory handling***********/
@@ -501,9 +503,9 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
 int render_simple_Polygon();
 
 
-void calc_start(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal);
-void calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal);
-void calc_end(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, vec2 *last_normal);
+void calc_start(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
+void calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
+void calc_end(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
 
 int build_program();
 int floats_left(GLESSTRUCT *res_buf);

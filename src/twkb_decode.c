@@ -298,7 +298,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
 
     if(type & 8)
     {
-        vec2 last_normal;
+        t_vec2 last_normal;
         POINT_CIRCLE p[3];
         p->next = (POINT_CIRCLE*) p+1;
         (p+1)->next = (POINT_CIRCLE*) p+2;

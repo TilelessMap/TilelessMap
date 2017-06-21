@@ -112,8 +112,8 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
     int i;
-    
-  /*  printf(".............................................................\n");   
+ /*   
+    printf(".............................................................\n");   
 for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
 {    
  printf("load, i = %d, v = %f\n", i,*(oneLayer->wide_lines->vertex_array->list+i));   
@@ -194,7 +194,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
   //  total_points += line->vertex_array->used/ndims;
     
     
-  /*  printf("------------------------------------------------------\n");   
+/*    printf("------------------------------------------------------\n");   
 for (i=0;i<line->vertex_array->used; i++)
 {    
  printf("load, i = %d, v = %f\n", i,*(line->vertex_array->list+i));   
