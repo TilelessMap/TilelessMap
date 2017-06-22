@@ -207,7 +207,6 @@ static int load_layers(TEXT *missing_db)
     char stylejoin[128];
     char stylewhere[128];
     char textselect[128];
-    uint8_t override_type;
     char sql[2048];
     uint8_t type = 0;
 
@@ -232,19 +231,18 @@ static int load_layers(TEXT *missing_db)
                              "d.name dbname, "   // 0
                              /*fields for creating the prepared statement to get data later*/
                              "l.name layername,"  // 1
-                             "l.override_type,"  // 2
                              /*fields to inform comming processes about how and when to render*/
-                             " l.defaultVisible,"  // 3
-                             "l.minScale,"  // 4
-                             "l.maxScale,"  // 5
-                             "styleField,"  // 6
-                             "showText,"  // 7
-                             "linewidth,"  // 8
-                             "l.layerID, "  // 9
-                             "tc.size_fld,"  // 10
-                             "rotation_fld,"  // 11
-                             "anchor_fld,"  // 12
-                             "txt_fld"  // 13
+                             " l.defaultVisible,"  // 2
+                             "l.minScale,"  // 3
+                             "l.maxScale,"  // 4
+                             "styleField,"  // 5
+                             "showText,"  // 6
+                             "linewidth,"  // 7
+                             "l.layerID, "  // 8
+                             "tc.size_fld,"  // 9
+                             "rotation_fld,"  // 10
+                             "anchor_fld,"  // 11
+                             "txt_fld"  // 12
 
                              " FROM layers l "
                              "INNER JOIN dbs d on l.source = d.name "
@@ -278,25 +276,23 @@ static int load_layers(TEXT *missing_db)
         oneLayer=layerRuntime + i;
         //   sqlite3_step(preparedLayerLoading);
 
-        override_type = 0;
         oneLayer->close_ring = 0;
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
-        override_type = sqlite3_column_int(preparedLayerLoading,2);
-        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 3);
-        oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 4);
-        oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 5);
-        const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 6);
-        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 7);
-        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
-        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 9);
+       oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);
+        oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 3);
+        oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 4);
+        const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 5);
+        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 6);
+        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 7);
+        int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
 
 
 
-        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,10);
-        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 11);
-        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 12);
-        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 13);
+        const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,9);
+        const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 10);
+        const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 11);
+        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
 
 
         if (check_layer(dbname, layername))
@@ -457,11 +453,11 @@ static int load_layers(TEXT *missing_db)
         init_buffers(oneLayer);
 
 
-        oneLayer->res_buf =  init_res_buf();
+ /*       oneLayer->res_buf =  init_res_buf();
 
         if (oneLayer->type & 4)
             oneLayer->tri_index =  init_element_buf();
-
+*/
         if (oneLayer->type & 32)
             oneLayer->text =  init_text_buf();
 

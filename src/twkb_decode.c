@@ -26,36 +26,41 @@
 #include "buffer_handling.h"
 
 static void init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts);
-static int decode_point(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf);
-static int decode_line(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf);
-static int decode_polygon(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf);
-static int decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf);
-static int read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf);
+static int decode_point(TWKB_PARSE_STATE *ts);
+static int decode_line(TWKB_PARSE_STATE *ts);
+static int decode_polygon(TWKB_PARSE_STATE *ts);
+static int decode_multi(TWKB_PARSE_STATE *ts);
+static int read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints);
 int* decode_id_list(TWKB_PARSE_STATE *ts, int ngeoms);
 
+static inline long int getReadPos(TWKB_BUF *tb)
+{
+    return tb->BufOffsetFromBof + tb->read_pos - tb->start_pos;
+}
 
 
 int
-decode_twkb(TWKB_PARSE_STATE *old_ts, GLESSTRUCT *res_buf)
-{   TWKB_PARSE_STATE ts;
+decode_twkb(TWKB_PARSE_STATE *old_ts)
+{
+    TWKB_PARSE_STATE ts;
     init_decode(&ts, old_ts);
     read_header (&ts);
     switch (ts.thi->type)
     {
     case POINTTYPE:
-        return decode_point(&ts, res_buf);
+        return decode_point(&ts);//, res_buf);
         break;
     case LINETYPE:
-        return decode_line(&ts, res_buf);
+        return decode_line(&ts);//, res_buf);
         break;
     case POLYGONTYPE:
-        return decode_polygon(&ts, res_buf);
+        return decode_polygon(&ts);//, res_buf);
         break;
     case MULTIPOINTTYPE:
     case MULTILINETYPE:
     case MULTIPOLYGONTYPE:
     case COLLECTIONTYPE:
-        return decode_multi(&ts, res_buf);
+        return decode_multi(&ts);//, res_buf);
         break;
     default:
         fprintf(stderr,"Error: Unknown type number %d\n",ts.thi->type);
@@ -71,13 +76,8 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
     int i;
 
     ts->tb = old_ts->tb;
-    ts->line_width = old_ts->line_width;
-    ts->utm_zone = old_ts->utm_zone;
-    ts->hemisphere = old_ts->hemisphere;
-    ts->close_ring = old_ts->close_ring;
     ts->styleID = old_ts->styleID;
     ts->theLayer = old_ts->theLayer;
-    //~ ts->rb = old_ts->rb;
     ts->thi = old_ts->thi;
     ts->thi->has_bbox=0;
     ts->thi->has_size=0;
@@ -170,48 +170,37 @@ read_header (TWKB_PARSE_STATE *ts)
 
 
 static int
-decode_point(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
+decode_point(TWKB_PARSE_STATE *ts)
 {
-    //int type;
-    //type = POINTTYPE;
-    check_and_increase_max_pa(1,res_buf);
-    read_pointarray(ts, 1, res_buf);
+    read_pointarray(ts, 1);//, res_buf);
     return 0;
 }
 
 
 static int
-decode_line(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
+decode_line(TWKB_PARSE_STATE *ts)
 {
     int npoints;
-    //int type;
-    //type = LINETYPE;
 
     npoints = (int) buffer_read_uvarint(ts->tb);
-    //   log_this(10, "npoints;%d\n", npoints);
-    check_and_increase_max_pa(1,res_buf);
-    read_pointarray(ts, npoints, res_buf);
+    read_pointarray(ts, npoints);//, res_buf);
 
     return 0;
 }
 
 static int
-decode_polygon(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
+decode_polygon(TWKB_PARSE_STATE *ts)
 {
     int npoints, i, nrings;
 
-//int type;
-    //  type = POLYGONTYPE;
     nrings = (int) buffer_read_uvarint(ts->tb);
-
-    check_and_increase_max_pa(nrings,res_buf);
 
 
     for (i=0; i<nrings; i++)
     {
         npoints = (int) buffer_read_uvarint(ts->tb);
 
-        read_pointarray(ts, npoints, res_buf);
+        read_pointarray(ts, npoints);//, res_buf);
     }
 
     return 0;
@@ -219,20 +208,15 @@ decode_polygon(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
 
 
 static int
-decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
+decode_multi(TWKB_PARSE_STATE *ts)
 {
     int i,  *idlist, ngeoms;
-
-    check_and_increase_max_polygon(2, res_buf);// Here we add one extra since we register start offset for the comming polygon. So we need space for that
-
-    set_end_polygon( res_buf);
 
     if(ts->theLayer->type & 6)
         add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->vertex_array->used);
 
-    //int type;
+    
     parseFunctions_p pf;
-//    type = COLLECTIONTYPE;
     ngeoms = (int) buffer_read_uvarint(ts->tb);
     if(ts->thi->has_idlist)
         idlist = decode_id_list(ts, ngeoms);
@@ -259,7 +243,7 @@ decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
     }
     for (i=0; i<ngeoms; i++)
     {
-        pf(ts, res_buf);
+        pf(ts);
     }
 
     return 0;
@@ -267,19 +251,18 @@ decode_multi(TWKB_PARSE_STATE *ts, GLESSTRUCT *res_buf)
 
 
 static int
-read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
+read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
 {
 //TODO, handle more than 2 coordinates. Now they are just read into the buffer which will give failur in opengl since it doesn't get that info
     uint32_t i, j;
     uint32_t ndims = ts->thi->ndims;
     int64_t val;
-    GLfloat *dlist;
     GLFLOAT_LIST *vertex_list, *wide_line;
     float new_val;
     GLfloat start_x, start_y;
     int c=0;
     int reprpject = 0;
-    uint8_t utm_in, utm_out, hemi_in, hemi_out;
+    uint8_t utm_in, hemi_in;
     uint8_t close_ring = 0;
     LAYER_RUNTIME *theLayer = ts->theLayer;
     uint type = theLayer->type;
@@ -290,8 +273,8 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
     if((ts->utm_zone != curr_utm) || (ts->hemisphere != curr_hemi))
     {
         reprpject = 1;
-        utm_in = ts->utm_zone;
-        hemi_in = ts->hemisphere;
+        utm_in = ts->theLayer->utm_zone;
+        hemi_in = ts->theLayer->hemisphere;
     }
 
     vertex_list = get_coord_list(theLayer, ts->styleID);
@@ -307,22 +290,18 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
         if(type & 6)
             close_ring = 1;
         POINT_CIRCLE *p_akt = p;
-        //TODO this is just a guess. It can be more if a lot of beavel joins, so have to check
-        //    dlist = get_start(npoints*3, ndims,res_buf);
 
         wide_line = get_wide_line_list(theLayer, ts->styleID);
 
         for( i = 0; i < npoints; i++ )
         {
 
-            //         float* increase_buffer(GLESSTRUCT *res_buf, float *old_buf)
             for( j = 0; j < ndims; j++ )
             {
                 val = buffer_read_svarint(ts->tb);
                 ts->thi->coords[j] += val;
                 new_val = (float) (ts->thi->coords[j] / ts->thi->factors[j]);
                 p_akt->coord[j] = new_val;
-                //  dlist[c++] = new_val;
             }
             if(reprpject)
                 reproject(p_akt->coord,utm_in,curr_utm,hemi_in,  curr_hemi);
@@ -338,16 +317,12 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                     start_y = p->coord[1];
                 }
 
-                //if(floats_left(res_buf)<8)//we alocate for end point too (we know it will come)
-                //dlist = increase_buffer(res_buf);
                 calc_start(p, wide_line, &c, &last_normal);
             }
 
 
             if(i>1)
             {
-                // if(floats_left(res_buf)<12)
-                //dlist = increase_buffer(res_buf);
                 calc_join(p_akt, wide_line, &c,&last_normal);
             }
 
@@ -364,25 +339,19 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
             p_akt->coord[0] = start_x;
             p_akt->coord[1] = start_y;
 
-            /// if(floats_left(res_buf)<12)
-            //dlist = increase_buffer(res_buf);
             calc_join(p_akt, wide_line, &c,&last_normal);
 
             calc_end(p_akt->next, wide_line, &c,&last_normal);
         }
-        //set_end(c/(ndims+2), ndims+2,ts->id, ts->styleID,res_buf);
-        //  add2gluint_list(theLayer->wide_lines->line_start_indexes, theLayer->wide_lines->vertex_array->used);
     }
     else
     {
         GLfloat coords[4];
-        //dlist = get_start(npoints, ndims,res_buf);
         for( i = 0; i < npoints; i++ )
         {
             for( j = 0; j < ndims; j++ )
             {
                 val = buffer_read_svarint(ts->tb);
-                //printf("val=%d\n", val);
                 ts->thi->coords[j] += val;
                 new_val = (GLfloat) (ts->thi->coords[j] / ts->thi->factors[j]);
 
@@ -393,9 +362,6 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints, GLESSTRUCT *res_buf)
                 reproject(coords,utm_in,curr_utm,hemi_in,  curr_hemi);
             addbatch2glfloat_list(vertex_list, ndims, coords);
         }
-
-        // log_this(10, "klar med n points = %d\n", c);
-        //set_end(npoints, ndims,ts->id, ts->styleID,res_buf);
 
 
     }
@@ -425,7 +391,7 @@ type for this. It have to get a special decoding since the result is to be loade
 We can also skip reading the header, since we we know wat it shall contain.
 If that is not right we will find errors when decoding, hopefully catching before crashing*/
 
-int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
+int* decode_element_array(TWKB_PARSE_STATE *old_ts)
 {
     TWKB_PARSE_STATE ts;
     init_decode(&ts, old_ts);
@@ -434,7 +400,6 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
 
     uint32_t i, j;
     int64_t val;
-    GLushort *dlist;
 
     GLushort val_list[3];
 //jump over header
@@ -448,27 +413,20 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf)
     GLUSHORT_LIST *element_list = theLayer->polygons->element_array;
 
 
-    //  read_header (&ts);
     npoints = (uint32_t) buffer_read_uvarint(ts.tb);
-    element_check_and_increase_max_pa(1,index_buf);
-
-
     add2gluint_list(theLayer->polygons->area_style_id, old_ts->styleID);
 
-    dlist = element_get_start(npoints, 3,index_buf);
     for( i = 0; i < npoints; i++ )
     {
         for( j = 0; j < 3; j++ )
         {
             val = buffer_read_svarint(ts.tb);
             ts.thi->coords[j] += val;
-            dlist[3 * i + j] = (GLushort) ts.thi->coords[j];
             val_list[j] = (GLushort) ts.thi->coords[j];
         }
         addbatch2glushort_list(element_list,3, val_list);
     }
     add2gluint_list(theLayer->polygons->element_start_indexes,element_list->used);
-    element_set_end(npoints, 3, ts.styleID,index_buf);
 
     return 0;
 }

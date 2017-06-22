@@ -272,6 +272,37 @@ static int reset_polygon_list(POLYGON_LIST *l)
 }
 
 
+static int destroy_point_list(POINT_LIST *l)
+{
+    destroy_glfloat_list(l->points);
+    destroy_gluint_list(l->point_start_indexes);
+    destroy_gluint_list(l->style_id);
+    return 0;
+}
+
+static int destroy_linestring_list(LINESTRING_LIST *l)
+{
+    
+    destroy_glfloat_list(l->vertex_array);
+    destroy_gluint_list(l->line_start_indexes);
+    destroy_gluint_list(l->style_id);
+    return 0;
+    
+}
+
+static int destroy_polygon_list(POLYGON_LIST *l)
+{
+    destroy_glfloat_list(l->vertex_array);
+    destroy_gluint_list(l->pa_start_indexes);
+    destroy_gluint_list(l->polygon_start_indexes);
+    destroy_glushort_list(l->element_array);
+    destroy_gluint_list(l->element_start_indexes);
+    destroy_gluint_list(l->outline_style_id);
+    destroy_gluint_list(l->area_style_id);
+    return 0;
+}
+
+
 
 
 
@@ -370,7 +401,20 @@ int pa_end(LAYER_RUNTIME *l)
 
 
 
+int destroy_buffers(LAYER_RUNTIME *layer)
 
+{
+    if(layer->type & 224)
+         destroy_point_list(layer->points);
+    if(layer->type & 16)
+        destroy_linestring_list(layer->lines);
+    if(layer->type & 8)
+        destroy_linestring_list(layer->wide_lines);
+    if (layer->type & 4)
+        destroy_polygon_list(layer->polygons);
+
+    return 0;
+}
 
 
 

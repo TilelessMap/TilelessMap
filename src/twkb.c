@@ -88,8 +88,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
     if((theLayer->utm_zone != curr_utm) || (theLayer->hemisphere != curr_hemi))
     {
-        int layer_utm = theLayer->utm_zone;
-        GLfloat reproj_coord[2];
+          GLfloat reproj_coord[2];
         GLfloat maxx;
         GLfloat maxy;
         GLfloat minx;
@@ -180,7 +179,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
         ts.close_ring = theLayer->close_ring;
         while (ts.tb->read_pos<ts.tb->end_pos)
         {
-            decode_twkb(&ts, theLayer->res_buf);
+            decode_twkb(&ts);//, theLayer->res_buf);
         }
 //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
         free(tb.start_pos);
@@ -197,7 +196,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
             while (ts.tb->read_pos<ts.tb->end_pos)
             {
-                decode_element_array(&ts, theLayer->tri_index);
+                decode_element_array(&ts);
             }
 //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
             free(tb.start_pos);

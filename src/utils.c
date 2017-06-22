@@ -123,7 +123,7 @@ GLfloat* create_circle(int npoints)
 {
     GLfloat *res = malloc((npoints + 2) * 2 * sizeof(GLfloat));
 
-    double rad, x, y;
+    double rad;
     int i, res_pos = 0;
 
     //add center of point at 0,0

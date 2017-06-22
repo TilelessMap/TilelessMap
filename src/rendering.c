@@ -33,25 +33,26 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         render_text(oneLayer,theMatrix);
         return 0;
     }
-    GLESSTRUCT *rb = oneLayer->res_buf;
-
+ //   GLESSTRUCT *rb = oneLayer->res_buf;
+/*
     glGenBuffers(1, &(oneLayer->points->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
-    renderPoint( oneLayer, theMatrix);
+    renderPoint( oneLayer, theMatrix);*/
     return 0;
 }
 
 int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
+#ifdef __use_points__
     int ndims = 2;
     uint32_t i;//, np, pi;
     GLfloat *color;
     GLfloat c[4];
     //  GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
-    GLESSTRUCT *rb = oneLayer->res_buf;
+ //   GLESSTRUCT *rb = oneLayer->res_buf;
     // glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(2);
     glUseProgram(std_program);
@@ -99,8 +100,8 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     }
     glDisableVertexAttribArray(std_coord2d
-                              );
-
+);
+#endif
     return 0;
 
 }
@@ -109,9 +110,6 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-
-
-    int i;
  /*   
     printf(".............................................................\n");   
 for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
@@ -133,7 +131,7 @@ for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
         glGenBuffers(1, &(line->vbo));
         glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
-        renderLine( oneLayer, theMatrix, 0);
+        renderLine( oneLayer, theMatrix);
     }
     return 0;
 }
@@ -282,13 +280,11 @@ for (i=0;i<line->vertex_array->used; i++)
 }
 
 
-int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline)
+int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
-    GLfloat c[4];
-//   GLenum err;
     LINESTRING_LIST *line = oneLayer->lines;
 
     unsigned int n_vals = 0, n_vals_acc = 0;
@@ -359,7 +355,6 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     POLYGON_LIST *poly = oneLayer->polygons;
 
-    int i;
     glGenBuffers(1, &(poly->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, poly->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*poly->vertex_array->used,poly->vertex_array->list, GL_STATIC_DRAW);
@@ -534,7 +529,7 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
             if(type & 8)
                 renderLineTri(oneLayer,theMatrix);
             if (type & 16)
-                renderLine( oneLayer, theMatrix, 0);
+                renderLine( oneLayer, theMatrix);
             if(type & 4)
                 renderPolygon( oneLayer, theMatrix);
             //renderLine(oneLayer, theMatrix,1);
@@ -569,9 +564,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     int i;
     GLfloat *color;
     GLfloat c[4];
-    int ndims=oneLayer->n_dims;
-    //FT_GlyphSlot g = face->glyph;
-//   GLuint text_vbo;
+    
     int offset = 0;;
     char *txt;
 //   glGenBuffers(1, &text_vbo);
@@ -580,7 +573,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
 
-    GLESSTRUCT *rb = oneLayer->res_buf;
+  //  GLESSTRUCT *rb = oneLayer->res_buf;
 
     POINT_LIST *point = oneLayer->points;
     glUseProgram(txt_program);
@@ -596,7 +589,6 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     if(oneLayer->show_text && oneLayer->text->used_n_vals!=point->point_start_indexes->used)
     {
         printf("There is a mismatch between number of labels and number of corresponding points\n");
-        printf("%d vs %d\n",oneLayer->text->used_n_vals, point->point_start_indexes->used);
     }
     int used=0;
 
@@ -755,20 +747,18 @@ int renderGPS(GLfloat *theMatrix)
 {
 
     log_this(100,"rendering gps with x=%f, y = %f",gps_point.x,gps_point.y);
-    uint32_t  i;
-    GLfloat z, radius1=0, radius2=0, radius3 = 0;
+    GLfloat radius1=0, radius2=0, radius3 = 0;
     GLfloat color1[4] = {0.5,0.5,0.5,0.2};
     GLfloat color2[4] = {0,0,0,1};
     GLfloat color3[4] = {0,1,0,1};
     GLfloat p[2];
 
-    GLfloat c[4];
+    
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
 
     GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
 
-    GLint unit = -1;
 
     glBindBuffer(GL_ARRAY_BUFFER, gps_vbo);
 

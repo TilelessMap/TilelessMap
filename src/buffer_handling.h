@@ -8,6 +8,7 @@
 
 
 int init_buffers(LAYER_RUNTIME *layer);
+int destroy_buffers(LAYER_RUNTIME *layer);
 
 int reset_buffers(LAYER_RUNTIME *layer);
 

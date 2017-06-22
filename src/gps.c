@@ -11,13 +11,10 @@ void gps_in(double latitude, double longitude, double acc)
 
     log_this(100, " let's reproj: lat = %lf, lon = %lf", latitude, longitude);
 
-    double x_res, y_res;
     int hemi = 0;
     if(longitude < 0)
         hemi = 1;
 
-//   int zone = 33;
-    //  latlon2utm(&zone,latitude, longitude, &x_res, &y_res);
     GLfloat reproj_coord[2];
     reproj_coord[0] = latitude;
     reproj_coord[1] = longitude;
@@ -37,7 +34,6 @@ void gps_in(double latitude, double longitude, double acc)
         SDL_memset(&event, 0, sizeof(event)); /* or SDL_zero(event) */
         event.type = GPSEventType;
         event.user.code = 1;
-//       event.user.data1 = &gps_point;
         event.user.data1 = 0;
         event.user.data2 = 0;
         SDL_PushEvent(&event);

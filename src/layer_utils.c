@@ -24,7 +24,7 @@
 
 
 #include "theclient.h"
-
+#include "buffer_handling.h"
 
 int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 {
@@ -118,7 +118,7 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->lines = NULL;
         theLayer->wide_lines = NULL;
         theLayer->polygons = NULL;
-        theLayer->res_buf = NULL;
+      //  theLayer->res_buf = NULL;
         theLayer->tri_index = NULL;
         theLayer->text = NULL;
 
@@ -141,11 +141,12 @@ void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
     {
         theLayer = lr+i;
 
-        destroy_buffer(theLayer->res_buf);
+ /*       destroy_buffer(theLayer->res_buf);
         if (theLayer->type & 4)
         {
             element_destroy_buffer(theLayer->tri_index);
-        }
+        }*/
+ destroy_buffers(theLayer);
         if(theLayer->type & 32)
             text_destroy_buffer(theLayer->text);
 

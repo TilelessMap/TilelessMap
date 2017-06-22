@@ -269,7 +269,6 @@ typedef struct
     LINESTRING_LIST *lines;
     LINESTRING_LIST *wide_lines;
     POLYGON_LIST *polygons;
-    GLESSTRUCT *res_buf;
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
 
@@ -366,7 +365,7 @@ typedef struct
     TWKB_BUF *tb; /* Points to start of TWKB */
     //~ buffer_collection *rb;
     TWKB_HEADER_INFO *thi;
-    GLESSTRUCT *res_buf;
+//    GLESSTRUCT *res_buf;
     LAYER_RUNTIME *theLayer;
     sqlite3_stmt *prepared_statement;
     uint32_t id;  //the current styleID
@@ -391,7 +390,7 @@ int init_resources(char *dir);
 
 
 GLESSTRUCT* init_res_buf();
-void destroy_buffer(GLESSTRUCT *res_buf);
+/*void destroy_buffer(GLESSTRUCT *res_buf);
 int check_and_increase_max_pa(size_t needed, GLESSTRUCT *res_buf);
 float* get_start(uint32_t npoints, uint8_t ndims, GLESSTRUCT *res_buf);
 int set_end(uint32_t npoints, uint8_t ndims,uint32_t id, uint32_t styleID, GLESSTRUCT *res_buf);
@@ -406,7 +405,7 @@ int element_check_and_increase_max_pa(size_t needed, ELEMENTSTRUCT *element_buf)
 GLushort* element_get_start(uint32_t npoints, uint8_t ndims, ELEMENTSTRUCT *element_buf);
 int element_set_end(uint32_t npoints, uint8_t ndims,uint32_t styleID, ELEMENTSTRUCT *element_buf);
 GLfloat* increase_buffer(GLESSTRUCT *res_buf);
-
+*/
 TEXTSTRUCT* init_text_buf();
 int text_write(const char *the_text,uint32_t styleID, GLshort size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf);
 void text_reset_buffer(TEXTSTRUCT *text_buf);
@@ -418,11 +417,11 @@ void text_destroy_buffer(TEXTSTRUCT *text_buf);
 /* Functions for decoding twkb*/
 int read_header (TWKB_PARSE_STATE *ts);
 int decode_twkb_start(uint8_t *buf, size_t buf_len);
-int decode_twkb(TWKB_PARSE_STATE *old_ts,GLESSTRUCT *res_buf);
-int* decode_element_array(TWKB_PARSE_STATE *old_ts, ELEMENTSTRUCT *index_buf);
+int decode_twkb(TWKB_PARSE_STATE *old_ts);
+int* decode_element_array(TWKB_PARSE_STATE *old_ts);
 
 /*a type holding pointers to our parsing functions*/
-typedef int (*parseFunctions_p)(TWKB_PARSE_STATE*,GLESSTRUCT *res_buf);
+typedef int (*parseFunctions_p)(TWKB_PARSE_STATE*);
 
 /*Functions for decoding varInt*/
 int64_t unzigzag64(uint64_t val);
@@ -432,7 +431,6 @@ uint8_t buffer_read_byte(TWKB_BUF *tb);
 void buffer_jump_varint(TWKB_BUF *tb,int n);
 
 
-long int getReadPos(TWKB_BUF *tb);
 
 /*resetting GLESSTRUCT buffer*/
 void reset_buffer();
@@ -470,7 +468,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
-int  renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix, int outline);
+int  renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 
 void render_txt(SDL_Window* window) ;

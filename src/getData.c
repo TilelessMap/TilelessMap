@@ -100,10 +100,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
                 loadLine( oneLayer, theMatrix);            
             if(type & 6)
                 loadPolygon( oneLayer, theMatrix);
-                while ((err = glGetError()) != GL_NO_ERROR) {
                
-                break;
-            }
         }
 
     }
