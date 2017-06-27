@@ -1,5 +1,8 @@
 #ifndef _interface_H
 #define _interface_H
+
+#include "info.h"
+
 typedef struct
 {
     GLshort minx;

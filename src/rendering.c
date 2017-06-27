@@ -27,7 +27,7 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
 
-    if(oneLayer->show_text)
+    if(oneLayer->type & 32)
     {
 
         render_text(oneLayer,theMatrix);
@@ -536,6 +536,7 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
     }
     renderGPS(theMatrix);
 
+    render_simple_rect(5,75,300,225);
     SDL_GL_SwapWindow(window);
 
     //  pthread_mutex_destroy(&mutex);
@@ -581,7 +582,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 //    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
-    if(oneLayer->show_text && oneLayer->text->used_n_vals!=point->point_start_indexes->used)
+    if(oneLayer->type & 32 && oneLayer->text->used_n_vals!=point->point_start_indexes->used)
     {
         printf("There is a mismatch between number of labels and number of corresponding points\n");
     }

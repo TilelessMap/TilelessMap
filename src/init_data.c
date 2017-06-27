@@ -194,7 +194,7 @@ static int load_layers(TEXT *missing_db)
     /********************************************************************************
      Get information about all the layers in the project
      */
-    int rc, i;
+    int rc, i, show_text, line_width;
     char *err_msg;
 
     sqlite3_stmt *preparedLayerLoading;
@@ -276,15 +276,15 @@ static int load_layers(TEXT *missing_db)
         oneLayer=layerRuntime + i;
         //   sqlite3_step(preparedLayerLoading);
 
-        oneLayer->close_ring = 0;
+ //       oneLayer->close_ring = 0;
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);
         oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 3);
         oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 4);
         const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 5);
-        oneLayer->show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 6);
-        oneLayer->line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 7);
+        show_text =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 6);
+        line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 7);
         int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
 
 
@@ -328,12 +328,12 @@ static int load_layers(TEXT *missing_db)
         if(oneLayer->geometryType == POINTTYPE)
         {
             type = type | 128;
-            if (oneLayer->show_text)
+            if (show_text)
                 type = type | 32;
         }
         else if(oneLayer->geometryType == LINETYPE)
         {
-            if(oneLayer->line_width)
+            if(line_width)
                 type = type | 8;
             else
                 type = type | 16;
@@ -341,7 +341,7 @@ static int load_layers(TEXT *missing_db)
         else if(oneLayer->geometryType == POLYGONTYPE)
         {
             type = type | 4;
-            if(oneLayer->line_width)
+            if(line_width)
                 type = type | 8;
 
         }
@@ -366,7 +366,6 @@ static int load_layers(TEXT *missing_db)
         //printf("name = %s\n", oneLayer->name);
         oneLayer->layer_id =  (uint8_t) layerid;
 
-        oneLayer->render_area =! NULL;
 
 
         char tri_idx_fld[32];
@@ -399,7 +398,7 @@ static int load_layers(TEXT *missing_db)
             stylewhere[0] =  '\0';
         }
 
-        if(oneLayer->show_text)
+        if(show_text)
         {
             snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",txt_fld, size_fld, rotation_fld, anchor_fld);
         }
@@ -504,7 +503,7 @@ static int load_layers(TEXT *missing_db)
 
     return 0;
 }
-int init_gps()
+static int init_gps()
 {
     gps_npoints = 32;
     gps_circle = create_circle(gps_npoints);
@@ -512,18 +511,36 @@ int init_gps()
     return 0;
 }
 
+static int init_info_Layer()
+{
+    infoLayer = init_layer_runtime(1);
+    
+    /*By setting type to 0 and calling init_buffers we set all buffers to NULL
+     * Then we can cal init_buffers again to init the buffers we may need
+     * Just be cautious to never remove type bits before calling init_buffer,
+     * since that will cause NULL-setting buffers leading to memory leaks.
+     * Do instead add new type bits. 
+     * */
+    infoLayer->type = 0;
+    init_buffers(infoLayer);    
+    
+    return 0;
 
+}
 
 int init_resources(char *dir)
 {
     log_this(10, "Entering init_resources\n");
-
+map_modus = 1;
     TEXT *missing_db = init_txt(1024);
 curr_utm = 0;
     curr_hemi = 0;
     //char stylewhere[128];
 
-
+info_box_color[0] = 1;
+info_box_color[1] = 1;
+info_box_color[2] = 1;
+info_box_color[3] = 0.9;
     build_program();
 
     attach_db(dir, missing_db);
@@ -533,6 +550,7 @@ curr_utm = 0;
     load_layers(missing_db);
     destroy_txt(missing_db);
     init_gps();
+    init_info_Layer();
     init_controls();
     return 0;
 }

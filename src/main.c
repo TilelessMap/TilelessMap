@@ -100,66 +100,78 @@ void mainLoop(SDL_Window* window)
                     mouse_up_y = ev.button.y;
                     
                     if(mouse_down_x == mouse_up_x && mouse_down_y == mouse_up_y)
+                    {
                         check_click(mouse_up_x, mouse_up_y);
-                    
-                    matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+                        render_data(window, theMatrix);
+                    }
+                    if(map_modus)
+                    {
+                        matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
 
-                    get_data(window, newBBOX, theMatrix);
-                    copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                        get_data(window, newBBOX, theMatrix);
+                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                    }
                     break;
                 case SDL_MOUSEWHEEL:
                     wheel_y = ev.wheel.y;
 
                     SDL_GetMouseState(&px_x_clicked, &px_y_clicked);
+                    if(map_modus)
+                    {
+                        if(wheel_y > 0)
+                            matrixFromBboxPointZoom(currentBBOX,newBBOX,px_x_clicked, px_y_clicked, 0.5, theMatrix);
+                        else
+                            matrixFromBboxPointZoom(currentBBOX,newBBOX,px_x_clicked, px_y_clicked, 2, theMatrix);
 
-                    if(wheel_y > 0)
-                        matrixFromBboxPointZoom(currentBBOX,newBBOX,px_x_clicked, px_y_clicked, 0.5, theMatrix);
-                    else
-                        matrixFromBboxPointZoom(currentBBOX,newBBOX,px_x_clicked, px_y_clicked, 2, theMatrix);
+                        get_data(window, newBBOX, theMatrix);
 
-                    get_data(window, newBBOX, theMatrix);
-
-                    copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                    }
                     break;
 
                 case SDL_MOUSEMOTION:
-
-
-
-
-
-                    if(mouse_down)
+                      if(map_modus)
                     {
-                        n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
-
-                        if(n_events<2)
+                        if(mouse_down)
                         {
+                            n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
 
-                            mouse_up_x = ev.motion.x;
-                            mouse_up_y = ev.motion.y;
+                            if(n_events<2)
+                            {
+
+                                mouse_up_x = ev.motion.x;
+                                mouse_up_y = ev.motion.y;
 
 
 
-                            matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+                                matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
 
-                            while ((err = glGetError()) != GL_NO_ERROR) {
-                                log_this(10, "Problem 2\n");
-                                fprintf(stderr,"opengl error aaa: %d\n", err);
-                            }
-                            render_data(window, theMatrix);
-                            //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
-                            while ((err = glGetError()) != GL_NO_ERROR) {
-                                log_this(10, "Problem 2\n");
-                                fprintf(stderr,"opengl error aaa999: %d\n", err);
+
+                                render_data(window, theMatrix);
+                                //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                                while ((err = glGetError()) != GL_NO_ERROR) {
+                                    log_this(10, "Problem 2\n");
+                                    fprintf(stderr,"opengl error aaa999: %d\n", err);
+                                }
+
                             }
 
                         }
 
+                    }
+                    else
+                    {
+                              if(n_events<2)
+                            {
 
-                        break;
+                                mouse_up_x = ev.motion.x;
+                                mouse_up_y = ev.motion.y;
 
+                        identify(currentBBOX, mouse_up_x,mouse_up_y);
+                            }
                     }
 
+                        break;
 
 #endif
 
@@ -182,81 +194,87 @@ void mainLoop(SDL_Window* window)
                     ty = ev.tfinger.y;
                     pr = ev.tfinger.pressure;
 
-                    if(touches[1].active) //check if at least 2 fingers are activated
+                    if(map_modus)
                     {
-                        log_this(10, "UP: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti);
-                        if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
+                        if(touches[1].active) //check if at least 2 fingers are activated
                         {
-                            log_this(10, "OK, on the inside\n");
-                            get_box_from_touches(touches, currentBBOX, newBBOX);
-                            reset_touch_que(touches);
-                            matrixFromBBOX(newBBOX, theMatrix);
-                            log_this(10,"ok, go get data");
-                            get_data(window, newBBOX, theMatrix);
-                            copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                            log_this(10, "UP: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti);
+                            if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
+                            {
+                                log_this(10, "OK, on the inside\n");
+                                get_box_from_touches(touches, currentBBOX, newBBOX);
+                                reset_touch_que(touches);
+                                matrixFromBBOX(newBBOX, theMatrix);
+                                log_this(10,"ok, go get data");
+                                get_data(window, newBBOX, theMatrix);
+                                copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                            }
                         }
-                    }
+                    
                     else
                     {
-                        //	  mouse_down = 0;
-                        mouse_up_x = (GLint) (tx * CURR_WIDTH);
-                        mouse_up_y = (GLint)(ty * CURR_HEIGHT);
-                        mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
-                        mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
-                        matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-                        reset_touch_que(touches);
+                            //	  mouse_down = 0;
+                            mouse_up_x = (GLint) (tx * CURR_WIDTH);
+                            mouse_up_y = (GLint)(ty * CURR_HEIGHT);
+                            mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
+                            mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
+                            matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+                            reset_touch_que(touches);
 
-                        //render_data(window, newBBOX, theMatrix);
-                        get_data(window, newBBOX, theMatrix);
-                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                            //render_data(window, newBBOX, theMatrix);
+                            get_data(window, newBBOX, theMatrix);
+                            copyNew2CurrentBBOX(newBBOX, currentBBOX);
 
+                        }
                     }
+                
 
                     break;
 
                 case SDL_FINGERMOTION:
                     log_this(10,"SDL_FINGERMOTION");
                     n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
-
-                    if(touches[1].active) //check if at least 2 fingers are activated
+                    if(map_modus)
                     {
-                        log_this(10, "m2");
+                        if(touches[1].active) //check if at least 2 fingers are activated
+                        {
+                            log_this(10, "m2");
 
-                        register_motion(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
-                        log_this(10, "register_motion");
-                        get_box_from_touches(touches, currentBBOX, newBBOX);
-                        log_this(10, "get_box_from_touches");
-                        //reset_touch_que(touches);
-                        matrixFromBBOX(newBBOX, theMatrix);
-                        log_this(10, "matrixFromBBOX");
-                        if(n_events<2)
-                            render_data(window, theMatrix);
+                            register_motion(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
+                            log_this(10, "register_motion");
+                            get_box_from_touches(touches, currentBBOX, newBBOX);
+                            log_this(10, "get_box_from_touches");
+                            //reset_touch_que(touches);
+                            matrixFromBBOX(newBBOX, theMatrix);
+                            log_this(10, "matrixFromBBOX");
+                            if(n_events<2)
+                                render_data(window, theMatrix);
 
 
+                        }
+                        else
+                        {
+                            log_this(10, "m1");
+                            //~ android_log_print(ANDROID_LOG_INFO, APPNAME, "m1");
+                            ti = (int) ev.tfinger.touchId;
+                            fi = (int) ev.tfinger.fingerId;
+                            tx = ev.tfinger.x;
+                            ty = ev.tfinger.y;
+                            pr = ev.tfinger.pressure;
+
+
+                            //	  mouse_down = 0;
+                            mouse_up_x = (GLint) (tx * CURR_WIDTH);
+                            mouse_up_y = (GLint)(ty * CURR_HEIGHT);
+                            mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
+                            mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
+                            matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+
+                            if(n_events<2)
+                                render_data(window, theMatrix);
+                            //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                        }
                     }
-                    else
-                    {
-                        log_this(10, "m1");
-                        //~ android_log_print(ANDROID_LOG_INFO, APPNAME, "m1");
-                        ti = (int) ev.tfinger.touchId;
-                        fi = (int) ev.tfinger.fingerId;
-                        tx = ev.tfinger.x;
-                        ty = ev.tfinger.y;
-                        pr = ev.tfinger.pressure;
-
-
-                        //	  mouse_down = 0;
-                        mouse_up_x = (GLint) (tx * CURR_WIDTH);
-                        mouse_up_y = (GLint)(ty * CURR_HEIGHT);
-                        mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
-                        mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
-                        matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-
-                        if(n_events<2)
-                            render_data(window, theMatrix);
-                        //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
-                    }
-
                     break;
 
 
@@ -294,6 +312,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     glDeleteProgram(lw_program);
 
     destroy_layer_runtime(layerRuntime,nLayers);
+    destroy_layer_runtime(infoLayer,1);
     free(gps_circle);
     
     free(atlases[0]);

@@ -52,7 +52,13 @@ static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 
 }
 
-
+void *twkb_fromSQLiteBBOX_thread(void *theL)
+{
+    twkb_fromSQLiteBBOX(theL);
+    
+     pthread_exit(NULL);
+     return NULL;
+}
 
 void *twkb_fromSQLiteBBOX(void *theL)
 {
@@ -149,9 +155,10 @@ void *twkb_fromSQLiteBBOX(void *theL)
         sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
         sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY
         sqlite3_bind_double(prepared_statement, 4,(float) ext[1]); //minY
+    log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
+        
     }
 
-    log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
 
 
     err = sqlite3_errcode(projectDB);
@@ -173,10 +180,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
             return NULL;
         }
         ts.tb=&tb;
-        ts.line_width = theLayer->line_width;
         ts.utm_zone = theLayer->utm_zone;
         ts.hemisphere = theLayer->hemisphere;
-        ts.close_ring = theLayer->close_ring;
         while (ts.tb->read_pos<ts.tb->end_pos)
         {
             decode_twkb(&ts);//, theLayer->res_buf);
@@ -220,5 +225,9 @@ void *twkb_fromSQLiteBBOX(void *theL)
     sqlite3_reset(prepared_statement);
 
     return NULL;
-    // pthread_exit(NULL);
 }
+
+
+
+
+

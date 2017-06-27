@@ -59,8 +59,25 @@ int parent_add_child(struct CTRL *parent, struct CTRL *child)
 }
 
 
-int activate_info(void *val)
+int switch_map_modus(void *val)
 {
+    if(map_modus)
+    {
+        info_box_color[0] = 0.8;
+        info_box_color[1] = 1;
+        info_box_color[2] = 0.8;
+        info_box_color[3] = 0.9;
+        map_modus = 0;
+    }
+    else
+    {
+        info_box_color[0] = 1;
+        info_box_color[1] = 1;
+        info_box_color[2] = 1;
+        info_box_color[3] = 0.9;
+        map_modus = 1;
+    }
+    
  printf("Yes\n");
  return 0;    
 }
@@ -72,7 +89,7 @@ int init_controls()
     GLshort box[] = {0,0,0,0};
     controls =  register_control(NULL,NULL, NULL, box,1);
   GLshort box2[] = {5,75,300,225};
-  register_control(controls, activate_info, NULL,box2 , 1);
+  register_control(controls, switch_map_modus, NULL,box2 , 1);
   return 0;
 }
 

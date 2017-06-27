@@ -78,7 +78,7 @@ int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
     glUseProgram(std_program);
 
 
-    glUniform4fv(std_color,1,color );
+    glUniform4fv(std_color,1,info_box_color );
     glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

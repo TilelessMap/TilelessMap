@@ -58,7 +58,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         {
             //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = bbox;
-            rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX, (void *) oneLayer);
+            rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
             //  twkb_fromSQLiteBBOX((void *) oneLayer);
         }
     }

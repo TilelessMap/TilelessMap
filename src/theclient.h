@@ -272,13 +272,13 @@ typedef struct
     ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
 
-    uint8_t show_text;
-    uint8_t line_width;
+//    uint8_t show_text;
+//    uint8_t line_width;
     int layer_id;
-    int render_area; //This is a way to render only border of polygon. No triangels will be loadded
+//    int render_area; //This is a way to render only border of polygon. No triangels will be loadded
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
-    uint8_t close_ring; //when rendering polygon border we need to close the ring since last point is missing
+//    uint8_t close_ring; //when rendering polygon border we need to close the ring since last point is missing
 
 }
 LAYER_RUNTIME;
@@ -439,6 +439,7 @@ void reset_buffer();
 void element_reset_buffer();
 
 /*Functions exposed to other programs*/
+void *twkb_fromSQLiteBBOX_thread( void *theL);
 void *twkb_fromSQLiteBBOX( void *theL);
 GLuint create_shader(const char* source, GLenum type);
 void print_log(GLuint object);
@@ -524,6 +525,8 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 struct timeval tval_before, tval_after, tval_result;
 #endif
 
+int map_modus;
+GLfloat info_box_color[4];
 sqlite3 *projectDB;
 
 GLfloat init_x;
@@ -536,6 +539,7 @@ int text_scale;
 GLfloat *gps_circle;
 
 LAYER_RUNTIME *layerRuntime;
+LAYER_RUNTIME *infoLayer;
 
 
 STYLES_RUNTIME *global_styles;

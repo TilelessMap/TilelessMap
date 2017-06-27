@@ -122,13 +122,13 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->tri_index = NULL;
         theLayer->text = NULL;
 
-        theLayer->show_text = 0;
-        theLayer->line_width = 0;
+//        theLayer->show_text = 0;
+//        theLayer->line_width = 0;
         theLayer->layer_id = 0;
-        theLayer->render_area = 0; //This is a way to render only border of polygon. No triangels will be loadded
+//        theLayer->render_area = 0; //This is a way to render only border of polygon. No triangels will be loadded
         theLayer->utm_zone = 0;
         theLayer->hemisphere = 0; //1 is southern hemisphere and 0 is northern
-        theLayer->close_ring = 0;
+//        theLayer->close_ring = 0;
     }
     return lr;
 }
