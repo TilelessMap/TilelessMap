@@ -25,7 +25,7 @@
 
 
 #include "theclient.h"
-
+#include "interface.h"
 
 void mainLoop(SDL_Window* window)
 {
@@ -98,6 +98,10 @@ void mainLoop(SDL_Window* window)
                     mouse_down = 0;
                     mouse_up_x = ev.button.x;
                     mouse_up_y = ev.button.y;
+                    
+                    if(mouse_down_x == mouse_up_x && mouse_down_y == mouse_up_y)
+                        check_click(mouse_up_x, mouse_up_y);
+                    
                     matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
 
                     get_data(window, newBBOX, theMatrix);
@@ -290,13 +294,19 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     glDeleteProgram(lw_program);
 
     destroy_layer_runtime(layerRuntime,nLayers);
-
+    free(gps_circle);
+    
+    free(atlases[0]);
+    free(atlases[1]);
+    free(atlases[2]);
+    FT_Done_FreeType(ft);
     free(global_styles);
     sqlite3_close_v2(projectDB);
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow( window );
     window = NULL;
     //Quit SDL subsystems
+    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     SDL_Quit();
 }
 

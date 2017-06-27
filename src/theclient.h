@@ -498,7 +498,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 void log_this(int log_level, const char *log_txt, ... );
 int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy  );
 int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
-int render_simple_Polygon();
+int render_simple_rect(GLfloat minx, GLfloat miny, GLfloat maxx, GLfloat maxy);
 
 
 void calc_start(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
@@ -533,7 +533,7 @@ GLint curr_hemi;
 GLfloat init_box_width;
 int nLayers;
 int text_scale;
-
+GLfloat *gps_circle;
 
 LAYER_RUNTIME *layerRuntime;
 

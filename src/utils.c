@@ -23,7 +23,7 @@
 
 
 #include "theclient.h"
-
+#include "mem.h"
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -121,7 +121,7 @@ int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl)
 
 GLfloat* create_circle(int npoints)
 {
-    GLfloat *res = malloc((npoints + 2) * 2 * sizeof(GLfloat));
+    GLfloat *res = st_malloc((npoints + 2) * 2 * sizeof(GLfloat));
 
     double rad;
     int i, res_pos = 0;

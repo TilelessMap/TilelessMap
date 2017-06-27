@@ -183,6 +183,7 @@ int init_text_resources()
     create_atlas(atlases[2], face, 32);
 
     sqlite3_finalize(preparedFonts);
+    free(font_data);
     return 0;
 }
 
@@ -263,22 +264,8 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 
     /* Create a texture that will be used to hold all ASCII glyphs */
     glActiveTexture(GL_TEXTURE0);
-
-
-
-
-
     glGenTextures(1, &(a->tex));
-
-
-
-
     glBindTexture(GL_TEXTURE_2D, a->tex);
-
-
-
-
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, a->w, a->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
     /* We require 1 byte alignment when uploading texture data */

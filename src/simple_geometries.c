@@ -26,7 +26,7 @@
 
 
 
-int render_simple_Polygon()
+int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
 {
 
     GLuint vbo;
@@ -42,7 +42,20 @@ int render_simple_Polygon()
     //  GLfloat theMatrix[16] = {1, 0,0,0,0,1,0,0,0,0,1,0,-0.5,0,0,1};
 
 
-    GLfloat punkter[] = {5,75,5, 225,300,225,300,75};
+    GLfloat punkter[8];
+    punkter[0] = minx;
+    punkter[1] = miny;
+    punkter[2] = minx;
+    punkter[3] = maxy;
+    punkter[4] = maxx;
+    punkter[5] = maxy;
+    punkter[6] = maxx;
+    punkter[7] = miny;
+    
+    
+    
+    
+  //  {5,75,5, 225,300,225,300,75};
     //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
     GLshort tri_index[] = {0,1,3,1,2,3};
 

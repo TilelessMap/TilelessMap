@@ -35,7 +35,6 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
  //   GLESSTRUCT *rb = oneLayer->res_buf;
 /*
-    glGenBuffers(1, &(oneLayer->points->vbo));
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
@@ -119,7 +118,6 @@ for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
     if(oneLayer->type & 8)
     {
         LINESTRING_LIST *line = oneLayer->wide_lines;
-        glGenBuffers(1, &(line->vbo));
         glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
         renderLineTri(oneLayer,theMatrix);
@@ -128,7 +126,6 @@ for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
     {
         LINESTRING_LIST *line = oneLayer->lines;
         //	 int i,j, offset=0;
-        glGenBuffers(1, &(line->vbo));
         glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*line->vertex_array->used,line->vertex_array->list, GL_STATIC_DRAW);
         renderLine( oneLayer, theMatrix);
@@ -355,12 +352,10 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     POLYGON_LIST *poly = oneLayer->polygons;
 
-    glGenBuffers(1, &(poly->vbo));
+    
     glBindBuffer(GL_ARRAY_BUFFER, poly->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*poly->vertex_array->used,poly->vertex_array->list, GL_STATIC_DRAW);
 
-
-    glGenBuffers(1, &(poly->ebo));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort)*poly->element_array->used, poly->element_array->list, GL_STATIC_DRAW);
 
@@ -734,8 +729,6 @@ int loadGPS(GLfloat *gps_circle)
     glGenBuffers(1, &gps_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gps_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*((gps_npoints+2) * 2), gps_circle, GL_STATIC_DRAW);
-
-
     return 0;
 }
 

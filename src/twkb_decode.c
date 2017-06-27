@@ -270,7 +270,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
     //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
     theLayer->n_dims = ndims;
 
-    if((ts->utm_zone != curr_utm) || (ts->hemisphere != curr_hemi))
+    if((ts->theLayer->utm_zone != curr_utm) || (ts->theLayer->hemisphere != curr_hemi))
     {
         reprpject = 1;
         utm_in = ts->theLayer->utm_zone;

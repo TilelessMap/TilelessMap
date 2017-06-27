@@ -214,6 +214,7 @@ static POINT_LIST* init_point_list()
     res->points = init_glfloat_list();
     res->style_id = init_gluint_list();
     res->point_start_indexes = init_gluint_list();
+    glGenBuffers(1, &(res->vbo));
     return res;
 }
 
@@ -223,6 +224,7 @@ static LINESTRING_LIST* init_linestring_list()
     res->vertex_array = init_glfloat_list();
     res->line_start_indexes = init_gluint_list();
     res->style_id = init_gluint_list();
+    glGenBuffers(1, &(res->vbo));
 
     return res;
 }
@@ -237,6 +239,9 @@ static POLYGON_LIST* init_polygon_list()
     res->element_start_indexes = init_gluint_list();
     res->outline_style_id = init_gluint_list();
     res->area_style_id = init_gluint_list();
+    
+    glGenBuffers(1, &(res->vbo));
+    glGenBuffers(1, &(res->ebo));
     return res;
 }
 
@@ -277,6 +282,7 @@ static int destroy_point_list(POINT_LIST *l)
     destroy_glfloat_list(l->points);
     destroy_gluint_list(l->point_start_indexes);
     destroy_gluint_list(l->style_id);
+    free(l);
     return 0;
 }
 
@@ -286,6 +292,7 @@ static int destroy_linestring_list(LINESTRING_LIST *l)
     destroy_glfloat_list(l->vertex_array);
     destroy_gluint_list(l->line_start_indexes);
     destroy_gluint_list(l->style_id);
+    free(l);
     return 0;
     
 }
@@ -299,6 +306,7 @@ static int destroy_polygon_list(POLYGON_LIST *l)
     destroy_gluint_list(l->element_start_indexes);
     destroy_gluint_list(l->outline_style_id);
     destroy_gluint_list(l->area_style_id);
+    free(l);
     return 0;
 }
 

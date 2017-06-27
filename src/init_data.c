@@ -24,7 +24,7 @@
 
 #include "buffer_handling.h"
 #include "theclient.h"
-
+#include "interface.h"
 
 
 /********************************************************************************
@@ -507,7 +507,7 @@ static int load_layers(TEXT *missing_db)
 int init_gps()
 {
     gps_npoints = 32;
-    GLfloat *gps_circle = create_circle(gps_npoints);
+    gps_circle = create_circle(gps_npoints);
     loadGPS(gps_circle);
     return 0;
 }
@@ -519,7 +519,8 @@ int init_resources(char *dir)
     log_this(10, "Entering init_resources\n");
 
     TEXT *missing_db = init_txt(1024);
-
+curr_utm = 0;
+    curr_hemi = 0;
     //char stylewhere[128];
 
 
@@ -532,6 +533,7 @@ int init_resources(char *dir)
     load_layers(missing_db);
     destroy_txt(missing_db);
     init_gps();
+    init_controls();
     return 0;
 }
 
