@@ -210,7 +210,7 @@ static int load_layers(TEXT *missing_db)
     char sql[2048];
     uint8_t type = 0;
 
-    if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
+  /*  if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
     {
 
         rc = sqlite3_exec(projectDB,"alter table layers add column override_type integer;",NULL, NULL, &err_msg);
@@ -224,7 +224,7 @@ static int load_layers(TEXT *missing_db)
 
 
 
-    }
+    }*/
     char sqlLayerLoading[2048];
     char *sqlLayerLoading1 = "SELECT "
                              /*fields for attaching the database*/
@@ -307,7 +307,7 @@ static int load_layers(TEXT *missing_db)
 
 
         //Get the basic layer info from geometry columns table in data db
-        snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere from %s.geometry_columns where layer_name='%s';", dbname, layername);
+        snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
 
         log_this(100, "Get info from geometry_columns : %s\n",sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
@@ -354,6 +354,7 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 4);
         oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 5);
         oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
+        oneLayer->n_dims = (uint8_t) sqlite3_column_int(prepared_geo_col, 7);
 
 
 

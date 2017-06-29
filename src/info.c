@@ -4,7 +4,7 @@
 
 int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theMatrix)
 {
-    log_this(100,"info, x=%d, y=%d\n",x,y);
+    log_this(10,"info, x=%d, y=%d\n",x,y);
     GLfloat w_x, w_y;
     int i, z, r, n_vals_acc, n_vals, poly_start_index , pa_start_index, n_of_pa,n_polys, n_points,next_pa ;
     int inside,n_dims, nrings,n_elements_acc,n_elements;
@@ -98,7 +98,6 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
             if(wn_PnPoly( point,poly->vertex_array->list + poly_start_index, n_points , n_dims))
             {
                 inside = 1;
-                printf("inside outer ring");
                 nrings++;
                 
                     next_pa = *(poly->pa_start_indexes->list + r);
@@ -129,7 +128,7 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
                 if(inside)
                 {
                      add2gluint_list(renderpoly->polygon_start_indexes, renderpoly->vertex_array->used); //register start of new polygon to render
-                     addbatch2glfloat_list(renderpoly->vertex_array, next_poly-poly_start_index, poly->vertex_array->list + pa_start_index); //memcpy all vertexes in polygon
+                     addbatch2glfloat_list(renderpoly->vertex_array, next_poly-poly_start_index, poly->vertex_array->list + poly_start_index); //memcpy all vertexes in polygon
                      
                      
                      

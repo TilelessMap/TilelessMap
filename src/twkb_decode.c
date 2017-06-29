@@ -257,7 +257,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
 {
 //TODO, handle more than 2 coordinates. Now they are just read into the buffer which will give failur in opengl since it doesn't get that info
     uint32_t i, j;
-    uint32_t ndims = ts->thi->ndims;
+  
     int64_t val;
     GLFLOAT_LIST *vertex_list, *wide_line;
     float new_val;
@@ -270,8 +270,8 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
     uint type = theLayer->type;
 
     //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
-    theLayer->n_dims = ndims;
-
+ //   theLayer->n_dims = ndims;
+      uint32_t ndims = theLayer->n_dims;
     if((ts->theLayer->utm_zone != curr_utm) || (ts->theLayer->hemisphere != curr_hemi))
     {
         reprpject = 1;

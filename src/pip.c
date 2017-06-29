@@ -42,7 +42,7 @@ int wn_PnPoly( GLfloat *P, GLfloat *V, int n , int n_dims_in_array)
     // loop through all edges of the polygon
     for (int i=0; i<n-1; i++) 
     {   // edge from V[i] to  V[i+1]
-        printf("Vi= %f, Vi+1 = %f, Vi1 = %f, Vi1 + 1= %f, X = %f, Y = %f \n",V[n_dims_in_array*i], V[n_dims_in_array*i + 1], V[n_dims_in_array*(i+1)], V[n_dims_in_array*(i+1)+1], P[0], P[1]);
+     //   printf("Vi= %f, Vi+1 = %f, Vi1 = %f, Vi1 + 1= %f, X = %f, Y = %f \n",V[n_dims_in_array*i], V[n_dims_in_array*i + 1], V[n_dims_in_array*(i+1)], V[n_dims_in_array*(i+1)+1], P[0], P[1]);
         if (V[n_dims_in_array*i+1] <= P[1]) 
         {          // start y <= P.y
             if (V[n_dims_in_array*(i+1)+1]  > P[1])      // an upward crossing
@@ -60,7 +60,7 @@ int wn_PnPoly( GLfloat *P, GLfloat *V, int n , int n_dims_in_array)
     i = n-1;
     if(P[0] != V[n_dims_in_array*i] || P[1] != V[n_dims_in_array*i+1])
     {
-                printf("Vi= %f, Vi+1 = %f, Vi1 = %f, Vi1 + 1= %f, X = %f, Y = %f \n",V[n_dims_in_array*i], V[n_dims_in_array*i + 1], V[0], V[1], P[0], P[1]);
+              //  printf("Vi= %f, Vi+1 = %f, Vi1 = %f, Vi1 + 1= %f, X = %f, Y = %f \n",V[n_dims_in_array*i], V[n_dims_in_array*i + 1], V[0], V[1], P[0], P[1]);
 
         if (V[n_dims_in_array*i+1] <= P[1]) 
         {          // start y <= P.y
@@ -75,7 +75,7 @@ int wn_PnPoly( GLfloat *P, GLfloat *V, int n , int n_dims_in_array)
                         --wn;            // have  a valid down intersect
             }
     }    
-     printf("wn = %d\n", wn);   
+    // printf("wn = %d\n", wn);   
     return wn;
 }
 //===================================================================
