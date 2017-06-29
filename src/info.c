@@ -127,6 +127,7 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
                 
                 if(inside)
                 {
+                    log_this(100,"ok, poly for rendering");
                      add2gluint_list(renderpoly->polygon_start_indexes, renderpoly->vertex_array->used); //register start of new polygon to render
                      addbatch2glfloat_list(renderpoly->vertex_array, next_poly-poly_start_index, poly->vertex_array->list + poly_start_index); //memcpy all vertexes in polygon
                      

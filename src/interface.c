@@ -63,6 +63,7 @@ int switch_map_modus(void *val)
 {
     if(map_modus)
     {
+ log_this(100, "remove map_modus");
         info_box_color[0] = 0.8;
         info_box_color[1] = 1;
         info_box_color[2] = 0.8;
@@ -72,6 +73,8 @@ int switch_map_modus(void *val)
     }
     else
     {
+        
+ log_this(100, "set map_modus");
         info_box_color[0] = 1;
         info_box_color[1] = 1;
         info_box_color[2] = 1;
@@ -105,10 +108,12 @@ static int check_box(GLshort *box,int x, int y)
 }
 static int check_controls(struct CTRL *ctrl, int x, int y)
 {
+    
  int i;
  if(!ctrl->active)
      return 0;
  
+ log_this(100, "checkcontrol, x = %d, y = %d\n",x,y);
  for (i=0;i<ctrl->n_children;i++)
  {
   struct CTRL *child = *(ctrl->children+i);

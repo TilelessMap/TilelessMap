@@ -467,7 +467,6 @@ static int load_layers(TEXT *missing_db)
     nLayers = i;
     sqlite3_finalize(preparedLayerLoading);
 
-
     /*get init_bbox*/
     if (check_layer((const unsigned char *) "main", (const unsigned char *)  "init_box"))
     {

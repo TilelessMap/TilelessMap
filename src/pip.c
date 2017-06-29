@@ -40,7 +40,7 @@ int wn_PnPoly( GLfloat *P, GLfloat *V, int n , int n_dims_in_array)
     int    wn = 0, i;    // the  winding number counter
 
     // loop through all edges of the polygon
-    for (int i=0; i<n-1; i++) 
+    for (i=0; i<n-1; i++) 
     {   // edge from V[i] to  V[i+1]
      //   printf("Vi= %f, Vi+1 = %f, Vi1 = %f, Vi1 + 1= %f, X = %f, Y = %f \n",V[n_dims_in_array*i], V[n_dims_in_array*i + 1], V[n_dims_in_array*(i+1)], V[n_dims_in_array*(i+1)+1], P[0], P[1]);
         if (V[n_dims_in_array*i+1] <= P[1]) 
