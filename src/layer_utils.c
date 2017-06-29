@@ -119,7 +119,6 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->wide_lines = NULL;
         theLayer->polygons = NULL;
       //  theLayer->res_buf = NULL;
-        theLayer->tri_index = NULL;
         theLayer->text = NULL;
 
 //        theLayer->show_text = 0;

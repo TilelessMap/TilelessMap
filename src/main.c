@@ -47,7 +47,7 @@ void mainLoop(SDL_Window* window)
     gps_point.x = 0;
     gps_point.y = 0;
     gps_point.s = 0;
-
+    int map_modus_before;
     int mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
 //     initialBBOX(380000, 6660000, 300000, newBBOX);
@@ -101,15 +101,23 @@ void mainLoop(SDL_Window* window)
                     
                     if(mouse_down_x == mouse_up_x && mouse_down_y == mouse_up_y)
                     {
+                        map_modus_before = map_modus;
                         check_click(mouse_up_x, mouse_up_y);
                         render_data(window, theMatrix);
+                        
+                        if(!map_modus && ! map_modus_before)
+                            identify(currentBBOX, mouse_up_x,mouse_up_y,window, theMatrix);
                     }
-                    if(map_modus)
+                    else
                     {
-                        matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+                        if(map_modus)
+                        {
+                            matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
 
-                        get_data(window, newBBOX, theMatrix);
-                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                            get_data(window, newBBOX, theMatrix);
+                            copyNew2CurrentBBOX(newBBOX, currentBBOX);
+                        }
+          
                     }
                     break;
                 case SDL_MOUSEWHEEL:
@@ -159,17 +167,17 @@ void mainLoop(SDL_Window* window)
                         }
 
                     }
-                    else
+                   /*  else
                     {
-                              if(n_events<2)
+                             if(n_events<2)
                             {
 
                                 mouse_up_x = ev.motion.x;
                                 mouse_up_y = ev.motion.y;
 
-                        identify(currentBBOX, mouse_up_x,mouse_up_y);
+                        identify(currentBBOX, mouse_up_x,mouse_up_y,window, theMatrix);
                             }
-                    }
+                    }*/
 
                         break;
 

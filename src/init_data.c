@@ -515,14 +515,16 @@ static int init_info_Layer()
 {
     infoLayer = init_layer_runtime(1);
     
-    /*By setting type to 0 and calling init_buffers we set all buffers to NULL
-     * Then we can cal init_buffers again to init the buffers we may need
-     * Just be cautious to never remove type bits before calling init_buffer,
-     * since that will cause NULL-setting buffers leading to memory leaks.
-     * Do instead add new type bits. 
-     * */
-    infoLayer->type = 0;
+    /*We init all buffers */
+    infoLayer->type = 255;
     init_buffers(infoLayer);    
+    
+    
+    infoRenderLayer = init_layer_runtime(1);
+    
+    /*We init all buffers */
+    infoRenderLayer->type = 255;
+    init_buffers(infoRenderLayer);    
     
     return 0;
 

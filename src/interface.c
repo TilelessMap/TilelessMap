@@ -68,6 +68,7 @@ int switch_map_modus(void *val)
         info_box_color[2] = 0.8;
         info_box_color[3] = 0.9;
         map_modus = 0;
+        return 0;
     }
     else
     {
@@ -76,6 +77,7 @@ int switch_map_modus(void *val)
         info_box_color[2] = 1;
         info_box_color[3] = 0.9;
         map_modus = 1;
+        return 1;
     }
     
  printf("Yes\n");

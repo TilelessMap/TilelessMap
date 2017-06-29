@@ -137,6 +137,21 @@ int add2gluint_list(GLUINT_LIST *list, GLuint val)
     return 0;
 }
 
+int addbatch2gluint_list(GLUINT_LIST *list,GLuint n_vals, GLuint *vals)
+{
+    increase_gluint_list(list, n_vals);
+    memcpy(list->list + list->used, vals, n_vals * sizeof(GLuint));
+    list->used += n_vals;
+    return 0;
+}
+
+int setzero2gluint_list(GLUINT_LIST *list,GLuint n_vals)
+{
+    increase_gluint_list(list, n_vals);
+    memset(list->list + list->used, 0, n_vals * sizeof(GLuint));
+    list->used += n_vals;
+    return 0;
+}
 
 /************* GL UShort List ********************/
 static GLUSHORT_LIST* init_glushort_list()
@@ -330,7 +345,7 @@ int init_buffers(LAYER_RUNTIME *layer)
         layer->wide_lines = init_linestring_list();
     else
         layer->wide_lines = NULL;
-    if (layer->type & 4)
+    if (layer->type & 6)
         layer->polygons = init_polygon_list();
     else
         layer->polygons = NULL;

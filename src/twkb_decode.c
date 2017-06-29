@@ -213,8 +213,10 @@ decode_multi(TWKB_PARSE_STATE *ts)
     int i,  *idlist, ngeoms;
 
     if(ts->theLayer->type & 6)
+    {
         add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->vertex_array->used);
-
+     //  add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->pa_start_indexes->used);
+    }
     
     parseFunctions_p pf;
     ngeoms = (int) buffer_read_uvarint(ts->tb);

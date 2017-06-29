@@ -164,46 +164,6 @@ typedef struct
 POLYGON_LIST;
 
 
-/**
-
-This is a struct keeping track of the arrays holdng vertices and vertice information
-*/
-typedef struct
-{
-    float *vertex_array; // A long list of vertices
-    uint32_t *start_index; //a list of offsets where each point array starts in "vertex_array" above
-    uint32_t *npoints; //a list of npoints in corresponding point array
-    uint32_t total_npoints; // total npoints in all point arrays
-    uint32_t used_n_pa; //used number of point arrays
-    uint32_t max_pa; //max number of point arrays that we have allocated memory for in "npoints" and "start_index" lists
-    float *buffer_end; //where "vertex_array" ends
-    float *first_free;    //first free position in "vertex_array"
-    uint32_t *polygon_offset; //a polygon can have several point arrays (if holes) so we have to keep track of where the polygon starts
-    uint32_t used_n_polygon; //number of polygons that we have registered
-    uint32_t max_polygon; //max number of polygons that we have allocated memory for in "used_n_polygon" and "polygon_offset" lists
-    int *id; //lista med id till korresponderande pointarrays
-    uint32_t *styleID; //array of styleID
-}
-GLESSTRUCT;
-
-/**
-
-This is a structsimilar to the above, but instead keeping track of arrays of indexes constructing triangels from vertex_array
-*/
-typedef struct
-{
-    GLushort *index_array; // a list of indeces for triangels
-    uint32_t *start_index; //list where each point array starts (not each triangel)
-    uint32_t *npoints; //number of values in "index_array"
-    uint32_t total_npoints;
-    uint32_t max_pa; //max number of point arrays we have allocated memory for storing info about
-    uint32_t used_n_pa;
-    GLushort *buffer_end;
-    GLushort *first_free;
-    int *id; //list if id to corresponding point array
-    uint32_t *styleID; //array of styleID
-}
-ELEMENTSTRUCT;
 
 
 
@@ -252,34 +212,20 @@ typedef struct
     char *name;
     uint8_t visible;
     sqlite3_stmt *preparedStatement;
-    /*Buffers*/
-   // GLuint vbo;
-    //GLuint ebo;
-    /*Values for shaders*/
-  //  GLfloat theMatrix[16];
-    /*values for what and how to render*/
     GLfloat *BBOX;
     uint8_t geometryType;
     uint8_t type; //8 on/off switches: point simple, point symbol, point text, line simple, line width, poly
     uint8_t n_dims;
-//   uint8_t has_text;
     GLfloat minScale;
     GLfloat maxScale;
     POINT_LIST *points;
     LINESTRING_LIST *lines;
     LINESTRING_LIST *wide_lines;
     POLYGON_LIST *polygons;
-    ELEMENTSTRUCT *tri_index;
     TEXTSTRUCT *text;
-
-//    uint8_t show_text;
-//    uint8_t line_width;
     int layer_id;
-//    int render_area; //This is a way to render only border of polygon. No triangels will be loadded
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
-//    uint8_t close_ring; //when rendering polygon border we need to close the ring since last point is missing
-
 }
 LAYER_RUNTIME;
 
@@ -389,7 +335,6 @@ int init_resources(char *dir);
 /*************Memory handling***********/
 
 
-GLESSTRUCT* init_res_buf();
 /*void destroy_buffer(GLESSTRUCT *res_buf);
 int check_and_increase_max_pa(size_t needed, GLESSTRUCT *res_buf);
 float* get_start(uint32_t npoints, uint8_t ndims, GLESSTRUCT *res_buf);
@@ -476,7 +421,7 @@ void render_txt(SDL_Window* window) ;
 int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int render_data(SDL_Window* window,GLfloat *theMatrix);
-
+int render_info(SDL_Window* window,GLfloat *theMatrix);
 
 FINGEREVENT* init_touch_que();
 int reset_touch_que(FINGEREVENT *touches);
@@ -507,7 +452,6 @@ void calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
 void calc_end(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
 
 int build_program();
-int floats_left(GLESSTRUCT *res_buf);
 int check_layer(const unsigned char *dbname, const unsigned char  *layername);
 
 
@@ -540,6 +484,7 @@ GLfloat *gps_circle;
 
 LAYER_RUNTIME *layerRuntime;
 LAYER_RUNTIME *infoLayer;
+LAYER_RUNTIME *infoRenderLayer;
 
 
 STYLES_RUNTIME *global_styles;

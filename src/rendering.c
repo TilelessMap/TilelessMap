@@ -382,16 +382,17 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     unsigned int n_vals = 0, n_vals_acc = 0;
 
     unsigned int used_n_pa;
+    unsigned int used_n_poly;
     
     
     if(oneLayer->type & 4)
     {
-        used_n_pa = poly->polygon_start_indexes->used;
+        used_n_poly = poly->polygon_start_indexes->used;
 
         glUseProgram(std_program);
         glEnableVertexAttribArray(std_coord2d);
 
-        n_polys += used_n_pa;
+        n_polys += used_n_poly;
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->ebo);
         glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
@@ -399,10 +400,15 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
    // n_polys += poly->pa_start_indexes->used;
     //total_points += poly->vertex_array->used/ndims;
     //n_tri += poly->element_array->used/3;
-        for (i=0; i<used_n_pa; i++)
+        
+        for (i=0; i<used_n_poly; i++)
         {
             size_t  vertex_offset = sizeof(GLuint) * *(poly->polygon_start_indexes->list + i);
-
+            
+           // printf("pa_list_index = %d, vertex_list_index_0 = %d\n", poly->polygon_start_indexes->list[i], poly->pa_start_indexes->list[0]);
+           // size_t  vertex_offset = sizeof(GLuint) * poly->pa_start_indexes->list[poly->polygon_start_indexes->list[i]];
+    
+            //printf("vertex_offfset = %d\n", vertex_offset);
             glVertexAttribPointer(
                 std_coord2d, // attribute
                 2,                 // number of elements per vertex, here (x,y)
@@ -493,16 +499,15 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 }
 
 
-int render_data(SDL_Window* window,GLfloat *theMatrix)
+
+
+static int render_data_layers(GLfloat *theMatrix)
 {
     log_this(10, "Entering render_data\n");
     int i;
     LAYER_RUNTIME *oneLayer;
 
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-
+ 
     total_points=0;
     for (i=0; i<nLayers; i++)
     {
@@ -537,7 +542,6 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
     renderGPS(theMatrix);
 
     render_simple_rect(5,75,300,225);
-    SDL_GL_SwapWindow(window);
 
     //  pthread_mutex_destroy(&mutex);
 //render(window,res_buf);
@@ -546,6 +550,32 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
 
 
 
+int render_data(SDL_Window* window,GLfloat *theMatrix)
+{
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    render_data_layers(theMatrix);
+    
+    
+    SDL_GL_SwapWindow(window);
+    
+    return 0;
+}
+
+int render_info(SDL_Window* window,GLfloat *theMatrix)
+{
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    
+    render_data_layers(theMatrix);
+    
+    loadPolygon(infoRenderLayer, theMatrix);
+    
+    SDL_GL_SwapWindow(window);
+    return 0;
+}
 
 
 /**
@@ -740,7 +770,7 @@ int renderGPS(GLfloat *theMatrix)
 //void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb)
 {
 
-    log_this(100,"rendering gps with x=%f, y = %f",gps_point.x,gps_point.y);
+    log_this(10,"rendering gps with x=%f, y = %f",gps_point.x,gps_point.y);
     GLfloat radius1=0, radius2=0, radius3 = 0;
     GLfloat color1[4] = {0.5,0.5,0.5,0.2};
     GLfloat color2[4] = {0,0,0,1};
