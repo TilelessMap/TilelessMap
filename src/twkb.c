@@ -55,9 +55,9 @@ static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 void *twkb_fromSQLiteBBOX_thread(void *theL)
 {
     twkb_fromSQLiteBBOX(theL);
-    
-     pthread_exit(NULL);
-     return NULL;
+
+    pthread_exit(NULL);
+    return NULL;
 }
 
 void *twkb_fromSQLiteBBOX(void *theL)
@@ -94,7 +94,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
     if((theLayer->utm_zone != curr_utm) || (theLayer->hemisphere != curr_hemi))
     {
-          GLfloat reproj_coord[2];
+        GLfloat reproj_coord[2];
         GLfloat maxx;
         GLfloat maxy;
         GLfloat minx;
@@ -155,8 +155,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
         sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
         sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY
         sqlite3_bind_double(prepared_statement, 4,(float) ext[1]); //minY
-    log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
-        
+        log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
+
     }
 
 

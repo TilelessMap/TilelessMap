@@ -216,9 +216,9 @@ decode_multi(TWKB_PARSE_STATE *ts)
     if(ts->theLayer->type & 6)
     {
         add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->vertex_array->used);
-     //  add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->pa_start_indexes->used);
+        //  add2gluint_list(ts->theLayer->polygons->polygon_start_indexes, ts->theLayer->polygons->pa_start_indexes->used);
     }
-    
+
     parseFunctions_p pf;
     ngeoms = (int) buffer_read_uvarint(ts->tb);
     if(ts->thi->has_idlist)
@@ -258,7 +258,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
 {
 //TODO, handle more than 2 coordinates. Now they are just read into the buffer which will give failur in opengl since it doesn't get that info
     uint32_t i, j;
-  
+
     int64_t val;
     GLFLOAT_LIST *vertex_list, *wide_line;
     float new_val;
@@ -271,8 +271,8 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
     uint type = theLayer->type;
 
     //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
- //   theLayer->n_dims = ndims;
-      uint32_t ndims = theLayer->n_dims;
+//   theLayer->n_dims = ndims;
+    uint32_t ndims = theLayer->n_dims;
     if((ts->theLayer->utm_zone != curr_utm) || (ts->theLayer->hemisphere != curr_hemi))
     {
         reprpject = 1;
@@ -289,7 +289,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
         p->next = (POINT_CIRCLE*) p+1;
         (p+1)->next = (POINT_CIRCLE*) p+2;
         (p+2)->next = (POINT_CIRCLE*) p;
-        
+
         if(type & 6)
             close_ring = 1;
         POINT_CIRCLE *p_akt = p;

@@ -132,7 +132,7 @@ calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal)
 
     d=(p3x - p1x) * (p2y - p1y) - (p3y - p1y) * (p2x - p1x);
 
-  //  printf("d = %f\n",d);
+    //  printf("d = %f\n",d);
 
 
 //d=(x−x1)(y2−y1)−(y−y1)(x2−x1)
@@ -144,15 +144,15 @@ calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal)
     Bx = p2x + avg_vec.x;
     By = 1.0*(1.0*p2y + 1.0*avg_vec.y);
 
-    
- //   printf("Ay = %f, avg_vec.y = %f, By = %f, Ay+avg_vec.y = %f\n", Ay, avg_vec.y, By, Ay+avg_vec.y);
 
-        Cx =  p1x + last_normal->x;
-        Cy =  p1y + last_normal->y;
-        Dx =  p2x + last_normal->x;
-        Dy =  p2y + last_normal->y;
+//   printf("Ay = %f, avg_vec.y = %f, By = %f, Ay+avg_vec.y = %f\n", Ay, avg_vec.y, By, Ay+avg_vec.y);
 
-    
+    Cx =  p1x + last_normal->x;
+    Cy =  p1y + last_normal->y;
+    Dx =  p2x + last_normal->x;
+    Dy =  p2y + last_normal->y;
+
+
 
     r_top = ((Ay - Cy) * (Dx-Cx)-(Ax-Cx) * (Dy-Cy));
     r_bot = ((Bx-Ax) * (Dy-Cy)-(By-Ay) * (Dx-Cx));
@@ -162,17 +162,17 @@ calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal)
     else
         r = r_top/r_bot;
 
-    
-  //  printf("ax = %f, ay = %f, bx = %f, by = %f, cx = %f, cy=%f, dx=%f, dy=%f\n", Ax, Ay, Bx, By, Cx, Cy, Dx, Dy);
-    
- //   printf("r = %f, rtop = %f, r_bot = %f\n",r,  r_top, r_bot);
+
+    //  printf("ax = %f, ay = %f, bx = %f, by = %f, cx = %f, cy=%f, dx=%f, dy=%f\n", Ax, Ay, Bx, By, Cx, Cy, Dx, Dy);
+
+//   printf("r = %f, rtop = %f, r_bot = %f\n",r,  r_top, r_bot);
     //      r = ((l1.p1.y - l2.p1.y) * (l2.p2.x - l2.p1.x) - (l1.p1.x - l2.p1.x) * (l2.p2.y - l2.p1.y)) / ((l1.p2.x - l1.p1.x) * (l2.p2.y - l2.p1.y) - (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x));
 
     //     printf("r: %f\n", r);
 
     if(fabs(r)>1.4)
     {
-      //    printf("d: %f\n", d);
+        //    printf("d: %f\n", d);
         if (d < 0)
         {
             add2glfloat_list(ut, p2x);
@@ -235,15 +235,15 @@ calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal)
             add2glfloat_list(ut, p2y);
             add2glfloat_list(ut,(GLfloat)  - r * avg_vec.x);
             add2glfloat_list(ut,(GLfloat)  - r * avg_vec.y);
-            
-       /*    printf("-------------:::::::.----------------\n");
-            printf("p2x = %f, p2y = %f\n",p2x, p2y);
-            printf("last_normal->x = %f, last_normal->y = %f\n",last_normal->x, last_normal->y);
-            printf("p2x = %f, p2y = %f\n",p2x, p2y);
-            printf("r = %f, avg_vec.x =  %f, avg_vec.y = %f\n",r,avg_vec.x, avg_vec.y );
-            printf("p2x = %f, p2y = %f\n",p2x, p2y);
-            printf("normal.x = %f, normal.y = %f\n",norm.x, norm.y);
-*/
+
+            /*    printf("-------------:::::::.----------------\n");
+                 printf("p2x = %f, p2y = %f\n",p2x, p2y);
+                 printf("last_normal->x = %f, last_normal->y = %f\n",last_normal->x, last_normal->y);
+                 printf("p2x = %f, p2y = %f\n",p2x, p2y);
+                 printf("r = %f, avg_vec.x =  %f, avg_vec.y = %f\n",r,avg_vec.x, avg_vec.y );
+                 printf("p2x = %f, p2y = %f\n",p2x, p2y);
+                 printf("normal.x = %f, normal.y = %f\n",norm.x, norm.y);
+            */
             /**(ut + n++) = p2x;
             *(ut + n++) = p2y;
 

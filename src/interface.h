@@ -8,8 +8,8 @@ typedef struct
     GLshort minx;
     GLshort maxx;
     GLshort miny;
-    GLshort maxy;    
-}CTRL_BOX;
+    GLshort maxy;
+} CTRL_BOX;
 
 
 typedef int (*tileless_event)(void*);

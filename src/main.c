@@ -30,7 +30,7 @@
 void mainLoop(SDL_Window* window)
 {
     log_this(100, "Entering mainLoop\n");
-    
+
     GLfloat tx,ty,pr;
     int ti, fi;
     GLfloat currentBBOX[4] = {0.0,0.0,0.0,0.0};
@@ -65,7 +65,7 @@ void mainLoop(SDL_Window* window)
         log_this(10, "Problem 2\n");
         fprintf(stderr,"opengl error 65 :%d\n", err);
     }
- 
+
     get_data(window, newBBOX, theMatrix);
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
@@ -79,8 +79,8 @@ void mainLoop(SDL_Window* window)
         {
 
             if(ev.type == GPSEventType)
-            {                  
-                render_data(window, theMatrix); 
+            {
+                render_data(window, theMatrix);
             }
             else
             {
@@ -102,7 +102,7 @@ void mainLoop(SDL_Window* window)
                         map_modus_before = map_modus;
                         check_click(mouse_up_x, mouse_up_y);
                         render_data(window, theMatrix);
-                        
+
                         if(!map_modus && ! map_modus_before)
                             identify(currentBBOX, mouse_up_x,mouse_up_y,window, theMatrix);
                     }
@@ -115,7 +115,7 @@ void mainLoop(SDL_Window* window)
                             get_data(window, newBBOX, theMatrix);
                             copyNew2CurrentBBOX(newBBOX, currentBBOX);
                         }
-          
+
                     }
                     break;
                 case SDL_MOUSEWHEEL:
@@ -136,7 +136,7 @@ void mainLoop(SDL_Window* window)
                     break;
 
                 case SDL_MOUSEMOTION:
-                      if(map_modus)
+                    if(map_modus)
                     {
                         if(mouse_down)
                         {
@@ -151,7 +151,7 @@ void mainLoop(SDL_Window* window)
 
 
                                 matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-                                                  render_data(window, theMatrix);
+                                render_data(window, theMatrix);
                                 //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                                 while ((err = glGetError()) != GL_NO_ERROR) {
                                     log_this(10, "Problem 2\n");
@@ -163,34 +163,34 @@ void mainLoop(SDL_Window* window)
                         }
 
                     }
-                   /*  else
-                    {
-                             if(n_events<2)
-                            {
+                    /*  else
+                     {
+                              if(n_events<2)
+                             {
 
-                                mouse_up_x = ev.motion.x;
-                                mouse_up_y = ev.motion.y;
+                                 mouse_up_x = ev.motion.x;
+                                 mouse_up_y = ev.motion.y;
 
-                        identify(currentBBOX, mouse_up_x,mouse_up_y,window, theMatrix);
-                            }
-                    }*/
+                         identify(currentBBOX, mouse_up_x,mouse_up_y,window, theMatrix);
+                             }
+                     }*/
 
-                        break;
+                    break;
 
 #endif
 
                 case SDL_FINGERDOWN:
-                                       
- 
+
+
                     ti = (int) ev.tfinger.touchId;
                     fi = (int) ev.tfinger.fingerId;
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
                     pr = ev.tfinger.pressure;
                     //DEBUG_PRINT(("DOWN: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti));
-                    
-                    register_touch_down(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y); 
-                   
+
+                    register_touch_down(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
+
                     break;
                 case SDL_FINGERUP:
                     log_this(10,"SDL_FINGERUP");
@@ -200,60 +200,60 @@ void mainLoop(SDL_Window* window)
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
                     pr = ev.tfinger.pressure;
-                    
-                       
-                    
-               /*     if(abs(mouse_down_x-mouse_up_x) < 10 && abs(mouse_down_y-mouse_up_y)<10)
-                    {*/
-                        map_modus_before = map_modus;
-                        check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
-                       
-                               
-                        render_data(window, theMatrix);
-                                   
-                        if(!map_modus && ! map_modus_before)
-                            identify(currentBBOX, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT),window, theMatrix);
-                /*    }
-                    else
-                    {*/
-                        if(map_modus)
-                        {
-                            if(touches[1].active) //check if at least 2 fingers are activated
-                            {
-                                if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
-                                {
-                                    log_this(10, "OK, on the inside\n");
-                                    get_box_from_touches(touches, currentBBOX, newBBOX);
-                                    reset_touch_que(touches);
-                                    matrixFromBBOX(newBBOX, theMatrix);
-                                    log_this(10,"ok, go get data");
-                                                     
- 
-                                    get_data(window, newBBOX, theMatrix);
-                                    copyNew2CurrentBBOX(newBBOX, currentBBOX);
-                                }
-                            }
-                        
-                        else
-                        {
-                                //	  mouse_down = 0;
-                                mouse_up_x = (GLint) (tx * CURR_WIDTH);
-                                mouse_up_y = (GLint)(ty * CURR_HEIGHT);
-                                mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
-                                mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
-                                matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-                                reset_touch_que(touches);
 
-                                //render_data(window, newBBOX, theMatrix);
-                               
+
+
+                    /*     if(abs(mouse_down_x-mouse_up_x) < 10 && abs(mouse_down_y-mouse_up_y)<10)
+                         {*/
+                    map_modus_before = map_modus;
+                    check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
+
+
+                    render_data(window, theMatrix);
+
+                    if(!map_modus && ! map_modus_before)
+                        identify(currentBBOX, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT),window, theMatrix);
+                    /*    }
+                        else
+                        {*/
+                    if(map_modus)
+                    {
+                        if(touches[1].active) //check if at least 2 fingers are activated
+                        {
+                            if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
+                            {
+                                log_this(10, "OK, on the inside\n");
+                                get_box_from_touches(touches, currentBBOX, newBBOX);
+                                reset_touch_que(touches);
+                                matrixFromBBOX(newBBOX, theMatrix);
+                                log_this(10,"ok, go get data");
+
+
                                 get_data(window, newBBOX, theMatrix);
                                 copyNew2CurrentBBOX(newBBOX, currentBBOX);
-
                             }
                         }
-                        else 
-                             reset_touch_que(touches);
-                   // }
+
+                        else
+                        {
+                            //	  mouse_down = 0;
+                            mouse_up_x = (GLint) (tx * CURR_WIDTH);
+                            mouse_up_y = (GLint)(ty * CURR_HEIGHT);
+                            mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
+                            mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
+                            matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
+                            reset_touch_que(touches);
+
+                            //render_data(window, newBBOX, theMatrix);
+
+                            get_data(window, newBBOX, theMatrix);
+                            copyNew2CurrentBBOX(newBBOX, currentBBOX);
+
+                        }
+                    }
+                    else
+                        reset_touch_que(touches);
+                    // }
 
                     break;
 
@@ -273,7 +273,7 @@ void mainLoop(SDL_Window* window)
                             //reset_touch_que(touches);
                             matrixFromBBOX(newBBOX, theMatrix);
                             log_this(10, "matrixFromBBOX");
-                                             
+
                             if(n_events<2)
                                 render_data(window, theMatrix);
 
@@ -296,8 +296,8 @@ void mainLoop(SDL_Window* window)
                             mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
                             mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
                             matrixFromDeltaMouse(currentBBOX,newBBOX,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y, theMatrix);
-                  
- 
+
+
                             if(n_events<2)
                                 render_data(window, theMatrix);
                             //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
@@ -342,7 +342,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     destroy_layer_runtime(layerRuntime,nLayers);
     destroy_layer_runtime(infoLayer,1);
     free(gps_circle);
-    
+
     free(atlases[0]);
     free(atlases[1]);
     free(atlases[2]);

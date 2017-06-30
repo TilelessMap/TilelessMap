@@ -95,12 +95,12 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
             }
             if(type & 224)
                 loadPoint( oneLayer, theMatrix);
-  
+
             if(type & 24)
-                loadLine( oneLayer, theMatrix);            
+                loadLine( oneLayer, theMatrix);
             if(type & 6)
                 loadPolygon( oneLayer, theMatrix);
-               
+
         }
 
     }

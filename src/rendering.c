@@ -33,12 +33,12 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         render_text(oneLayer,theMatrix);
         return 0;
     }
- //   GLESSTRUCT *rb = oneLayer->res_buf;
-/*
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
+//   GLESSTRUCT *rb = oneLayer->res_buf;
+    /*
+        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
 
-    renderPoint( oneLayer, theMatrix);*/
+        renderPoint( oneLayer, theMatrix);*/
     return 0;
 }
 
@@ -51,7 +51,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLfloat c[4];
     //  GLenum err;
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
- //   GLESSTRUCT *rb = oneLayer->res_buf;
+//   GLESSTRUCT *rb = oneLayer->res_buf;
     // glEnable(GL_PROGRAM_POINT_SIZE);
     glPointSize(2);
     glUseProgram(std_program);
@@ -99,7 +99,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     }
     glDisableVertexAttribArray(std_coord2d
-);
+                              );
 #endif
     return 0;
 
@@ -109,12 +109,12 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
- /*   
-    printf(".............................................................\n");   
-for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
-{    
- printf("load, i = %d, v = %f\n", i,*(oneLayer->wide_lines->vertex_array->list+i));   
-}*/
+    /*
+       printf(".............................................................\n");
+    for (i=0;i<oneLayer->wide_lines->vertex_array->used; i++)
+    {
+    printf("load, i = %d, v = %f\n", i,*(oneLayer->wide_lines->vertex_array->list+i));
+    }*/
     if(oneLayer->type & 8)
     {
         LINESTRING_LIST *line = oneLayer->wide_lines;
@@ -186,14 +186,14 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glEnable (GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 //    n_lines += line->line_start_indexes->used;
-  //  total_points += line->vertex_array->used/ndims;
-    
-    
-/*    printf("------------------------------------------------------\n");   
-for (i=0;i<line->vertex_array->used; i++)
-{    
- printf("load, i = %d, v = %f\n", i,*(line->vertex_array->list+i));   
-}*/
+    //  total_points += line->vertex_array->used/ndims;
+
+
+    /*    printf("------------------------------------------------------\n");
+    for (i=0;i<line->vertex_array->used; i++)
+    {
+     printf("load, i = %d, v = %f\n", i,*(line->vertex_array->list+i));
+    }*/
     for (i=0; i<line->line_start_indexes->used; i++)
     {
 
@@ -239,12 +239,12 @@ for (i=0;i<line->vertex_array->used; i++)
             c[3] = 255;
             color = c;
         }
-        
+
         if(oneLayer->type & 6)
         {
             color = color2;
             lw2 = 0;
-            
+
         }
         else if(lw2)
         {
@@ -352,7 +352,7 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     POLYGON_LIST *poly = oneLayer->polygons;
 
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, poly->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*poly->vertex_array->used,poly->vertex_array->list, GL_STATIC_DRAW);
 
@@ -383,8 +383,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     unsigned int used_n_pa;
     unsigned int used_n_poly;
-    
-    
+
+
     if(oneLayer->type & 4)
     {
         used_n_poly = poly->polygon_start_indexes->used;
@@ -396,18 +396,18 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->ebo);
         glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
-        
-   // n_polys += poly->pa_start_indexes->used;
-    //total_points += poly->vertex_array->used/ndims;
-    //n_tri += poly->element_array->used/3;
-        
+
+        // n_polys += poly->pa_start_indexes->used;
+        //total_points += poly->vertex_array->used/ndims;
+        //n_tri += poly->element_array->used/3;
+
         for (i=0; i<used_n_poly; i++)
         {
             size_t  vertex_offset = sizeof(GLuint) * *(poly->polygon_start_indexes->list + i);
-            
-           // printf("pa_list_index = %d, vertex_list_index_0 = %d\n", poly->polygon_start_indexes->list[i], poly->pa_start_indexes->list[0]);
-           // size_t  vertex_offset = sizeof(GLuint) * poly->pa_start_indexes->list[poly->polygon_start_indexes->list[i]];
-    
+
+            // printf("pa_list_index = %d, vertex_list_index_0 = %d\n", poly->polygon_start_indexes->list[i], poly->pa_start_indexes->list[0]);
+            // size_t  vertex_offset = sizeof(GLuint) * poly->pa_start_indexes->list[poly->polygon_start_indexes->list[i]];
+
             //printf("vertex_offfset = %d\n", vertex_offset);
             glVertexAttribPointer(
                 std_coord2d, // attribute
@@ -507,7 +507,7 @@ static int render_data_layers(GLfloat *theMatrix)
     int i;
     LAYER_RUNTIME *oneLayer;
 
- 
+
     total_points=0;
     for (i=0; i<nLayers; i++)
     {
@@ -521,8 +521,8 @@ static int render_data_layers(GLfloat *theMatrix)
 //~ log_this(10, "render : %d\n",oneLayer->geometryType);
 
             //     log_this(10, "render point");
-              if (type & 32) 
-                 render_text(oneLayer, theMatrix);
+            if (type & 32)
+                render_text(oneLayer, theMatrix);
 
             //   renderPoint(oneLayer, theMatrix);
 
@@ -556,10 +556,10 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     render_data_layers(theMatrix);
-    
-    
+
+
     SDL_GL_SwapWindow(window);
-    
+
     return 0;
 }
 
@@ -568,11 +568,11 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    
+
     render_data_layers(theMatrix);
-    
+
     loadPolygon(infoRenderLayer, theMatrix);
-    
+
     SDL_GL_SwapWindow(window);
     return 0;
 }
@@ -590,7 +590,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     int i;
     GLfloat *color;
     GLfloat c[4];
-    
+
     int offset = 0;;
     char *txt;
 //   glGenBuffers(1, &text_vbo);
@@ -599,7 +599,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
 
-  //  GLESSTRUCT *rb = oneLayer->res_buf;
+    //  GLESSTRUCT *rb = oneLayer->res_buf;
 
     POINT_LIST *point = oneLayer->points;
     glUseProgram(txt_program);
@@ -619,12 +619,12 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     int used=0;
 
     int nw = point->point_start_indexes->used;
-    
-    
+
+
     n_words += nw;
     total_points += nw;
-    
-    
+
+
     for (i=0; i<nw; i++)
     {
 
@@ -645,16 +645,16 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         /*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
                 point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
-        
+
         point_coord[0] =  *(point->points->list + i*ndims);
         point_coord[1] =  *(point->points->list + i*ndims + 1);
- */
+        */
         point_coord[0] =  *(point->points->list + offset);
         point_coord[1] =  *(point->points->list + offset + 1);
-        
+
         offset = *(point->point_start_indexes->list + i);
-     //  printf("c1 = %f, c2 = %f\n", point_coord[0], point_coord[1]);
-        
+        //  printf("c1 = %f, c2 = %f\n", point_coord[0], point_coord[1]);
+
         txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
         draw_it(color,point_coord, psz, txt_box, txt_color, txt_coord2d, txt, sx, sy);
@@ -777,7 +777,7 @@ int renderGPS(GLfloat *theMatrix)
     GLfloat color3[4] = {0,1,0,1};
     GLfloat p[2];
 
-    
+
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
 

@@ -210,21 +210,21 @@ static int load_layers(TEXT *missing_db)
     char sql[2048];
     uint8_t type = 0;
 
-  /*  if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
-    {
+    /*  if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
+      {
 
-        rc = sqlite3_exec(projectDB,"alter table layers add column override_type integer;",NULL, NULL, &err_msg);
-        if (rc != 0)
-        {
-            log_this(90, "failed to add missing column in layers table: %s\n", err_msg);
+          rc = sqlite3_exec(projectDB,"alter table layers add column override_type integer;",NULL, NULL, &err_msg);
+          if (rc != 0)
+          {
+              log_this(90, "failed to add missing column in layers table: %s\n", err_msg);
 
-            sqlite3_free(err_msg);
-        }
-
-
+              sqlite3_free(err_msg);
+          }
 
 
-    }*/
+
+
+      }*/
     char sqlLayerLoading[2048];
     char *sqlLayerLoading1 = "SELECT "
                              /*fields for attaching the database*/
@@ -276,10 +276,10 @@ static int load_layers(TEXT *missing_db)
         oneLayer=layerRuntime + i;
         //   sqlite3_step(preparedLayerLoading);
 
- //       oneLayer->close_ring = 0;
+//       oneLayer->close_ring = 0;
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
-       oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);
+        oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);
         oneLayer->minScale = sqlite3_column_double(preparedLayerLoading, 3);
         oneLayer->maxScale = sqlite3_column_double(preparedLayerLoading, 4);
         const unsigned char *stylefield =  sqlite3_column_text(preparedLayerLoading, 5);
@@ -453,11 +453,11 @@ static int load_layers(TEXT *missing_db)
         init_buffers(oneLayer);
 
 
- /*       oneLayer->res_buf =  init_res_buf();
+        /*       oneLayer->res_buf =  init_res_buf();
 
-        if (oneLayer->type & 4)
-            oneLayer->tri_index =  init_element_buf();
-*/
+               if (oneLayer->type & 4)
+                   oneLayer->tri_index =  init_element_buf();
+        */
         if (oneLayer->type & 32)
             oneLayer->text =  init_text_buf();
 
@@ -514,18 +514,18 @@ static int init_gps()
 static int init_info_Layer()
 {
     infoLayer = init_layer_runtime(1);
-    
+
     /*We init all buffers */
     infoLayer->type = 255;
-    init_buffers(infoLayer);    
-    
-    
+    init_buffers(infoLayer);
+
+
     infoRenderLayer = init_layer_runtime(1);
-    
+
     /*We init all buffers */
     infoRenderLayer->type = 255;
-    init_buffers(infoRenderLayer);    
-    
+    init_buffers(infoRenderLayer);
+
     return 0;
 
 }
@@ -533,16 +533,16 @@ static int init_info_Layer()
 int init_resources(char *dir)
 {
     log_this(10, "Entering init_resources\n");
-map_modus = 1;
+    map_modus = 1;
     TEXT *missing_db = init_txt(1024);
-curr_utm = 0;
+    curr_utm = 0;
     curr_hemi = 0;
     //char stylewhere[128];
 
-info_box_color[0] = 1;
-info_box_color[1] = 1;
-info_box_color[2] = 1;
-info_box_color[3] = 0.9;
+    info_box_color[0] = 1;
+    info_box_color[1] = 1;
+    info_box_color[2] = 1;
+    info_box_color[3] = 0.9;
     build_program();
 
     attach_db(dir, missing_db);

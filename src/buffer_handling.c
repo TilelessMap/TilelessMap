@@ -332,7 +332,7 @@ static POLYGON_LIST* init_polygon_list()
     res->element_start_indexes = init_gluint_list();
     res->outline_style_id = init_gluint_list();
     res->area_style_id = init_gluint_list();
-    
+
     glGenBuffers(1, &(res->vbo));
     glGenBuffers(1, &(res->ebo));
     return res;
@@ -381,13 +381,13 @@ static int destroy_point_list(POINT_LIST *l)
 
 static int destroy_linestring_list(LINESTRING_LIST *l)
 {
-    
+
     destroy_glfloat_list(l->vertex_array);
     destroy_gluint_list(l->line_start_indexes);
     destroy_gluint_list(l->style_id);
     free(l);
     return 0;
-    
+
 }
 
 static int destroy_polygon_list(POLYGON_LIST *l)
@@ -446,7 +446,7 @@ int reset_buffers(LAYER_RUNTIME *layer)
         reset_polygon_list(layer->polygons);
 
     reset_int64_list(layer->twkb_id);
-    
+
     //  reset_gluint_list(layer->style_id);
     return 0;
 }
@@ -474,8 +474,8 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
     }
     else
         return NULL;
-    
-    
+
+
 }
 
 
@@ -490,7 +490,7 @@ GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id)
 int pa_end(LAYER_RUNTIME *l, int64_t id)
 {
     add2int64_list(l->twkb_id, id);
-    
+
     int type = l->type;
     if(type & 224)
         add2gluint_list(l->points->point_start_indexes, l->points->points->used);
@@ -513,7 +513,7 @@ int destroy_buffers(LAYER_RUNTIME *layer)
 
 {
     if(layer->type & 224)
-         destroy_point_list(layer->points);
+        destroy_point_list(layer->points);
     if(layer->type & 16)
         destroy_linestring_list(layer->lines);
     if(layer->type & 8)

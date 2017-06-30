@@ -51,11 +51,11 @@ int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
     punkter[5] = maxy;
     punkter[6] = maxx;
     punkter[7] = miny;
-    
-    
-    
-    
-  //  {5,75,5, 225,300,225,300,75};
+
+
+
+
+    //  {5,75,5, 225,300,225,300,75};
     //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
     GLshort tri_index[] = {0,1,3,1,2,3};
 
