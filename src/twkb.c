@@ -171,7 +171,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
     while (sqlite3_step(prepared_statement)==SQLITE_ROW)
     {
         ts.id = sqlite3_column_int(prepared_statement, 2);
-        printf("id fra db = %ld\n",ts.id);
+       // printf("id fra db = %ld\n",ts.id);
         ts.styleID = sqlite3_column_int(prepared_statement, 3);
         if(get_blob(&tb,prepared_statement,0))
         {

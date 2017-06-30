@@ -151,20 +151,7 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
                         ring_n = 0;
                         inside = 0;
                     }
-
-
-
-
-
                 }
-
-
-
-
-
-
-
-
 
             }
 

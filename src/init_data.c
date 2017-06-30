@@ -516,14 +516,14 @@ static int init_info_Layer()
     infoLayer = init_layer_runtime(1);
 
     /*We init all buffers */
-    infoLayer->type = 255;
+    infoLayer->type = 255-32;
     init_buffers(infoLayer);
 
 
     infoRenderLayer = init_layer_runtime(1);
 
     /*We init all buffers */
-    infoRenderLayer->type = 255;
+    infoRenderLayer->type = 255-32;
     init_buffers(infoRenderLayer);
 
     return 0;
