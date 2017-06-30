@@ -153,6 +153,84 @@ int setzero2gluint_list(GLUINT_LIST *list,GLuint n_vals)
     return 0;
 }
 
+
+/************* int64 List ********************/
+static INT64_LIST* init_int64_list()
+{
+    INT64_LIST *res = (INT64_LIST*) st_malloc(sizeof(INT64_LIST));
+
+    res->list = st_malloc(INIT_LIST_SIZE * sizeof(int64_t));
+    res->alloced = INIT_LIST_SIZE;
+    res->used = 0;
+
+    return res;
+}
+
+
+
+static int increase_int64_list(INT64_LIST *l, size_t needed_space)
+{
+
+    size_t available_space = l->alloced-l->used;
+
+    if (available_space >= needed_space)
+        return 0;
+
+
+    size_t new_size = l->alloced;
+
+    while (available_space < needed_space)
+    {
+        new_size*=2;
+        available_space = new_size - l->used;
+    }
+    l->list = st_realloc(l->list, new_size * sizeof(int64_t));
+    l->alloced = new_size;
+    return 0;
+}
+
+static int reset_int64_list(INT64_LIST *l)
+{
+    l->used = 0;
+    return 0;
+}
+
+
+static int destroy_int64_list(INT64_LIST *l)
+{
+    free(l->list);
+    l->list = NULL;
+    l->used = 0;
+    l->alloced = 0;
+    free(l);
+    l = NULL;
+    return 0;
+}
+
+int add2int64_list(INT64_LIST *list, int64_t val)
+{
+    increase_int64_list(list, 1);
+    *(list->list + list->used) = val;
+    list->used++;
+    return 0;
+}
+
+int addbatch2int64_list(INT64_LIST *list,GLuint n_vals, int64_t *vals)
+{
+    increase_int64_list(list, n_vals);
+    memcpy(list->list + list->used, vals, n_vals * sizeof(int64_t));
+    list->used += n_vals;
+    return 0;
+}
+
+int setzero2int64_list(INT64_LIST *list,int64_t n_vals)
+{
+    increase_int64_list(list, n_vals);
+    memset(list->list + list->used, 0, n_vals * sizeof(int64_t));
+    list->used += n_vals;
+    return 0;
+}
+
 /************* GL UShort List ********************/
 static GLUSHORT_LIST* init_glushort_list()
 {
@@ -350,6 +428,7 @@ int init_buffers(LAYER_RUNTIME *layer)
     else
         layer->polygons = NULL;
 
+    layer->twkb_id = init_int64_list();
     //  layer->style_id = init_gluint_list();
     return 0;
 }
@@ -366,6 +445,8 @@ int reset_buffers(LAYER_RUNTIME *layer)
     if(layer->polygons)
         reset_polygon_list(layer->polygons);
 
+    reset_int64_list(layer->twkb_id);
+    
     //  reset_gluint_list(layer->style_id);
     return 0;
 }
@@ -393,6 +474,8 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
     }
     else
         return NULL;
+    
+    
 }
 
 
@@ -404,8 +487,10 @@ GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id)
 
 }
 
-int pa_end(LAYER_RUNTIME *l)
+int pa_end(LAYER_RUNTIME *l, int64_t id)
 {
+    add2int64_list(l->twkb_id, id);
+    
     int type = l->type;
     if(type & 224)
         add2gluint_list(l->points->point_start_indexes, l->points->points->used);
@@ -436,6 +521,7 @@ int destroy_buffers(LAYER_RUNTIME *layer)
     if (layer->type & 4)
         destroy_polygon_list(layer->polygons);
 
+    destroy_int64_list(layer->twkb_id);
     return 0;
 }
 

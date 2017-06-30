@@ -9,9 +9,9 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
     int i, z, r, n_vals_acc, n_vals, poly_start_index , pa_start_index, n_of_pa,n_polys, n_points,next_pa ;
     int inside,n_dims, nrings,n_elements_acc,n_elements;
     px2m(currentBBOX,x,y,&w_x,&w_y);
-    
+    int64_t id; 
     GLfloat meterPerPixel = (currentBBOX[2]-currentBBOX[0])/CURR_WIDTH;
-//    printf("w_x = %f, w_y = %f\n", w_x, w_y);
+   printf("w_x = %f, w_y = %f\n", w_x, w_y);
     
     GLfloat box[4];
     GLfloat point[2];
@@ -31,6 +31,7 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
     for (i = 0;i<nLayers;i++)
     {
         theLayer = layerRuntime + i;  
+        printf("layer name %s\n",theLayer->name);
         if(theLayer->visible && theLayer->minScale<=meterPerPixel && theLayer->maxScale>meterPerPixel)
         {
         //reset all used buffers in our infoLayer
@@ -69,82 +70,103 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
         if(theLayer->type & 6)
         {
             
-            poly_start_index = 0;
-            pa_start_index = 0;
-            n_of_pa = 0;
+    
             n_dims = infoLayer->n_dims;
             
-            
-
-             n_polys = poly->polygon_start_indexes->used;
-        r = 0;    
-        pa_start_index = 0;
-       int n_rings, next_poly;
-       if(n_polys)
-            n_points = (poly->pa_start_indexes->list[0])/n_dims;
-        for (z=0;z<n_polys; z++)
+      /*    for (r=0;r<poly->pa_start_indexes->used; r++)
         {
-            nrings = 0;
-            n_elements = 0;
-            n_elements_acc = 0;
-            poly_start_index = poly->polygon_start_indexes->list[z];
-            if(z<n_polys-1)
-                next_poly = poly->polygon_start_indexes->list[z+1];
-            else
-                next_poly = poly->vertex_array->used;
             
-               
-            inside=0;
-            if(wn_PnPoly( point,poly->vertex_array->list + poly_start_index, n_points , n_dims))
+         printf("r = %d, pa_start = %d, id = %ld\n", r, poly-> );   
+        }*/
+        next_pa = 0;
+        r = 0; 
+        
+int poly_n = 0;
+int next_polystart;
+if (poly->polygon_start_indexes->used>1)
+next_polystart = poly->polygon_start_indexes->list[poly_n+1];  
+else 
+    next_polystart =  poly->vertex_array->used;
+int curr_pa_start = 0;
+int ring_n = 0;
+int next_pa_start = 0;
+int curr_poly_start = 0;
+int n_elements_acc = 0;
+uint pa;
+inside = 0;
+        for (pa=0;pa<poly->pa_start_indexes->used; pa++)
+        {
+        printf("poly_number = %d and id = %ld\n", poly_n, infoLayer->twkb_id->list[pa]);
+        curr_pa_start = next_pa_start;
+        next_pa_start = poly->pa_start_indexes->list[pa];
+        
+        
+        
+        if(ring_n == 0 || inside)
+        {
+            
+            if(wn_PnPoly( point,poly->vertex_array->list + curr_pa_start, (next_pa_start - curr_pa_start)/n_dims, n_dims))
             {
+             if(ring_n == 0) //outer boundary  
                 inside = 1;
-                nrings++;
-                
-                    next_pa = *(poly->pa_start_indexes->list + r);
-                r++;
-                while(next_pa<next_poly)
-                {
-                    
-                        pa_start_index = next_pa;
-                    next_pa = *(poly->pa_start_indexes->list + r);
-                    r++;
-                    n_points = (next_pa - pa_start_index)/n_dims;
-                    
-                    if(wn_PnPoly( point,poly->vertex_array->list + pa_start_index,n_points , n_dims))
-                    {
-                        inside = 0;   
-                        //Ok, we are inside a hole, let's fast forward through the rest of the holes
-                        while(next_pa<next_poly)
-                        {
-                                next_pa = *(poly->pa_start_indexes->list + r);
-                                r++;
-                        }    
-                        
-                        
-                    }
-                    
-                }
-                
+             else
+                 inside = 0;
+            }
+            else
+            {
+             if(ring_n == 0)   
+                inside = 0;
+             else
+                 inside = 1;
+            }
+            
+        }
+        
+    
+        ring_n++;    
+        printf("next_polystart = %d, next_pa_start = %d\n", next_polystart, next_pa_start);
+         if(next_polystart == next_pa_start)
+        {            
                 if(inside)
                 {
                     log_this(100,"ok, poly for rendering");
                      add2gluint_list(renderpoly->polygon_start_indexes, renderpoly->vertex_array->used); //register start of new polygon to render
-                     addbatch2glfloat_list(renderpoly->vertex_array, next_poly-poly_start_index, poly->vertex_array->list + poly_start_index); //memcpy all vertexes in polygon
+                     addbatch2glfloat_list(renderpoly->vertex_array, next_polystart - curr_poly_start, poly->vertex_array->list + curr_poly_start); //memcpy all vertexes in polygon
                      
                      
                      
-                    n_elements = *(poly->element_start_indexes->list + z) - n_elements_acc;
+                    n_elements = *(poly->element_start_indexes->list + poly_n) - n_elements_acc;
                     
                      addbatch2glushort_list(renderpoly->element_array, n_elements, poly->element_array->list + n_elements_acc); //memcpy all vertexes in polygon
                      add2gluint_list(renderpoly->element_start_indexes, renderpoly->element_array->used); //register start of new polygon to render
                     
-                    n_elements_acc = *(poly->element_start_indexes->list + z);
+                    
                     
                 }
-                
-                        
-                }                
-                }   
+            curr_poly_start = next_polystart;
+            n_elements_acc = *(poly->element_start_indexes->list + poly_n);
+            poly_n++;
+            if(poly_n < poly->polygon_start_indexes->used - 1)
+                next_polystart = poly->polygon_start_indexes->list[poly_n+1];   
+            else                
+                next_polystart = poly->vertex_array->used;   
+            ring_n = 0;
+            inside = 0;
+        }
+       
+        
+        
+        
+        
+        }
+        
+        
+        
+        
+        
+        
+        
+        
                 
             }
     

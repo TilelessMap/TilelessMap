@@ -130,6 +130,14 @@ GLUINT_LIST;
 
 typedef struct
 {
+    int64_t *list;
+    size_t alloced;
+    size_t used;
+}
+INT64_LIST;
+
+typedef struct
+{
     GLFLOAT_LIST *points;
     GLUINT_LIST *point_start_indexes;
     GLUINT_LIST *style_id;
@@ -223,6 +231,7 @@ typedef struct
     LINESTRING_LIST *wide_lines;
     POLYGON_LIST *polygons;
     TEXTSTRUCT *text;
+    INT64_LIST *twkb_id;
     int layer_id;
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
@@ -314,7 +323,7 @@ typedef struct
 //    GLESSTRUCT *res_buf;
     LAYER_RUNTIME *theLayer;
     sqlite3_stmt *prepared_statement;
-    uint32_t id;  //the current styleID
+    int64_t id;  //the current id
     uint32_t styleID;  //the current styleID
     uint8_t line_width;  //If we shall calculate triangels to get line width
     uint8_t utm_zone;

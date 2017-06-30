@@ -75,6 +75,7 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
 {
     int i;
 
+    ts->id = old_ts->id;
     ts->tb = old_ts->tb;
     ts->styleID = old_ts->styleID;
     ts->theLayer = old_ts->theLayer;
@@ -367,7 +368,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
 
 
     }
-    pa_end(theLayer);
+    pa_end(theLayer, ts->id);
     return 0;
 }
 

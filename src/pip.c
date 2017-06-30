@@ -38,7 +38,7 @@ inline static int isLeft( GLfloat *P0, GLfloat *P1, GLfloat *P2 )
 int wn_PnPoly( GLfloat *P, GLfloat *V, int n , int n_dims_in_array)
 {
     int    wn = 0, i;    // the  winding number counter
-
+printf("npoints in wn = %d\n", n);
     // loop through all edges of the polygon
     for (i=0; i<n-1; i++) 
     {   // edge from V[i] to  V[i+1]
