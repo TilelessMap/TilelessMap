@@ -114,7 +114,14 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
     print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);*/
 
-print_txt(10,200,200,0,0,255,2,200, "Nu testart vi att skriva en lång rad så får vi se hur det går!");
+GLfloat point_coord[2] = {10, 200};
+GLfloat color[4] = {200,0,0,255};
+
+
+
+print_txt(point_coord, color,1,0,300, "Normal text ");
+printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
+print_txt(point_coord, color,1,1,300, "bold text");
 #ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 

@@ -657,7 +657,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
-        draw_it(color,point_coord, psz, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
+        draw_it(color,point_coord, psz,0, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
 
 
 
@@ -671,7 +671,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-static inline int add_word(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_chars, float sx, float sy,POINT_T *coords ) 
+static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_chars, float sx, float sy,POINT_T *coords ) 
 {
     
     uint32_t p;
@@ -704,11 +704,15 @@ static inline int add_word(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_
     return c;
 }
 
-int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
+int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
 {
 
-
-    ATLAS *a = atlases[atlas_nr-1];
+    ATLAS *a;
+    if(bold)        
+        a = font_bold[atlas_nr-1];
+    else
+        a = font_normal[atlas_nr-1];
+    
     const char *u;
     GLfloat x,y;
     uint32_t p;
@@ -729,6 +733,7 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
 
    // max_width = 255;
 
+    //TODO, fix dynamic allocation.
     POINT_T coords[600];
     int c = 0;
 
@@ -760,18 +765,28 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
              n_chars_in_word = 0;
              word_width = 0;
              }
+             else if (p=='\n')
+             {
+                    n_chars_in_line += n_chars_in_word;
+                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+                    line_start = i;
+                    word_width = line_width = 0;
+                    n_chars_in_line = n_chars_in_word =0;     
+                    nlines++;
+                 
+             }
             if(line_width + word_width >= max_width)
             {
                 if(n_chars_in_line == 0) //there is only 1 word in line, we have to cut the word
                 {
-                    c += add_word(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_word, sx, sy, coords+c) ;
+                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_word-1, sx, sy, coords+c) ;
                     line_start = i;
-                    word_width = line_width = 0;
-                    n_chars_in_line = n_chars_in_word =0;
+                    word_width = line_width = 1;
+                    n_chars_in_line = n_chars_in_word =1;
                 }
                 else //we put the last word on the next line instead
                 {
-                    c += add_word(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;   
+                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;   
                     line_width = 0;                    
                     line_start += n_chars_in_line;
                     n_chars_in_line =0;
@@ -785,12 +800,14 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLin
             
              n_chars_in_line += n_chars_in_word;
              line_width += word_width;
-             c += add_word(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+             c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
         }
+        point_coord[0] += line_width;
+        point_coord[1] -= rh*nlines;
         
     }
     else
-        c += add_word(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
+        c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
 
 
     /* Draw all the character on the screen in one go */

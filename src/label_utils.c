@@ -121,7 +121,7 @@ int init_text_resources()
     FT_Face face;
     int len;
     char *font_data;
-
+    FT_Error fterr;
 
 
 
@@ -138,7 +138,7 @@ int init_text_resources()
 
     // font_data = file_read(fontfilename, &len);
 
-    sql_txt = "select name, font from main.fonts where \"name\" = 'freesans';";
+    sql_txt = "select name, font from main.fonts where \"name\" = ?;";
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
     if (rc != SQLITE_OK ) {
@@ -146,6 +146,7 @@ int init_text_resources()
         sqlite3_close(projectDB);
         return 1;
     }
+    sqlite3_bind_text(preparedFonts,1,"freesans",-1,NULL);
     sqlite3_step(preparedFonts);
     // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
 
@@ -156,32 +157,71 @@ int init_text_resources()
 
 
     if (font_data == NULL) {
-
         fprintf(stderr, "Could not load font file ");
         return 1;
     }
-    FT_Error fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
+    fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
     if (fterr != FT_Err_Ok) {
         fprintf(stderr, "Could not init font: error ");
         return 1;
     }
 
-
+    printf("font name = %s\n", face->style_name);
 
     // Create the vertex buffer object
     //  glGenBuffers(1, &text_vbo);
 
 
-    atlases[0] = malloc(sizeof(ATLAS));
-    atlases[1] = malloc(sizeof(ATLAS));
-    atlases[2] = malloc(sizeof(ATLAS));
+    font_normal[0] = malloc(sizeof(ATLAS));
+    font_normal[1] = malloc(sizeof(ATLAS));
+    font_normal[2] = malloc(sizeof(ATLAS));
 
 
+    create_atlas(font_normal[0], face, 20);
+    create_atlas(font_normal[1], face, 26);
+    create_atlas(font_normal[2], face, 32);    
+    
+    sqlite3_clear_bindings(preparedFonts);
+    sqlite3_reset(preparedFonts);
+    
+    sqlite3_bind_text(preparedFonts,1,"freesans_bold",-1,NULL);
+    sqlite3_step(preparedFonts);
+    // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
 
-    create_atlas(atlases[0], face, 20);
-    create_atlas(atlases[1], face, 26);
-    create_atlas(atlases[2], face, 32);
+    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
+    len = sqlite3_column_bytes(preparedFonts, 1);
+    font_data = malloc(len);
+    memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
 
+
+    if (font_data == NULL) {
+        fprintf(stderr, "Could not load font file ");
+        return 1;
+    }
+    fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
+    if (fterr != FT_Err_Ok) {
+        fprintf(stderr, "Could not init font: error ");
+        return 1;
+    }
+
+printf("font name = %s\n", face->style_name);
+
+    // Create the vertex buffer object
+    //  glGenBuffers(1, &text_vbo);
+
+
+    font_bold[0] = malloc(sizeof(ATLAS));
+    font_bold[1] = malloc(sizeof(ATLAS));
+    font_bold[2] = malloc(sizeof(ATLAS));
+
+
+    create_atlas(font_bold[0], face, 20);
+    create_atlas(font_bold[1], face, 26);
+    create_atlas(font_bold[2], face, 32);    
+    
+    sqlite3_clear_bindings(preparedFonts);
+    sqlite3_reset(preparedFonts);
+    
     sqlite3_finalize(preparedFonts);
     free(font_data);
     return 0;
@@ -284,7 +324,8 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 }
 
 
-int print_txt(float x,float y,float r, float g, float b, float a,int size,int max_width, const char *txt, ... )
+//int print_txt(float x,float y,float r, float g, float b, float a,int size,int max_width, const char *txt, ... )
+int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_width, const char *txt, ... )
 {
 
 
@@ -304,18 +345,19 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size,int ma
     glUseProgram(txt_program);
 
 
-    GLfloat color[4];
+    GLfloat norm_color[4];
 
-    color[0] = r/255;
-    color[1] = g/255;
-    color[2] = b/255;
-    color[3] = a/255;
+    norm_color[0] = color[0] / 255;
+    norm_color[1] = color[1] / 255;
+    norm_color[2] = color[2] / 255;
+    norm_color[3] = color[3] / 255;
 
-    GLfloat point_coord[2];
+ /*   GLfloat point_coord[2];
 
     point_coord[0]= x;
     point_coord[1]= y;
-    glUniform4fv(txt_color,1,color );
+  */
+  //  glUniform4fv(txt_color,1,norm_color );
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
@@ -323,7 +365,7 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size,int ma
     }
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
-    draw_it(color,point_coord, size,txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
+    draw_it(norm_color,point_coord, size,bold, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
 
 
     while ((err = glGetError()) != GL_NO_ERROR) {
