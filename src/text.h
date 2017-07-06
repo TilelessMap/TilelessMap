@@ -22,8 +22,10 @@
  *
  **********************************************************************/
 
+#ifndef _text_H
+#define _text_H
 
-#include <string.h>
+#include "theclient.h"
 #define NULL ((void *)0)
 
 typedef struct
@@ -34,9 +36,36 @@ typedef struct
 }
 TEXT;
 
+typedef struct
+{
+    uint32_t *txt;
+    size_t alloced;
+    size_t used;
+}
+WCHAR_TEXT;
+
+
+typedef struct {
+    GLfloat x;
+    GLfloat y;
+    GLfloat s;
+    GLfloat t;
+} POINT_T;
 
 TEXT* init_txt(size_t s);
 int add_txt(TEXT *t,const char *in);
 char* get_txt(TEXT *t);
 int reset_txt(TEXT *t);
 int destroy_txt(TEXT *t);
+
+WCHAR_TEXT* init_wc_txt(size_t s);
+int add_wc_txt(TEXT *t);
+int add_utf8_2_wc_txt(WCHAR_TEXT *t,const char *in);
+int reset_wc_txt(WCHAR_TEXT *t);
+int destroy_wc_txt(WCHAR_TEXT *t);
+
+uint32_t utf82unicode(const char *text,const char **the_rest);
+
+
+WCHAR_TEXT  *tmp_unicode_txt;
+#endif

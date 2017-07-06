@@ -554,6 +554,7 @@ int init_resources(char *dir)
     init_gps();
     init_info_Layer();
     init_controls();
+    tmp_unicode_txt = init_wc_txt(256);
     return 0;
 }
 

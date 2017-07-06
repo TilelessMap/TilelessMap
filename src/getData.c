@@ -107,19 +107,19 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
 
     renderGPS(theMatrix);
     render_simple_rect(5,75,300,225);
-    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);
+/*    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);
     print_txt(10,180,200,0,0,255,1, "n polygons %d ", n_polys);
     print_txt(10,160,200,0,0,255,1, "n triangels %d ", n_tri);
     print_txt(10,140,200,0,0,255,1, "n words %d ", n_words);
     print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
-    print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);
+    print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);*/
 
-
+print_txt(10,200,200,0,0,255,2,200, "Nu testart vi att skriva en lång rad så får vi se hur det går!");
 #ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 
     timersub(&tval_after, &tval_before, &tval_result);
-    print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+ //   print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
 #endif
 
     total_points=0;

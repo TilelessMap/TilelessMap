@@ -260,15 +260,10 @@ typedef struct   {
 
     unsigned int w;			// width of texture in pixels
     unsigned int h;			// height of texture in pixels
+    unsigned int ch;			// max_character_height
     C metrics[256];
 } ATLAS;
 
-typedef struct {
-    GLfloat x;
-    GLfloat y;
-    GLfloat s;
-    GLfloat t;
-} POINT_T;
 /***************************************************************
 			DECODING TWKB						*/
 /*Holds a buffer with the twkb-data during read*/
@@ -444,15 +439,16 @@ GLuint create_program(const unsigned char *vs_source,const unsigned char *fs_sou
 void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 
 //uint32_t utf82unicode(char *text, char **the_rest);
-uint32_t utf82unicode(const char *text,const char **the_rest);
 int init_text_resources();
 void render_txt(SDL_Window* window);
 
 ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 
 void log_this(int log_level, const char *log_txt, ... );
-int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy  );
-int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
+//int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt, float sx, float sy  );
+int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy);
+//int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
+int print_txt(float x,float y,float r, float g, float b, float a,int size,int max_width, const char *txt, ... );
 int render_simple_rect(GLfloat minx, GLfloat miny, GLfloat maxx, GLfloat maxy);
 
 
@@ -508,7 +504,6 @@ FT_Library ft;
 ATLAS *atlases[3];
 
 const char *fontfilename;
-
 /*shader programs*/
 
 //Standard geometryprogram

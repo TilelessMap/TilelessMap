@@ -188,45 +188,6 @@ int init_text_resources()
 }
 
 
-uint32_t utf82unicode(const char *text,const char **the_rest)
-{
-    uint32_t res = 0;
-    uint8_t nbytes=0;
-    uint8_t c;
-    int i =0;
-
-    c = text[0];
-    if(c==0)
-    {
-        return 0;
-    }
-    else if(!(c & 128))
-    {
-        res = (uint32_t) c;
-        *(the_rest) = text+1;
-        return res;
-    }
-
-    while((c<<++nbytes) & 128)
-    {};
-
-    *(the_rest) = text+nbytes;
-
-    res = ((c<<nbytes) & 0xff)>>nbytes;
-
-    for (i=1; i<nbytes; i++)
-    {
-        c = text[i];
-        if(c==0)
-        {
-            printf("Something went wrong, UTF is invalid\n");
-            return 0;
-        }
-        res = (res<<6) | (c & 63);
-    }
-    return res;
-}
-
 
 
 
@@ -261,7 +222,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 
     a->w = max_i(a->w, roww);
     a->h += rowh;
-
+    a->ch = rowh;
     /* Create a texture that will be used to hold all ASCII glyphs */
     glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &(a->tex));
@@ -323,7 +284,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 }
 
 
-int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... )
+int print_txt(float x,float y,float r, float g, float b, float a,int size,int max_width, const char *txt, ... )
 {
 
 
@@ -362,7 +323,7 @@ int print_txt(float x,float y,float r, float g, float b, float a,int size, const
     }
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
-    draw_it(color,point_coord, size,txt_box, txt_color, txt_coord2d, txt_tot, sx, sy);
+    draw_it(color,point_coord, size,txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
 
 
     while ((err = glGetError()) != GL_NO_ERROR) {

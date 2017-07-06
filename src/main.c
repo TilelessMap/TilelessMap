@@ -346,6 +346,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     free(atlases[0]);
     free(atlases[1]);
     free(atlases[2]);
+    destroy_wc_txt(tmp_unicode_txt);
     FT_Done_FreeType(ft);
     free(global_styles);
     sqlite3_close_v2(projectDB);

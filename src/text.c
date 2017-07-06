@@ -104,3 +104,127 @@ int destroy_txt(TEXT *t)
     t=NULL;
     return 0;
 }
+
+WCHAR_TEXT* init_wc_txt(size_t s)
+{
+
+    WCHAR_TEXT *t = malloc(sizeof(WCHAR_TEXT));
+    if(!t)
+    {
+        log_this(100,"Failed to alloc memory in func %s",__func__);
+        t->alloced = 0;
+        return NULL;
+    }
+
+    t->txt = malloc(sizeof(uint32_t) * s);
+    if(!t->txt)
+    {
+        log_this(100,"Failed to alloc memory in func %s",__func__);
+        t->alloced = 0;
+        return NULL;
+    }
+
+    t->alloced = s;
+    t->used = 0;
+
+    return t;
+}
+
+static int realloc_wc_txt(WCHAR_TEXT *t)
+{
+    size_t new_s = t->alloced * 2;
+
+
+    t->txt = realloc(t->txt, new_s * sizeof(uint32_t));
+    if(!t->txt)
+    {
+        log_this(100,"Failed to realloc memory in func %s",__func__);
+        t->alloced = 0;
+        return 1;
+    }
+    t->alloced = new_s;
+    return 0;
+}
+
+
+int add_utf8_2_wc_txt(WCHAR_TEXT *t,const char *in)
+{
+
+    uint32_t p = 0;
+
+    const char *u = in;
+    while(*u) {
+
+        p = utf82unicode(u,&u);
+
+        
+        
+
+    if(t->alloced-t->used < 1)
+    {
+            if(realloc_wc_txt(t))
+                return 1;
+    }       
+    t->txt[t->used] = p;
+    t->used++;
+    }
+    return 0;
+}
+
+int reset_wc_txt(WCHAR_TEXT *t)
+{
+    t->used = 0;
+    return 1;
+}
+
+int destroy_wc_txt(WCHAR_TEXT *t)
+{
+    free(t->txt);
+    t->alloced=0;
+    t->used=0;
+    free(t);
+    t=NULL;
+    return 0;
+}
+
+
+
+uint32_t utf82unicode(const char *text,const char **the_rest)
+{
+    uint32_t res = 0;
+    uint8_t nbytes=0;
+    uint8_t c;
+    int i =0;
+
+    c = text[0];
+    if(c==0)
+    {
+        return 0;
+    }
+    else if(!(c & 128))
+    {
+        res = (uint32_t) c;
+        *(the_rest) = text+1;
+        return res;
+    }
+
+    while((c<<++nbytes) & 128)
+    {};
+
+    *(the_rest) = text+nbytes;
+
+    /*TODO: test this "thing". */
+    res = ((c<<nbytes) & 0xff)>>nbytes;
+
+    for (i=1; i<nbytes; i++)
+    {
+        c = text[i];
+        if(c==0)
+        {
+            printf("Something went wrong, UTF is invalid\n");
+            return 0;
+        }
+        res = (res<<6) | (c & 63);
+    }
+    return res;
+}
