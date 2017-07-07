@@ -22,6 +22,7 @@
  **********************************************************************/
 
 #include "theclient.h"
+#include "interface.h"
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
@@ -541,8 +542,9 @@ static int render_data_layers(GLfloat *theMatrix)
     }
     renderGPS(theMatrix);
 
-    render_simple_rect(5,75,300,225);
+    //render_simple_rect(5,75,300,225);
 
+    render_controls(controls);
     //  pthread_mutex_destroy(&mutex);
 //render(window,res_buf);
     return 0;

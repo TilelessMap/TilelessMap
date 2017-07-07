@@ -26,7 +26,7 @@
 
 
 
-int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
+int render_simple_rect(GLshort *coords, GLfloat *color)
 {
 
     GLuint vbo;
@@ -40,7 +40,10 @@ int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
 
     GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     //  GLfloat theMatrix[16] = {1, 0,0,0,0,1,0,0,0,0,1,0,-0.5,0,0,1};
-
+    GLfloat minx = coords[0];
+    GLfloat miny = coords[1];
+    GLfloat maxx = coords[2];
+    GLfloat maxy = coords[3];
 
     GLfloat punkter[8];
     punkter[0] = minx;
@@ -59,8 +62,15 @@ int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
     //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
     GLshort tri_index[] = {0,1,3,1,2,3};
 
-    GLfloat color[] = {(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 0.9};
+ //   GLfloat color[] = {(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 0.9};
 
+    GLfloat norm_color[4];
+
+    norm_color[0] = color[0] / 255;
+    norm_color[1] = color[1] / 255;
+    norm_color[2] = color[2] / 255;
+    norm_color[3] = color[3] / 255;
+    
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*8, punkter, GL_STATIC_DRAW);
@@ -78,7 +88,7 @@ int render_simple_rect(GLfloat minx,GLfloat miny,GLfloat maxx,GLfloat maxy)
     glUseProgram(std_program);
 
 
-    glUniform4fv(std_color,1,info_box_color );
+    glUniform4fv(std_color,1,norm_color );
     glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
