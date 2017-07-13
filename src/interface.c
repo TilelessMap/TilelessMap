@@ -8,6 +8,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 static inline int get_parent_origo(struct CTRL *t, GLshort *p)
 {    
     p[0] = p[1] = 0;
+    
     struct CTRL *parent = t->spatial_family->parent;
     while (parent)
     {
@@ -133,10 +134,10 @@ static int remove_child(RELATIONS *t, struct CTRL *child)
          else
             t->children[i] = NULL; //if the child to remove is the last child we just set the slot to NULL 
          
+         
      }
     }
     t->n_children --;
-
     return 0;
 }
 
@@ -144,7 +145,11 @@ static int remove_child(RELATIONS *t, struct CTRL *child)
 static int destroy_family(RELATIONS *t)
 {
 
-    free(t->children);
+    if (!t->n_children == 0)
+    {
+        printf("Something strange, there are %d children left\n", t->n_children);
+        return 0;
+    }
     t->max_children=0;
     t->n_children=0;
     t->parent = NULL;
@@ -156,32 +161,32 @@ static int destroy_family(RELATIONS *t)
 
 static int destroy_control(struct CTRL *t)
 {
- //   printf("destroy_control %p \n", t);
-    int i;
-/*    for(i=0;i<t->spatial_family->n_children;i++);
-    {
-     struct CTRL *child = t->spatial_family->children[i];   
-     if(child)
-     {
-      destroy_control(child);
-     }
-    }*/
+    int i, r=0;
     
-      for(i=0;i<t->logical_family->n_children;i++)
+      while (t->logical_family->n_children)
     {
-     struct CTRL *child = t->logical_family->children[i];   
+     struct CTRL *child = t->logical_family->children[t->logical_family->n_children -1];   
      if(child)
      {
-         
-//    printf("destroy control  %p with parent %p under %p \n", child,child->logical_family->parent, t);
+         r ++;
       destroy_control(child);
      }
     }
+    free(t->logical_family->children);
     
- //   printf("remove child  %p from %p \n", t, t->logical_family->parent);
+      while (t->spatial_family->n_children)
+    {
+     struct CTRL *child = t->spatial_family->children[t->spatial_family->n_children -1];   
+     if(child)
+     {
+         r ++;
+      destroy_control(child);
+     }
+    }
+    free(t->spatial_family->children);
     remove_child(t->logical_family->parent->logical_family, t);
-    remove_child(t->logical_family->parent->spatial_family, t);
-    destroy_family(t->logical_family);    
+    remove_child(t->spatial_family->parent->spatial_family, t);
+    destroy_family(t->logical_family);        
     destroy_family(t->spatial_family);
     if(t->txt)
         destroy_txt(t->txt);
@@ -204,16 +209,19 @@ static inline void clone_box(GLshort *box_src, GLshort *box_dest)
 
 
 
-//struct CTRL* register_control(struct CTRL *parent, tileless_event click_func,void *onclick_arg, GLshort *box,int default_active)
-struct CTRL* register_control(struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event click_func,void *onclick_arg, GLshort *box,GLfloat *color,TEXT *txt, GLfloat *txt_margin,int txt_size, int default_active)
+//struct CTRL* register_control(struct CTRL *parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,int default_active)
+struct CTRL* register_control(struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,GLfloat *color,TEXT *txt, GLfloat *txt_margin,int txt_size, int default_active, int z)
 {
     struct CTRL *ctrl = st_malloc(sizeof(struct CTRL));
     ctrl->active = default_active;
+    ctrl->z = z;
     ctrl->logical_family = init_family(logical_parent);
     ctrl->spatial_family = init_family(spatial_parent);
  
-    ctrl->on_click = click_func;
-    ctrl->onclick_data = onclick_arg;
+    ctrl->on_click.te_func = click_func;
+    ctrl->on_click.data = onclick_arg;
+    ctrl->on_click.caller = ctrl;
+    
     if(color)
     {
         ctrl->color[0] = color[0];
@@ -226,6 +234,7 @@ struct CTRL* register_control(struct CTRL *spatial_parent,struct CTRL *logical_p
         ctrl->txt_margin[0] = txt_margin[0];
         ctrl->txt_margin[1] = txt_margin[1];
     }
+
     ctrl->txt = txt;
     ctrl->txt_size = txt_size;
     clone_box(box, ctrl->box);
@@ -277,7 +286,6 @@ int switch_map_modus(void *ctrl, void *val)
         color[3] = 220;
         map_modus = 0;
         
- //   printf("t->color = %f, %f, %f, %f\n", t->color[0], t->color[1], t->color[2], t->color[3]);
         return 0;
     }
     else
@@ -290,7 +298,6 @@ int switch_map_modus(void *ctrl, void *val)
         color[3] = 220;
         map_modus = 1;
         
-//    printf("t->color = %f, %f, %f, %f\n", t->color[0], t->color[1], t->color[2], t->color[3]);
         return 1;
     }
 
@@ -309,6 +316,8 @@ int show_layer_selecter(void *ctrl, void *val)
     
     return 0;
 }
+
+
 int hide_layer_selecter(void *ctrl, void *val)
 {
      
@@ -316,23 +325,13 @@ int hide_layer_selecter(void *ctrl, void *val)
     struct CTRL *t = (struct CTRL *) ctrl;
     
     struct CTRL *parent = t->logical_family->parent;
- /*   int i;
-    for (i=0;i<parent->logical_family->n_children;i++)
-    {
-        if(parent->logical_family->children[i])
-     printf("i = %d, child logic parent = %p, spatial parent = %p\n", i, parent->logical_family->children[i]->logical_family->parent, parent->logical_family->children[i]->spatial_family->parent);   
-   
-     if(parent->logical_family->children[i]->txt)
-       printf("txt=%s\n", parent->logical_family->children[i]->txt->txt);
-    }
-  */ 
-    
-  //  printf("close_parent = %p \n", t->logical_family->parent);
     destroy_control(t->logical_family->parent);
     
     
     return 0;
 }
+
+
 
 
 static int check_box(GLshort *box,int x, int y)
@@ -343,24 +342,33 @@ static int check_box(GLshort *box,int x, int y)
     return 0;
 
 }
-static int check_controls(struct CTRL *ctrl, int x, int y)
+static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event, int *z)
 {
 
-    int i;
+    int i, n_children;
+    int max_z = *z;
     if(!ctrl->active)
         return 0;
 
     log_this(100, "checkcontrol, x = %d, y = %d\n",x,y);
-    for (i=0; i<ctrl->spatial_family->n_children; i++)
+    n_children = ctrl->spatial_family->n_children;
+    for (i=0; i<n_children; i++)
     {
         struct CTRL *child = *(ctrl->spatial_family->children+i);
 
         if(child->active && check_box(child->box, x,y))
         {
-            printf("hit");
-            if(child->on_click)
-                child->on_click(child, child->onclick_data);
-            check_controls(child, x, y);
+            
+            check_controls(child, x, y, event, z);
+            
+            if(child->on_click.te_func && child->z >= *z)
+            {
+                *z = child->z;
+                event->te_func = child->on_click.te_func;
+                event->data = child->on_click.data;
+                event->caller = child->on_click.caller;
+                
+            }
         }
 
     }
@@ -370,7 +378,12 @@ static int check_controls(struct CTRL *ctrl, int x, int y)
 int check_click(int x, int y)
 {
 
-    check_controls(controls, x,CURR_HEIGHT -  y);
+    tileless_event te;
+    int z = 0;
+    te.te_func = NULL;
+    check_controls(controls, x,CURR_HEIGHT -  y, &te, &z);
+    if(te.te_func)
+        te.te_func(te.caller, te.data);
     return 0;
 }
 
@@ -449,7 +462,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLfloat click_box_color[]={255,255,255,255};
     GLfloat margins[] = {10,10};
     GLfloat box_text_margins[] = {3,3};
-    struct CTRL *layers_meny = register_control(spatial_parent,logical_parent, NULL,NULL,box,color, NULL,NULL, 0,1);
+    struct CTRL *layers_meny = register_control(spatial_parent,logical_parent, NULL,NULL,box,color, NULL,NULL, 0,1,0);
 //    printf("layers_menu=%p\n", layers_meny);
     GLshort startx, starty, p[] = {0,0};
     GLshort click_box_width = 30;
@@ -477,19 +490,18 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
             
         GLshort click_box[] = {startx, starty - i*row_dist,startx + click_box_width,starty + click_box_height-i*row_dist};
         GLshort text_box[] = {startx + 50, starty - i*row_dist,startx + 50 + text_box_width,starty + text_box_height-i*row_dist};
-            printf("name = %s, box = %d, %d, %d, %d\n", oneLayer->name, click_box[0], click_box[1], click_box[2], click_box[3]);
             
         if(oneLayer->visible)
         {
             x_txt = init_txt(5);
             
             add_txt(x_txt, "X");
-            new_ctrl = register_control(layers_meny,layers_meny, set_layer_visibility ,NULL,click_box,click_box_color,x_txt,box_text_margins, 3,1);
+            new_ctrl = register_control(layers_meny,layers_meny, set_layer_visibility ,NULL,click_box,click_box_color,x_txt,box_text_margins, 3,1,10);
         }
         else
-            new_ctrl = register_control(layers_meny,layers_meny, set_layer_visibility,NULL,click_box,click_box_color,NULL,box_text_margins, 3,1);
+            new_ctrl = register_control(layers_meny,layers_meny, set_layer_visibility,NULL,click_box,click_box_color,NULL,box_text_margins, 3,1,10);
             
-        register_control(layers_meny,new_ctrl, NULL,NULL,text_box,txt_box_color,txt,margins, 2,1); //register text label and set checkbox as logical parent
+        register_control(layers_meny,new_ctrl, NULL,NULL,text_box,txt_box_color,txt,margins, 2,1,10); //register text label and set checkbox as logical parent
         
         new_ctrl->obj = (void*) oneLayer;
     }
@@ -505,7 +517,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLfloat close_color[]={200,100,100,200};
     x_txt = init_txt(5); 
     add_txt(x_txt, "X");
-    register_control(layers_meny,layers_meny, hide_layer_selecter,NULL,close_box,close_color,x_txt,box_text_margins, 3,1); //register text label and set checkbox as logical parent
+    register_control(layers_meny,layers_meny, hide_layer_selecter,NULL,close_box,close_color,x_txt,box_text_margins, 3,1,10); //register text label and set checkbox as logical parent
 
     return 0;
 }
@@ -516,7 +528,7 @@ int init_controls()
     TEXT *txt;
     GLshort box[] = {0,0,0,0};
  //   controls =  register_control(NULL,NULL, NULL, box,1);
-    controls =  register_control(NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,0,1);
+    controls =  register_control(NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,0,1,0);
  //   GLshort box2[] = {5,75,300,225};
   //  register_control(controls, switch_map_modus, NULL,box2, 1);    
     
@@ -526,7 +538,7 @@ int init_controls()
     GLshort box2[] = {5,75,90,115};
     GLfloat txt_margin[] = {10,10};
     GLfloat color[]={200,200,200,100};
-    register_control(controls,controls, switch_map_modus,NULL,box2,color, txt,txt_margin, 2,1);
+    register_control(controls,controls, switch_map_modus,NULL,box2,color, txt,txt_margin, 2,1,1);
     
     show_layer_control = 0;
     txt = init_txt(7);
@@ -534,7 +546,7 @@ int init_controls()
     GLshort box3[] = {5,30,150,70};
     GLfloat txt_margin2[] = {10,10};
     GLfloat color2[]={255,200,200,100};
-    struct CTRL *layers_button = register_control(controls,controls, show_layer_selecter,NULL,box3,color2, txt,txt_margin2, 2,1);
+    struct CTRL *layers_button = register_control(controls,controls, show_layer_selecter,NULL,box3,color2, txt,txt_margin2, 2,1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     
    // create_layers_meny(controls, layers_button);

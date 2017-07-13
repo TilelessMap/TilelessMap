@@ -12,7 +12,9 @@ typedef struct
 } CTRL_BOX;
 
 
-typedef int (*tileless_event)(void *ctrl, void*);
+typedef int (*tileless_event_function)(void *ctrl, void*);
+
+
 
 /*
 typedef struct
@@ -34,6 +36,13 @@ typedef struct
 } RELATIONS;
 
 
+typedef struct
+{
+    void *caller; //caller controll
+    void *data;
+    tileless_event_function te_func;
+ 
+} tileless_event;
 
 struct CTRL
 {
@@ -43,13 +52,15 @@ struct CTRL
     RELATIONS *logical_family;// a child can be a fullscreen started from a small parent box.
     RELATIONS *spatial_family;
     tileless_event on_click;
-    void *onclick_data;
     GLfloat color[4];
     TEXT *txt;
     GLfloat txt_margin[2]; //distance in pixels from control border where text starts
     int txt_size; //text size, or more correct index of atlas to use (1,2 or 3)
     void *obj; //used to connect a layer for instance to a control
+    int z; //used both for rendering, but more importingly to decide which click event wins if many are triggered
 };
+
+
 
 struct CTRL *controls;
 
