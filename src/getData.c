@@ -29,7 +29,7 @@
 
 
 
-int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
+int get_data(SDL_Window* window,MATRIX *map_matrix)
 {
 
 
@@ -40,7 +40,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
     int i,t, rc;
     pthread_t threads[255];
     LAYER_RUNTIME *oneLayer;
-    GLfloat meterPerPixel = (bbox[2]-bbox[0])/CURR_WIDTH;
+    GLfloat meterPerPixel = (map_matrix->bbox[3]-map_matrix->bbox[1])/CURR_HEIGHT;
     uint8_t type;
 
     for (i=0; i<nLayers; i++)
@@ -58,7 +58,7 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
             //  log_this(10, "decode nr %d\n", i);
-            oneLayer->BBOX = bbox;
+            oneLayer->BBOX = map_matrix->bbox;
             rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
             //  twkb_fromSQLiteBBOX((void *) oneLayer);
         }
@@ -95,18 +95,18 @@ int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix)
                 exit(-1);
             }
             if(type & 224)
-                loadPoint( oneLayer, theMatrix);
+                loadPoint( oneLayer, map_matrix->matrix);
 
             if(type & 24)
-                loadLine( oneLayer, theMatrix);
+                loadLine( oneLayer, map_matrix->matrix);
             if(type & 6)
-                loadPolygon( oneLayer, theMatrix);
+                loadPolygon( oneLayer, map_matrix->matrix);
 
         }
 
     }
 
-    renderGPS(theMatrix);
+    renderGPS(map_matrix->matrix);
     render_controls(controls);
   //  render_simple_rect(5,75,300,225);
 /*    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);

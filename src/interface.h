@@ -1,7 +1,7 @@
 #ifndef _interface_H
 #define _interface_H
 
-#include "info.h"
+#include "matrix_handling.h"
 
 typedef struct
 {
@@ -25,6 +25,7 @@ typedef struct
 */
 
 
+        
 
 typedef struct
 {
@@ -58,6 +59,7 @@ struct CTRL
     int txt_size; //text size, or more correct index of atlas to use (1,2 or 3)
     void *obj; //used to connect a layer for instance to a control
     int z; //used both for rendering, but more importingly to decide which click event wins if many are triggered
+    MATRIX *matrix_handler;
 };
 
 
@@ -71,6 +73,10 @@ int check_click(int x, int y);
 int parent_add_child(struct CTRL *parent, struct CTRL *child);
 int init_controls();
 int render_controls(struct CTRL *ctrl);
+
+
+struct CTRL *incharge; //This variable handles what to mov on events. NULL means map, otherwise there will be a ccontrol that will be scrolled or move in other ways
+
 
 #endif
 

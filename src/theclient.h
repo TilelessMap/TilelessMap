@@ -56,7 +56,7 @@
 #include "SDL.h"
 #include "text.h"
 #include "global.h"
-
+#include "matrix_handling.h"
 
 #define INIT_WIDTH 1000
 #define INIT_HEIGHT 500
@@ -409,17 +409,20 @@ int px2m(GLfloat *bbox,GLint px_x,GLint px_y,GLfloat *w_x,GLfloat *w_y);
 int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl);
 int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale);
 void windowResize(int newWidth,int newHeight,GLfloat *currentBBOX, GLfloat *newBBOX);
-void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX);
+
+void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix);
+//void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX);
 
 /*event handling*/
-int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX,GLint px_x_clicked,GLint px_y_clicked, GLfloat zoom, GLfloat *theMatrix);
+int matrixFromBboxPointZoom(MATRIX *map_matrix,GLint px_x_clicked,GLint px_y_clicked, GLfloat zoom);
 //int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
-int matrixFromDeltaMouse(GLfloat *currentBBOX, GLfloat *newBBOX, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y, GLfloat *theMatrix);
+int matrixFromDeltaMouse(MATRIX *map_matrix, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y);
 LAYER_RUNTIME* init_layer_runtime(int n);
 void destroy_layer_runtime(LAYER_RUNTIME *lr, int n);
 
-int  matrixFromBBOX(GLfloat *newBBOX, GLfloat *theMatrix );
-int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
+int  matrixFromBBOX(MATRIX *map_matrix );
+//int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
+int get_data(SDL_Window* window,MATRIX *map_matrix);
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
@@ -446,7 +449,6 @@ void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 
 //uint32_t utf82unicode(char *text, char **the_rest);
 int init_text_resources();
-void render_txt(SDL_Window* window);
 
 ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 

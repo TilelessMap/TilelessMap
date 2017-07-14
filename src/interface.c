@@ -191,6 +191,8 @@ static int destroy_control(struct CTRL *t)
     if(t->txt)
         destroy_txt(t->txt);
     
+    if(t->matrix_handler)
+        free(t->matrix_handler);
     free(t);
     t=NULL;
     
@@ -206,7 +208,19 @@ static inline void clone_box(GLshort *box_src, GLshort *box_dest)
     box_dest[3] = box_src[3];
 }
 
-
+static inline int init_matrix_handler(struct CTRL *ctrl, uint8_t vertical_enabled, uint8_t horizontal_enabled, uint8_t zoom_enabled)
+{
+  ctrl->matrix_handler = st_malloc(sizeof(MATRIX));  
+ ctrl->matrix_handler->vertical_enabled = vertical_enabled;
+ ctrl->matrix_handler->horizontal_enabled = horizontal_enabled;
+ ctrl->matrix_handler->zoom_enabled = zoom_enabled;
+ 
+ ctrl->matrix_handler->bbox[0] = 0;
+ ctrl->matrix_handler->bbox[1] = 0;
+ ctrl->matrix_handler->bbox[2] = CURR_WIDTH;
+ ctrl->matrix_handler->bbox[3] = CURR_HEIGHT;
+    
+}
 
 
 //struct CTRL* register_control(struct CTRL *parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,int default_active)
@@ -243,6 +257,8 @@ struct CTRL* register_control(struct CTRL *spatial_parent,struct CTRL *logical_p
     if(logical_parent)
         add_child(logical_parent->logical_family, ctrl);
 
+    ctrl->matrix_handler = NULL;
+    
     return ctrl;
 }
 
@@ -323,7 +339,7 @@ int hide_layer_selecter(void *ctrl, void *val)
      
     
     struct CTRL *t = (struct CTRL *) ctrl;
-    
+    incharge = NULL; //move focus back to map
     struct CTRL *parent = t->logical_family->parent;
     destroy_control(t->logical_family->parent);
     
@@ -476,7 +492,8 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     startx = p[0] + 50;
     starty = p[1] - 50;
     
-    
+    init_matrix_handler(layers_meny, 1, 0, 0);
+    incharge = layers_meny;
     
     LAYER_RUNTIME *oneLayer;
     for (i=0; i<nLayers; i++)

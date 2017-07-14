@@ -2,15 +2,15 @@
 #include "buffer_handling.h"
 #include "info.h"
 
-int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theMatrix)
+int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
 {
     log_this(10,"info, x=%d, y=%d\n",x,y);
     GLfloat w_x, w_y;
     int i, z, r, n_vals_acc, n_vals, poly_start_index, pa_start_index, n_of_pa,n_polys, n_points,next_pa ;
     int inside,n_dims, nrings,n_elements_acc,n_elements;
-    px2m(currentBBOX,x,y,&w_x,&w_y);
+    px2m(map_matrix->bbox,x,y,&w_x,&w_y);
     int64_t id;
-    GLfloat meterPerPixel = (currentBBOX[2]-currentBBOX[0])/CURR_WIDTH;
+    GLfloat meterPerPixel = (map_matrix->bbox[2]-map_matrix->bbox[0])/CURR_WIDTH;
 //  printf("w_x = %f, w_y = %f\n", w_x, w_y);
 
     GLfloat box[4];
@@ -164,7 +164,7 @@ int identify(GLfloat *currentBBOX, int x, int y,SDL_Window* window,GLfloat *theM
     setzero2gluint_list(renderpoly->area_style_id, renderpoly->polygon_start_indexes->used);
 
 
-    render_info(window,theMatrix);
+    render_info(window,map_matrix->matrix);
 
 
 

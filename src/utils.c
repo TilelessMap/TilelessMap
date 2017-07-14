@@ -23,12 +23,13 @@
 
 
 #include "theclient.h"
+#include "interface.h"
 #include "mem.h"
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
 
-void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX)
+/*void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX)
 {
     GLfloat ratio = (GLfloat) CURR_HEIGHT/ (GLfloat) CURR_WIDTH;
     GLfloat height = width * ratio;
@@ -36,6 +37,15 @@ void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX)
     newBBOX[1] = y-height/2;
     newBBOX[2] = x+width/2;
     newBBOX[3] = y+height/2;
+}*/
+void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
+{
+    GLfloat ratio = (GLfloat) CURR_HEIGHT/ (GLfloat) CURR_WIDTH;
+    GLfloat height = width * ratio;
+    map_matrix->bbox[0] = x-width/2;
+    map_matrix->bbox[1] = y-height/2;
+    map_matrix->bbox[2] = x+width/2;
+    map_matrix->bbox[3] = y+height/2;
 }
 
 void copyNew2CurrentBBOX(GLfloat *newBBOX,GLfloat *currentBBOX)
