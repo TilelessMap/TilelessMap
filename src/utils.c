@@ -57,16 +57,16 @@ void copyNew2CurrentBBOX(GLfloat *newBBOX,GLfloat *currentBBOX)
     return;
 }
 
-void windowResize(int newWidth,int newHeight,GLfloat *currentBBOX, GLfloat *newBBOX)
+void windowResize(int newWidth,int newHeight,MATRIX *matrix_hndl,MATRIX *out)
 {
-    GLfloat meterPerPixel = (currentBBOX[2] - currentBBOX[0]) / (GLfloat) CURR_WIDTH;
-    GLfloat oldCenterX = currentBBOX[0] + (currentBBOX[2] - currentBBOX[0])/2;
-    GLfloat oldCenterY = currentBBOX[1] + (currentBBOX[3] - currentBBOX[1])/2;
+    GLfloat meterPerPixel = (matrix_hndl->bbox[2] - matrix_hndl->bbox[0]) / (GLfloat) CURR_WIDTH;
+    GLfloat oldCenterX = matrix_hndl->bbox[0] + (matrix_hndl->bbox[2] - matrix_hndl->bbox[0])/2;
+    GLfloat oldCenterY = matrix_hndl->bbox[1] + (matrix_hndl->bbox[3] - matrix_hndl->bbox[1])/2;
 
-    newBBOX[0] = oldCenterX - meterPerPixel * newWidth / 2;
-    newBBOX[1] = oldCenterY - meterPerPixel * newHeight / 2;
-    newBBOX[2] = oldCenterX + meterPerPixel * newWidth / 2;
-    newBBOX[3] = oldCenterY + meterPerPixel * newHeight / 2;
+    out->bbox[0] = oldCenterX - meterPerPixel * newWidth / 2;
+    out->bbox[1] = oldCenterY - meterPerPixel * newHeight / 2;
+    out->bbox[2] = oldCenterX + meterPerPixel * newWidth / 2;
+    out->bbox[3] = oldCenterY + meterPerPixel * newHeight / 2;
     CURR_WIDTH = newWidth;
     CURR_HEIGHT = newHeight;
 

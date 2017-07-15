@@ -53,7 +53,7 @@ int  matrixFromBBOX(MATRIX *matrix_hndl)
     multiply_matrices(scale,transl, matrix_hndl->matrix);
     return 0;
 }
-
+/*
 int matrixFromBboxPointZoom(MATRIX *matrix_hndl, GLint px_x_clicked, GLint px_y_clicked, GLfloat zoom)
 {
 
@@ -124,9 +124,9 @@ int matrixFromDeltaMouse(MATRIX *matrix_hndl,GLint mouse_down_x, GLint mouse_dow
     multiply_matrices(scale,transl, matrix_hndl->matrix);
 
     return 0;
-}
-/*
-int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX, GLint px_x_clicked, GLint px_y_clicked, GLfloat zoom, GLfloat *theMatrix)
+}*/
+
+int matrixFromBboxPointZoom(MATRIX *matrix_hndl,MATRIX *out, GLint px_x_clicked, GLint px_y_clicked, GLfloat zoom)
 {
 
     log_this(10, "Entering get_bbox\n");
@@ -136,13 +136,13 @@ int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX, GLint px_x_cl
     GLfloat transl[16];
     GLfloat scale[16];
 
-    px2m(currentBBOX,px_x_clicked, px_y_clicked, &w_x_clicked, &w_y_clicked);
+    px2m(matrix_hndl->bbox,px_x_clicked, px_y_clicked, &w_x_clicked, &w_y_clicked);
 
-    GLfloat original_w_width = (currentBBOX[2]-currentBBOX[0]);
-    GLfloat original_w_height = (currentBBOX[3]-currentBBOX[1]);
+    GLfloat original_w_width = (matrix_hndl->bbox[2]-matrix_hndl->bbox[0]);
+    GLfloat original_w_height = (matrix_hndl->bbox[3]-matrix_hndl->bbox[1]);
 
-    GLfloat original_w_x_dist2center = (GLfloat) (w_x_clicked - currentBBOX[0] - original_w_width * 0.5);
-    GLfloat original_w_y_dist2center = (GLfloat)(w_y_clicked - currentBBOX[1] - original_w_height * 0.5);
+    GLfloat original_w_x_dist2center = (GLfloat) (w_x_clicked - matrix_hndl->bbox[0] - original_w_width * 0.5);
+    GLfloat original_w_y_dist2center = (GLfloat)(w_y_clicked - matrix_hndl->bbox[1] - original_w_height * 0.5);
 
     GLfloat new_w_x_dist2center = (GLfloat)(original_w_x_dist2center * zoom);
     GLfloat new_w_y_dist2center = (GLfloat)(original_w_y_dist2center * zoom);
@@ -152,20 +152,20 @@ int matrixFromBboxPointZoom(GLfloat *currentBBOX,GLfloat *newBBOX, GLint px_x_cl
 
 
 
-    newBBOX[0]= (GLfloat)(w_x_center - original_w_width * 0.5 * zoom);
-    newBBOX[1]= (GLfloat)(w_y_center - original_w_height * 0.5 * zoom);
-    newBBOX[2]= (GLfloat)(w_x_center + original_w_width * 0.5 * zoom);
-    newBBOX[3]= (GLfloat)(w_y_center + original_w_height * 0.5 * zoom);
+    out->bbox[0]= (GLfloat)(w_x_center - original_w_width * 0.5 * zoom);
+    out->bbox[1]= (GLfloat)(w_y_center - original_w_height * 0.5 * zoom);
+    out->bbox[2]= (GLfloat)(w_x_center + original_w_width * 0.5 * zoom);
+    out->bbox[3]= (GLfloat)(w_y_center + original_w_height * 0.5 * zoom);
 
-    calc_scale(newBBOX,1, scale);
+    calc_scale(out->bbox,1, scale);
     calc_translate(w_x_center,w_y_center, transl);
-    multiply_matrices(scale,transl, theMatrix);
+    multiply_matrices(scale,transl, out->matrix);
 
     return 0;
 }
 
 
-int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y, GLfloat *theMatrix)
+int matrixFromDeltaMouse(MATRIX *matrix_hndl,MATRIX *out,GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y)
 {
 
 //GLfloat newBBOX[4] = {0.0,0.0,0.0,0.0};
@@ -173,28 +173,27 @@ int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLint mouse_down_
     GLfloat scale[16];
     GLfloat centerx, centery;
 
-    GLfloat width = currentBBOX[2]-currentBBOX[0];
-    GLfloat height = currentBBOX[3]-currentBBOX[1];
+    GLfloat width = matrix_hndl->bbox[2]-matrix_hndl->bbox[0];
+    GLfloat height = matrix_hndl->bbox[3]-matrix_hndl->bbox[1];
 
     GLfloat deltax = - (mouse_up_x - mouse_down_x) * width/CURR_WIDTH;
     GLfloat deltay =  -(mouse_down_y - mouse_up_y) * height/CURR_HEIGHT;
 
-    centerx= (GLfloat)(currentBBOX[0] + (currentBBOX[2]-currentBBOX[0]) * 0.5);
-    centery= (GLfloat)(currentBBOX[1] + (currentBBOX[3]-currentBBOX[1]) * 0.5);
+    centerx= (GLfloat)(matrix_hndl->bbox[0] + (matrix_hndl->bbox[2]-matrix_hndl->bbox[0]) * 0.5);
+    centery= (GLfloat)(matrix_hndl->bbox[1] + (matrix_hndl->bbox[3]-matrix_hndl->bbox[1]) * 0.5);
 
     centerx += deltax;
     centery += deltay;
 
-    newBBOX[0] = currentBBOX[0]  + deltax;
-    newBBOX[1] = currentBBOX[1]  + deltay;
-    newBBOX[2] = currentBBOX[2]  + deltax;
-    newBBOX[3] = currentBBOX[3]  + deltay;
+    out->bbox[0] = matrix_hndl->bbox[0]  + deltax;
+    out->bbox[1] = matrix_hndl->bbox[1]  + deltay;
+    out->bbox[2] = matrix_hndl->bbox[2]  + deltax;
+    out->bbox[3] = matrix_hndl->bbox[3]  + deltay;
 
 
-    calc_scale(newBBOX,1, scale);
+    calc_scale(out->bbox,1, scale);
     calc_translate(centerx,centery, transl);
-    multiply_matrices(scale,transl, theMatrix);
+    multiply_matrices(scale,transl, out->matrix);
 
     return 0;
 }
-*/

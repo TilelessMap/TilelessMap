@@ -129,7 +129,7 @@ int register_motion(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y
 
 
 
-int get_box_from_touches(FINGEREVENT *touches,GLfloat *currentBBOX,GLfloat *newBBOX)
+int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *out)
 {
     GLfloat w_x1,w_y1,w_x2,w_y2;
     GLfloat w_dist, px_dist;
@@ -149,8 +149,8 @@ int get_box_from_touches(FINGEREVENT *touches,GLfloat *currentBBOX,GLfloat *newB
     p2y2 = (GLint)(touches[1].y2 * CURR_HEIGHT);
 
 
-    px2m(currentBBOX,p1x1,p1y1,&w_x1,&w_y1);
-    px2m(currentBBOX,p2x1,p2y1,&w_x2,&w_y2);
+    px2m(matrix_hndl->bbox,p1x1,p1y1,&w_x1,&w_y1);
+    px2m(matrix_hndl->bbox,p2x1,p2y1,&w_x2,&w_y2);
 
     deltax_w = w_x2 - w_x1;
     deltay_w = w_y2 - w_y1;
@@ -162,10 +162,10 @@ int get_box_from_touches(FINGEREVENT *touches,GLfloat *currentBBOX,GLfloat *newB
     ratio = w_dist/px_dist;
 
 
-    newBBOX[0] = w_x1 - ratio * p1x2;
-    newBBOX[1] = w_y1 - ratio * (CURR_HEIGHT - p1y2);
-    newBBOX[2] = newBBOX[0] + ratio * CURR_WIDTH;
-    newBBOX[3] = newBBOX[1] + ratio * CURR_HEIGHT;
+    out->bbox[0] = w_x1 - ratio * p1x2;
+    out->bbox[1] = w_y1 - ratio * (CURR_HEIGHT - p1y2);
+    out->bbox[2] = out->bbox[0] + ratio * CURR_WIDTH;
+    out->bbox[3] = out->bbox[1] + ratio * CURR_HEIGHT;
     return 0;
 }
 

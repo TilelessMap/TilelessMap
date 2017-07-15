@@ -408,15 +408,15 @@ int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix);
 int px2m(GLfloat *bbox,GLint px_x,GLint px_y,GLfloat *w_x,GLfloat *w_y);
 int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl);
 int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale);
-void windowResize(int newWidth,int newHeight,GLfloat *currentBBOX, GLfloat *newBBOX);
+void windowResize(int newWidth,int newHeight,MATRIX *matrix_hndl,MATRIX *out);
 
 void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix);
 //void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX);
 
 /*event handling*/
-int matrixFromBboxPointZoom(MATRIX *map_matrix,GLint px_x_clicked,GLint px_y_clicked, GLfloat zoom);
+int matrixFromBboxPointZoom(MATRIX *map_matrix,MATRIX *out,GLint px_x_clicked,GLint px_y_clicked, GLfloat zoom);
 //int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
-int matrixFromDeltaMouse(MATRIX *map_matrix, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y);
+int matrixFromDeltaMouse(MATRIX *map_matrix,MATRIX *out, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y);
 LAYER_RUNTIME* init_layer_runtime(int n);
 void destroy_layer_runtime(LAYER_RUNTIME *lr, int n);
 
@@ -438,7 +438,7 @@ int render_info(SDL_Window* window,GLfloat *theMatrix);
 
 FINGEREVENT* init_touch_que();
 int reset_touch_que(FINGEREVENT *touches);
-int get_box_from_touches(FINGEREVENT *touches,GLfloat *currentBBOX,GLfloat *newBBOX);
+int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *out);
 int register_touch_down(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y);
 int register_touch_up(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y);
 int register_motion(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y);

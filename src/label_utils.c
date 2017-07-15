@@ -183,6 +183,7 @@ int init_text_resources()
     
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
+    free(font_data);
     
     sqlite3_bind_text(preparedFonts,1,"freesans_bold",-1,NULL);
     sqlite3_step(preparedFonts);
