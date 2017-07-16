@@ -401,8 +401,9 @@ void print_log(GLuint object);
 int loadOrSaveDb(sqlite3 *pInMemory, const char *zFilename, int isSave);
 
 /*utils*/
-void copyNew2CurrentBBOX(GLfloat *newBBOX,GLfloat *currentBBOX);
+void copy2ref_box(MATRIX *matrix_hndl,MATRIX *ref);
 int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix);
+int multiply_matrix_vektor(GLfloat *matrix,GLfloat *vektor_in, GLfloat *vektor_out);
 
 /*This is functions for manipulating bbox, translations and zoom*/
 int px2m(GLfloat *bbox,GLint px_x,GLint px_y,GLfloat *w_x,GLfloat *w_y);
@@ -457,7 +458,7 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
 //int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
 int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
 //int render_simple_rect(GLfloat minx, GLfloat miny, GLfloat maxx, GLfloat maxy);
-int render_simple_rect(GLshort *coords, GLfloat *color);
+int render_simple_rect(GLshort *coords, GLfloat *color, MATRIX *matrix_hndl);
 
 void calc_start(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);
 void calc_join(POINT_CIRCLE *p,GLFLOAT_LIST *ut,int *c, t_vec2 *last_normal);

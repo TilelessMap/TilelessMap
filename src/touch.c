@@ -129,7 +129,7 @@ int register_motion(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLfloat y
 
 
 
-int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *out)
+int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *ref)
 {
     GLfloat w_x1,w_y1,w_x2,w_y2;
     GLfloat w_dist, px_dist;
@@ -138,19 +138,40 @@ int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *out)
 
     GLint deltax_px, deltay_px;
     GLfloat deltax_w, deltay_w, ratio;
+    
+    //x at first points
     p1x1 = (GLint) (touches[0].x1 * CURR_WIDTH);
-    p1x2 = (GLint)(touches[0].x2 * CURR_WIDTH);
-    p1y1 = (GLint)(touches[0].y1 * CURR_HEIGHT);
-    p1y2 = (GLint)(touches[0].y2 * CURR_HEIGHT);
-
     p2x1 = (GLint)(touches[1].x1 * CURR_WIDTH);
-    p2x2 = (GLint)(touches[1].x2 * CURR_WIDTH);
+    
+    //y at first points
+    p1y1 = (GLint)(touches[0].y1 * CURR_HEIGHT);
     p2y1 = (GLint)(touches[1].y1 * CURR_HEIGHT);
-    p2y2 = (GLint)(touches[1].y2 * CURR_HEIGHT);
-
-
-    px2m(matrix_hndl->bbox,p1x1,p1y1,&w_x1,&w_y1);
-    px2m(matrix_hndl->bbox,p2x1,p2y1,&w_x2,&w_y2);
+    
+    //x at second points
+    if(matrix_hndl->horizontal_enabled)
+    {
+        p1x2 = (GLint)(touches[0].x2 * CURR_WIDTH);
+        p2x2 = (GLint)(touches[1].x2 * CURR_WIDTH);
+    }
+    else
+    {
+        p1x2 = p1x1;
+        p2x2 = p2x1;
+    }
+        
+    //y at second points
+    if(matrix_hndl->vertical_enabled)
+    {
+        p1y2 = (GLint)(touches[0].y2 * CURR_HEIGHT);
+        p2y2 = (GLint)(touches[1].y2 * CURR_HEIGHT);
+    }
+    else
+    {
+        p1y2 = p1y1;
+        p2y2 = p2y1;
+    }
+    px2m(ref->bbox,p1x1,p1y1,&w_x1,&w_y1);
+    px2m(ref->bbox,p2x1,p2y1,&w_x2,&w_y2);
 
     deltax_w = w_x2 - w_x1;
     deltay_w = w_y2 - w_y1;
@@ -159,13 +180,15 @@ int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *out)
     deltay_px = p2y2 - p1y2;
     px_dist = sqrtf((float) (1.0 * deltax_px * deltax_px + deltay_px * deltay_px));
 
-    ratio = w_dist/px_dist;
-
-
-    out->bbox[0] = w_x1 - ratio * p1x2;
-    out->bbox[1] = w_y1 - ratio * (CURR_HEIGHT - p1y2);
-    out->bbox[2] = out->bbox[0] + ratio * CURR_WIDTH;
-    out->bbox[3] = out->bbox[1] + ratio * CURR_HEIGHT;
+    if(matrix_hndl->zoom_enabled)
+        ratio = w_dist/px_dist;
+    else
+        ratio = 1;
+    
+    matrix_hndl->bbox[0] = w_x1 - ratio * p1x2;
+    matrix_hndl->bbox[1] = w_y1 - ratio * (CURR_HEIGHT - p1y2);
+    matrix_hndl->bbox[2] = matrix_hndl->bbox[0] + ratio * CURR_WIDTH;
+    matrix_hndl->bbox[3] = matrix_hndl->bbox[1] + ratio * CURR_HEIGHT;
     return 0;
 }
 

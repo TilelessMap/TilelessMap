@@ -352,9 +352,16 @@ int hide_layer_selecter(void *ctrl, void *val)
 
 static int check_box(GLshort *box,int x, int y)
 {
-    if(box[0] < x && box[1] < y && box[2] > x && box[3] > y)
-        return 1;
-
+ /*   if(matrix_hndl)
+    {
+     GLfloat p1[4], p2[4];
+     p1[0]
+    }    
+    else
+    {*/
+        if(box[0] < x && box[1] < y && box[2] > x && box[3] > y)
+            return 1;
+ //   }
     return 0;
 
 }
@@ -366,12 +373,26 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
     if(!ctrl->active)
         return 0;
 
+
+//    matrix_hndl = ctrl->matrix_handler;
+    
     log_this(100, "checkcontrol, x = %d, y = %d\n",x,y);
     n_children = ctrl->spatial_family->n_children;
     for (i=0; i<n_children; i++)
     {
         struct CTRL *child = *(ctrl->spatial_family->children+i);
-
+    if(child == incharge)
+    {
+        GLfloat ny_x = (GLfloat) x, ny_y = (GLfloat) y;
+        GLfloat *matrix = child->matrix_handler->matrix;
+        
+       // printf("matrix[0] = %f, 5 = %f, 12 = %f, 13 = %f, x = %f, y=%f\n", matrix[0],matrix[5],matrix[12],matrix[13], ny_x, ny_y);
+        ny_x = ny_x * CURR_WIDTH * matrix[0] / 2 - CURR_WIDTH * (1 + matrix[12])/2;
+        ny_y = ny_y * CURR_HEIGHT * matrix[5] / 2 - CURR_HEIGHT * (1+matrix[13])/2;
+        x = (int) roundf(ny_x);
+        y = (int) roundf(ny_y);
+      //  printf("nyX = %f, nyY = %f\n", ny_x,ny_y);
+    }
         if(child->active && check_box(child->box, x,y))
         {
             
@@ -404,10 +425,11 @@ int check_click(int x, int y)
 }
 
 
-int render_control(struct CTRL *ctrl)
+static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
  
-    render_simple_rect(ctrl->box, ctrl->color);  
+    
+    render_simple_rect(ctrl->box, ctrl->color, matrix_hndl);  
     if(ctrl->txt)
     {
      
@@ -421,17 +443,19 @@ int render_control(struct CTRL *ctrl)
     return 0;
 }
 
-int render_controls(struct CTRL *ctrl)
+int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
  int i;
  if(!ctrl->active)
      return 0;
  
- render_control(ctrl);
+ if(ctrl == incharge)
+     matrix_hndl = ctrl->matrix_handler;
+ render_control(ctrl, matrix_hndl);
  for (i=0;i < ctrl->logical_family->n_children;i++)
  {
      
-     render_controls(ctrl->logical_family->children[i]);
+     render_controls(ctrl->logical_family->children[i], matrix_hndl);
      
  }   
 return 0;    
@@ -494,7 +518,9 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     
     init_matrix_handler(layers_meny, 1, 0, 0);
     incharge = layers_meny;
-    
+    initialBBOX(CURR_WIDTH/2, CURR_HEIGHT/2, CURR_WIDTH, layers_meny->matrix_handler);
+    matrixFromBBOX(layers_meny->matrix_handler);
+                        
     LAYER_RUNTIME *oneLayer;
     for (i=0; i<nLayers; i++)
     {

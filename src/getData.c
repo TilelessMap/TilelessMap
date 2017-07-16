@@ -106,8 +106,9 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
 
     }
 
+    
     renderGPS(map_matrix->matrix);
-    render_controls(controls);
+    render_controls(controls, NULL );
   //  render_simple_rect(5,75,300,225);
 /*    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);
     print_txt(10,180,200,0,0,255,1, "n polygons %d ", n_polys);

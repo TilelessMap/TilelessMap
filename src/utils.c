@@ -48,12 +48,12 @@ void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
     map_matrix->bbox[3] = y+height/2;
 }
 
-void copyNew2CurrentBBOX(GLfloat *newBBOX,GLfloat *currentBBOX)
+void copy2ref_box(MATRIX *matrix_hndl,MATRIX *ref)
 {
-    currentBBOX[0] = newBBOX[0];
-    currentBBOX[1] = newBBOX[1];
-    currentBBOX[2] = newBBOX[2];
-    currentBBOX[3] = newBBOX[3];
+    ref->bbox[0] = matrix_hndl->bbox[0];
+    ref->bbox[1] = matrix_hndl->bbox[1];
+    ref->bbox[2] = matrix_hndl->bbox[2];
+    ref->bbox[3] = matrix_hndl->bbox[3];
     return;
 }
 
@@ -93,6 +93,25 @@ int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix)
             theMatrix[m2 + 4 * i] = val;
         }
     }
+    return 0;
+}
+
+int multiply_matrix_vektor(GLfloat *matrix,GLfloat *vektor_in, GLfloat *vektor_out)
+{
+    int m1, m2;
+    GLfloat  val=0; //m1o, m2o,
+
+    memset(vektor_out, 0,sizeof(GLfloat)*4);
+
+        for (m2 = 0; m2<4; m2++)
+        {
+            val = 0;
+            for (m1 = 0; m1<4; m1++)
+            {
+                val +=  matrix[m2 + m1*4] * vektor_in[m1];
+            }
+            vektor_out[m2] = val;
+        }
     return 0;
 }
 

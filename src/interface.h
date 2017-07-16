@@ -72,7 +72,7 @@ int check_click(int x, int y);
 
 int parent_add_child(struct CTRL *parent, struct CTRL *child);
 int init_controls();
-int render_controls(struct CTRL *ctrl);
+int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl);
 
 
 struct CTRL *incharge; //This variable handles what to mov on events. NULL means map, otherwise there will be a ccontrol that will be scrolled or move in other ways
