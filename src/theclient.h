@@ -412,6 +412,7 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale);
 void windowResize(int newWidth,int newHeight,MATRIX *matrix_hndl,MATRIX *out);
 
 void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix);
+int reset_matrix(MATRIX *matrix_handl);
 //void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX);
 
 /*event handling*/
@@ -456,7 +457,8 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 void log_this(int log_level, const char *log_txt, ... );
 int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy);
 //int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
-int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
+//int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
+int print_txt(GLfloat *point_coord, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
 //int render_simple_rect(GLfloat minx, GLfloat miny, GLfloat maxx, GLfloat maxy);
 int render_simple_rect(GLshort *coords, GLfloat *color, MATRIX *matrix_hndl);
 

@@ -428,17 +428,18 @@ int check_click(int x, int y)
 static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
  
-    
+    //log_this(100,"render control\n");
     render_simple_rect(ctrl->box, ctrl->color, matrix_hndl);  
     if(ctrl->txt)
     {
      
+    //log_this(100,"render control text %s\n", ctrl->txt->txt);
         GLfloat point_coord[2] = {ctrl->box[0] + ctrl->txt_margin[0], ctrl->box[1] + ctrl->txt_margin[1]};
         GLfloat color[4] = {0,0,0,255};
      //   print_txt(point_coord, color,1,0,300, "Normal text ");
      //   printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
         GLfloat max_width = ctrl->box[2]-ctrl->box[0] -2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
-        print_txt(point_coord, color,2, 1,max_width, ctrl->txt->txt);   
+        print_txt(point_coord,matrix_hndl, color,2, 1,max_width, ctrl->txt->txt);   
     }
     return 0;
 }

@@ -326,7 +326,7 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
 
 
 //int print_txt(float x,float y,float r, float g, float b, float a,int size,int max_width, const char *txt, ... )
-int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_width, const char *txt, ... )
+int print_txt(GLfloat *point_coord, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... )
 {
 
 
@@ -337,11 +337,19 @@ int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_widt
     va_start (args, txt);
     vsnprintf (txt_tot,1024,txt, args);
     va_end (args);
+    GLfloat *theMatrix;
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
+        GLfloat matrix_array[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+    if(matrix_hndl)
+        theMatrix = matrix_hndl->matrix;
+    else
+    {
+        theMatrix = (GLfloat *) matrix_array;
+   }
+    
 
-    GLfloat theMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     glGenBuffers(1, &text_vbo);
     glUseProgram(txt_program);
 

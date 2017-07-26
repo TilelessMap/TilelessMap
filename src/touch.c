@@ -62,7 +62,7 @@ int register_touch_down(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLflo
             i = MAX_ZOOM_FINGERS;
             break;
         }
-
+ 
     }
 
 

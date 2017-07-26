@@ -33,19 +33,19 @@ int render_simple_rect(GLshort *coords, GLfloat *color, MATRIX *matrix_hndl)
     GLuint ebo;
     GLenum err;
     GLfloat *theMatrix;
-
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
+    GLfloat matrix_array[] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     if(matrix_hndl)
-        theMatrix = matrix_hndl->matrix;
-    else
     {
-        GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
-        GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
-
-
-        GLfloat matrix_array[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
-        theMatrix = &matrix_array;
+        theMatrix = matrix_hndl->matrix;
     }
-    //  GLfloat theMatrix[16] = {1, 0,0,0,0,1,0,0,0,0,1,0,-0.5,0,0,1};
+    else
+    {    
+        theMatrix = (GLfloat *) &matrix_array;
+    }
+    
+
     GLfloat minx = coords[0];
     GLfloat miny = coords[1];
     GLfloat maxx = coords[2];
