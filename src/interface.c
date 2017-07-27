@@ -67,21 +67,11 @@ static inline int get_top_right(struct CTRL *t, GLshort *p)
 
 static RELATIONS *init_family(struct CTRL *parent)
 {
-    RELATIONS *t = malloc(sizeof(RELATIONS));
-    if(!t)
-    {
-        log_this(100,"Failed to alloc memory in func %s",__func__);
-        t->max_children = 0;
-        return NULL;
-    }
+    RELATIONS *t = st_malloc(sizeof(RELATIONS));
 
-    t->children = malloc(sizeof(struct CTRL));
-    if(!t->children)
-    {
-        log_this(100,"Failed to alloc memory in func %s",__func__);
-        t->max_children = 0;
-        return NULL;
-    }
+
+    t->children = st_malloc(sizeof(struct CTRL));
+
 
     t->max_children = 1;
     t->n_children = 0;

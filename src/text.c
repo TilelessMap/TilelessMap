@@ -26,26 +26,15 @@
 #include <stdlib.h>
 #include "log.h"
 #include "text.h"
+#include "mem.h"
 
 
 TEXT* init_txt(size_t s)
 {
 
-    TEXT *t = malloc(sizeof(TEXT));
-    if(!t)
-    {
-        log_this(100,"Failed to alloc memory in func %s",__func__);
-        t->alloced = 0;
-        return NULL;
-    }
+    TEXT *t = st_malloc(sizeof(TEXT));
 
-    t->txt = malloc(s);
-    if(!t->txt)
-    {
-        log_this(100,"Failed to alloc memory in func %s",__func__);
-        t->alloced = 0;
-        return NULL;
-    }
+    t->txt = st_malloc(s);
 
     t->alloced = s;
     t->used = 0;
