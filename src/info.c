@@ -67,7 +67,7 @@ int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
             twkb_fromSQLiteBBOX(infoLayer);
 
 
-            if(theLayer->type & 6)
+            if((theLayer->type & 6) && theLayer->info_active)
             {
 
 

@@ -24,7 +24,7 @@
 
 #include "buffer_handling.h"
 #include "theclient.h"
-#include "interface.h"
+#include "interface/interface.h"
 
 
 /********************************************************************************

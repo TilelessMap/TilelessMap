@@ -23,7 +23,7 @@
 
 
 #include "theclient.h"
-#include "interface.h"
+#include "interface/interface.h"
 #include "mem.h"
 #ifdef __ANDROID__
 #include <jni.h>
@@ -50,9 +50,9 @@ void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
 int reset_matrix(MATRIX *matrix_handl)
 {
     memset(matrix_handl->bbox, 0,4 *sizeof(GLfloat));
-                    log_this(100, "finger down matrix_handl1 = %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n", matrix_handl->matrix[0], matrix_handl->matrix[1], matrix_handl->matrix[2], matrix_handl->matrix[3], matrix_handl->matrix[4], matrix_handl->matrix[5], matrix_handl->matrix[6], matrix_handl->matrix[7], matrix_handl->matrix[8], matrix_handl->matrix[9], matrix_handl->matrix[10], matrix_handl->matrix[11], matrix_handl->matrix[12], matrix_handl->matrix[13], matrix_handl->matrix[14], matrix_handl->matrix[15]);
+        
     memset(matrix_handl->matrix, 0, 16*sizeof(GLfloat));
-                    log_this(100, "finger down matrix_handl2 = %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n", matrix_handl->matrix[0], matrix_handl->matrix[1], matrix_handl->matrix[2], matrix_handl->matrix[3], matrix_handl->matrix[4], matrix_handl->matrix[5], matrix_handl->matrix[6], matrix_handl->matrix[7], matrix_handl->matrix[8], matrix_handl->matrix[9], matrix_handl->matrix[10], matrix_handl->matrix[11], matrix_handl->matrix[12], matrix_handl->matrix[13], matrix_handl->matrix[14], matrix_handl->matrix[15]);
+                  
     matrix_handl->vertical_enabled = 0;
     matrix_handl->zoom_enabled = 0;
     

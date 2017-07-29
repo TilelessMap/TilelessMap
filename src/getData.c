@@ -23,7 +23,7 @@
 
 
 #include "theclient.h"
-#include "interface.h"
+#include "interface/interface.h"
 #include "buffer_handling.h"
 
 

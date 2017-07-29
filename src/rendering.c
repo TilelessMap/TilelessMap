@@ -22,7 +22,7 @@
  **********************************************************************/
 
 #include "theclient.h"
-#include "interface.h"
+#include "interface/interface.h"
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {

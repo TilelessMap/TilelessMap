@@ -58,6 +58,9 @@
 #include "global.h"
 #include "matrix_handling.h"
 
+
+#define NULL ((void *)0)
+
 #define INIT_WIDTH 1000
 #define INIT_HEIGHT 500
 
@@ -235,6 +238,7 @@ typedef struct
     int layer_id;
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
+    int info_active;
 }
 LAYER_RUNTIME;
 

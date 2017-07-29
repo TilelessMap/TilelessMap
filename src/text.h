@@ -26,7 +26,6 @@
 #define _text_H
 
 #include "theclient.h"
-#define NULL ((void *)0)
 
 typedef struct
 {

@@ -22,7 +22,7 @@
  **********************************************************************/
 
 #include "theclient.h"
-#include "interface.h"
+#include "interface/interface.h"
 
 
 /*int  matrixFromBBOX(GLfloat *newBBOX, GLfloat *theMatrix )

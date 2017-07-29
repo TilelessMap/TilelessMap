@@ -91,6 +91,8 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 
 
 
+
+
 LAYER_RUNTIME* init_layer_runtime(int n)
 {
     LAYER_RUNTIME *lr, *theLayer;
@@ -102,6 +104,7 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer = lr+i;
         theLayer->name = NULL;
         theLayer->visible = 0;
+        theLayer->info_active = 0;
         theLayer->preparedStatement = NULL;
         /*Buffers*/
         /*Values for shaders*/
