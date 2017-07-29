@@ -106,33 +106,33 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
 
     }
 
-    
+
     renderGPS(map_matrix->matrix);
     log_this(100, "---------------------let's rendr controls------------------------------\n");
     render_controls(controls, NULL );
-    
+
     log_this(100, "--------back from render controls---------\n");
-  //  render_simple_rect(5,75,300,225);
-/*    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);
-    print_txt(10,180,200,0,0,255,1, "n polygons %d ", n_polys);
-    print_txt(10,160,200,0,0,255,1, "n triangels %d ", n_tri);
-    print_txt(10,140,200,0,0,255,1, "n words %d ", n_words);
-    print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
-    print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);*/
+    //  render_simple_rect(5,75,300,225);
+    /*    print_txt(10,200,200,0,0,255,1, "n lines %d ", n_lines);
+        print_txt(10,180,200,0,0,255,1, "n polygons %d ", n_polys);
+        print_txt(10,160,200,0,0,255,1, "n triangels %d ", n_tri);
+        print_txt(10,140,200,0,0,255,1, "n words %d ", n_words);
+        print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
+        print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);*/
 
-GLfloat point_coord[2] = {10, 200};
-GLfloat color[4] = {200,0,0,255};
+    GLfloat point_coord[2] = {10, 200};
+    GLfloat color[4] = {200,0,0,255};
 
 
 
-print_txt(point_coord,NULL, color,1,0,300, "Normal text ");
-printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
-print_txt(point_coord,NULL, color,1,1,300, "bold text");
+    print_txt(point_coord,NULL, color,1,0,300, "Normal text ");
+    printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
+    print_txt(point_coord,NULL, color,1,1,300, "bold text");
 #ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 
     timersub(&tval_after, &tval_before, &tval_result);
- //   print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+//   print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
 #endif
 
     total_points=0;

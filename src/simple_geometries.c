@@ -41,10 +41,10 @@ int render_simple_rect(GLshort *coords, GLfloat *color, MATRIX *matrix_hndl)
         theMatrix = matrix_hndl->matrix;
     }
     else
-    {    
+    {
         theMatrix = (GLfloat *) &matrix_array;
     }
-    
+
 
     GLfloat minx = coords[0];
     GLfloat miny = coords[1];
@@ -68,7 +68,7 @@ int render_simple_rect(GLshort *coords, GLfloat *color, MATRIX *matrix_hndl)
     //  GLfloat punkter[] = {-0.2,-0.2,-0.2,0.2,0.5,0.2,0.5,-0.2};
     GLshort tri_index[] = {0,1,3,1,2,3};
 
- //   GLfloat color[] = {(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 0.9};
+//   GLfloat color[] = {(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 1.0,(GLfloat) 0.9};
 
     GLfloat norm_color[4];
 
@@ -76,7 +76,7 @@ int render_simple_rect(GLshort *coords, GLfloat *color, MATRIX *matrix_hndl)
     norm_color[1] = color[1] / 255;
     norm_color[2] = color[2] / 255;
     norm_color[3] = color[3] / 255;
-    
+
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*8, punkter, GL_STATIC_DRAW);

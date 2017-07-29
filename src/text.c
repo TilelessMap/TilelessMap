@@ -146,16 +146,16 @@ int add_utf8_2_wc_txt(WCHAR_TEXT *t,const char *in)
 
         p = utf82unicode(u,&u);
 
-        
-        
 
-    if(t->alloced-t->used < 1)
-    {
+
+
+        if(t->alloced-t->used < 1)
+        {
             if(realloc_wc_txt(t))
                 return 1;
-    }       
-    t->txt[t->used] = p;
-    t->used++;
+        }
+        t->txt[t->used] = p;
+        t->used++;
     }
     return 0;
 }

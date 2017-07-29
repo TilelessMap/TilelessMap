@@ -673,12 +673,12 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_chars, float sx, float sy,POINT_T *coords ) 
+static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_chars, float sx, float sy,POINT_T *coords )
 {
-    
+
     uint32_t p;
     uint i, c=0;
-    for(i = 0;i<n_chars;i++)
+    for(i = 0; i<n_chars; i++)
     {
 
         p = *(txt + i);
@@ -696,12 +696,24 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_
         if (!w || !h)
             continue;
 
-        coords[c++] = (POINT_T) {x2, -y2, a->metrics[p].tx, a->metrics[p].ty};
-        coords[c++] = (POINT_T) {x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty};
-        coords[c++] = (POINT_T) {x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h};
-        coords[c++] = (POINT_T) {x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty};
-        coords[c++] = (POINT_T) {x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h};
-        coords[c++] = (POINT_T) {x2 + w, -y2 - h, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty + a->metrics[p].bh / a->h};
+        coords[c++] = (POINT_T) {
+            x2, -y2, a->metrics[p].tx, a->metrics[p].ty
+        };
+        coords[c++] = (POINT_T) {
+            x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty
+        };
+        coords[c++] = (POINT_T) {
+            x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h
+        };
+        coords[c++] = (POINT_T) {
+            x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty
+        };
+        coords[c++] = (POINT_T) {
+            x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h
+        };
+        coords[c++] = (POINT_T) {
+            x2 + w, -y2 - h, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty + a->metrics[p].bh / a->h
+        };
     }
     return c;
 }
@@ -710,17 +722,17 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
 {
 
     ATLAS *a;
-    if(bold)        
+    if(bold)
         a = font_bold[atlas_nr-1];
     else
         a = font_normal[atlas_nr-1];
-    
+
     const char *u;
     GLfloat x,y;
     uint32_t p;
     uint i;
     reset_wc_txt(tmp_unicode_txt);
-    
+
     glBindTexture(GL_TEXTURE_2D, a->tex);
     //    glUniform1i(text_uniform_tex, 0);
     /* Set up the VBO for our vertex data */
@@ -733,7 +745,7 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
 
     glUniform2fv(txt_coord2d,1,point_coord);
 
-   // max_width = 255;
+    // max_width = 255;
 
     //TODO, fix dynamic allocation.
     POINT_T coords[600];
@@ -753,30 +765,30 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
         GLfloat line_width = 0, word_width = 0;
         unsigned int n_chars_in_line = 0, n_chars_in_word = 0, line_start=0;
         //uint32_t *last_word = 0;
-        for(i = 0;i<tmp_unicode_txt->used;i++)
+        for(i = 0; i<tmp_unicode_txt->used; i++)
         {
             p = *(tmp_unicode_txt->txt + i);
-            
+
             word_width += a->metrics[p].ax;
             n_chars_in_word++;
-           
+
             if(p==32)
             {
-             n_chars_in_line += n_chars_in_word;
-             line_width += word_width;
-             n_chars_in_word = 0;
-             word_width = 0;
-             }
-             else if (p=='\n')
-             {
-                    n_chars_in_line += n_chars_in_word;
-                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
-                    line_start = i;
-                    word_width = line_width = 0;
-                    n_chars_in_line = n_chars_in_word =0;     
-                    nlines++;
-                 
-             }
+                n_chars_in_line += n_chars_in_word;
+                line_width += word_width;
+                n_chars_in_word = 0;
+                word_width = 0;
+            }
+            else if (p=='\n')
+            {
+                n_chars_in_line += n_chars_in_word;
+                c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+                line_start = i;
+                word_width = line_width = 0;
+                n_chars_in_line = n_chars_in_word =0;
+                nlines++;
+
+            }
             if(line_width + word_width >= max_width)
             {
                 if(n_chars_in_line == 0) //there is only 1 word in line, we have to cut the word
@@ -788,25 +800,25 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
                 }
                 else //we put the last word on the next line instead
                 {
-                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;   
-                    line_width = 0;                    
+                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+                    line_width = 0;
                     line_start += n_chars_in_line;
                     n_chars_in_line =0;
-                    
+
                 }
                 nlines++;
             }
         }
         if(word_width > 0 || line_width > 0)
         {
-            
-             n_chars_in_line += n_chars_in_word;
-             line_width += word_width;
-             c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+
+            n_chars_in_line += n_chars_in_word;
+            line_width += word_width;
+            c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
         }
         point_coord[0] += line_width;
         point_coord[1] -= rh*nlines;
-        
+
     }
     else
         c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
@@ -816,8 +828,8 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
     glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, c);
 
-   // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
-    
+    // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
+
     glDisableVertexAttribArray(txt_box);
 
     return 0;

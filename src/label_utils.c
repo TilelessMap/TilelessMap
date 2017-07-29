@@ -179,12 +179,12 @@ int init_text_resources()
 
     create_atlas(font_normal[0], face, 20);
     create_atlas(font_normal[1], face, 26);
-    create_atlas(font_normal[2], face, 32);    
-    
+    create_atlas(font_normal[2], face, 32);
+
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
     free(font_data);
-    
+
     sqlite3_bind_text(preparedFonts,1,"freesans_bold",-1,NULL);
     sqlite3_step(preparedFonts);
     // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
@@ -205,7 +205,7 @@ int init_text_resources()
         return 1;
     }
 
-printf("font name = %s\n", face->style_name);
+    printf("font name = %s\n", face->style_name);
 
     // Create the vertex buffer object
     //  glGenBuffers(1, &text_vbo);
@@ -218,11 +218,11 @@ printf("font name = %s\n", face->style_name);
 
     create_atlas(font_bold[0], face, 20);
     create_atlas(font_bold[1], face, 26);
-    create_atlas(font_bold[2], face, 32);    
-    
+    create_atlas(font_bold[2], face, 32);
+
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
-    
+
     sqlite3_finalize(preparedFonts);
     free(font_data);
     return 0;
@@ -341,14 +341,14 @@ int print_txt(GLfloat *point_coord, MATRIX *matrix_hndl,GLfloat *color,int size,
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
-        GLfloat matrix_array[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+    GLfloat matrix_array[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
     if(matrix_hndl)
         theMatrix = matrix_hndl->matrix;
     else
     {
         theMatrix = (GLfloat *) matrix_array;
-   }
-    
+    }
+
 
     glGenBuffers(1, &text_vbo);
     glUseProgram(txt_program);
@@ -361,12 +361,12 @@ int print_txt(GLfloat *point_coord, MATRIX *matrix_hndl,GLfloat *color,int size,
     norm_color[2] = color[2] / 255;
     norm_color[3] = color[3] / 255;
 
- /*   GLfloat point_coord[2];
+    /*   GLfloat point_coord[2];
 
-    point_coord[0]= x;
-    point_coord[1]= y;
-  */
-  //  glUniform4fv(txt_color,1,norm_color );
+       point_coord[0]= x;
+       point_coord[1]= y;
+     */
+    //  glUniform4fv(txt_color,1,norm_color );
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");

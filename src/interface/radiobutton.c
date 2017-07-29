@@ -35,14 +35,14 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
 {
     int i, v;
     struct CTRL *t = (struct CTRL *) ctrl;
-    
+
     struct CTRL *radio_master = t->spatial_family->parent;
-     v = 0;
-    for (i=0;i<radio_master->spatial_family->n_children;i++)
+    v = 0;
+    for (i=0; i<radio_master->spatial_family->n_children; i++)
     {
         struct CTRL *rb = radio_master->spatial_family->children[i];
         func_in_func((void*) rb,(void*) &v);
-       // ((LAYER_RUNTIME*) rb->obj)->info_active = 0;    
+        // ((LAYER_RUNTIME*) rb->obj)->info_active = 0;
         if(rb->txt)
         {
             destroy_txt(rb->txt);
@@ -50,15 +50,15 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
         }
     }
 
-        TEXT *txt = init_txt(5);
-        add_txt(txt, "O");
-        t->txt=txt;
-         v = 1;
-        func_in_func((void*) t, &v);
-       // ((LAYER_RUNTIME*) t->obj)->info_active = 1;  
-    
-    
-  return 0;  
+    TEXT *txt = init_txt(5);
+    add_txt(txt, "O");
+    t->txt=txt;
+    v = 1;
+    func_in_func((void*) t, &v);
+    // ((LAYER_RUNTIME*) t->obj)->info_active = 1;
+
+
+    return 0;
 }
 
 
@@ -67,11 +67,11 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
 
 struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXT *txt, GLfloat *txt_margin,int txt_size,int default_active, int z)
 {
-    
-    
+
+
     return register_control(RADIOMASTER, spatial_parent, logical_parent,NULL, NULL, NULL,box, color, txt, txt_margin, txt_size, default_active, z);
-    
-     
+
+
 }
 
 
@@ -93,44 +93,44 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
         box[3] = radio_master->spatial_family->children[radio_master->spatial_family->n_children -1]->box[1] - row_dist; //we get miny from the last radiobutton from before
     }
     else
-    {  
-        
-     box[3] = radio_master->box[3] - row_dist; //so far we only support vertical radiobuttons so all share x-values   
-        
+    {
+
+        box[3] = radio_master->box[3] - row_dist; //so far we only support vertical radiobuttons so all share x-values
+
     }
-    
+
     box[1] = box[3] - size;
     box[2] = box[0] + size;
-    
-    
+
+
     GLfloat color[4];
-    
+
     /*GLfloat *master_color = radio_master->color;
-    
+
     for (i = 0;i<3;i++)
     {
         color[i] = master_color[i] - 50;
         if (color[i] < 0)
-            color[i] += 255;        
+            color[i] += 255;
     }*/
     color[3] = 255;
-    
+
     color[0] = 255;
     color[1] = 255;
     color[2] = 255;
-    
+
     GLfloat text_margins[] = {3,3};
     if(set)
     {
-            TEXT *txt;
-            txt = init_txt(5);            
-            add_txt(txt, "O");
-    
+        TEXT *txt;
+        txt = init_txt(5);
+        add_txt(txt, "O");
+
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins,3, default_active,radio_master->z + 1);
     }
-    else        
+    else
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, NULL,text_margins,3, default_active,radio_master->z + 1);
-    
+
     return radio_button;
 }
 

@@ -62,7 +62,7 @@ int register_touch_down(FINGEREVENT *touches, int64_t fingerid, GLfloat x, GLflo
             i = MAX_ZOOM_FINGERS;
             break;
         }
- 
+
     }
 
 
@@ -138,15 +138,15 @@ int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *ref)
 
     GLint deltax_px, deltay_px;
     GLfloat deltax_w, deltay_w, ratio;
-    
+
     //x at first points
     p1x1 = (GLint) (touches[0].x1 * CURR_WIDTH);
     p2x1 = (GLint)(touches[1].x1 * CURR_WIDTH);
-    
+
     //y at first points
     p1y1 = (GLint)(touches[0].y1 * CURR_HEIGHT);
     p2y1 = (GLint)(touches[1].y1 * CURR_HEIGHT);
-    
+
     //x at second points
     if(matrix_hndl->horizontal_enabled)
     {
@@ -158,7 +158,7 @@ int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *ref)
         p1x2 = p1x1;
         p2x2 = p2x1;
     }
-        
+
     //y at second points
     if(matrix_hndl->vertical_enabled)
     {
@@ -184,7 +184,7 @@ int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *ref)
         ratio = w_dist/px_dist;
     else
         ratio = 1;
-    
+
     matrix_hndl->bbox[0] = w_x1 - ratio * p1x2;
     matrix_hndl->bbox[1] = w_y1 - ratio * (CURR_HEIGHT - p1y2);
     matrix_hndl->bbox[2] = matrix_hndl->bbox[0] + ratio * CURR_WIDTH;

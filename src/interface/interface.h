@@ -39,7 +39,7 @@ typedef struct
 
 
 
-        
+
 
 typedef struct
 {
@@ -47,7 +47,7 @@ typedef struct
     struct CTRL **children;
     int n_children;
     int max_children;
- 
+
 } RELATIONS;
 
 
@@ -57,7 +57,7 @@ typedef struct
     void *data;
     tileless_event_function te_func;
     tileless_event_func_in_func te_func_in_func;
- 
+
 } tileless_event;
 
 struct CTRL

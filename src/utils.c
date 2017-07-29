@@ -50,12 +50,12 @@ void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
 int reset_matrix(MATRIX *matrix_handl)
 {
     memset(matrix_handl->bbox, 0,4 *sizeof(GLfloat));
-        
+
     memset(matrix_handl->matrix, 0, 16*sizeof(GLfloat));
-                  
+
     matrix_handl->vertical_enabled = 0;
     matrix_handl->zoom_enabled = 0;
-    
+
 }
 void copy2ref_box(MATRIX *matrix_hndl,MATRIX *ref)
 {
@@ -112,15 +112,15 @@ int multiply_matrix_vektor(GLfloat *matrix,GLfloat *vektor_in, GLfloat *vektor_o
 
     memset(vektor_out, 0,sizeof(GLfloat)*4);
 
-        for (m2 = 0; m2<4; m2++)
+    for (m2 = 0; m2<4; m2++)
+    {
+        val = 0;
+        for (m1 = 0; m1<4; m1++)
         {
-            val = 0;
-            for (m1 = 0; m1<4; m1++)
-            {
-                val +=  matrix[m2 + m1*4] * vektor_in[m1];
-            }
-            vektor_out[m2] = val;
+            val +=  matrix[m2 + m1*4] * vektor_in[m1];
         }
+        vektor_out[m2] = val;
+    }
     return 0;
 }
 

@@ -130,10 +130,10 @@ int matrixFromBboxPointZoom(MATRIX *matrix_hndl,MATRIX *ref, GLint px_x_clicked,
 {
 
     log_this(10, "Entering get_bbox\n");
-    
+
     if(! matrix_hndl->zoom_enabled)
         zoom = 1;
-    
+
     GLfloat w_x_clicked,w_y_clicked;
     GLfloat w_x_center,w_y_center;
     GLfloat new_w_x_dist2center, new_w_y_dist2center;
@@ -149,19 +149,19 @@ int matrixFromBboxPointZoom(MATRIX *matrix_hndl,MATRIX *ref, GLint px_x_clicked,
     GLfloat original_w_x_dist2center = (GLfloat) (w_x_clicked - ref->bbox[0] - original_w_width * 0.5);
     GLfloat original_w_y_dist2center = (GLfloat)(w_y_clicked - ref->bbox[1] - original_w_height * 0.5);
 
-    
-        new_w_x_dist2center = (GLfloat)(original_w_x_dist2center * zoom);
 
-    
-    
-        new_w_y_dist2center = (GLfloat)(original_w_y_dist2center * zoom);
+    new_w_x_dist2center = (GLfloat)(original_w_x_dist2center * zoom);
 
-    
+
+
+    new_w_y_dist2center = (GLfloat)(original_w_y_dist2center * zoom);
+
+
     if(matrix_hndl->horizontal_enabled)
         w_x_center = w_x_clicked - new_w_x_dist2center;
     else
         w_x_center = matrix_hndl->bbox[0] + original_w_width * 0.5;
-    
+
     if(matrix_hndl->vertical_enabled)
         w_y_center = w_y_clicked - new_w_y_dist2center;
     else
@@ -188,15 +188,15 @@ int matrixFromDeltaMouse(MATRIX *matrix_hndl,MATRIX *ref,GLint mouse_down_x, GLi
     GLfloat transl[16];
     GLfloat scale[16];
     GLfloat centerx, centery, deltax, deltay;
-    
+
     if(matrix_hndl->horizontal_enabled)
     {
         GLfloat width = ref->bbox[2]-ref->bbox[0];
-        deltax = - (mouse_up_x - mouse_down_x) * width/CURR_WIDTH;    
+        deltax = - (mouse_up_x - mouse_down_x) * width/CURR_WIDTH;
     }
     else
         deltax = 0;
-    
+
     if(matrix_hndl->vertical_enabled)
     {
         GLfloat height = ref->bbox[3]-ref->bbox[1];
@@ -204,8 +204,8 @@ int matrixFromDeltaMouse(MATRIX *matrix_hndl,MATRIX *ref,GLint mouse_down_x, GLi
     }
     else
         deltay = 0;
-    
-    centerx= (GLfloat)(ref->bbox[0] + (ref->bbox[2]-ref->bbox[0]) * 0.5);    
+
+    centerx= (GLfloat)(ref->bbox[0] + (ref->bbox[2]-ref->bbox[0]) * 0.5);
     centery= (GLfloat)(ref->bbox[1] + (ref->bbox[3]-ref->bbox[1]) * 0.5);
 
     centerx += deltax;
