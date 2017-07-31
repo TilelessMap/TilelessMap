@@ -37,10 +37,6 @@ typedef struct
 }TL_EV;
 */
 
-
-
-
-
 typedef struct
 {
     struct CTRL *parent;

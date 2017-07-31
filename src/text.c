@@ -46,7 +46,10 @@ static int realloc_txt(TEXT *t, size_t s)
 {
     size_t new_s = t->alloced;
 
-    while (new_s*=2 < s) {};
+    while (new_s < s) 
+    {
+        new_s*=2;
+    };
 
     t->txt = realloc(t->txt, new_s);
     if(!t->txt)

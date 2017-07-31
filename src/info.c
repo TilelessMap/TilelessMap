@@ -2,6 +2,109 @@
 #include "buffer_handling.h"
 #include "info.h"
 
+
+static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
+{
+    
+    
+    int max_cells = 50;
+    sqlite3_stmt *prepared_info;
+    sqlite3_stmt *prepared_layer_info;
+    
+    int i = 0;
+    
+        
+        
+    char *info_sql = "select field, row, column, header from info where layerID = ? order by row, column";
+    
+    int rc = sqlite3_prepare_v2(projectDB, info_sql, -1,&prepared_info, 0);
+    if (rc != SQLITE_OK ) {
+        log_this(100, "SQL error in %s\n",info_sql );
+        sqlite3_close(projectDB);
+        return 1;
+    }       
+        
+     TEXT *layer_info_sql = init_txt(512);
+        
+        
+        sqlite3_bind_int(prepared_info, 1,theLayer->layer_id);
+        
+        
+        
+        add_txt(layer_info_sql, "SELECT ");
+        while (sqlite3_step(prepared_info)==SQLITE_ROW)
+        {
+            
+            if(i>0)
+                add_txt(layer_info_sql, ", ");
+            const unsigned char *field = sqlite3_column_text(prepared_info, 0);
+            add_txt(layer_info_sql, (const char*) field);               
+               
+            i++;
+        }
+        add_txt(layer_info_sql, " FROM ");
+        add_txt(layer_info_sql, theLayer->name);
+        add_txt(layer_info_sql, " where twkb_id = ?;");
+        
+        
+        sqlite3_reset(prepared_info);
+       
+    rc = sqlite3_prepare_v2(projectDB, layer_info_sql->txt, -1,&prepared_layer_info, 0);
+    if (rc != SQLITE_OK ) {
+        log_this(100, "SQL error in %s\n",layer_info_sql->txt );
+        sqlite3_close(projectDB);
+        return 1;
+    }        
+        
+        
+     
+        sqlite3_bind_int(prepared_layer_info, 1,twkb_id);   
+        
+    
+        while (sqlite3_step(prepared_layer_info)==SQLITE_ROW)
+        {
+    
+    i=0;
+            while (sqlite3_step(prepared_info)==SQLITE_ROW)
+            {
+                int type = sqlite3_column_type(prepared_layer_info, i);
+                
+                const unsigned char *header = sqlite3_column_text(prepared_info, 3);   
+                int row = sqlite3_column_int(prepared_info, 1);
+                int col = sqlite3_column_int(prepared_info, 2);
+                
+                if(type == SQLITE_INTEGER)
+                {
+                    int val_int = sqlite3_column_int(prepared_layer_info, i);
+                    printf("header = %s, row = %d, col = %d, value = %d    \n",header, row, col, val_int);
+                    
+                }
+                else if (type == SQLITE_FLOAT)
+                {
+                    double val_float = sqlite3_column_double(prepared_layer_info, i);
+                    printf("header = %s, row = %d, col = %d, value = %lf    \n",header, row, col, val_float);
+                    
+                }
+                else if (type == SQLITE_TEXT)
+                {
+                    const char *val_txt = sqlite3_column_text(prepared_layer_info, i);
+                    printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
+                  
+                }  
+               
+            i++; 
+            }
+            
+        }
+    
+    
+    
+    
+}
+
+
+
+
 int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
 {
     log_this(10,"info, x=%d, y=%d\n",x,y);
@@ -92,7 +195,7 @@ int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
                 int next_pa_start = 0;
                 int curr_poly_start = 0;
                 int n_elements_acc = 0;
-                uint pa;
+                unsigned int pa;
                 inside = 0;
                 for (pa=0; pa<poly->pa_start_indexes->used; pa++)
                 {
@@ -127,6 +230,7 @@ int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
                     {
                         if(inside)
                         {
+                            id = infoLayer->twkb_id->list[pa];
                             log_this(100,"ok, poly for rendering");
                             add2gluint_list(renderpoly->polygon_start_indexes, renderpoly->vertex_array->used); //register start of new polygon to render
                             addbatch2glfloat_list(renderpoly->vertex_array, next_polystart - curr_poly_start, poly->vertex_array->list + curr_poly_start); //memcpy all vertexes in polygon
@@ -137,8 +241,8 @@ int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
 
                             addbatch2glushort_list(renderpoly->element_array, n_elements, poly->element_array->list + n_elements_acc); //memcpy all vertexes in polygon
                             add2gluint_list(renderpoly->element_start_indexes, renderpoly->element_array->used); //register start of new polygon to render
-
-
+                            
+                            printinfo(theLayer,id);
 
                         }
                         curr_poly_start = next_polystart;

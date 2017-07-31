@@ -127,7 +127,7 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
 
     print_txt(point_coord,NULL, color,1,0,300, "Normal text ");
     printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
-    print_txt(point_coord,NULL, color,1,1,300, "bold text");
+    print_txt(point_coord,NULL, color,1,1,300, "bold text\n efter radbrytning");
 #ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 

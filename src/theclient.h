@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-
+#include "fonts.h"
 #include <time.h>
 #ifndef _WIN32
 #include <sys/time.h>
@@ -43,8 +43,6 @@
 #include<pthread.h>
 #include "ext/sqlite/sqlite3.h"
 //#include <sqlite3.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 /* Use glew.h instead of gl.h to get all the GL prototypes declared */
 #ifdef __ANDROID__
@@ -221,6 +219,7 @@ Information about all the layers in the project is loaded in an array of this st
 typedef struct
 {
     char *name;
+    char *title;
     uint8_t visible;
     sqlite3_stmt *preparedStatement;
     GLfloat *BBOX;
@@ -241,32 +240,6 @@ typedef struct
     int info_active;
 }
 LAYER_RUNTIME;
-
-
-
-
-typedef struct {
-    float ax;	// advance.x
-    float ay;	// advance.y
-
-    float bw;	// bitmap.width;
-    float bh;	// bitmap.height;
-
-    float bl;	// bitmap_left;
-    float bt;	// bitmap_top;
-
-    float tx;	// x offset of glyph in texture coordinates
-    float ty;	// y offset of glyph in texture coordinates
-} C;		// character information
-
-typedef struct   {
-    GLuint tex;		// texture object
-
-    unsigned int w;			// width of texture in pixels
-    unsigned int h;			// height of texture in pixels
-    unsigned int ch;			// max_character_height
-    C metrics[256];
-} ATLAS;
 
 
 
@@ -328,6 +301,7 @@ typedef struct
 //    GLESSTRUCT *res_buf;
     LAYER_RUNTIME *theLayer;
     sqlite3_stmt *prepared_statement;
+    sqlite3_stmt *info_prepared_statement;
     int64_t id;  //the current id
     uint32_t styleID;  //the current styleID
     uint8_t line_width;  //If we shall calculate triangels to get line width
@@ -456,7 +430,6 @@ void reset_shaders(GLuint vs,GLuint fs,GLuint program);
 //uint32_t utf82unicode(char *text, char **the_rest);
 int init_text_resources();
 
-ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
 
 void log_this(int log_level, const char *log_txt, ... );
 int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy);
@@ -514,11 +487,6 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int CURR_WIDTH;
 int CURR_HEIGHT;
 
-FT_Library ft;
-
-ATLAS *font_normal[3];
-
-ATLAS *font_bold[3];
 
 
 const char *fontfilename;

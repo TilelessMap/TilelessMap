@@ -44,12 +44,23 @@ typedef struct
 WCHAR_TEXT;
 
 
+/*
+typedef struct
+{
+    TEXT *txt;
+    int *sizes;
+  */  
+    
+    
 typedef struct {
     GLfloat x;
     GLfloat y;
     GLfloat s;
     GLfloat t;
 } POINT_T;
+
+
+
 
 TEXT* init_txt(size_t s);
 int add_txt(TEXT *t,const char *in);

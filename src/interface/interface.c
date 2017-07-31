@@ -535,7 +535,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
     GLshort radio_width = 100;
     GLshort check_width = 30;
-    GLshort  text_width = 300;
+    GLshort  text_width = 400;
 
     GLshort row_height = 30;
     GLshort row_dist = 20;
@@ -553,7 +553,6 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLshort startx, starty, p[] = {0,0};
     GLshort click_box_width = 30;
     GLshort click_box_height = 30;
-    GLshort text_box_width = 300;
     GLshort text_box_height = 30;
     GLshort col_dist = 30;
 
@@ -582,8 +581,9 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
         oneLayer = layerRuntime + i;
 
         txt = init_txt(20);
-
-        add_txt(txt, oneLayer->name);
+        
+        printf("title = %s\n", oneLayer->title);
+        add_txt(txt, oneLayer->title);
 
         GLshort click_box[] = {rowstart_x, rowstart_y,rowstart_x + check_width,rowstart_y + row_height};
         GLshort text_box[] = {rowstart_x + check_width + col_dist, rowstart_y,rowstart_x + check_width + col_dist + text_width,rowstart_y + row_height};

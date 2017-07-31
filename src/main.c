@@ -29,6 +29,7 @@
 #include "info.h"
 #include "matrix_handling.h"
 #include "log.h"
+
 void mainLoop(SDL_Window* window)
 {
     log_this(100, "Entering mainLoop\n");

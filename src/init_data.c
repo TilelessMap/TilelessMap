@@ -242,7 +242,8 @@ static int load_layers(TEXT *missing_db)
                              "tc.size_fld,"  // 9
                              "rotation_fld,"  // 10
                              "anchor_fld,"  // 11
-                             "txt_fld"  // 12
+                             "txt_fld,"  // 12
+                             "title"  // 13
 
                              " FROM layers l "
                              "INNER JOIN dbs d on l.source = d.name "
@@ -268,6 +269,7 @@ static int load_layers(TEXT *missing_db)
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
 
+        
     layerRuntime = init_layer_runtime(count_layers());
     //  for (i =0; i<nLayers; i++)
     i=0;
@@ -293,6 +295,7 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 10);
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 11);
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
+        const unsigned char *title =  sqlite3_column_text(preparedLayerLoading, 13);
 
 
         if (check_layer(dbname, layername))
@@ -359,9 +362,13 @@ static int load_layers(TEXT *missing_db)
 
 
         //TODO free this
-        oneLayer->name = malloc(strlen((char*) layername)+1);
+        oneLayer->name = malloc(2 * strlen((char*) layername)+1);
 
         strcpy(oneLayer->name,(char*) layername);
+        
+        oneLayer->title = malloc(2 * strlen((char*) title)+1);
+
+        strcpy(oneLayer->title,(char*) title);
 
 
         //printf("name = %s\n", oneLayer->name);
@@ -450,6 +457,11 @@ static int load_layers(TEXT *missing_db)
         }
         oneLayer->preparedStatement = preparedLayer;
 
+        
+        
+        
+        
+        
         init_buffers(oneLayer);
 
 
