@@ -27,7 +27,7 @@
 
 
 //int print_txt(float x,float y,float r, float g, float b, float a,int size,int max_width, const char *txt, ... )
-int print_txt(GLfloat *point_coord, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... )
+int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... )
 {
 
 
@@ -75,7 +75,7 @@ int print_txt(GLfloat *point_coord, MATRIX *matrix_hndl,GLfloat *color,int size,
     }
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
-    draw_it(norm_color,point_coord, size,bold, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
+    draw_it(norm_color,point_coord,point_offset, size,bold, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
 
 
     while ((err = glGetError()) != GL_NO_ERROR) {

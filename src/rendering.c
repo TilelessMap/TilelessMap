@@ -600,6 +600,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
+    GLfloat point_offset[] ={0,0};
 
     //  GLESSTRUCT *rb = oneLayer->res_buf;
 
@@ -659,7 +660,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
-        draw_it(color,point_coord, psz,0, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
+        draw_it(color,point_coord,point_offset, psz,0, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
 
 
 
@@ -718,19 +719,26 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_
     return c;
 }
 
-int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
+int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
 {
 
     ATLAS *a;
     if(bold)
-        a = font_bold[atlas_nr-1];
+    {
+     //   a = font_bold[atlas_nr-1];
+        a = fonts[0]->fss->fs[atlas_nr].bold;
+        
+    }
     else
-        a = font_normal[atlas_nr-1];
-
+    {
+        //a = font_normal[atlas_nr-1];
+        
+        a = fonts[0]->fss->fs[atlas_nr].normal;
+    }
     const char *u;
     GLfloat x,y;
     uint32_t p;
-    uint i;
+    unsigned int i;
     reset_wc_txt(tmp_unicode_txt);
 
     glBindTexture(GL_TEXTURE_2D, a->tex);
@@ -743,7 +751,7 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
 
     glUniform4fv(txt_color,1,color);
 
-    glUniform2fv(txt_coord2d,1,point_coord);
+    glUniform2fv(txt_coord2d,1,startp);
 
     // max_width = 255;
 
@@ -753,12 +761,13 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
 
     add_utf8_2_wc_txt(tmp_unicode_txt, txt);
 
-    x = 0;
-    y = 0;
+    x = offset[0] * sx;
+    y = offset[1] * sy;
     /* Loop through all characters */
     u = txt;
     n_letters +=tmp_unicode_txt->used;
-    GLfloat rh = a->ch * sy * 1.1;
+    GLfloat rh_pixels= a->ch * 1.1;
+    GLfloat rh = rh_pixels * sy;
     if(max_width)
     {
         int nlines=0;
@@ -787,6 +796,7 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
                 word_width = line_width = 0;
                 n_chars_in_line = n_chars_in_word =0;
                 nlines++;
+                x=0;
 
             }
             if(line_width + word_width >= max_width)
@@ -806,7 +816,8 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
                     n_chars_in_line =0;
 
                 }
-                nlines++;
+                nlines++;                
+                x=0;
             }
         }
         if(word_width > 0 || line_width > 0)
@@ -816,8 +827,8 @@ int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt
             line_width += word_width;
             c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
         }
-        point_coord[0] += line_width;
-        point_coord[1] -= rh*nlines;
+        offset[0] += line_width;
+        offset[1] -= rh_pixels*nlines;
 
     }
     else

@@ -220,3 +220,47 @@ uint32_t utf82unicode(const char *text,const char **the_rest)
     }
     return res;
 }
+
+
+TEXTBLOCK init_textblock(size_t s)
+{
+    int i;
+    TEXTBLOCK *tb = st_malloc(sizeof(TEXTBLOCK));
+    tb->txt = st_malloc(s * sizeof(TEXT*));
+    for (i=0;i<s;i++)
+    {
+        tb->txt[i] = init_txt(32);
+    }
+    
+    tb->font = st_malloc(s * sizeof(ATLAS*));
+    tb->max_n_txts = s;
+    tb->n_txts = 0;
+}
+/*
+int destroy_textblock(TEXTBLOCK *tb)
+{
+    int i;
+    for (i=0;i<s;i++)
+    {
+        destroy_txt(tb->txt[i]);
+    }
+    
+    free(tb->font);
+    tb->font = NULL;
+    tb->max_n_txts = 0;
+    tb->n_txts = 0;
+    free(tb);
+    tb = NULL;
+    return 0;
+}
+
+int append_2_textblock(TEXTBLOCK *tb, char* txt, 
+*/
+
+
+
+
+
+
+
+

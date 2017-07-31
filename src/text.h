@@ -44,12 +44,15 @@ typedef struct
 WCHAR_TEXT;
 
 
-/*
+
 typedef struct
 {
-    TEXT *txt;
-    int *sizes;
-  */  
+    TEXT **txt;
+    ATLAS *font;
+    int n_txts;
+    int max_n_txts;
+}TEXTBLOCK;
+    
     
     
 typedef struct {

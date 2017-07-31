@@ -38,6 +38,7 @@
     newBBOX[2] = x+width/2;
     newBBOX[3] = y+height/2;
 }*/
+
 void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
 {
     GLfloat ratio = (GLfloat) CURR_HEIGHT/ (GLfloat) CURR_WIDTH;

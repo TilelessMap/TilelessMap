@@ -41,17 +41,17 @@ static inline uint32_t max_i(int a, int b)
 
 
 
-FONT init_font(char* fontname)
+FONT* init_font(const char* fontname)
 {
     
     FONT *f = st_malloc(sizeof(FONT));
     f->fontname = st_malloc(strlen(fontname)+1);
-    strcpy(fontname, f->fontname);
+    strcpy(f->fontname,fontname);
     
     f->fss = st_malloc(sizeof(FONTSIZES));
     f->fss->fs = st_calloc(MAX_FONT_SIZE, sizeof(FONTSIZE));
     f->fss->max_size = MAX_FONT_SIZE;   
-    
+    return f;
 }
 
 int destroy_font(FONT *f)
@@ -64,147 +64,38 @@ int destroy_font(FONT *f)
         FONTSIZE fs = f->fss->fs[i];
         
         if(fs.normal)
+        {
             free(fs.normal);
+            fs.normal = NULL;
+        }
         if(fs.bold)
-            free(fs.bold);        
+        {
+            free(fs.bold);      
+            fs.bold = NULL;
+        }
     }
     
     free(f->fss->fs);
+    f->fss->fs = NULL;
     free(f->fss);
+    f->fss = NULL;
     free(f);
-    
+    f = NULL;
     return 0;    
 }
 
 
-int init_text_resources()
-{
-    char *sql_txt;
-    int rc;
-    sqlite3_stmt *preparedFonts;
-    fontfilename = "FreeSans.ttf";
-    //char *fontfilename = "LiberationSerif-Regular.ttf";
-    FT_Face face;
-    int len;
-    char *font_data;
-    FT_Error fterr;
-
-
-
-
-
-
-    /* Initialize the FreeType2 library */
-    if (FT_Init_FreeType(&ft)) {
-        fprintf(stderr, "Could not init freetype library");
-        return 1;
-    }
-
-    /* Load a font */
-
-    // font_data = file_read(fontfilename, &len);
-
-    sql_txt = "select name, font from main.fonts where \"name\" = ?;";
-    rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
-
-    if (rc != SQLITE_OK ) {
-        fprintf(stderr, "SQL error in %s\n",sql_txt );
-        sqlite3_close(projectDB);
-        return 1;
-    }
-    sqlite3_bind_text(preparedFonts,1,"freesans",-1,NULL);
-    sqlite3_step(preparedFonts);
-    // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
-
-    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
-    len = sqlite3_column_bytes(preparedFonts, 1);
-    font_data = malloc(len);
-    memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
-
-
-    if (font_data == NULL) {
-        fprintf(stderr, "Could not load font file ");
-        return 1;
-    }
-    fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
-    if (fterr != FT_Err_Ok) {
-        fprintf(stderr, "Could not init font: error ");
-        return 1;
-    }
-
-    printf("font name = %s\n", face->style_name);
-
-    // Create the vertex buffer object
-    //  glGenBuffers(1, &text_vbo);
-
-
-    font_normal[0] = malloc(sizeof(ATLAS));
-    font_normal[1] = malloc(sizeof(ATLAS));
-    font_normal[2] = malloc(sizeof(ATLAS));
-
-
-    create_atlas(font_normal[0], face, 20);
-    create_atlas(font_normal[1], face, 26);
-    create_atlas(font_normal[2], face, 32);
-
-    sqlite3_clear_bindings(preparedFonts);
-    sqlite3_reset(preparedFonts);
-    free(font_data);
-
-    sqlite3_bind_text(preparedFonts,1,"freesans_bold",-1,NULL);
-    sqlite3_step(preparedFonts);
-    // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
-
-    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
-    len = sqlite3_column_bytes(preparedFonts, 1);
-    font_data = malloc(len);
-    memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
-
-
-    if (font_data == NULL) {
-        fprintf(stderr, "Could not load font file ");
-        return 1;
-    }
-    fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
-    if (fterr != FT_Err_Ok) {
-        fprintf(stderr, "Could not init font: error ");
-        return 1;
-    }
-
-    printf("font name = %s\n", face->style_name);
-
-    // Create the vertex buffer object
-    //  glGenBuffers(1, &text_vbo);
-
-
-    font_bold[0] = st_malloc(sizeof(ATLAS));
-    font_bold[1] = st_malloc(sizeof(ATLAS));
-    font_bold[2] = st_malloc(sizeof(ATLAS));
-
-
-    create_atlas(font_bold[0], face, 20);
-    create_atlas(font_bold[1], face, 26);
-    create_atlas(font_bold[2], face, 32);
-
-    sqlite3_clear_bindings(preparedFonts);
-    sqlite3_reset(preparedFonts);
-
-    sqlite3_finalize(preparedFonts);
-    free(font_data);
-    return 0;
-}
-
-
-
-
-
-ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
+static ATLAS* create_atlas(FT_Face face, int height)
 {
     FT_Set_Pixel_Sizes(face, 0, height);
     FT_GlyphSlot g = face->glyph;
+    
+    
     int i;
     unsigned int roww = 0;
     unsigned int rowh = 0;
+    
+    ATLAS *a = st_malloc(sizeof(ATLAS));
     a->w = 0;
     a->h = 0;
 
@@ -289,3 +180,132 @@ ATLAS* create_atlas(ATLAS *a, FT_Face face, int height)
     fprintf(stderr, "Generated a %d x %d (%d kb) texture atlas\n", a->w, a->h, a->w * a->h / 1024);
     return a;
 }
+
+
+int init_text_resources()
+{
+    char *sql_txt;
+    int rc;
+    sqlite3_stmt *preparedFonts;
+    fontfilename = "FreeSans.ttf";
+    //char *fontfilename = "LiberationSerif-Regular.ttf";
+    FT_Face face;
+    int len;
+    char *font_data;
+    FT_Error fterr;
+
+    
+    fonts = st_malloc(sizeof(FONT*));
+    
+    fonts[0] = init_font(fontfilename);
+
+
+
+    /* Initialize the FreeType2 library */
+    if (FT_Init_FreeType(&ft)) {
+        fprintf(stderr, "Could not init freetype library");
+        return 1;
+    }
+
+    /* Load a font */
+
+    // font_data = file_read(fontfilename, &len);
+
+    sql_txt = "select name, font from main.fonts where \"name\" = ?;";
+    rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
+
+    if (rc != SQLITE_OK ) {
+        fprintf(stderr, "SQL error in %s\n",sql_txt );
+        sqlite3_close(projectDB);
+        return 1;
+    }
+    sqlite3_bind_text(preparedFonts,1,"freesans",-1,NULL);
+    sqlite3_step(preparedFonts);
+    // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
+
+    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
+    len = sqlite3_column_bytes(preparedFonts, 1);
+    font_data = malloc(len);
+    memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
+
+
+    if (font_data == NULL) {
+        fprintf(stderr, "Could not load font file ");
+        return 1;
+    }
+    fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
+    if (fterr != FT_Err_Ok) {
+        fprintf(stderr, "Could not init font: error ");
+        return 1;
+    }
+
+    printf("font name = %s\n", face->style_name);
+
+    // Create the vertex buffer object
+    //  glGenBuffers(1, &text_vbo);
+
+
+/*    font_normal[0] = malloc(sizeof(ATLAS));
+    font_normal[1] = malloc(sizeof(ATLAS));
+    font_normal[2] = malloc(sizeof(ATLAS));
+*/
+
+    FONTSIZE *fs = fonts[0]->fss->fs;
+
+    (fs+1)->normal = create_atlas(face, 20);
+    (fs+2)->normal = create_atlas(face, 26);
+    (fs+3)->normal = create_atlas(face, 32);
+
+    sqlite3_clear_bindings(preparedFonts);
+    sqlite3_reset(preparedFonts);
+    free(font_data);
+
+    sqlite3_bind_text(preparedFonts,1,"freesans_bold",-1,NULL);
+    sqlite3_step(preparedFonts);
+    // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
+
+    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
+    len = sqlite3_column_bytes(preparedFonts, 1);
+    font_data = malloc(len);
+    memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
+
+
+    if (font_data == NULL) {
+        fprintf(stderr, "Could not load font file ");
+        return 1;
+    }
+    fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
+    if (fterr != FT_Err_Ok) {
+        fprintf(stderr, "Could not init font: error ");
+        return 1;
+    }
+
+    printf("font name = %s\n", face->style_name);
+
+    // Create the vertex buffer object
+    //  glGenBuffers(1, &text_vbo);
+
+/*
+    font_bold[0] = st_malloc(sizeof(ATLAS));
+    font_bold[1] = st_malloc(sizeof(ATLAS));
+    font_bold[2] = st_malloc(sizeof(ATLAS));
+
+
+    create_atlas(font_bold[0], face, 20);
+    create_atlas(font_bold[1], face, 26);
+    create_atlas(font_bold[2], face, 32);*/
+
+    (fs+1)->bold = create_atlas(face, 20);
+    (fs+2)->bold= create_atlas(face, 26);
+    (fs+3)->bold = create_atlas(face, 32);
+    sqlite3_clear_bindings(preparedFonts);
+    sqlite3_reset(preparedFonts);
+
+    sqlite3_finalize(preparedFonts);
+    free(font_data);
+    return 0;
+}
+
+
+
+

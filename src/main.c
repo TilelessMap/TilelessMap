@@ -417,12 +417,16 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     destroy_layer_runtime(infoLayer,1);
     free(gps_circle);
 
-    free(font_normal[0]);
+    destroy_font(fonts[0]);
+    
+/*    free(font_normal[0]);
     free(font_normal[1]);
     free(font_normal[2]);
     free(font_bold[0]);
     free(font_bold[1]);
-    free(font_bold[2]);
+    free(font_bold[2]);*/
+
+
     destroy_wc_txt(tmp_unicode_txt);
     FT_Done_FreeType(ft);
     free(global_styles);

@@ -39,8 +39,6 @@ typedef struct   {
 
 
 
-ATLAS* create_atlas(ATLAS *a, FT_Face face, int height);
-
 
 
 FT_Library ft;
@@ -64,7 +62,9 @@ typedef struct
  FONTSIZES *fss;
 } FONT;
 
-FONT *fonts;
+FONT* init_font(const char* fontname);
+int destroy_font(FONT *f);
+FONT **fonts;
 
 ATLAS *font_normal[3];
 

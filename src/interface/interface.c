@@ -457,7 +457,9 @@ static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
         //   print_txt(point_coord, color,1,0,300, "Normal text ");
         //   printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
         GLfloat max_width = ctrl->box[2]-ctrl->box[0] -2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
-        print_txt(point_coord,matrix_hndl, color,2, 1,max_width, ctrl->txt->txt);
+        
+        GLfloat point_offset[] = {0,0};
+        print_txt(point_coord,point_offset, matrix_hndl, color,2, 1,max_width, ctrl->txt->txt);
     }
     return 0;
 }
