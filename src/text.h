@@ -26,7 +26,7 @@
 #define _text_H
 
 #include "theclient.h"
-
+#include "matrix_handling.h"
 typedef struct
 {
     char *txt;
@@ -48,7 +48,7 @@ WCHAR_TEXT;
 typedef struct
 {
     TEXT **txt;
-    ATLAS *font;
+    ATLAS **font;
     int n_txts;
     int max_n_txts;
 }TEXTBLOCK;
@@ -78,6 +78,17 @@ int reset_wc_txt(WCHAR_TEXT *t);
 int destroy_wc_txt(WCHAR_TEXT *t);
 
 uint32_t utf82unicode(const char *text,const char **the_rest);
+
+
+TEXTBLOCK* init_textblock(size_t s);
+int destroy_textblock(TEXTBLOCK *tb);
+int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font);
+
+
+
+
+int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
+int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb);
 
 
 WCHAR_TEXT  *tmp_unicode_txt;

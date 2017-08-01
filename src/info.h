@@ -3,7 +3,7 @@
 #define _info_H
 
 #include "matrix_handling.h"
-
+#include "interface/interface.h"
 
 int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window);
 

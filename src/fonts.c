@@ -59,8 +59,9 @@ int destroy_font(FONT *f)
  
     int i;
     
-    for (i=0;0<f->fss->max_size;i++)
+    for (i=0;i<f->fss->max_size;i++)
     {
+   //     log_this(100, "delete fs nr %d of %d\n", i,f->fss->max_size);
         FONTSIZE fs = f->fss->fs[i];
         
         if(fs.normal)

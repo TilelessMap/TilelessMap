@@ -35,7 +35,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
 {
     int i, v;
     struct CTRL *t = (struct CTRL *) ctrl;
-
+    TEXTBLOCK *txt;
     struct CTRL *radio_master = t->spatial_family->parent;
     v = 0;
     for (i=0; i<radio_master->spatial_family->n_children; i++)
@@ -45,13 +45,17 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
         // ((LAYER_RUNTIME*) rb->obj)->info_active = 0;
         if(rb->txt)
         {
-            destroy_txt(rb->txt);
+            destroy_textblock(rb->txt);
             rb->txt = 0;
         }
     }
 
-    TEXT *txt = init_txt(5);
-    add_txt(txt, "O");
+
+    /*
+    txt = init_txt(5);
+    add_txt(txt, "O");*/
+    txt = init_textblock(1);
+    append_2_textblock(txt,"O", fonts[0]->fss->fs[2].bold);
     t->txt=txt;
     v = 1;
     func_in_func((void*) t, &v);
@@ -65,11 +69,11 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
 
 
 
-struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXT *txt, GLfloat *txt_margin,int txt_size,int default_active, int z)
+struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLfloat *txt_margin,int default_active, int z)
 {
 
 
-    return register_control(RADIOMASTER, spatial_parent, logical_parent,NULL, NULL, NULL,box, color, txt, txt_margin, txt_size, default_active, z);
+    return register_control(RADIOMASTER, spatial_parent, logical_parent,NULL, NULL, NULL,box, color, txt, txt_margin, default_active, z);
 
 
 }
@@ -122,14 +126,18 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
     GLfloat text_margins[] = {3,3};
     if(set)
     {
-        TEXT *txt;
+        
+        TEXTBLOCK *txt;
+        /*
         txt = init_txt(5);
-        add_txt(txt, "O");
-
-        radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins,3, default_active,radio_master->z + 1);
+        add_txt(txt, "O");*/
+        txt = init_textblock(1);
+        append_2_textblock(txt,"O", fonts[0]->fss->fs[2].bold);
+    
+        radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins, default_active,radio_master->z + 1);
     }
     else
-        radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, NULL,text_margins,3, default_active,radio_master->z + 1);
+        radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, NULL,text_margins, default_active,radio_master->z + 1);
 
     return radio_button;
 }

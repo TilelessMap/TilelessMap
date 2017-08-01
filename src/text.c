@@ -222,7 +222,7 @@ uint32_t utf82unicode(const char *text,const char **the_rest)
 }
 
 
-TEXTBLOCK init_textblock(size_t s)
+TEXTBLOCK* init_textblock(size_t s)
 {
     int i;
     TEXTBLOCK *tb = st_malloc(sizeof(TEXTBLOCK));
@@ -235,12 +235,24 @@ TEXTBLOCK init_textblock(size_t s)
     tb->font = st_malloc(s * sizeof(ATLAS*));
     tb->max_n_txts = s;
     tb->n_txts = 0;
+    return tb;
 }
-/*
+
+static int realloc_textblock(TEXTBLOCK *tb)
+{
+    int i;
+    tb->max_n_txts *= 2;
+    
+    tb->txt = st_realloc(tb->txt, tb->max_n_txts * sizeof(TEXT*));
+
+    tb->font = st_realloc(tb->font, tb->max_n_txts * sizeof(ATLAS*));
+    return 0;
+}
+
 int destroy_textblock(TEXTBLOCK *tb)
 {
     int i;
-    for (i=0;i<s;i++)
+    for (i=0;i<tb->n_txts;i++)
     {
         destroy_txt(tb->txt[i]);
     }
@@ -254,8 +266,22 @@ int destroy_textblock(TEXTBLOCK *tb)
     return 0;
 }
 
-int append_2_textblock(TEXTBLOCK *tb, char* txt, 
-*/
+int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font)
+{
+    if(! (tb->n_txts < tb->max_n_txts))
+        realloc_textblock(tb);
+    
+    add_txt(tb->txt[tb->n_txts], txt);
+    
+    tb->font[tb->n_txts] = font;
+    
+    tb->n_txts++;
+ 
+
+    return 0;
+    
+}
+
 
 
 

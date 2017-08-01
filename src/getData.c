@@ -106,7 +106,9 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
 
     }
 
-
+    if(infoRenderLayer->visible)
+        loadPolygon(infoRenderLayer, map_matrix->matrix);
+    
     renderGPS(map_matrix->matrix);
     log_this(100, "---------------------let's rendr controls------------------------------\n");
     render_controls(controls, NULL );

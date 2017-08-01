@@ -559,12 +559,15 @@ int render_data(SDL_Window* window,GLfloat *theMatrix)
 
     render_data_layers(theMatrix);
 
-
+    if(infoRenderLayer->visible)
+    {
+        loadPolygon(infoRenderLayer, theMatrix);
+    }
     SDL_GL_SwapWindow(window);
 
     return 0;
 }
-
+/*
 int render_info(SDL_Window* window,GLfloat *theMatrix)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -578,7 +581,7 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
     SDL_GL_SwapWindow(window);
     return 0;
 }
-
+*/
 
 /**
  * Render text using the currently loaded font and currently set font size.
@@ -587,7 +590,7 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
  */
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-
+    ATLAS *a;
     log_this(10, "Entering renderText\n");
     int i;
     GLfloat *color;
@@ -660,7 +663,13 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         txt = oneLayer->text->char_array+used;
         used+=strlen(txt)+1;
-        draw_it(color,point_coord,point_offset, psz,0, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
+        
+        
+
+        a = fonts[0]->fss->fs[psz].normal;
+    
+    
+        draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
 
 
 
@@ -719,9 +728,17 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_
     return c;
 }
 
-int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
+static inline GLfloat max_f(GLfloat a, GLfloat b)
 {
+    if (b > a)
+        return b;
+    else
+        return a;
+}
 
+int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_nr,int bold*/,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
+{
+/*
     ATLAS *a;
     if(bold)
     {
@@ -734,11 +751,12 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
         //a = font_normal[atlas_nr-1];
         
         a = fonts[0]->fss->fs[atlas_nr].normal;
-    }
+    }*/
     const char *u;
     GLfloat x,y;
     uint32_t p;
     unsigned int i;
+    GLfloat max_used_width = 0;
     reset_wc_txt(tmp_unicode_txt);
 
     glBindTexture(GL_TEXTURE_2D, a->tex);
@@ -761,13 +779,13 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
 
     add_utf8_2_wc_txt(tmp_unicode_txt, txt);
 
-    x = offset[0] * sx;
-    y = offset[1] * sy;
     /* Loop through all characters */
     u = txt;
     n_letters +=tmp_unicode_txt->used;
     GLfloat rh_pixels= a->ch * 1.1;
     GLfloat rh = rh_pixels * sy;
+    x = offset[0] * sx;
+    y = offset[1] * sy - a->ch * sy;
     if(max_width)
     {
         int nlines=0;
@@ -792,11 +810,12 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
             {
                 n_chars_in_line += n_chars_in_word;
                 c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
-                line_start = i;
+                line_start = i;                
+                max_used_width = max_f(max_used_width, line_width);
                 word_width = line_width = 0;
                 n_chars_in_line = n_chars_in_word =0;
                 nlines++;
-                x=0;
+                offset[0] = x = 0;
 
             }
             if(line_width + word_width >= max_width)
@@ -811,13 +830,14 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
                 else //we put the last word on the next line instead
                 {
                     c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+                    max_used_width = max_f(max_used_width, line_width);
                     line_width = 0;
                     line_start += n_chars_in_line;
                     n_chars_in_line =0;
 
                 }
-                nlines++;                
-                x=0;
+                nlines++; 
+                offset[0] = x = 0;
             }
         }
         if(word_width > 0 || line_width > 0)
@@ -827,6 +847,8 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
             line_width += word_width;
             c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
         }
+        
+        max_used_width = max_f(max_used_width, line_width);
         offset[0] += line_width;
         offset[1] -= rh_pixels*nlines;
 
@@ -834,7 +856,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
     else
         c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
 
-
+    
     /* Draw all the character on the screen in one go */
     glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, c);
@@ -843,7 +865,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bol
 
     glDisableVertexAttribArray(txt_box);
 
-    return 0;
+    return max_used_width;
 }
 
 

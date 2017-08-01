@@ -538,6 +538,7 @@ static int init_info_Layer()
     infoRenderLayer->type = 255-32;
     init_buffers(infoRenderLayer);
 
+    infoRenderLayer->visible = 0;
     return 0;
 
 }

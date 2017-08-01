@@ -126,18 +126,22 @@ void mainLoop(SDL_Window* window)
                     mouse_up_y = ev.button.y;
                     if(mouse_down_x == mouse_up_x && mouse_down_y == mouse_up_y)
                     {
-                        map_modus_before = map_modus;
-                        check_click(mouse_up_x, mouse_up_y);
+                      //  map_modus_before = map_modus;
+                        int any_hit = check_click(mouse_up_x, mouse_up_y);
 
-                        render_data(window, map_matrix.matrix);
 
-                        if(!map_modus && ! map_modus_before && ! incharge)
+                        if(! map_modus && !any_hit)
+                        {
                             identify(&map_matrix, mouse_up_x,mouse_up_y,window);
+                           //render_data(window, map_matrix.matrix);
+                        }
+                        render_data(window, map_matrix.matrix);
+                        
                     }
                     else
                     {
-                        if(map_modus)
-                        {
+                      /*  if(map_modus)
+                        {*/
                             if(!incharge)
                             {
                                 matrixFromDeltaMouse(&map_matrix,&ref, mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
@@ -149,7 +153,7 @@ void mainLoop(SDL_Window* window)
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref, mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
                                 render_data(window, map_matrix.matrix);
                             }
-                        }
+                        //}
 
                     }
                     break;
@@ -157,8 +161,8 @@ void mainLoop(SDL_Window* window)
                     wheel_y = ev.wheel.y;
 
                     SDL_GetMouseState(&px_x_clicked, &px_y_clicked);
-                    if(map_modus)
-                    {
+                      /*  if(map_modus)
+                        {*/
                         if(wheel_y > 0)
                             matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 0.5);
                         else
@@ -167,12 +171,12 @@ void mainLoop(SDL_Window* window)
                         get_data(window, &map_matrix);
 
                         // copyNew2CurrentBBOX(newBBOX, currentBBOX);
-                    }
+                    //}
                     break;
 
                 case SDL_MOUSEMOTION:
-                    if(map_modus)
-                    {
+                      /*  if(map_modus)
+                        {*/
                         if(mouse_down)
                         {
                             n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
@@ -202,7 +206,7 @@ void mainLoop(SDL_Window* window)
 
                         }
 
-                    }
+                    //}
                     /*  else
                      {
                               if(n_events<2)
@@ -257,7 +261,10 @@ void mainLoop(SDL_Window* window)
                         render_data(window, map_matrix.matrix);
 
                         if(!map_modus && ! map_modus_before && !incharge)
+                        {
                             identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT),window);
+                            render_data(window, map_matrix.matrix);
+                        }
                         reset_touch_que(touches);
                     }
                     else
@@ -568,6 +575,12 @@ int main(int argc, char **argv)
 #endif
 
 
+    if (init_text_resources())
+    {
+        log_this(1,"Problems in init_text_resources");
+        return EXIT_FAILURE;
+    }
+
 
 
     if (init_resources(dir))
@@ -577,13 +590,6 @@ int main(int argc, char **argv)
 
 
 
-
-    if (init_text_resources())
-    {
-        log_this(1,"Problems in init_text_resources");
-        return EXIT_FAILURE;
-
-    }
 
 
 

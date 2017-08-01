@@ -34,6 +34,7 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     char txt_tot[1024];
 
 
+       ATLAS *a;
     va_list args;
     va_start (args, txt);
     vsnprintf (txt_tot,1024,txt, args);
@@ -75,7 +76,23 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     }
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
-    draw_it(norm_color,point_coord,point_offset, size,bold, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
+    
+    
+    if(bold)
+    {
+     //   a = font_bold[atlas_nr-1];
+        a = fonts[0]->fss->fs[size].bold;
+        
+    }
+    else
+    {
+        //a = font_normal[atlas_nr-1];
+        
+        a = fonts[0]->fss->fs[size].normal;
+    }
+    
+    
+    draw_it(norm_color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
 
 
     while ((err = glGetError()) != GL_NO_ERROR) {
@@ -85,3 +102,64 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     return 0;
 }
 
+
+
+static inline GLfloat max_f(GLfloat a, GLfloat b)
+{
+    if (b > a)
+        return b;
+    else
+        return a;
+}
+
+int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb)
+{
+    int i;
+    GLfloat point_offset[] = {0,0};
+    GLfloat *theMatrix;
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
+
+    GLfloat matrix_array[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+    if(matrix_hndl)
+        theMatrix = matrix_hndl->matrix;
+    else
+    {
+        theMatrix = (GLfloat *) matrix_array;
+    }
+
+
+    glGenBuffers(1, &text_vbo);
+    glUseProgram(txt_program);
+
+
+    GLfloat norm_color[4];
+
+    norm_color[0] = color[0] / 255;
+    norm_color[1] = color[1] / 255;
+    norm_color[2] = color[2] / 255;
+    norm_color[3] = color[3] / 255;
+
+    /*   GLfloat point_coord[2];
+
+       point_coord[0]= x;
+       point_coord[1]= y;
+     */
+    //  glUniform4fv(txt_color,1,norm_color );
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error wt:%d\n", err);
+    }
+
+    glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
+    
+    
+    for (i=0;i<tb->n_txts;i++)
+    {
+        draw_it(norm_color,point_coord,point_offset, tb->font[i], txt_box, txt_color, txt_coord2d, tb->txt[i]->txt ,max_width, sx, sy);
+    }
+    
+    
+    return 0;
+}
