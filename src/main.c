@@ -254,23 +254,21 @@ void mainLoop(SDL_Window* window)
 
                     if(abs(mouse_down_x-mouse_up_x) < 10 && abs(mouse_down_y-mouse_up_y)<10)
                     {
-                        map_modus_before = map_modus;
-                        check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
+                        int any_hit = check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
 
 
-                        render_data(window, map_matrix.matrix);
 
-                        if(!map_modus && ! map_modus_before && !incharge)
+                        if(! map_modus && !any_hit)
                         {
                             identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT),window);
-                            render_data(window, map_matrix.matrix);
                         }
+                        render_data(window, map_matrix.matrix);
                         reset_touch_que(touches);
                     }
                     else
                     {
-                        if(map_modus)
-                        {
+                      /*  if(map_modus)
+                        {*/
                             if(touches[1].active) //check if at least 2 fingers are activated
                             {
                                 if(register_touch_up(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y))
@@ -320,9 +318,9 @@ void mainLoop(SDL_Window* window)
                                 //      copyNew2CurrentBBOX(newBBOX, currentBBOX);
 
                             }
-                        }
+                        /*}
                         else
-                            reset_touch_que(touches);
+                            reset_touch_que(touches);*/
                     }
 
                     break;
@@ -330,8 +328,8 @@ void mainLoop(SDL_Window* window)
                 case SDL_FINGERMOTION:
                     log_this(10,"SDL_FINGERMOTION");
                     n_events = 	SDL_PeepEvents(tmp_ev,3,SDL_PEEKEVENT,SDL_FIRSTEVENT,SDL_LASTEVENT);
-                    if(map_modus)
-                    {
+                   /* if(map_modus)
+                    {*/
                         if(touches[1].active) //check if at least 2 fingers are activated
                         {
 
@@ -383,7 +381,7 @@ void mainLoop(SDL_Window* window)
                                 render_data(window, map_matrix.matrix);
                             //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                         }
-                    }
+                    //}
                     break;
 
 
