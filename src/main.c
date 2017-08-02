@@ -252,12 +252,10 @@ void mainLoop(SDL_Window* window)
 
                     int tolerance = 10 * size_factor;
 
-                    if(abs(mouse_down_x-mouse_up_x) < tolerance && abs(mouse_down_y-mouse_up_y)<tolerance)
+                    if(abs(mouse_down_x-mouse_up_x) < tolerance && abs(mouse_down_y-mouse_up_y)<tolerance && !touches[1].active)
                     {
+                        
                         int any_hit = check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
-
-
-
                         if(! map_modus && !any_hit)
                         {
                             identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT),window);
@@ -293,7 +291,7 @@ void mainLoop(SDL_Window* window)
                                 }
                             }
 
-                            else
+                            else// if(touches[0].active)
                             {
                                 //	  mouse_down = 0;
                                 mouse_up_x = (GLint) (tx * CURR_WIDTH);
