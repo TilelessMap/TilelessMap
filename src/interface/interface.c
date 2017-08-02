@@ -28,6 +28,45 @@
 static uint8_t show_layer_control;
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent);
 
+int multiply_array(GLshort *a, GLfloat v, GLshort ndims)
+{
+    int i;
+    for(i=0;i<ndims;i++)
+    {
+        printf("a = %d\n", *(a+i));
+        *(a+i) *= v;
+    }
+    return 0;
+}
+
+int check_screen_size()
+{
+    if(CURR_WIDTH > 1000)
+    {
+        screensize = BIGSCREEN;
+        size_factor = 2;
+        character_size = 4;
+        text_size = 3;
+    }
+    else if (CURR_WIDTH >800)
+    {
+        screensize = MIDDLESCREEN;
+        size_factor = 1.5;
+        character_size = 3;
+        text_size = 2;
+    }
+    else
+    {
+        screensize = SMALLSCREEN;
+        size_factor = 1;
+        character_size = 2;
+        text_size = 2;
+    }
+    
+    return 0;
+    
+}
+
 int get_parent_origo(struct CTRL *t, GLshort *p)
 {
     p[0] = p[1] = 0;
@@ -174,7 +213,7 @@ static int destroy_family(RELATIONS *t)
 
 static int destroy_control(struct CTRL *t)
 {
-    int i, r=0;
+    int r=0;
 
     while (t->logical_family->n_children)
     {
@@ -232,12 +271,14 @@ int init_matrix_handler(struct CTRL *ctrl, uint8_t vertical_enabled, uint8_t hor
     ctrl->matrix_handler->bbox[1] = 0;
     ctrl->matrix_handler->bbox[2] = CURR_WIDTH;
     ctrl->matrix_handler->bbox[3] = CURR_HEIGHT;
+    
+    return 0;
 
 }
 
 
 //struct CTRL* register_control(struct CTRL *parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,int default_active)
-struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLfloat *txt_margin, int default_active, int z)
+struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z)
 {
     struct CTRL *ctrl = st_malloc(sizeof(struct CTRL));
     ctrl->type = type;
@@ -341,7 +382,6 @@ int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_
 {
 
     struct CTRL *t = (struct CTRL *) ctrl;
-    uint8_t current_status = *((uint8_t*) t->obj);
 
     create_layers_meny(controls, t);
 
@@ -356,7 +396,6 @@ int hide_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_
 
     struct CTRL *t = (struct CTRL *) ctrl;
     incharge = NULL; //move focus back to map
-    struct CTRL *parent = t->logical_family->parent;
     destroy_control(t->logical_family->parent);
 
 
@@ -370,7 +409,6 @@ int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 
     struct CTRL *t = (struct CTRL *) ctrl;
     incharge = NULL; //move focus back to map
-    struct CTRL *parent = t->logical_family->parent;
     destroy_control(t->logical_family->parent);
 
 
@@ -392,7 +430,6 @@ static int check_box(GLshort *box,int x, int y)
 static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event, int *z, int *any_hit)
 {
     int i, n_children;
-    int max_z = *z;
     if(!ctrl->active)
         return 0;
 
@@ -462,10 +499,8 @@ static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
         GLfloat color[4] = {0,0,0,255};
         //   print_txt(point_coord, color,1,0,300, "Normal text ");
         //   printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
-        GLfloat max_width = ctrl->box[2]-ctrl->box[0] -2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
+        GLfloat max_width = ctrl->box[2]-ctrl->box[0] - 2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
         
-        GLfloat point_offset[] = {0,0};
- //       print_txt(point_coord,point_offset, matrix_hndl, color,2, 1,max_width, ctrl->txt->txt[0]->txt);
          print_txtblock(point_coord, matrix_hndl, color,max_width, ctrl->txt);
         
         
@@ -513,7 +548,7 @@ static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_fun
     {
         //TEXT *txt = init_txt(5);
         TEXTBLOCK *txt = init_textblock(1);
-        append_2_textblock(txt,"X", fonts[0]->fss->fs[3].bold);
+        append_2_textblock(txt,"X", fonts[0]->fss->fs[character_size].bold);
 //        add_txt(txt, "X");
         t->txt=txt;
         oneLayer->visible = 1;
@@ -546,34 +581,37 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLshort box_height = 50, box_width = CURR_WIDTH - 2 * box_start_y;
     GLshort box[] = {box_start_x,CURR_HEIGHT - box_start_y - box_height,box_start_x + box_width,CURR_HEIGHT - box_start_y};
 
-    GLshort radio_width = 100;
-    GLshort check_width = 30;
-    GLshort  text_width = 400;
+    GLshort radio_width = 50 * size_factor;
+    GLshort  text_width = 300 * size_factor;
+    GLshort click_size = 30 * size_factor;
+    GLshort col_dist = 30 * size_factor;
 
-    GLshort row_height = 30;
-    GLshort row_dist = 20;
+    GLshort row_dist = 20 * size_factor;
 
+    GLshort row_height = click_size + row_dist;
     GLfloat color[]= {200,200,200,100};
     GLfloat txt_box_color[]= {0,0,0,0};
     GLfloat click_box_color[]= {255,255,255,255};
-    GLfloat radio_box_color[]= {200,255,200,255};
+    GLfloat radio_box_color[]= {200,255,200,50};
 
-    GLfloat margins[] = {3,3};
-    GLfloat box_text_margins[] = {2,2};
+    GLshort margins[] = {3,3};
+    GLshort box_text_margins[] = {4,4};
+    
 
+    
+    
     struct CTRL *layers_meny = register_control(BOX,  spatial_parent,logical_parent, NULL,NULL,NULL,box,color, NULL,NULL, 1,0);
 //    printf("layers_menu=%p\n", layers_meny);
     GLshort startx, starty, p[] = {0,0};
-    GLshort click_box_width = 30;
-    GLshort click_box_height = 30;
-    GLshort text_box_height = 30;
-    GLshort col_dist = 30;
+    
 
+    multiply_array(box_text_margins, size_factor, 2);
+    
     struct CTRL *new_ctrl;
     get_top_left(layers_meny, p);
 
     startx = box[0] + col_dist;
-    starty = box[3] - 2 * (row_dist + row_height);
+    starty = box[3] - 2 * row_height;
 
     init_matrix_handler(layers_meny, 1, 0, 0);
     incharge = layers_meny;
@@ -581,15 +619,16 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
     matrixFromBBOX(layers_meny->matrix_handler);
 
-
-    GLshort radio_box[] = {startx + check_width + col_dist + text_width + col_dist,box[1], startx + check_width + col_dist + text_width + col_dist + radio_width,box[1]};
+    GLshort radiostart_x = startx + click_size + col_dist + text_width + col_dist;
+    
+    GLshort radio_box[] = {radiostart_x,starty, radiostart_x + radio_width,starty+row_dist};
     struct CTRL *radio_master = init_radio( layers_meny,layers_meny,radio_box,radio_box_color,  NULL, NULL,  1, 0 );
     LAYER_RUNTIME *oneLayer;
     for (i=0; i<nLayers; i++)
     {
 
         GLshort rowstart_x = startx;
-        GLshort rowstart_y = starty - i * (row_dist + row_height);
+        GLshort rowstart_y = starty - i * row_height;
 
         oneLayer = layerRuntime + i;
 /*
@@ -600,11 +639,11 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
         
         txt = init_textblock(1);
-        append_2_textblock(txt,oneLayer->title, fonts[0]->fss->fs[2].bold);
+        append_2_textblock(txt,oneLayer->title, fonts[0]->fss->fs[text_size].bold);
         
         
-        GLshort click_box[] = {rowstart_x, rowstart_y,rowstart_x + check_width,rowstart_y + row_height};
-        GLshort text_box[] = {rowstart_x + check_width + col_dist, rowstart_y,rowstart_x + check_width + col_dist + text_width,rowstart_y + row_height};
+        GLshort click_box[] = {rowstart_x, rowstart_y-click_size,rowstart_x + click_size,rowstart_y};
+        GLshort text_box[] = {rowstart_x + click_size + col_dist, rowstart_y - click_size,rowstart_x + click_size + col_dist + text_width,rowstart_y};
 
         if(oneLayer->visible)
         {
@@ -613,7 +652,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
             add_txt(x_txt, "X");
             */
             x_txt = init_textblock(1);
-            append_2_textblock(x_txt,"X", fonts[0]->fss->fs[2].bold);
+            append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
 
             new_ctrl = register_control(CHECKBOX, layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,x_txt,box_text_margins, 1,10);
         }
@@ -623,12 +662,12 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
         register_control(TEXTBOX, layers_meny,new_ctrl, NULL,NULL,NULL,text_box,txt_box_color,txt,margins, 1,10); //register text label and set checkbox as logical parent
         new_ctrl->obj = (void*) oneLayer;
 
-        new_ctrl = add_radio_button(radio_master,set_info_layer, 30, 20, 1, oneLayer->info_active);
+        new_ctrl = add_radio_button(radio_master,set_info_layer, click_size, row_dist, 1, oneLayer->info_active);
         new_ctrl->obj = (void*) oneLayer;
     }
 
-    layers_meny->box[1] -= i * (row_dist + row_height);
-    radio_master->box[1] -= i * (row_dist + row_height);
+    layers_meny->box[1] = starty - i * row_height;
+    radio_master->box[1] = starty -  i * row_height;
 
     //create close button
 
@@ -636,17 +675,19 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
     get_top_right(layers_meny, p);
 
-    startx = p[0] - 50;
-    starty = p[1] - 50;
+    startx = p[0] - 50*size_factor;
+    starty = p[1] - 50*size_factor;
 
-    GLshort close_box[] = {startx, starty,startx + click_box_width,starty + row_height};
+    GLshort close_box[] = {startx, starty,startx + click_size,starty + click_size};
+    
+    
     GLfloat close_color[]= {200,100,100,200};
     /*x_txt = init_txt(5);
 
     add_txt(x_txt, "X");
     */
     x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[2].bold);
+    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
     register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
 
     return 0;
@@ -656,6 +697,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 int init_controls()
 {
     TEXTBLOCK *txt;
+    int fontsize;
     GLshort box[] = {0,0,0,0};
 //   controls =  register_control(NULL,NULL, NULL,NULL, box,1);
     controls =  register_control(MASTER, NULL,NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,1,0);
@@ -667,23 +709,30 @@ int init_controls()
     add_txt(txt,"INFO");;
     */
 
-    txt = init_textblock(1);
-    append_2_textblock(txt,"INFO", fonts[0]->fss->fs[2].bold);
     
-    GLshort box2[] = {5,75,90,115};
-    GLfloat txt_margin[] = {10,5};
-    GLfloat color[]= {200,200,200,100};
+    GLshort box2[] = {5,5,105,65}; 
+    multiply_array(box2, size_factor, 4);
+    
+ 
+    GLshort box3[] = {5,85,155,155};    
+    multiply_array(box3, size_factor, 4);
+    
+    txt = init_textblock(1);
+    append_2_textblock(txt,"INFO", fonts[0]->fss->fs[character_size].bold);
+    
+    GLshort txt_margin[] = {20,20};
+    multiply_array(txt_margin, size_factor, 2);
+        GLfloat color[]= {200,200,200,100};
+   
     register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,box2,color, txt,txt_margin, 1,1);
 
     show_layer_control = 0;
     /*txt = init_txt(7);
     add_txt(txt,"");*/
     txt = init_textblock(1);
-    append_2_textblock(txt,"LAYERS", fonts[0]->fss->fs[2].bold);
-    GLshort box3[] = {5,30,150,70};
-    GLfloat txt_margin2[] = {10,5};
+    append_2_textblock(txt,"LAYERS", fonts[0]->fss->fs[character_size].bold);
     GLfloat color2[]= {255,200,200,100};
-    struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, box3,color2, txt,txt_margin2, 1,1);
+    struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, box3,color2, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
 
     // create_layers_meny(controls, layers_button);

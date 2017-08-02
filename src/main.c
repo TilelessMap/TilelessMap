@@ -250,9 +250,9 @@ void mainLoop(SDL_Window* window)
                     ty = ev.tfinger.y;
                     pr = ev.tfinger.pressure;
 
+                    int tolerance = 10 * size_factor;
 
-
-                    if(abs(mouse_down_x-mouse_up_x) < 10 && abs(mouse_down_y-mouse_up_y)<10)
+                    if(abs(mouse_down_x-mouse_up_x) < tolerance && abs(mouse_down_y-mouse_up_y)<tolerance)
                     {
                         int any_hit = check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
 
@@ -395,7 +395,8 @@ void mainLoop(SDL_Window* window)
 //                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
 
                         glViewport(0,0,CURR_WIDTH, CURR_HEIGHT);
-
+                        
+                        check_screen_size();
                     }
                     break;
 
@@ -534,6 +535,10 @@ int main(int argc, char **argv)
     CURR_WIDTH = r.w;
     CURR_HEIGHT = r.h;
 
+    
+    check_screen_size();
+    
+    
 //log_this(10, "width =  %d and height = %d\n",r.w, r.h);
     if (window == NULL) {
         log_this(1, "Error: can't create window:  : %s", SDL_GetError());

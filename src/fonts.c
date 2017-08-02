@@ -256,6 +256,7 @@ int init_text_resources()
     (fs+1)->normal = create_atlas(face, 20);
     (fs+2)->normal = create_atlas(face, 26);
     (fs+3)->normal = create_atlas(face, 32);
+    (fs+4)->normal = create_atlas(face, 46);
 
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
@@ -299,6 +300,7 @@ int init_text_resources()
     (fs+1)->bold = create_atlas(face, 20);
     (fs+2)->bold= create_atlas(face, 26);
     (fs+3)->bold = create_atlas(face, 32);
+    (fs+4)->bold = create_atlas(face, 46);
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
 

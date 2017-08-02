@@ -55,7 +55,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
     txt = init_txt(5);
     add_txt(txt, "O");*/
     txt = init_textblock(1);
-    append_2_textblock(txt,"O", fonts[0]->fss->fs[2].bold);
+    append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
     t->txt=txt;
     v = 1;
     func_in_func((void*) t, &v);
@@ -69,7 +69,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
 
 
 
-struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLfloat *txt_margin,int default_active, int z)
+struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin,int default_active, int z)
 {
 
 
@@ -123,18 +123,21 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
     color[1] = 255;
     color[2] = 255;
 
-    GLfloat text_margins[] = {3,3};
+    GLshort text_margins[] = {3,3};
     if(set)
     {
         
         TEXTBLOCK *txt;
-        /*
-        txt = init_txt(5);
-        add_txt(txt, "O");*/
+
         txt = init_textblock(1);
-        append_2_textblock(txt,"O", fonts[0]->fss->fs[2].bold);
+        append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
     
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins, default_active,radio_master->z + 1);
+        
+        
+                   
+            
+            
     }
     else
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, NULL,text_margins, default_active,radio_master->z + 1);

@@ -30,7 +30,7 @@
 
 
 
-struct CTRL* init_textbox(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color, GLfloat *txt_margin,int default_active, int z)
+struct CTRL* init_textbox(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color, GLshort *txt_margin,int default_active, int z)
 {
  
     return register_control(TEXTBOX, spatial_parent, logical_parent,NULL, NULL, NULL,box, color, NULL,txt_margin,default_active, z);
