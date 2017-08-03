@@ -195,7 +195,6 @@ static int load_layers(TEXT *missing_db)
      Get information about all the layers in the project
      */
     int rc, i, show_text, line_width;
-    char *err_msg;
 
     sqlite3_stmt *preparedLayerLoading;
     sqlite3_stmt *preparedLayer;

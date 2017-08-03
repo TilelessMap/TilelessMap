@@ -56,7 +56,7 @@ int reset_matrix(MATRIX *matrix_handl)
 
     matrix_handl->vertical_enabled = 0;
     matrix_handl->zoom_enabled = 0;
-
+    return 0;
 }
 void copy2ref_box(MATRIX *matrix_hndl,MATRIX *ref)
 {

@@ -33,6 +33,7 @@
 
 static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 {
+    log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
     int i, v;
     struct CTRL *t = (struct CTRL *) ctrl;
     TEXTBLOCK *txt;
@@ -49,24 +50,13 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
             rb->txt = 0;
         }
     }
-
-
-    /*
-    txt = init_txt(5);
-    add_txt(txt, "O");*/
     txt = init_textblock(1);
     append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
     t->txt=txt;
     v = 1;
     func_in_func((void*) t, &v);
-    // ((LAYER_RUNTIME*) t->obj)->info_active = 1;
-
-
     return 0;
 }
-
-
-
 
 
 struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin,int default_active, int z)
@@ -85,10 +75,7 @@ struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent,
 
 struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_func set_unset, GLshort size, GLshort row_dist, int default_active, int set)
 {
-
-    int i;
     GLshort box[4];
-    GLshort origo_y;
     GLshort master_width = radio_master->box[2] - radio_master->box[0];
     box[0] = radio_master->box[0] + master_width/2 - size/2;
     struct CTRL *radio_button;

@@ -226,6 +226,7 @@ decode_multi(TWKB_PARSE_STATE *ts)
     else
         idlist = NULL;
 
+    log_this(5, "idlist pointer = %p\n",idlist);
 
     switch (ts->thi->type)
     {

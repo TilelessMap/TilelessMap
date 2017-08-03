@@ -10,22 +10,18 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
 {
     
     
-    int max_cells = 50;
     sqlite3_stmt *prepared_info;
     sqlite3_stmt *prepared_layer_info;
     TEXTBLOCK *tb;
     int i = 0;
     
-    GLshort row_height = 30;
     
     char number_text[32];
     char header_tot[32];
         
-    GLshort radio_width = 100;
 
     GLshort click_box_width = 50;
     GLshort click_box_height = 50;
-    GLshort text_box_height = 30;
         
     char *info_sql = "select field, row, column, header from info where layerID = ? order by row, column";
     
@@ -107,7 +103,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
                 }
                 else if (type == SQLITE_TEXT)
                 {
-                    const char *val_txt = sqlite3_column_text(prepared_layer_info, i);
+                    const unsigned char *val_txt = sqlite3_column_text(prepared_layer_info, i);
                     printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
                     append_2_textblock(tb, (const char*) val_txt, fonts[0]->fss->fs[text_size].normal);
                   
@@ -151,12 +147,12 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
 
 
 
-int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
+int identify(MATRIX *map_matrix, int x, int y)
 {
     log_this(10,"info, x=%d, y=%d\n",x,y);
     GLfloat w_x, w_y;
-    int i, z, r, n_vals_acc, n_vals, poly_start_index, pa_start_index, n_of_pa,n_polys, n_points,next_pa ;
-    int inside,n_dims, nrings,n_elements_acc,n_elements;
+    int i;
+    int inside,n_dims, n_elements;
     px2m(map_matrix->bbox,x,y,&w_x,&w_y);
     int64_t id;
     GLfloat meterPerPixel = (map_matrix->bbox[2]-map_matrix->bbox[0])/CURR_WIDTH;
@@ -223,15 +219,7 @@ int identify(MATRIX *map_matrix, int x, int y,SDL_Window* window)
 
                 n_dims = infoLayer->n_dims;
 
-                /*    for (r=0;r<poly->pa_start_indexes->used; r++)
-                  {
-
-                   printf("r = %d, pa_start = %d, id = %ld\n", r, poly-> );
-                  }*/
-                next_pa = 0;
-                r = 0;
-
-                int poly_n = 0;
+                unsigned int poly_n = 0;
                 int next_polystart;
                 if (poly->polygon_start_indexes->used>1)
                     next_polystart = poly->polygon_start_indexes->list[poly_n+1];

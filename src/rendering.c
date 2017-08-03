@@ -50,10 +50,9 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     uint32_t i;//, np, pi;
     GLfloat *color;
     GLfloat c[4];
-    //  GLenum err;
+
     glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
-//   GLESSTRUCT *rb = oneLayer->res_buf;
-    // glEnable(GL_PROGRAM_POINT_SIZE);
+    
     glPointSize(2);
     glUseProgram(std_program);
     glEnableVertexAttribArray(std_coord2d);
@@ -738,21 +737,7 @@ static inline GLfloat max_f(GLfloat a, GLfloat b)
 
 int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_nr,int bold*/,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
 {
-/*
-    ATLAS *a;
-    if(bold)
-    {
-     //   a = font_bold[atlas_nr-1];
-        a = fonts[0]->fss->fs[atlas_nr].bold;
-        
-    }
-    else
-    {
-        //a = font_normal[atlas_nr-1];
-        
-        a = fonts[0]->fss->fs[atlas_nr].normal;
-    }*/
-    const char *u;
+
     GLfloat x,y;
     uint32_t p;
     unsigned int i;
@@ -780,7 +765,6 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     add_utf8_2_wc_txt(tmp_unicode_txt, txt);
 
     /* Loop through all characters */
-    u = txt;
     n_letters +=tmp_unicode_txt->used;
     GLfloat rh_pixels= a->ch * 1.1;
     GLfloat rh = rh_pixels * sy;

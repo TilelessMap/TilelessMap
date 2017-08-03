@@ -224,7 +224,7 @@ uint32_t utf82unicode(const char *text,const char **the_rest)
 
 TEXTBLOCK* init_textblock(size_t s)
 {
-    int i;
+    unsigned int i;
     TEXTBLOCK *tb = st_malloc(sizeof(TEXTBLOCK));
     tb->txt = st_malloc(s * sizeof(TEXT*));
     for (i=0;i<s;i++)
@@ -240,7 +240,6 @@ TEXTBLOCK* init_textblock(size_t s)
 
 static int realloc_textblock(TEXTBLOCK *tb)
 {
-    int i;
     tb->max_n_txts *= 2;
     
     tb->txt = st_realloc(tb->txt, tb->max_n_txts * sizeof(TEXT*));

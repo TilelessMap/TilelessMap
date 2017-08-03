@@ -119,7 +119,7 @@ int get_top_left(struct CTRL *t, GLshort *p);
 int get_bottom_right(struct CTRL *t, GLshort *p);
 int get_top_right(struct CTRL *t, GLshort *p);
 
-
+int destroy_control(struct CTRL *t);
 int multiply_array(GLshort *a, GLfloat v, GLshort ndims);
 uint8_t screensize;
 

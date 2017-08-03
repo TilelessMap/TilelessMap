@@ -34,10 +34,7 @@ void mainLoop(SDL_Window* window)
 {
     log_this(100, "Entering mainLoop\n");
 
-    GLfloat tx,ty,pr;
-    int ti, fi;
-    GLfloat tmp_box[4] = {0.0,0.0,0.0,0.0};
-    //GLfloat newBBOX[4] = {0.0,0.0,0.0,0.0};
+    GLfloat tx,ty;
     int mouse_down = 0;
     int wheel_y;
     SDL_Event ev;
@@ -62,7 +59,6 @@ void mainLoop(SDL_Window* window)
     gps_point.x = 0;
     gps_point.y = 0;
     gps_point.s = 0;
-    int map_modus_before=1;
     int mouse_down_x = 0, mouse_down_y = 0,mouse_up_x, mouse_up_y;
 
     incharge = NULL; //this means map is in charge when events occur.
@@ -76,7 +72,6 @@ void mainLoop(SDL_Window* window)
     //initialBBOX(init_x, init_y, init_box_width, newBBOX);
     initialBBOX(init_x, init_y, init_box_width, &map_matrix);
     initialBBOX(init_x, init_y, init_box_width, &ref); //just for saftey we init the values in ref too
-    GLfloat theMatrix[16];
 
 //    matrixFromBBOX(newBBOX, theMatrix);
     matrixFromBBOX(&map_matrix);
@@ -132,7 +127,7 @@ void mainLoop(SDL_Window* window)
 
                         if(! map_modus && !any_hit)
                         {
-                            identify(&map_matrix, mouse_up_x,mouse_up_y,window);
+                            identify(&map_matrix, mouse_up_x,mouse_up_y);
                            //render_data(window, map_matrix.matrix);
                         }
                         render_data(window, map_matrix.matrix);
@@ -225,12 +220,8 @@ void mainLoop(SDL_Window* window)
 
                 case SDL_FINGERDOWN:
 
-                    ti = (int) ev.tfinger.touchId;
-                    fi = (int) ev.tfinger.fingerId;
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
-                    pr = ev.tfinger.pressure;
-                    //DEBUG_PRINT(("DOWN: fi=%d, x = %f, y = %f, pr = %f, ti = %d\n",fi, tx, ty,pr,ti));
 
                     register_touch_down(touches, ev.tfinger.fingerId, ev.tfinger.x, ev.tfinger.y);
                     if(incharge)
@@ -244,11 +235,8 @@ void mainLoop(SDL_Window* window)
                 case SDL_FINGERUP:
                     log_this(10,"SDL_FINGERUP");
 
-                    ti = (int) ev.tfinger.touchId;
-                    fi = (int) ev.tfinger.fingerId;
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
-                    pr = ev.tfinger.pressure;
 
                     int tolerance = 10 * size_factor;
 
@@ -258,7 +246,7 @@ void mainLoop(SDL_Window* window)
                         int any_hit = check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
                         if(! map_modus && !any_hit)
                         {
-                            identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT),window);
+                            identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
                         }
                         render_data(window, map_matrix.matrix);
                         reset_touch_que(touches);
@@ -353,12 +341,8 @@ void mainLoop(SDL_Window* window)
                         else
                         {
                             log_this(10, "m1");
-                            //~ android_log_print(ANDROID_LOG_INFO, APPNAME, "m1");
-                            ti = (int) ev.tfinger.touchId;
-                            fi = (int) ev.tfinger.fingerId;
                             tx = ev.tfinger.x;
                             ty = ev.tfinger.y;
-                            pr = ev.tfinger.pressure;
 
 
                             //	  mouse_down = 0;
