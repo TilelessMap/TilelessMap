@@ -28,7 +28,7 @@
 int multiply_array(GLshort *a, GLfloat v, GLshort ndims)
 {
     int i;
-    for(i=0;i<ndims;i++)
+    for(i=0; i<ndims; i++)
     {
         printf("a = %d\n", *(a+i));
         *(a+i) *= v;
@@ -62,9 +62,9 @@ int check_screen_size()
         character_size = 2;
         text_size = 1;
     }
-    
+
     return 0;
-    
+
 }
 
 int get_parent_origo(struct CTRL *t, GLshort *p)
@@ -270,7 +270,7 @@ int init_matrix_handler(struct CTRL *ctrl, uint8_t vertical_enabled, uint8_t hor
     ctrl->matrix_handler->bbox[1] = 0;
     ctrl->matrix_handler->bbox[2] = CURR_WIDTH;
     ctrl->matrix_handler->bbox[3] = CURR_HEIGHT;
-    
+
     return 0;
 
 }
@@ -442,10 +442,10 @@ static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
         //   print_txt(point_coord, color,1,0,300, "Normal text ");
         //   printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
         GLfloat max_width = ctrl->box[2]-ctrl->box[0] - 2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
-        
-         print_txtblock(point_coord, matrix_hndl, color,max_width, ctrl->txt);
-        
-        
+
+        print_txtblock(point_coord, matrix_hndl, color,max_width, ctrl->txt);
+
+
     }
     return 0;
 }

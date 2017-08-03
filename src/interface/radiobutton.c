@@ -113,18 +113,18 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
     GLshort text_margins[] = {3,3};
     if(set)
     {
-        
+
         TEXTBLOCK *txt;
 
         txt = init_textblock(1);
         append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
-    
+
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins, default_active,radio_master->z + 1);
-        
-        
-                   
-            
-            
+
+
+
+
+
     }
     else
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, NULL,text_margins, default_active,radio_master->z + 1);
