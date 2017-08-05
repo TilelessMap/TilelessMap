@@ -36,6 +36,7 @@ static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_fun
 static int hide_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_func func_in_func);
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent);
+static struct CTRL* add_tileless_info(struct CTRL *ctrl);
 
 /**********************************************
  * This function must be present, and it defines
@@ -76,7 +77,7 @@ int init_controls()
 
     struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
-
+    add_tileless_info(controls);
     return 0;
 }
 
@@ -353,8 +354,10 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
         else
             font = fonts[0]->fss->fs[text_size].normal;
             
-
+    
             append_2_textblock(tb, (char*)txt, font);
+        
+            append_2_textblock(tb," \n ", font);
         
      }
     
@@ -376,12 +379,12 @@ int init_show_info(void *ctrl, void *val, tileless_event_func_in_func func_in_fu
 
     GLshort box_start_x = 10 * size_factor, box_start_y = 10 * size_factor;
     
-    GLshort box_height = 50, box_width = CURR_WIDTH - 2 * box_start_y;
+    GLshort box_height = 1000, box_width = CURR_WIDTH - 2 * box_start_y;
     
     GLshort box[] = {box_start_x,CURR_HEIGHT - box_start_y - box_height,box_start_x + box_width,CURR_HEIGHT - box_start_y};
     
     
-    GLfloat color[]= {200,200,200,100};
+    GLfloat color[]= {255,255,255,220};
     
     
     
