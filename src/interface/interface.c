@@ -344,6 +344,32 @@ int parent_add_child(struct CTRL *parent, struct CTRL *child)
 
 
 
+struct CTRL* add_close_button(struct CTRL *ctrl)
+{
+    
+    GLshort box_text_margins[] = {4,4};
+    multiply_array(box_text_margins, size_factor, 2);
+    
+    GLshort click_size = 30 * size_factor;
+    GLshort startx, starty, p[] = {0,0};
+    get_top_right(ctrl, p);
+
+    startx = p[0] - 50*size_factor;
+    starty = p[1] - 50*size_factor;
+
+    GLshort close_box[] = {startx, starty,startx + click_size,starty + click_size};
+
+    GLfloat close_color[]= {200,100,100,200};
+    
+    TEXTBLOCK *x_txt = init_textblock(1);
+    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
+    return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
+
+    
+    
+    
+}
+
 int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 {
 
