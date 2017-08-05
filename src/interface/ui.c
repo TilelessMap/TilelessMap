@@ -354,7 +354,7 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
         else
             font = fonts[0]->fss->fs[text_size].normal;
             
-    
+    printf("txt = %s\n", (char*)txt);
             append_2_textblock(tb, (char*)txt, font);
         
             append_2_textblock(tb," \n ", font);

@@ -23,7 +23,7 @@
 
 #include "theclient.h"
 #include "interface/interface.h"
-
+#include "mem.h"
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
@@ -759,7 +759,9 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     // max_width = 255;
 
     //TODO, fix dynamic allocation.
-    POINT_T coords[600];
+    size_t coordssize = 6 * strlen(txt) * sizeof(POINT_T);
+    POINT_T *coords = st_malloc(coordssize);
+    //POINT_T coords[6000];
     int c = 0;
 
     add_utf8_2_wc_txt(tmp_unicode_txt, txt);
@@ -842,13 +844,13 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
 
     
     /* Draw all the character on the screen in one go */
-    glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, coordssize, coords, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, c);
 
     // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
 
     glDisableVertexAttribArray(txt_box);
-
+    free(coords);
     return max_used_width;
 }
 
