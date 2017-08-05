@@ -311,3 +311,124 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
 
 
+
+int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_func)
+{
+    
+    log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) page_p,func_in_func);
+    
+    struct CTRL *t = (struct CTRL *) ctrl;
+    int page = *((int*) page_p);
+    ATLAS *font;
+    
+    sqlite3_stmt *preparedinfo;
+    char *sql = "select txt, text_size, bold, link_to_page from tilelessmap_info where page = ? order by orderby;";
+    
+    int rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinfo, 0);
+
+    if (rc != SQLITE_OK ) {
+        log_this(100, "SQL error in %s\n",sql );
+        sqlite3_close(projectDB);
+        return 1;
+    }
+    
+    
+    sqlite3_bind_int(preparedinfo, 1,page);
+    
+    if(t->txt)
+        destroy_textblock(t->txt);
+    
+    TEXTBLOCK *tb = init_textblock(4);
+    
+     while(sqlite3_step(preparedinfo) ==  SQLITE_ROW)
+     {
+    
+        const unsigned char *txt = sqlite3_column_text(preparedinfo, 0);
+        int text_size = sqlite3_column_int(preparedinfo, 1);
+        int bold = sqlite3_column_int(preparedinfo, 2);
+        int link_to_page = sqlite3_column_int(preparedinfo, 3);
+        
+        if(bold)
+            font = fonts[0]->fss->fs[text_size].bold;
+        else
+            font = fonts[0]->fss->fs[text_size].normal;
+            
+
+            append_2_textblock(tb, (char*)txt, font);
+        
+     }
+    
+    
+    t->txt = tb;
+    
+    sqlite3_finalize(preparedinfo);
+    
+    return 0;
+}
+
+int init_show_info(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
+{
+
+    log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
+    
+    struct CTRL *t = (struct CTRL *) ctrl;
+    
+
+    GLshort box_start_x = 10 * size_factor, box_start_y = 10 * size_factor;
+    
+    GLshort box_height = 50, box_width = CURR_WIDTH - 2 * box_start_y;
+    
+    GLshort box[] = {box_start_x,CURR_HEIGHT - box_start_y - box_height,box_start_x + box_width,CURR_HEIGHT - box_start_y};
+    
+    
+    GLfloat color[]= {200,200,200,100};
+    
+    
+    
+    GLshort box_text_margins[] = {4,4};
+    multiply_array(box_text_margins, size_factor, 2);
+    
+
+
+    struct CTRL *info_box = register_control(TEXTBOX, controls,t, NULL,NULL,NULL,box,color, NULL,box_text_margins, 1,20);
+    
+    
+    add_close_button(info_box);
+    int page = 1;
+    set_info_txt(info_box, &page, NULL);
+    
+    return 0;
+    
+}
+
+
+struct CTRL* add_tileless_info(struct CTRL *ctrl)
+{
+    if (!check_layer((const unsigned char*) "main",(const unsigned char*) "tilelessmap_info"))
+     return 0;
+     
+    int page = 1;
+    GLshort box_text_margins[] = {7,5};
+    multiply_array(box_text_margins, size_factor, 2);
+    
+    GLshort click_size = 30 * size_factor;
+    GLshort startx, starty, p[] = {0,0};
+    
+    p[0] = CURR_WIDTH;
+
+    startx = p[0] - 50*size_factor;
+    starty = p[1] + 20*size_factor;
+
+    GLshort info_box[] = {startx, starty,startx + click_size,starty + click_size};
+
+    GLfloat info_color[]= {100,200, 100,200};
+    
+    TEXTBLOCK *x_txt = init_textblock(1);
+    append_2_textblock(x_txt,"i", fonts[0]->fss->fs[character_size].bold);
+    return register_control(BUTTON, ctrl,ctrl, init_show_info,&page,NULL,info_box,info_color,x_txt,box_text_margins, 1,10);
+
+    
+    
+}
+
+
