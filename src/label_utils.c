@@ -92,7 +92,7 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     }
     
     
-    draw_it(norm_color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
+    draw_it(norm_color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d, txt_tot,0,max_width, sx, sy);
 
 
     while ((err = glGetError()) != GL_NO_ERROR) {
@@ -157,9 +157,9 @@ int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int
     
     for (i=0;i<tb->n_txts;i++)
     {
-        draw_it(norm_color,point_coord,point_offset, tb->font[i], txt_box, txt_color, txt_coord2d, tb->txt[i]->txt ,max_width, sx, sy);
+        draw_it(norm_color,point_coord,point_offset, tb->font[i], txt_box, txt_color, txt_coord2d, tb->txt[i]->txt ,0,max_width, sx, sy);
     }
     
     
-    return 0;
+    return (int) roundf(point_coord[1] - point_offset[0]) ;
 }

@@ -263,7 +263,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
     int64_t val;
     GLFLOAT_LIST *vertex_list, *wide_line;
     float new_val;
-    GLfloat start_x, start_y;
+    GLfloat start_x = 0, start_y = 0;
     int c=0;
     int reprpject = 0;
     uint8_t utm_in, hemi_in;

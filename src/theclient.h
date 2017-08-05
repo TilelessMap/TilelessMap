@@ -434,8 +434,7 @@ int init_text_resources();
 
 void log_this(int log_level, const char *log_txt, ... );
 //int draw_it(GLfloat *color,GLfloat *point_coord, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy);
-//int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset, int atlas_nr,int bold,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy);
-int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_nr,int bold*/,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy);
+int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,uint8_t alignment, GLint max_width, float sx, float sy);
 //int print_txt(float x,float y,float r, float g, float b, float a,int size, const char *txt, ... );
 //int print_txt(GLfloat *point_coord,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
 //int render_simple_rect(GLfloat minx, GLfloat miny, GLfloat maxx, GLfloat maxy);

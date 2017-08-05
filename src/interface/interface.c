@@ -235,6 +235,9 @@ int destroy_control(struct CTRL *t)
             destroy_control(child);
         }
     }
+    if(t == incharge)
+        incharge = NULL;
+    
     free(t->spatial_family->children);
     remove_child(t->logical_family->parent->logical_family, t);
     remove_child(t->spatial_family->parent->spatial_family, t);
@@ -245,6 +248,9 @@ int destroy_control(struct CTRL *t)
 
     if(t->matrix_handler)
         free(t->matrix_handler);
+    
+    if(t->on_click.data)
+        free(t->on_click.data);
     free(t);
     t=NULL;
 
@@ -340,8 +346,31 @@ int parent_add_child(struct CTRL *parent, struct CTRL *child)
     return 0;
 }*/
 
+struct CTRL* add_close_button(struct CTRL *ctrl)
+{
+    
+    GLshort box_text_margins[] = {4,4};
+    multiply_array(box_text_margins, size_factor, 2);
+    
+    GLshort click_size = 30 * size_factor;
+    GLshort startx, starty, p[] = {0,0};
+    get_top_right(ctrl, p);
 
+    startx = p[0] - 50*size_factor;
+    starty = p[1] - 50*size_factor;
 
+    GLshort close_box[] = {startx, starty,startx + click_size,starty + click_size};
+
+    GLfloat close_color[]= {200,100,100,200};
+    
+    TEXTBLOCK *x_txt = init_textblock(1,0);
+    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
+    return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
+
+    
+    
+    
+}
 
 
 int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
@@ -350,7 +379,7 @@ int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
     log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
 
     struct CTRL *t = (struct CTRL *) ctrl;
-    incharge = NULL; //move focus back to map
+    //incharge = NULL; //move focus back to map
     destroy_control(t->logical_family->parent);
 
 
@@ -443,10 +472,13 @@ static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
         //   printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
         GLfloat max_width = ctrl->box[2]-ctrl->box[0] - 2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
 
-        print_txtblock(point_coord, matrix_hndl, color,max_width, ctrl->txt);
+        int y = print_txtblock(point_coord, matrix_hndl, color,max_width, ctrl->txt);
+        printf("returning y = %d and box[1] = %d\n", y, ctrl->box[1]);
+        if(ctrl->box[1] > y)
+            ctrl->box[1] = y;
 
-
-    }
+    }    
+    
     return 0;
 }
 

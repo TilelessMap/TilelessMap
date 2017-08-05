@@ -50,7 +50,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
             rb->txt = 0;
         }
     }
-    txt = init_textblock(1);
+    txt = init_textblock(1,0);
     append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
     t->txt=txt;
     v = 1;
@@ -116,7 +116,7 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
 
         TEXTBLOCK *txt;
 
-        txt = init_textblock(1);
+        txt = init_textblock(1,0);
         append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
 
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins, default_active,radio_master->z + 1);

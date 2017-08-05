@@ -237,7 +237,10 @@ void mainLoop(SDL_Window* window)
 
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
-
+                    mouse_up_x = (GLint) (tx * CURR_WIDTH);
+                    mouse_up_y = (GLint)(ty * CURR_HEIGHT);
+                    mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
+                    mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
                     int tolerance = 10 * size_factor;
 
                     if(abs(mouse_down_x-mouse_up_x) < tolerance && abs(mouse_down_y-mouse_up_y)<tolerance && !touches[1].active)
@@ -282,10 +285,7 @@ void mainLoop(SDL_Window* window)
                             else// if(touches[0].active)
                             {
                                 //	  mouse_down = 0;
-                                mouse_up_x = (GLint) (tx * CURR_WIDTH);
-                                mouse_up_y = (GLint)(ty * CURR_HEIGHT);
-                                mouse_down_x = (GLint)(touches[0].x1 * CURR_WIDTH);
-                                mouse_down_y = (GLint)(touches[0].y1 * CURR_HEIGHT);
+
                                 if(!incharge)
                                 {
                                     matrixFromDeltaMouse(&map_matrix,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);

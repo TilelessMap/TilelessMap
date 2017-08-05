@@ -222,11 +222,16 @@ uint32_t utf82unicode(const char *text,const char **the_rest)
 }
 
 
-TEXTBLOCK* init_textblock(size_t s)
+TEXTBLOCK* init_textblock(size_t s, int with_links)
 {
     unsigned int i;
     TEXTBLOCK *tb = st_malloc(sizeof(TEXTBLOCK));
     tb->txt = st_malloc(s * sizeof(TEXT*));
+    
+    if(with_links)
+        tb->links = st_calloc(s,sizeof(tileless_event));
+    else 
+        tb->links = NULL;
     for (i=0;i<s;i++)
     {
         tb->txt[i] = init_txt(32);
@@ -240,11 +245,20 @@ TEXTBLOCK* init_textblock(size_t s)
 
 static int realloc_textblock(TEXTBLOCK *tb)
 {
-    tb->max_n_txts *= 2;
     
-    tb->txt = st_realloc(tb->txt, tb->max_n_txts * sizeof(TEXT*));
+    int new_size = tb->max_n_txts * 2;
+    
+    tb->txt = st_realloc(tb->txt, new_size * sizeof(TEXT*));
 
-    tb->font = st_realloc(tb->font, tb->max_n_txts * sizeof(ATLAS*));
+    tb->font = st_realloc(tb->font, new_size * sizeof(ATLAS*));
+    
+    if(tb->links)
+    {
+        tb->links = st_realloc(tb->links, new_size * sizeof(tileless_event));       
+        memset(tb->links + tb->max_n_txts * sizeof(tileless_event), 0, tb->max_n_txts * sizeof(tileless_event));
+    }
+    
+    tb->max_n_txts = new_size;
     return 0;
 }
 
@@ -255,7 +269,14 @@ int destroy_textblock(TEXTBLOCK *tb)
     {
         destroy_txt(tb->txt[i]);
     }
-    
+    if(tb->links)
+    {
+        for (i=0;i<tb->n_txts;i++)
+        {
+            if(tb->links[i].caller)
+                free(tb->links[i].caller);
+        }
+    }
     free(tb->font);
     tb->font = NULL;
     tb->max_n_txts = 0;
@@ -270,13 +291,40 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font)
     if(! (tb->n_txts < tb->max_n_txts))
         realloc_textblock(tb);
     
-    add_txt(tb->txt[tb->n_txts], txt);
-    
-    tb->font[tb->n_txts] = font;
-    
+    add_txt(tb->txt[tb->n_txts], txt);    
+    tb->font[tb->n_txts] = font;    
+    if(tb->links)
+    {
+        tileless_event te = tb->links[tb->n_txts];
+        te.te_func = NULL;
+        te.caller = NULL;
+        te.data = NULL;
+        te.te_func_in_func = NULL;
+    }
+        
     tb->n_txts++;
- 
+    return 0;
+    
+}
 
+int append_2_textblock_w_link(TEXTBLOCK *tb, const char* txt, ATLAS *font, tileless_event_function click_func,void *data,size_t data_len,tileless_event_func_in_func func_in_func)
+{
+    if(! (tb->n_txts < tb->max_n_txts))
+        realloc_textblock(tb);
+    
+    add_txt(tb->txt[tb->n_txts], txt);    
+    tb->font[tb->n_txts] = font;    
+    if(tb->links)
+    {
+        tileless_event te = tb->links[tb->n_txts];
+        te.te_func = click_func;
+        te.caller = NULL;
+        if(data && data_len)
+        te.data = st_malloc(data_len);
+        memcpy(te.data, data, data_len);
+        te.te_func_in_func = func_in_func;
+    }
+    tb->n_txts++;
     return 0;
     
 }

@@ -212,7 +212,7 @@ int init_text_resources()
 
     // font_data = file_read(fontfilename, &len);
 
-    sql_txt = "select name, font from main.fonts where \"name\" = ?;";
+    sql_txt = "select name, font from main.fonts where name = ?;";
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
     if (rc != SQLITE_OK ) {

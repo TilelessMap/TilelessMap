@@ -2,7 +2,7 @@
 #define _interface_H
 
 #include "../matrix_handling.h"
-
+#include "../events.h"
 
 #define MASTER      0
 #define BOX         1
@@ -25,10 +25,6 @@ typedef struct
 } CTRL_BOX;
 
 
-typedef int (*tileless_event_func_in_func)(void *ctrl, void*);
-
-typedef int (*tileless_event_function)(void *ctrl, void*, tileless_event_func_in_func func_in_func);
-
 
 
 /*
@@ -49,14 +45,6 @@ typedef struct
 } RELATIONS;
 
 
-typedef struct
-{
-    void *caller; //caller controll
-    void *data;
-    tileless_event_function te_func;
-    tileless_event_func_in_func te_func_in_func;
-
-} tileless_event;
 
 struct CTRL
 {
@@ -127,6 +115,7 @@ GLfloat size_factor;
 int check_screen_size();
 int character_size, text_size;
 
+struct CTRL* add_close_button(struct CTRL *ctrl);
 #endif
 
 

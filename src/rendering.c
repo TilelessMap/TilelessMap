@@ -635,6 +635,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         total_points += 1;
         int psz =  *(oneLayer->text->size+i);
+        int anchor =  *(oneLayer->text->anchor+i);
 
 //log_this(10, "psz = %d \n",psz);
 
@@ -668,7 +669,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         a = fonts[0]->fss->fs[psz].normal;
     
     
-        draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
+        draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,anchor,0, sx, sy);
 
 
 
@@ -735,10 +736,10 @@ static inline GLfloat max_f(GLfloat a, GLfloat b)
         return a;
 }
 
-int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_nr,int bold*/,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
+int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,uint8_t alignment, GLint max_width, float sx, float sy)
 {
 
-    GLfloat x,y;
+    GLfloat x,y, corrected_x;
     uint32_t p;
     unsigned int i;
     GLfloat max_used_width = 0;
@@ -761,7 +762,19 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     //TODO, fix dynamic allocation.
     POINT_T coords[600];
     int c = 0;
-
+    GLfloat correction_factor;
+    
+    if(alignment ==0)
+        correction_factor = 0;
+    else if (alignment == 1)
+        correction_factor = -0.5;
+    else if (alignment == 2)
+        correction_factor = -1;
+    else 
+        correction_factor = 0;
+    
+    correction_factor *= sx;
+    
     add_utf8_2_wc_txt(tmp_unicode_txt, txt);
 
     /* Loop through all characters */
@@ -770,16 +783,18 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     GLfloat rh = rh_pixels * sy;
     x = offset[0] * sx;
     y = offset[1] * sy - a->ch * sy;
+    
+    uint32_t new_line = '\n';
     if(max_width)
     {
         int nlines=0;
-        GLfloat line_width = 0, word_width = 0;
+        GLfloat line_width = 0, word_width = 0, last_word_width = 0;
         unsigned int n_chars_in_line = 0, n_chars_in_word = 0, line_start=0;
         //uint32_t *last_word = 0;
         for(i = 0; i<tmp_unicode_txt->used; i++)
         {
             p = *(tmp_unicode_txt->txt + i);
-
+            last_word_width = word_width;
             word_width += a->metrics[p].ax;
             n_chars_in_word++;
 
@@ -789,11 +804,13 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
                 line_width += word_width;
                 n_chars_in_word = 0;
                 word_width = 0;
+                last_word_width = 0;
             }
-            else if (p=='\n')
+            else if (p==new_line)
             {
                 n_chars_in_line += n_chars_in_word;
-                c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+                corrected_x = x + line_width * correction_factor;
+                c += add_line(a,corrected_x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
                 line_start = i;                
                 max_used_width = max_f(max_used_width, line_width);
                 word_width = line_width = 0;
@@ -806,14 +823,17 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
             {
                 if(n_chars_in_line == 0) //there is only 1 word in line, we have to cut the word
                 {
-                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_word-1, sx, sy, coords+c) ;
+                    corrected_x = x + last_word_width * correction_factor;
+                    c += add_line(a,corrected_x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_word-1, sx, sy, coords+c) ;
                     line_start = i;
                     word_width = line_width = 1;
                     n_chars_in_line = n_chars_in_word =1;
                 }
                 else //we put the last word on the next line instead
                 {
-                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+                    
+                    corrected_x = x + line_width * correction_factor;
+                    c += add_line(a,corrected_x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
                     max_used_width = max_f(max_used_width, line_width);
                     line_width = 0;
                     line_start += n_chars_in_line;
@@ -829,7 +849,9 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
 
             n_chars_in_line += n_chars_in_word;
             line_width += word_width;
-            c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
+            
+            corrected_x = x + line_width * correction_factor;
+            c += add_line(a,corrected_x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
         }
         
         max_used_width = max_f(max_used_width, line_width);
@@ -838,8 +860,22 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
 
     }
     else
-        c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
-
+    {
+        if (correction_factor)
+        {
+            GLfloat line_width = 0;
+            for(i = 0; i<tmp_unicode_txt->used; i++)
+            {
+                p = *(tmp_unicode_txt->txt + i);
+                line_width += a->metrics[p].ax;
+            }            
+            corrected_x = line_width * correction_factor;
+            c += add_line(a,corrected_x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
+        }
+        else
+            c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
+        
+    }
     
     /* Draw all the character on the screen in one go */
     glBufferData(GL_ARRAY_BUFFER, sizeof coords, coords, GL_DYNAMIC_DRAW);

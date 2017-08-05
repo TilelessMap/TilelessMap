@@ -27,6 +27,8 @@
 
 #include "theclient.h"
 #include "matrix_handling.h"
+#include "events.h"
+
 typedef struct
 {
     char *txt;
@@ -49,11 +51,12 @@ typedef struct
 {
     TEXT **txt;
     ATLAS **font;
+    tileless_event *links;
     int n_txts;
     int max_n_txts;
 }TEXTBLOCK;
     
-    
+
     
 typedef struct {
     GLfloat x;
@@ -80,9 +83,10 @@ int destroy_wc_txt(WCHAR_TEXT *t);
 uint32_t utf82unicode(const char *text,const char **the_rest);
 
 
-TEXTBLOCK* init_textblock(size_t s);
+TEXTBLOCK* init_textblock(size_t s, int with_links);
 int destroy_textblock(TEXTBLOCK *tb);
 int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font);
+int append_2_textblock_w_link(TEXTBLOCK *tb, const char* txt, ATLAS *font, tileless_event_function click_func,void *data,size_t data_len, tileless_event_func_in_func func_in_func);
 
 
 

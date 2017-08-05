@@ -20,8 +20,6 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     char header_tot[32];
         
 
-    GLshort click_box_width = 50;
-    GLshort click_box_height = 50;
         
     char *info_sql = "select field, row, column, header from info where layerID = ? order by row, column";
     
@@ -68,7 +66,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
      
         sqlite3_bind_int(prepared_layer_info, 1,twkb_id);   
         
-    tb = init_textblock(8);
+    tb = init_textblock(8,0);
         
         while (sqlite3_step(prepared_layer_info)==SQLITE_ROW)
         {
@@ -127,19 +125,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     
     matrixFromBBOX(textbox->matrix_handler);
     
-    GLshort p[] = {0,0};
-    GLshort box_text_margins[] = {2,2};
-    get_top_right(textbox, p);
-
-    GLshort startx = p[0] - 50 * size_factor;
-    GLshort starty = p[1] - 50 * size_factor;
-
-    GLshort close_box[] = {startx, starty,startx + click_box_width,starty + click_box_height};
-    GLfloat close_color[]= {200,100,100,200};
-    TEXTBLOCK *x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
-    register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,22); //register text label and 
-    
+    add_close_button(textbox);
     
     return 1;
 }
