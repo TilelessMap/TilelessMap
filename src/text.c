@@ -240,11 +240,17 @@ TEXTBLOCK* init_textblock(size_t s)
 
 static int realloc_textblock(TEXTBLOCK *tb)
 {
-    tb->max_n_txts *= 2;
-    
-    tb->txt = st_realloc(tb->txt, tb->max_n_txts * sizeof(TEXT*));
+    int i;
+    int new_size = tb->max_n_txts * 2;
+    tb->txt = st_realloc(tb->txt, new_size * sizeof(TEXT*));
+    for (i=tb->max_n_txts;i<new_size;i++)
+    {
+        tb->txt[i] = init_txt(32);
+    }
+    tb->font = st_realloc(tb->font, new_size * sizeof(ATLAS*));
 
-    tb->font = st_realloc(tb->font, tb->max_n_txts * sizeof(ATLAS*));
+    tb->font = st_realloc(tb->font, new_size * sizeof(ATLAS*));
+    tb->max_n_txts = new_size;
     return 0;
 }
 
