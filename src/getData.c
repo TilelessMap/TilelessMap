@@ -122,17 +122,7 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
         print_txt(10,120,200,0,0,255,1, "n letters %d ", n_letters);
         print_txt(10,100,200,0,0,255,1, "Total points %d ", total_points);*/
 
-    GLfloat point_coord[2] = {10, 200};
-    GLfloat color[4] = {200,0,0,255};
 
-    GLfloat point_offset[] = {0,0};
-
-    print_txt(point_coord,point_offset, NULL, color,1,0,300, "Normal text ");
-    
-    printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
-    
-    print_txt(point_coord,point_offset, NULL, color,1,1,300, "bold text\n efter radbrytning");
-    
 #ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 

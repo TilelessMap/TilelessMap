@@ -54,7 +54,7 @@ int init_controls()
     GLshort txt_margin[] = {20,20};
     multiply_array(txt_margin, size_factor, 2);
 
-    GLfloat color[]= {200,200,200,130};
+    GLfloat color[]= {200,255,200,200};
 
     /**** define info-button at main screen ******/
     GLshort info_box[] = {5,5,135,65};
@@ -93,10 +93,10 @@ static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func f
     {
 
         log_this(100, "remove map_modus");
-        color[0] = 200;
+        color[0] = 150;
         color[1] = 255;
-        color[2] = 200;
-        color[3] = 220;
+        color[2] = 150;
+        color[3] = 255;
         map_modus = 0;
 
         return 0;
@@ -106,9 +106,9 @@ static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func f
 
         log_this(100, "set map_modus");
         color[0] = 200;
-        color[1] = 200;
+        color[1] = 255;
         color[2] = 200;
-        color[3] = 130;
+        color[3] = 200;
         map_modus = 1;
         infoRenderLayer->visible = 0;
         return 1;
@@ -231,10 +231,9 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     starty = box[3] - 2 * row_height;
 
     init_matrix_handler(layers_meny, 1, 0, 0);
+    matrixFromBBOX(layers_meny->matrix_handler);
     incharge = layers_meny;
 
-
-    matrixFromBBOX(layers_meny->matrix_handler);
 
     GLshort radiostart_x = startx + click_size + col_dist + text_width + col_dist;
 
@@ -400,6 +399,10 @@ int init_show_info(void *ctrl, void *val, tileless_event_func_in_func func_in_fu
     int page = 1;
     set_info_txt(info_box, &page, NULL);
     
+    init_matrix_handler(info_box, 1, 0, 0);
+    matrixFromBBOX(info_box->matrix_handler);
+    
+    incharge = info_box;
     return 0;
     
 }
@@ -411,15 +414,15 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
      return 0;
      
     int page = 1;
-    GLshort box_text_margins[] = {7,5};
+    GLshort box_text_margins[] = {20,10};
     multiply_array(box_text_margins, size_factor, 2);
     
-    GLshort click_size = 30 * size_factor;
+    GLshort click_size = 60 * size_factor;
     GLshort startx, starty, p[] = {0,0};
     
     p[0] = CURR_WIDTH;
 
-    startx = p[0] - 50*size_factor;
+    startx = p[0] - 80*size_factor;
     starty = p[1] + 20*size_factor;
 
     GLshort info_box[] = {startx, starty,startx + click_size,starty + click_size};
