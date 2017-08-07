@@ -310,7 +310,7 @@ static int load_layers(TEXT *missing_db)
 
         //Get the basic layer info from geometry columns table in data db
 
-        if(check_column(dbname, layername,(const unsigned char*) "idx_id_fld"))
+        if(check_column(dbname, "geometry_columns",(const unsigned char*) "idx_id_fld"))
             snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
         else
             snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
