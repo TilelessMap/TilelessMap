@@ -309,8 +309,12 @@ static int load_layers(TEXT *missing_db)
 
 
         //Get the basic layer info from geometry columns table in data db
-        snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
 
+        if(check_column(dbname, layername,(const unsigned char*) "idx_id_fld"))
+            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+        else
+            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+            
         log_this(100, "Get info from geometry_columns : %s\n",sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
