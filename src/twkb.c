@@ -170,9 +170,9 @@ void *twkb_fromSQLiteBBOX(void *theL)
 
     while (sqlite3_step(prepared_statement)==SQLITE_ROW)
     {
-        ts.id = sqlite3_column_int(prepared_statement, 2);
+        ts.id = sqlite3_column_int(prepared_statement, 3);
         // printf("id fra db = %ld\n",ts.id);
-        ts.styleID = sqlite3_column_int(prepared_statement, 3);
+        ts.styleID = sqlite3_column_int(prepared_statement, 4);
         if(get_blob(&tb,prepared_statement,0))
         {
             log_this(1,"Failed to select data\n");
@@ -212,11 +212,11 @@ void *twkb_fromSQLiteBBOX(void *theL)
         }
         if(theLayer->type & 32)
         {
-            const char *txt = (const char*) sqlite3_column_text(prepared_statement, 4);
+            const char *txt = (const char*) sqlite3_column_text(prepared_statement, 5);
 
-            size = sqlite3_column_int(prepared_statement, 5);
-            rotation = (GLfloat) sqlite3_column_double(prepared_statement, 6);
-            anchor = (GLint) sqlite3_column_double(prepared_statement, 7);
+            size = sqlite3_column_int(prepared_statement, 6);
+            rotation = (GLfloat) sqlite3_column_double(prepared_statement, 7);
+            anchor = (GLint) sqlite3_column_double(prepared_statement, 8);
 
             text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
         }

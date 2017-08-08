@@ -220,6 +220,7 @@ Information about all the layers in the project is loaded in an array of this st
 typedef struct
 {
     char *name;
+    char *db;
     char *title;
     uint8_t visible;
     sqlite3_stmt *preparedStatement;
@@ -239,6 +240,7 @@ typedef struct
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
     int info_active;
+    char *info_rel;
 }
 LAYER_RUNTIME;
 

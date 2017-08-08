@@ -22,7 +22,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
 
     GLshort click_box_width = 50;
     GLshort click_box_height = 50;
-        
+
     char *info_sql = "select field, row, column, header from info where layerID = ? order by row, column";
     
     int rc = sqlite3_prepare_v2(projectDB, info_sql, -1,&prepared_info, 0);
@@ -45,13 +45,22 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
             
             if(i>0)
                 add_txt(layer_info_sql, ", ");
+            
             const unsigned char *field = sqlite3_column_text(prepared_info, 0);
+            printf("test header = %s, field = %s\n",(char*) sqlite3_column_text(prepared_info, 3), (char*) field);
             add_txt(layer_info_sql, (const char*) field);               
                
             i++;
         }
         add_txt(layer_info_sql, " FROM ");
-        add_txt(layer_info_sql, theLayer->name);
+        if(theLayer->info_rel)
+            add_txt(layer_info_sql, theLayer->info_rel);
+        else{
+            add_txt(layer_info_sql,  theLayer->db );
+            add_txt(layer_info_sql, ".");
+            add_txt(layer_info_sql, theLayer->name);
+        }
+        //TODO get rid of hardcoded id field
         add_txt(layer_info_sql, " where twkb_id = ?;");
         
         
@@ -80,6 +89,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
                 
                 
                 const unsigned char *header = sqlite3_column_text(prepared_info, 3);   
+                printf("header = %s\n", header);
                 int row = sqlite3_column_int(prepared_info, 1);
                 int col = sqlite3_column_int(prepared_info, 2);
                 

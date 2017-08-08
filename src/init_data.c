@@ -208,7 +208,7 @@ static int load_layers(TEXT *missing_db)
     char textselect[128];
     char sql[2048];
     uint8_t type = 0;
-
+    char sqlSel2[15];
     /*  if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
       {
 
@@ -242,19 +242,26 @@ static int load_layers(TEXT *missing_db)
                              "rotation_fld,"  // 10
                              "anchor_fld,"  // 11
                              "txt_fld,"  // 12
-                             "title"  // 13
-
-                             " FROM layers l "
+                             "title";  // 13
+    
+    char *sqlLayerLoading2 = " FROM layers l "
                              "INNER JOIN dbs d on l.source = d.name "
                              "LEFT JOIN text_conf tc on l.layerID=tc.layerID ";
-
-    if(missing_db->used)
-        snprintf(sqlLayerLoading, 2048, "%s where d.name not in (%s) order by l.orderby ;",sqlLayerLoading1, get_txt(missing_db));
+    
+    
+        int info_rel = check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "info_rel");                         
+    if(info_rel)
+        strcpy(sqlSel2,", info_rel");
     else
-        snprintf(sqlLayerLoading, 2048, "%s order by l.orderby ;",sqlLayerLoading1);
+        sqlSel2[0] = '\0';
+    
+    if(missing_db->used)
+        snprintf(sqlLayerLoading, 2048, "%s %s %s where d.name not in (%s) order by l.orderby ;",sqlLayerLoading1, sqlSel2, sqlLayerLoading2, get_txt(missing_db));
+    else
+        snprintf(sqlLayerLoading, 2048, "%s %s %s order by l.orderby ;",sqlLayerLoading1, sqlSel2, sqlLayerLoading2);
 
 
-    log_this(50, "Get Layer sql : %s\n",sqlLayerLoading);
+    log_this(100, "Get Layer sql : %s\n",sqlLayerLoading);
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
 
     if (rc != SQLITE_OK ) {
@@ -310,10 +317,10 @@ static int load_layers(TEXT *missing_db)
 
         //Get the basic layer info from geometry columns table in data db
 
-        if(check_column(dbname, "geometry_columns",(const unsigned char*) "idx_id_fld"))
-            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+        if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
+            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
         else
-            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
             
         log_this(100, "Get info from geometry_columns : %s\n",sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
@@ -355,25 +362,41 @@ static int load_layers(TEXT *missing_db)
 
 
         const unsigned char *geometryfield = sqlite3_column_text(prepared_geo_col, 1);
-        const unsigned char *idfield = sqlite3_column_text(prepared_geo_col, 2);
-        const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 3);
-        const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 4);
-        oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 5);
-        oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
-        oneLayer->n_dims = (uint8_t) sqlite3_column_int(prepared_geo_col, 7);
+        const unsigned char *idx_idfield = sqlite3_column_text(prepared_geo_col, 2);
+        const unsigned char *unique_idfield = sqlite3_column_text(prepared_geo_col, 3);
+        const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 4);
+        const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 5);
+        oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
+        oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 7);
+        oneLayer->n_dims = (uint8_t) sqlite3_column_int(prepared_geo_col, 8);
 
 
 
         //TODO free this
+        
+        
         oneLayer->name = malloc(2 * strlen((char*) layername)+1);
-
         strcpy(oneLayer->name,(char*) layername);
+        oneLayer->db = malloc(2 * strlen((char*) dbname)+1);
+        strcpy(oneLayer->db,(char*) dbname);
         
         oneLayer->title = malloc(2 * strlen((char*) title)+1);
-
         strcpy(oneLayer->title,(char*) title);
-
-
+        
+        if(info_rel)
+        {
+            const unsigned char *info_relation = sqlite3_column_text(preparedLayerLoading, 14);
+            if(info_relation)
+            {
+                oneLayer->info_rel = malloc(2 * strlen((char*) info_relation)+1);
+                strcpy(oneLayer->info_rel,(char*) info_relation);           
+            }
+            else
+                oneLayer->info_rel = NULL;
+            
+        }
+        else
+            oneLayer->info_rel = NULL;
         //printf("name = %s\n", oneLayer->name);
         oneLayer->layer_id =  (uint8_t) layerid;
 
@@ -418,17 +441,18 @@ static int load_layers(TEXT *missing_db)
             textselect[0] = '\0';
         }
 
-        snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id %s where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? %s",
+        snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id %s where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? %s",
                  geometryfield,
                  tri_idx_fld,
-                 idfield,
+                 idx_idfield,
+                 unique_idfield,
                  styleselect,
                  textselect,
                  dbname,
                  layername,
                  dbname,
                  geometryindex,
-                 idfield,
+                 idx_idfield,
                  stylejoin,
                  stylewhere );
 
