@@ -185,6 +185,7 @@ static ATLAS* create_atlas(FT_Face face, int height)
 
 int init_text_resources()
 {
+    log_this(10, "Entering %s\n",__func__);
     char *sql_txt;
     int rc;
     sqlite3_stmt *preparedFonts;
@@ -204,7 +205,7 @@ int init_text_resources()
 
     /* Initialize the FreeType2 library */
     if (FT_Init_FreeType(&ft)) {
-        fprintf(stderr, "Could not init freetype library");
+        log_this(100,"Could not init freetype library");
         return 1;
     }
 
@@ -216,7 +217,7 @@ int init_text_resources()
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
     if (rc != SQLITE_OK ) {
-        fprintf(stderr, "SQL error in %s\n",sql_txt );
+        log_this(100,"SQL error in %s\n",sql_txt );
         sqlite3_close(projectDB);
         return 1;
     }
@@ -224,23 +225,23 @@ int init_text_resources()
     sqlite3_step(preparedFonts);
     // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
 
-    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
+    log_this(10,"namn = %s\n",sqlite3_column_text(preparedFonts, 0));
     len = sqlite3_column_bytes(preparedFonts, 1);
     font_data = malloc(len);
     memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
 
 
     if (font_data == NULL) {
-        fprintf(stderr, "Could not load font file ");
+        log_this(100,"Could not load font file ");
         return 1;
     }
     fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
     if (fterr != FT_Err_Ok) {
-        fprintf(stderr, "Could not init font: error ");
+        log_this(100,"Could not init font: error ");
         return 1;
     }
 
-    printf("font name = %s\n", face->style_name);
+    log_this(10,"font name = %s\n", face->style_name);
 
     // Create the vertex buffer object
     //  glGenBuffers(1, &text_vbo);
@@ -266,23 +267,23 @@ int init_text_resources()
     sqlite3_step(preparedFonts);
     // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
 
-    printf("namn = %s\n",sqlite3_column_text(preparedFonts, 0));
+    log_this(10,"namn = %s\n",sqlite3_column_text(preparedFonts, 0));
     len = sqlite3_column_bytes(preparedFonts, 1);
     font_data = malloc(len);
     memcpy(font_data, sqlite3_column_blob(preparedFonts, 1), len);
 
 
     if (font_data == NULL) {
-        fprintf(stderr, "Could not load font file ");
+        log_this(100,"Could not load font file ");
         return 1;
     }
     fterr = FT_New_Memory_Face(ft, (FT_Byte*)font_data, len, 0, &face);
     if (fterr != FT_Err_Ok) {
-        fprintf(stderr, "Could not init font: error ");
+        log_this(100,"Could not init font: error ");
         return 1;
     }
 
-    printf("font name = %s\n", face->style_name);
+    log_this(10,"font name = %s\n", face->style_name);
 
     // Create the vertex buffer object
     //  glGenBuffers(1, &text_vbo);
@@ -301,11 +302,16 @@ int init_text_resources()
     (fs+2)->bold= create_atlas(face, 26);
     (fs+3)->bold = create_atlas(face, 32);
     (fs+4)->bold = create_atlas(face, 46);
+    
+    init_txt_coords();
+    
+    
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
 
     sqlite3_finalize(preparedFonts);
     free(font_data);
+    
     return 0;
 }
 

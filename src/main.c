@@ -32,7 +32,7 @@
 
 void mainLoop(SDL_Window* window)
 {
-    log_this(100, "Entering mainLoop\n");
+    log_this(100, "Entering mainLoop now\n");
 
     GLfloat tx,ty;
     int mouse_down = 0;
@@ -418,6 +418,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     destroy_wc_txt(tmp_unicode_txt);
     FT_Done_FreeType(ft);
     free(global_styles);
+    destroy_txt_coords();
     sqlite3_close_v2(projectDB);
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow( window );
@@ -523,7 +524,7 @@ int main(int argc, char **argv)
     
 //log_this(10, "width =  %d and height = %d\n",r.w, r.h);
     if (window == NULL) {
-        log_this(1, "Error: can't create window:  : %s", SDL_GetError());
+        log_this(100, "Error: can't create window:  : %s", SDL_GetError());
         return EXIT_FAILURE;
     }
 
@@ -533,7 +534,7 @@ int main(int argc, char **argv)
     int rc = sqlite3_open_v2(projectfile, &projectDB,SQLITE_OPEN_READWRITE, NULL );
 
     if (rc != SQLITE_OK) {
-        log_this(1, "Cannot open database: %s\n", sqlite3_errmsg(projectDB));
+        log_this(100, "Cannot open database: %s\n", sqlite3_errmsg(projectDB));
         sqlite3_close(projectDB);
         return 1;
     }
@@ -543,7 +544,7 @@ int main(int argc, char **argv)
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (context == NULL) {
-        log_this(1, "Error: SDL_GL_CreateContext : %s", SDL_GetError());
+        log_this(100, "Error: SDL_GL_CreateContext : %s", SDL_GetError());
         return EXIT_FAILURE;
     }
     SDL_GL_SetSwapInterval(1);
@@ -562,7 +563,7 @@ int main(int argc, char **argv)
 
     if (init_text_resources())
     {
-        log_this(1,"Problems in init_text_resources");
+        log_this(100,"Problems in init_text_resources");
         return EXIT_FAILURE;
     }
 

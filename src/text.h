@@ -55,14 +55,20 @@ typedef struct
     
     
     
-typedef struct {
+typedef struct 
+{
     GLfloat x;
     GLfloat y;
     GLfloat s;
     GLfloat t;
 } POINT_T;
 
-
+typedef struct
+{
+ POINT_T *coords;   
+ size_t used;
+ size_t alloced;    
+} TEXTCOORDS;
 
 
 TEXT* init_txt(size_t s);
@@ -90,6 +96,14 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font);
 int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
 int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb);
 
-
+int init_txt_coords();
+int check_and_realloc_txt_coords(size_t needed);
+int destroy_txt_coords();
 WCHAR_TEXT  *tmp_unicode_txt;
+
+/*TODO This is just temporary
+ * Later there will be something holding all txt_coordinates from all layers and controls
+ * and all of it will be rendered from there. */
+TEXTCOORDS *txt_coords;
+
 #endif

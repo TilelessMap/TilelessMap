@@ -759,8 +759,16 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     // max_width = 255;
 
     //TODO, fix dynamic allocation.
-    size_t coordssize = 6 * strlen(txt) * sizeof(POINT_T);
-    POINT_T *coords = st_malloc(coordssize);
+    
+    size_t npoints = 6 * strlen(txt);
+    size_t coordssize = npoints * sizeof(POINT_T);
+    
+    check_and_realloc_txt_coords(npoints);
+    
+    POINT_T *coords = txt_coords->coords+txt_coords->used;
+    
+    //txt_coords->used += npoints;
+    
     //POINT_T coords[6000];
     int c = 0;
 
@@ -850,7 +858,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
 
     glDisableVertexAttribArray(txt_box);
-    free(coords);
+    
     return max_used_width;
 }
 

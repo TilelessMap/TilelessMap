@@ -155,7 +155,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
         sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
         sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY
         sqlite3_bind_double(prepared_statement, 4,(float) ext[1]); //minY
-        log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
+        log_this(100, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
 
     }
 

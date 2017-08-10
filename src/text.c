@@ -291,7 +291,47 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font)
 
 
 
+int init_txt_coords()
+{
+ /*TODO This is just temporary
+ * Later there will be something holding all txt_coordinates from all layers and controls
+ * and all of it will be rendered from there. */
+ 
+    const size_t init_size = 2048;
+    txt_coords = st_malloc(sizeof(TEXTCOORDS));
+    txt_coords->coords = st_malloc(init_size * sizeof(POINT_T));
+    txt_coords->alloced = init_size;
+    txt_coords->used = 0;    
+ return 0;
+}
+int check_and_realloc_txt_coords(size_t needed)
+{
+    size_t needed_tot = txt_coords->used + needed;
+        if(needed_tot > txt_coords->alloced)
+        {
+            size_t new_size = txt_coords->alloced * 2;
+            
+            while (new_size < needed_tot)
+            {
+                new_size *=2;
+            }
+            txt_coords->coords = st_realloc(txt_coords->coords, new_size * sizeof(POINT_T));
+            txt_coords->alloced = new_size;
+        }
+ return 0;
+    
+}
 
-
-
+int destroy_txt_coords()
+{
+ if(txt_coords)
+ {
+        if(txt_coords->coords)
+            free(txt_coords->coords);
+        
+        free(txt_coords);
+     
+ }
+ return 0;
+}
 

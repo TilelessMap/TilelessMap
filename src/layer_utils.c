@@ -45,7 +45,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
     {
         //We don't check if layer actually is represented. That will be found without db-error when loading layer
-        if(sqlite3_column_int(prepared_sql, 0)==1) //should be 2 rows, 1 for the layer and 1 for geometry_columns
+        if(sqlite3_column_int(prepared_sql, 0)==1) 
         {
             sqlite3_finalize(prepared_sql);
             return 1;
@@ -65,9 +65,9 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 int check_column(const unsigned char *dbname,const unsigned char * layername, const unsigned char  *col_name)
 {
     char sql[1024];
-    int rc;
+    int rc, res;
     sqlite3_stmt *prepared_sql;
-    snprintf(sql, 1024, "select * from %s.sqlite_master where type in ('table','view') and name = '%s' and sql like '%%%s%%'", dbname, layername, col_name);
+    snprintf(sql, 1024, "select sql from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
  //   printf("sql = %s\n", sql);
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
@@ -79,8 +79,11 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 
     if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
     {
+        const char *w = (const char*) sqlite3_column_text(prepared_sql, 0);
+        
+        res = search_string(w,(const char*) col_name);
         sqlite3_finalize(prepared_sql);
-        return 1;
+        return res;
     }
 
     sqlite3_finalize(prepared_sql);

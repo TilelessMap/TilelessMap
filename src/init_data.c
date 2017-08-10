@@ -115,7 +115,7 @@ static int load_styles()
     /********************************************************************************
      Count the layers in the project and get maximum styleID in the project
      */
-    char *sqlCountStyles = "SELECT COUNT(*), MAX(styleID)   "
+    char *sqlCountStyles = "SELECT COUNT(*), MAX(rowid)   "
                            "FROM styles s ; ";
 
     rc = sqlite3_prepare_v2(projectDB, sqlCountStyles, -1, &preparedCountStyle, 0);
@@ -143,7 +143,7 @@ static int load_styles()
 
     char *sqlStyles = "SELECT "
                       /*fields for attaching the database*/
-                      "styleID, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
+                      "rowid, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
                       "from styles;";
 
     rc = sqlite3_prepare_v2(projectDB, sqlStyles, -1, &preparedStylesLoading, 0);
@@ -414,7 +414,7 @@ static int load_layers(TEXT *missing_db)
 
         if(stylefield)
         {
-            styleselect = ", styleID ";
+            styleselect = ", s.rowid ";
             if(strcmp((const char *)stylefield, "__everything__"))
             {
                 snprintf(stylejoin,sizeof(stylejoin), "%s%s%s", " inner join styles s on e.", stylefield, "=s.value " );
@@ -572,7 +572,7 @@ static int init_info_Layer()
 
 int init_resources(char *dir)
 {
-    log_this(10, "Entering init_resources\n");
+    log_this(10, "Entering %s\n",__func__);
     map_modus = 1;
     TEXT *missing_db = init_txt(1024);
     curr_utm = 0;
