@@ -306,33 +306,35 @@ static int load_layers(TEXT *missing_db)
 
         if (check_layer(dbname, layername))
         {
+
+
+
+            //Get the basic layer info from geometry columns table in data db
+
+            if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
+                snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+            else
+                snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+                
+            log_this(100, "Get info from geometry_columns : %s\n",sql);
+            rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
+
+            if (rc != SQLITE_OK ) {
+                log_this(110, "SQL error in %s\n",sql);
+                sqlite3_close(projectDB);
+                return 1;
+            }
+            if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
+            {
+                log_this(100, "Cannot use layer %s",layername);
+                continue;
+            }
+            
             i++;
         }
         else
         {
             log_this(90, "Cannot use layer %s",layername);
-            continue;
-        }
-
-
-        //Get the basic layer info from geometry columns table in data db
-
-        if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
-            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
-        else
-            snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
-            
-        log_this(100, "Get info from geometry_columns : %s\n",sql);
-        rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
-
-        if (rc != SQLITE_OK ) {
-            log_this(110, "SQL error in %s\n",sql);
-            sqlite3_close(projectDB);
-            return 1;
-        }
-        if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
-        {
-            log_this(100, "Cannot use layer %s",layername);
             continue;
         }
         oneLayer->geometryType =  (uint8_t) sqlite3_column_int(prepared_geo_col, 0);
