@@ -540,7 +540,7 @@ int main(int argc, char **argv)
     }
 
     /*load the db into memory*/
-    loadOrSaveDb(projectDB, projectfile,0);
+  //  loadOrSaveDb(projectDB, projectfile,0);
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (context == NULL) {
