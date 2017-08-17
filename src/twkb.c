@@ -23,13 +23,14 @@
 
 
 #include "theclient.h"
+#include "buffer_handling.h"
 
-
+/*
 static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 {
 
 
-    /*twkb-buffer*/
+    //twkb-buffer
     uint8_t *buf;
     size_t buf_len;
     const sqlite3_blob *db_blob;
@@ -45,6 +46,32 @@ static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 
     tb->start_pos = tb->read_pos=buf;
     tb->end_pos=buf+buf_len;
+    //printf("allocate buffer at %p\n",tb->start_pos);
+    return 0;
+    
+}*/
+
+
+
+static int get_blob( sqlite3_stmt *prep, int icol,uint8_t **res,size_t *res_len)
+{
+
+
+    /*twkb-buffer*/
+    uint8_t *buf;
+    size_t buf_len;
+    const sqlite3_blob *db_blob;
+
+    db_blob = sqlite3_column_blob(prep, icol);
+
+    buf_len = sqlite3_column_bytes(prep, icol);
+    //   log_this(10, "blob size;%d\n", buf_len);
+    buf = malloc(buf_len);
+    memcpy(buf, db_blob,buf_len);
+
+
+    *res = buf;
+    *res_len = buf_len;
     //printf("allocate buffer at %p\n",tb->start_pos);
 
     return 0;
@@ -68,7 +95,8 @@ void *twkb_fromSQLiteBBOX(void *theL)
     TWKB_PARSE_STATE ts;
     TWKB_BUF tb;
     sqlite3_stmt *prepared_statement;
-
+    uint8_t *res;
+    size_t res_len;
     GLfloat *ext;
     BBOX bbox;
     ts.thi = &thi;
@@ -165,62 +193,89 @@ void *twkb_fromSQLiteBBOX(void *theL)
     if(err)
         log_this(1,"sqlite problem 2, %d\n",err);
 
-
-
-
-    while (sqlite3_step(prepared_statement)==SQLITE_ROW)
+    if(theLayer->geometryType == RASTER)
     {
-        ts.id = sqlite3_column_int(prepared_statement, 3);
-        // printf("id fra db = %ld\n",ts.id);
-        ts.styleID = sqlite3_column_int(prepared_statement, 4);
-        if(get_blob(&tb,prepared_statement,0))
+        GLfloat box[4];
+        while (sqlite3_step(prepared_statement)==SQLITE_ROW)
         {
-            log_this(1,"Failed to select data\n");
+                 if(get_blob(prepared_statement,0, &res, &res_len))
+                {
+                    fprintf(stderr, "Failed to select data\n");
 
-            sqlite3_close(projectDB);
-            return NULL;
+                    sqlite3_close(projectDB);
+                    return NULL;
+                }
+        box[0] = sqlite3_column_double(prepared_statement, 1);
+        box[1] = sqlite3_column_double(prepared_statement, 2);
+        box[2] = sqlite3_column_double(prepared_statement, 3);
+        box[3] = sqlite3_column_double(prepared_statement, 4);
+        addbatch2uint8_list(theLayer->rast->data,res_len, res);
+        addbatch2glfloat_list(theLayer->rast->bboxes,4,box );
+        add2gluint_list(theLayer->rast->raster_start_indexes, res_len);
         }
-        ts.tb=&tb;
-        ts.utm_zone = theLayer->utm_zone;
-        ts.hemisphere = theLayer->hemisphere;
-        while (ts.tb->read_pos<ts.tb->end_pos)
+        log_this(100,"orto buffer loaded with %d tiles, total of %d bytes\n", theLayer->rast->raster_start_indexes->used, theLayer->rast->data->used);
+    }
+    else
+    {
+        while (sqlite3_step(prepared_statement)==SQLITE_ROW)
         {
-            decode_twkb(&ts);//, theLayer->res_buf);
-        }
-//printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
-        free(tb.start_pos);
-        if(theLayer->type & 4)
-        {
-            if(get_blob(&tb,prepared_statement,1))
+            ts.id = sqlite3_column_int(prepared_statement, 3);
+            // printf("id fra db = %ld\n",ts.id);
+            ts.styleID = sqlite3_column_int(prepared_statement, 4);
+            if(get_blob(prepared_statement,0, &res, &res_len))
             {
-                fprintf(stderr, "Failed to select data\n");
+    
+                log_this(1,"Failed to select data\n");
 
                 sqlite3_close(projectDB);
                 return NULL;
-            }
+            } 
+            tb.start_pos = tb.read_pos = res;            
+            tb.end_pos=res+res_len;  
             ts.tb=&tb;
-
+            ts.utm_zone = theLayer->utm_zone;
+            ts.hemisphere = theLayer->hemisphere;
             while (ts.tb->read_pos<ts.tb->end_pos)
             {
-                decode_element_array(&ts);
+                decode_twkb(&ts);//, theLayer->res_buf);
             }
-//printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
+    //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
             free(tb.start_pos);
+            if(theLayer->type & 4)
+            {
+                if(get_blob(prepared_statement,1, &res, &res_len))
+                {
+                    fprintf(stderr, "Failed to select data\n");
+
+                    sqlite3_close(projectDB);
+                    return NULL;
+                }
+            tb.start_pos = tb.read_pos = res;            
+            tb.end_pos=res+res_len;  
+                ts.tb=&tb;
+
+                while (ts.tb->read_pos<ts.tb->end_pos)
+                {
+                    decode_element_array(&ts);
+                }
+    //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
+                free(tb.start_pos);
 
 
+
+            }
+            if(theLayer->type & 32)
+            {
+                const char *txt = (const char*) sqlite3_column_text(prepared_statement, 5);
+
+                size = sqlite3_column_int(prepared_statement, 6);
+                rotation = (GLfloat) sqlite3_column_double(prepared_statement, 7);
+                anchor = (GLint) sqlite3_column_double(prepared_statement, 8);
+
+                text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
+            }
 
         }
-        if(theLayer->type & 32)
-        {
-            const char *txt = (const char*) sqlite3_column_text(prepared_statement, 5);
-
-            size = sqlite3_column_int(prepared_statement, 6);
-            rotation = (GLfloat) sqlite3_column_double(prepared_statement, 7);
-            anchor = (GLint) sqlite3_column_double(prepared_statement, 8);
-
-            text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
-        }
-
     }
     sqlite3_clear_bindings(prepared_statement);
     sqlite3_reset(prepared_statement);

@@ -396,6 +396,70 @@ void main(void) { \
 
 
     reset_shaders(vs, fs, gps_program);
+    
+    
+    
+    
+
+    /*create a shader program raster textures*/
+
+    const unsigned char gen_vraster[1024] =  "attribute vec2 coord2d; \
+attribute vec2 texcoord; \
+varying vec2 f_texcoord; \
+uniform mat4 theMatrix; \
+void main(void) { \
+  gl_Position = theMatrix * vec4(coord2d,0, 1.0); \
+  f_texcoord = texcoord;\
+}";
+
+    const unsigned char gen_fraster[1024] = "varying vec2 f_texcoord; \
+    uniform sampler2D rastertexture; \
+    void main(void) { \
+    gl_FragColor = texture2D(rastertexture, f_texcoord); \
+    }" ;
+    
+    
+    
+
+    raster_program = create_program((unsigned char *) gen_vraster,(unsigned char *)  gen_fraster, &vs, &fs);
+
+    if(raster_program == 0)
+    {
+        log_this(100,"problem compiling raster-program");
+        return 0;
+    }
+
+    raster_coord2d = glGetAttribLocation(raster_program, "coord2d");
+    if (gps_norm == -1)
+    {
+        fprintf(stderr, "test: Could not bind attribute : %s\n", "coord2d");
+        return 0;
+    }
+
+    raster_texcoord = glGetAttribLocation(raster_program, "texcoord");
+    if (gps_norm == -1)
+    {
+        fprintf(stderr, "test: Could not bind attribute : %s\n", "texcoord");
+        return 0;
+    }
+
+
+
+    raster_matrix = glGetUniformLocation(raster_program, "theMatrix");
+    if (raster_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+        return 0;
+    }
+
+	raster_texture = glGetUniformLocation(raster_program, "rastertexture");
+    if (raster_texture == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "rastertexture");
+        return 0;
+    }
+
+    reset_shaders(vs, fs, raster_program);
 
     return 0;
 }

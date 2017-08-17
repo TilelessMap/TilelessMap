@@ -74,6 +74,9 @@ can hold according to the specification*/
 #define	MULTILINETYPE		5
 #define	MULTIPOLYGONTYPE	6
 #define	COLLECTIONTYPE		7
+#define	RASTER		        128
+
+
 #define DEFAULT_TEXT_BUF 1024
 
 #define MAX_ZOOM_FINGERS 2
@@ -113,6 +116,14 @@ typedef struct
 }
 GLFLOAT_LIST;
 
+
+typedef struct
+{
+    uint8_t *list;
+    size_t alloced;
+    size_t used;
+}
+UINT8_LIST;
 
 typedef struct
 {
@@ -159,6 +170,7 @@ typedef struct
 }
 LINESTRING_LIST;
 
+
 typedef struct
 {
     GLFLOAT_LIST *vertex_array;  //all vertex coordinates in a long array
@@ -173,6 +185,17 @@ typedef struct
 }
 POLYGON_LIST;
 
+
+
+typedef struct
+{
+    UINT8_LIST *data;
+    GLUINT_LIST *raster_start_indexes;
+    GLFLOAT_LIST *bboxes; //each 4 glfloat represents minx, maxx, miny, maxy in world coordinates
+    GLuint vbo;
+
+}
+RASTER_LIST;
 
 
 
@@ -224,9 +247,9 @@ typedef struct
     char *title;
     uint8_t visible;
     sqlite3_stmt *preparedStatement;
-    GLfloat *BBOX;
+    GLfloat *BBOX; // the requested bounding box (window)
     uint8_t geometryType;
-    uint8_t type; //8 on/off switches: point simple, point symbol, point text, line simple, line width, poly
+    uint8_t type; 
     uint8_t n_dims;
     GLfloat minScale;
     GLfloat maxScale;
@@ -236,6 +259,7 @@ typedef struct
     POLYGON_LIST *polygons;
     TEXTSTRUCT *text;
     INT64_LIST *twkb_id;
+    RASTER_LIST *rast;
     int layer_id;
     int utm_zone;
     int hemisphere; //1 is southern hemisphere and 0 is northern
@@ -419,6 +443,8 @@ int  renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int render_data(SDL_Window* window,GLfloat *theMatrix);
 int render_info(SDL_Window* window,GLfloat *theMatrix);
 
+int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
+
 FINGEREVENT* init_touch_que();
 int reset_touch_que(FINGEREVENT *touches);
 int get_box_from_touches(FINGEREVENT *touches,MATRIX *matrix_hndl,MATRIX *out);
@@ -528,13 +554,19 @@ GLint lw_z;
 
 //gps-void calc_end(POINT_CIRCLE* p, GLfloat* ut, int* c, vec2* last_normal)
 
-GLint gps_program;
+GLuint gps_program;
 GLint gps_norm;
 GLint gps_coord2d;
 GLint gps_radius;
 GLint gps_color;
 GLint gps_matrix;
 GLint gps_px_matrix;
+
+GLuint raster_program;
+GLint raster_coord2d;
+GLint raster_texcoord;
+GLint raster_matrix;
+GLint raster_texture;
 
 
 typedef struct  {

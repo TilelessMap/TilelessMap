@@ -303,207 +303,258 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
         const unsigned char *title =  sqlite3_column_text(preparedLayerLoading, 13);
 
-
+        
         if (check_layer(dbname, layername))
         {
 
 
-
-            //Get the basic layer info from geometry columns table in data db
-
-            if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
-                snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
-            else
-                snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
-                
-            log_this(100, "Get info from geometry_columns : %s\n",sql);
-            rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
-
-            if (rc != SQLITE_OK ) {
-                log_this(110, "SQL error in %s\n",sql);
-                sqlite3_close(projectDB);
-                return 1;
-            }
-            if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
+            if(!strcmp(stylefield,  "__raster__"))
             {
-                log_this(100, "Cannot use layer %s",layername);
-                continue;
+                    snprintf(sql, 2048, "SELECT data_fld, id_fld, spatial_idx, utm_zone, hemisphere from %s.raster_columns where layer_name='%s';", dbname, layername);
+
+                log_this(100, "Get info from raster_columns : %s\n",sql);
+                rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
+
+                if (rc != SQLITE_OK ) {
+                    log_this(110, "SQL error in %s\n",sql);
+                    sqlite3_close(projectDB);
+                    return 1;
+                }
+                if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
+                {
+                    log_this(100, "Cannot use layer %s",layername);
+                    continue;
+                }
+                i++;
+                oneLayer->geometryType = RASTER;
+                oneLayer->type = 0;
+                
+                const unsigned char *data_fld = sqlite3_column_text(prepared_geo_col, 0);
+                const unsigned char *idfield = sqlite3_column_text(prepared_geo_col, 1);
+                const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 2);
+                oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 3);
+                oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 4);
+
+                
+                snprintf(sql, 2048, "select %s, i.minx, i.maxx, i.miny, i.maxy from %s.%s o inner join %s.%s i on o.%s = i.id where  i.minX<? and i.maxX>? and i.minY<? and i.maxY >?;",
+                         data_fld,dbname, layername, dbname, geometryindex, idfield);
+                         
+                rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
+                log_this(100, "sql %s\n",sql );
+                if (rc != SQLITE_OK ) {
+                    log_this(100, "SQL error in %s\n",sql );
+                    sqlite3_close(projectDB);
+                    return 1;
+                }
+                oneLayer->preparedStatement = preparedLayer;
+                
             }
+            else
+            {
+                    //Get the basic layer info from geometry columns table in data db
+
+                if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
+                    snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+                else
+                    snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
+                    
+                log_this(100, "Get info from geometry_columns : %s\n",sql);
+                rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
+
+                if (rc != SQLITE_OK ) {
+                    log_this(110, "SQL error in %s\n",sql);
+                    sqlite3_close(projectDB);
+                    return 1;
+                }
+                if(!(sqlite3_step(prepared_geo_col) ==  SQLITE_ROW))
+                {
+                    log_this(100, "Cannot use layer %s",layername);
+                    continue;
+                }
+                
+                i++;
+                    
+                oneLayer->geometryType =  (uint8_t) sqlite3_column_int(prepared_geo_col, 0);
+                type = 0;
+
+                if(oneLayer->geometryType == POINTTYPE)
+                {
+                    type = type | 128;
+                    if (show_text)
+                        type = type | 32;
+                }
+                else if(oneLayer->geometryType == LINETYPE)
+                {
+                    if(line_width)
+                        type = type | 8;
+                    else
+                        type = type | 16;
+                }
+                else if(oneLayer->geometryType == POLYGONTYPE)
+                {
+                    type = type | 4;
+                    if(line_width)
+                        type = type | 8;
+
+                }
+                oneLayer->type = type;
+
+
+                const unsigned char *geometryfield = sqlite3_column_text(prepared_geo_col, 1);
+                const unsigned char *idx_idfield = sqlite3_column_text(prepared_geo_col, 2);
+                const unsigned char *unique_idfield = sqlite3_column_text(prepared_geo_col, 3);
+                const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 4);
+                const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 5);
+                oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
+                oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 7);
+                oneLayer->n_dims = (uint8_t) sqlite3_column_int(prepared_geo_col, 8);
+
+
+
+                //TODO free this
+                
+                
+                
+                if(info_rel)
+                {
+                    const unsigned char *info_relation = sqlite3_column_text(preparedLayerLoading, 14);
+                    if(info_relation)
+                    {
+                        oneLayer->info_rel = malloc(2 * strlen((char*) info_relation)+1);
+                        strcpy(oneLayer->info_rel,(char*) info_relation);           
+                    }
+                    else
+                        oneLayer->info_rel = NULL;
+                    
+                }
+                else
+                    oneLayer->info_rel = NULL;
+                //printf("name = %s\n", oneLayer->name);
+                oneLayer->layer_id =  (uint8_t) layerid;
+
+
+
+                char tri_idx_fld[32];
+                if(oneLayer->type & 4)
+                {
+                    snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s", tri_index_field);
+                }
+                else
+                {
+                    snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s","'a'" );
+                }
+
+                if(stylefield)
+                {
+                    styleselect = ", s.rowid ";
+                    if(strcmp((const char *)stylefield, "__everything__"))
+                    {
+                        snprintf(stylejoin,sizeof(stylejoin), "%s%s%s", " inner join styles s on e.", stylefield, "=s.value " );
+                    }
+                    else
+                    {
+                        snprintf(stylejoin,sizeof(stylejoin), "%s", " , styles s " );
+                    }
+                    snprintf(stylewhere,sizeof(stylewhere), "%s%d", " and s.layerID=", layerid);
+                }
+                else
+                {
+                    styleselect = "\0";
+                    stylejoin[0] = '\0';
+                    stylewhere[0] =  '\0';
+                }
+
+                if(show_text)
+                {
+                    snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",txt_fld, size_fld, rotation_fld, anchor_fld);
+                }
+                else
+                {
+                    textselect[0] = '\0';
+                }
+
+                snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id %s where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? %s",
+                        geometryfield,
+                        tri_idx_fld,
+                        idx_idfield,
+                        unique_idfield,
+                        styleselect,
+                        textselect,
+                        dbname,
+                        layername,
+                        dbname,
+                        geometryindex,
+                        idx_idfield,
+                        stylejoin,
+                        stylewhere );
+
+                /*
+
+                snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+                        "select ",
+                        geometryfield,
+                        ", ",tri_idx_fld,
+                        ", e.", idfield, styleselect, textselect,  " from ",
+                        dbname, ".",layername,
+                        " e inner join ",
+                        dbname, ".",geometryindex,
+                        "  ei on e.",
+                        idfield,
+                        "=ei.id ",
+                        stylejoin,
+                        "where ",
+                        " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
+                        stylewhere );
+
+                        */
+                rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
+                log_this(100, "sql %s\n",sql );
+                if (rc != SQLITE_OK ) {
+                    log_this(100, "SQL error in %s\n",sql );
+                    sqlite3_close(projectDB);
+                    return 1;
+                }
+                oneLayer->preparedStatement = preparedLayer;
+
+                
+                
+                
+                
+                
+                    
+            }      
+                    
+                init_buffers(oneLayer);
+
+
+                /*       oneLayer->res_buf =  init_res_buf();
+
+                    if (oneLayer->type & 4)
+                        oneLayer->tri_index =  init_element_buf();
+                */
+                if (oneLayer->type & 32)
+                    oneLayer->text =  init_text_buf();
+                    
+                oneLayer->name = malloc(2 * strlen((char*) layername)+1);
+                strcpy(oneLayer->name,(char*) layername);
+                oneLayer->db = malloc(2 * strlen((char*) dbname)+1);
+                strcpy(oneLayer->db,(char*) dbname);
+                
+                oneLayer->title = malloc(2 * strlen((char*) title)+1);
+                strcpy(oneLayer->title,(char*) title);
+                
+                sqlite3_finalize(prepared_geo_col);
             
-            i++;
+            
+            
         }
         else
         {
             log_this(90, "Cannot use layer %s",layername);
             continue;
         }
-        oneLayer->geometryType =  (uint8_t) sqlite3_column_int(prepared_geo_col, 0);
-        type = 0;
+ 
 
-        if(oneLayer->geometryType == POINTTYPE)
-        {
-            type = type | 128;
-            if (show_text)
-                type = type | 32;
-        }
-        else if(oneLayer->geometryType == LINETYPE)
-        {
-            if(line_width)
-                type = type | 8;
-            else
-                type = type | 16;
-        }
-        else if(oneLayer->geometryType == POLYGONTYPE)
-        {
-            type = type | 4;
-            if(line_width)
-                type = type | 8;
-
-        }
-        oneLayer->type = type;
-
-
-        const unsigned char *geometryfield = sqlite3_column_text(prepared_geo_col, 1);
-        const unsigned char *idx_idfield = sqlite3_column_text(prepared_geo_col, 2);
-        const unsigned char *unique_idfield = sqlite3_column_text(prepared_geo_col, 3);
-        const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 4);
-        const unsigned char *tri_index_field = sqlite3_column_text(prepared_geo_col, 5);
-        oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 6);
-        oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 7);
-        oneLayer->n_dims = (uint8_t) sqlite3_column_int(prepared_geo_col, 8);
-
-
-
-        //TODO free this
-        
-        
-        oneLayer->name = malloc(2 * strlen((char*) layername)+1);
-        strcpy(oneLayer->name,(char*) layername);
-        oneLayer->db = malloc(2 * strlen((char*) dbname)+1);
-        strcpy(oneLayer->db,(char*) dbname);
-        
-        oneLayer->title = malloc(2 * strlen((char*) title)+1);
-        strcpy(oneLayer->title,(char*) title);
-        
-        if(info_rel)
-        {
-            const unsigned char *info_relation = sqlite3_column_text(preparedLayerLoading, 14);
-            if(info_relation)
-            {
-                oneLayer->info_rel = malloc(2 * strlen((char*) info_relation)+1);
-                strcpy(oneLayer->info_rel,(char*) info_relation);           
-            }
-            else
-                oneLayer->info_rel = NULL;
-            
-        }
-        else
-            oneLayer->info_rel = NULL;
-        //printf("name = %s\n", oneLayer->name);
-        oneLayer->layer_id =  (uint8_t) layerid;
-
-
-
-        char tri_idx_fld[32];
-        if(oneLayer->type & 4)
-        {
-            snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s", tri_index_field);
-        }
-        else
-        {
-            snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s","'a'" );
-        }
-
-        if(stylefield)
-        {
-            styleselect = ", s.rowid ";
-            if(strcmp((const char *)stylefield, "__everything__"))
-            {
-                snprintf(stylejoin,sizeof(stylejoin), "%s%s%s", " inner join styles s on e.", stylefield, "=s.value " );
-            }
-            else
-            {
-                snprintf(stylejoin,sizeof(stylejoin), "%s", " , styles s " );
-            }
-            snprintf(stylewhere,sizeof(stylewhere), "%s%d", " and s.layerID=", layerid);
-        }
-        else
-        {
-            styleselect = "\0";
-            stylejoin[0] = '\0';
-            stylewhere[0] =  '\0';
-        }
-
-        if(show_text)
-        {
-            snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",txt_fld, size_fld, rotation_fld, anchor_fld);
-        }
-        else
-        {
-            textselect[0] = '\0';
-        }
-
-        snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id %s where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? %s",
-                 geometryfield,
-                 tri_idx_fld,
-                 idx_idfield,
-                 unique_idfield,
-                 styleselect,
-                 textselect,
-                 dbname,
-                 layername,
-                 dbname,
-                 geometryindex,
-                 idx_idfield,
-                 stylejoin,
-                 stylewhere );
-
-        /*
-
-        snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
-                 "select ",
-                 geometryfield,
-                 ", ",tri_idx_fld,
-                 ", e.", idfield, styleselect, textselect,  " from ",
-                 dbname, ".",layername,
-                 " e inner join ",
-                 dbname, ".",geometryindex,
-                 "  ei on e.",
-                 idfield,
-                 "=ei.id ",
-                 stylejoin,
-                 "where ",
-                 " ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? ",
-                 stylewhere );
-
-                 */
-        rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
-        log_this(100, "sql %s\n",sql );
-        if (rc != SQLITE_OK ) {
-            log_this(100, "SQL error in %s\n",sql );
-            sqlite3_close(projectDB);
-            return 1;
-        }
-        oneLayer->preparedStatement = preparedLayer;
-
-        
-        
-        
-        
-        
-        init_buffers(oneLayer);
-
-
-        /*       oneLayer->res_buf =  init_res_buf();
-
-               if (oneLayer->type & 4)
-                   oneLayer->tri_index =  init_element_buf();
-        */
-        if (oneLayer->type & 32)
-            oneLayer->text =  init_text_buf();
-
-
-        sqlite3_finalize(prepared_geo_col);
     }
     nLayers = i;
     sqlite3_finalize(preparedLayerLoading);

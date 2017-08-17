@@ -3,6 +3,8 @@
 #include "buffer_handling.h"
 
 /************* GL Float List ********************/
+
+
 static GLFLOAT_LIST* init_glfloat_list()
 {
     GLFLOAT_LIST *res = (GLFLOAT_LIST*) st_malloc(sizeof(GLFLOAT_LIST));
@@ -301,6 +303,85 @@ int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals)
     return 0;
 }
 
+/************* UINT8_LIST List ********************/
+static UINT8_LIST* init_uint8_list()
+{
+    UINT8_LIST *res = (UINT8_LIST*) st_malloc(sizeof(UINT8_LIST));
+
+    res->list = st_malloc(INIT_LIST_SIZE * sizeof(uint8_t));
+    res->alloced = INIT_LIST_SIZE;
+    res->used = 0;
+
+    return res;
+}
+
+
+
+static int increase_uint8_list(UINT8_LIST *l, size_t needed_space)
+{
+
+    size_t available_space = l->alloced-l->used;
+
+    if (available_space >= needed_space)
+        return 0;
+
+
+    size_t new_size = l->alloced;
+
+    while (available_space < needed_space)
+    {
+        new_size*=2;
+        available_space = new_size - l->used;
+    }
+    l->list = st_realloc(l->list, new_size * sizeof(uint8_t));
+    l->alloced = new_size;
+    return 0;
+}
+
+static int reset_uint8_list(UINT8_LIST *l)
+{
+    l->used = 0;
+    return 0;
+}
+
+
+static int destroy_uint8_list(UINT8_LIST *l)
+{
+    free(l->list);
+    l->list = NULL;
+    l->used = 0;
+    l->alloced = 0;
+    free(l);
+    l = NULL;
+    return 0;
+}
+
+int add2uint8_list(UINT8_LIST *list, uint8_t val)
+{
+    increase_uint8_list(list, 1);
+    *(list->list + list->used) = val;
+    list->used++;
+    return 0;
+}
+
+
+int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals)
+{
+    increase_uint8_list(list, n_vals);
+    memcpy(list->list + list->used, vals, n_vals * sizeof(uint8_t));
+    list->used += n_vals;
+    return 0;
+}
+
+static RASTER_LIST* init_raster_list()
+{
+    RASTER_LIST *res = st_malloc(sizeof(RASTER_LIST));
+    res->data = init_uint8_list();
+    res->raster_start_indexes = init_gluint_list();
+    res->bboxes = init_glfloat_list();
+    glGenBuffers(1, &(res->vbo));
+    return res;
+}
 static POINT_LIST* init_point_list()
 {
     POINT_LIST *res = st_malloc(sizeof(POINT_LIST));
@@ -340,6 +421,13 @@ static POLYGON_LIST* init_polygon_list()
 
 
 
+static int reset_raster_list(RASTER_LIST *l)
+{
+    reset_glfloat_list(l->bboxes);
+    reset_gluint_list(l->raster_start_indexes);
+    reset_uint8_list(l->data);
+    return 0;
+}
 static int reset_point_list(POINT_LIST *l)
 {
     reset_glfloat_list(l->points);
@@ -370,6 +458,14 @@ static int reset_polygon_list(POLYGON_LIST *l)
 }
 
 
+static int destroy_raster_list(RASTER_LIST *l)
+{
+    destroy_glfloat_list(l->bboxes);
+    destroy_gluint_list(l->raster_start_indexes);
+    destroy_uint8_list(l->data);
+    free(l);
+    return 0;
+}
 static int destroy_point_list(POINT_LIST *l)
 {
     destroy_glfloat_list(l->points);
@@ -429,6 +525,9 @@ int init_buffers(LAYER_RUNTIME *layer)
         layer->polygons = NULL;
 
     layer->twkb_id = init_int64_list();
+    
+    if(layer->geometryType == RASTER)
+        layer->rast = init_raster_list();
     //  layer->style_id = init_gluint_list();
     return 0;
 }
@@ -445,8 +544,11 @@ int reset_buffers(LAYER_RUNTIME *layer)
     if(layer->polygons)
         reset_polygon_list(layer->polygons);
 
-    reset_int64_list(layer->twkb_id);
-
+    if(layer->twkb_id)
+        reset_int64_list(layer->twkb_id);
+    
+    if(layer->geometryType == RASTER)
+        reset_raster_list(layer->rast);
     //  reset_gluint_list(layer->style_id);
     return 0;
 }
@@ -522,6 +624,9 @@ int destroy_buffers(LAYER_RUNTIME *layer)
         destroy_polygon_list(layer->polygons);
 
     destroy_int64_list(layer->twkb_id);
+    
+    if(layer->geometryType == RASTER)
+        layer->rast = destroy_raster_list(layer->rast);
     return 0;
 }
 

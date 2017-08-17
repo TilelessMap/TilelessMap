@@ -24,6 +24,8 @@ int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals);
 int setzero2gluint_list(GLUINT_LIST *list,GLuint n_vals);
 int setzero2int64_list(INT64_LIST *list,int64_t n_vals);
 
+int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);
+
 GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id);
 GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id);
 int pa_end(LAYER_RUNTIME *l, int64_t id);

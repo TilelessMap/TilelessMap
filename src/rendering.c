@@ -24,6 +24,7 @@
 #include "theclient.h"
 #include "interface/interface.h"
 #include "mem.h"
+#include "SDL_image.h"
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
@@ -513,6 +514,8 @@ static int render_data_layers(GLfloat *theMatrix)
     {
         oneLayer = layerRuntime + i;
 
+        if(oneLayer->geometryType >= RASTER)
+            continue;
         int type = oneLayer->type;
 
         if(oneLayer->visible)
@@ -956,4 +959,148 @@ int renderGPS(GLfloat *theMatrix)
     return 0;
 
 }
+
+
+
+
+
+
+
+int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
+{
+
+    GLuint i;
+    unsigned int tot_index = 0;
+    RASTER_LIST *rast = oneLayer->rast;
+    
+    GLuint vbo_cube_texcoords;
+	GLfloat cube_texcoords[2*4] = {
+		// front
+		0.0, 0.0,
+		1.0, 0.0,
+		1.0, 1.0,
+		0.0, 1.0,
+	};
+	glGenBuffers(1, &vbo_cube_texcoords);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texcoords), cube_texcoords, GL_STATIC_DRAW);
+	
+    
+    
+    GLuint ibo_cube_elements;
+	GLushort cube_elements[] = {
+		// front
+		0,  1,  2,
+		2,  3,  0
+	};
+	glGenBuffers(1, &ibo_cube_elements);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);
+
+    
+        
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	
+	glUseProgram(raster_program);
+	
+	glActiveTexture(GL_TEXTURE0);
+    
+        glUniformMatrix4fv(raster_matrix, 1, GL_FALSE,theMatrix );
+    for (i=0;i<rast->raster_start_indexes->used;i++)
+    {
+        uint8_t *data = rast->data->list + tot_index;
+        size_t data_len = rast->raster_start_indexes->list[i];
+        SDL_Surface* res_texture =  IMG_Load_RW(SDL_RWFromMem(data, data_len), 1);
+        
+        if (res_texture == NULL) 
+        {
+            continue;
+        }
+        GLuint texture_id;
+        glGenTextures(1, &texture_id);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, // target
+		0,  // level, 0 = base, no minimap,
+		GL_RGB, // internalformat
+		res_texture->w,  // width
+		res_texture->h,  // height
+		0,  // border, always 0 in OpenGL ES
+		GL_RGB,  // format
+		GL_UNSIGNED_BYTE, // type
+		res_texture->pixels);
+        SDL_FreeSurface(res_texture);
+        
+        
+        
+        GLfloat cube_vertices[6];
+        cube_vertices[0] = *(rast->bboxes->list + i*4 + 0);
+        cube_vertices[1] = *(rast->bboxes->list + i*4 + 3);
+        cube_vertices[2] = *(rast->bboxes->list + i*4 + 1);
+        cube_vertices[3] = *(rast->bboxes->list + i*4 + 3);
+        cube_vertices[4] = *(rast->bboxes->list + i*4 + 1);
+        cube_vertices[5] = *(rast->bboxes->list + i*4 + 2);
+        cube_vertices[4] = *(rast->bboxes->list + i*4 + 0);
+        cube_vertices[5] = *(rast->bboxes->list + i*4 + 2);
+        
+        GLuint vbo_cube_vertices;
+	glGenBuffers(1, &vbo_cube_vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+	
+        
+        
+        
+        
+        
+        
+        
+	glUniform1i(raster_texture, /*GL_TEXTURE*/0);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	
+	glEnableVertexAttribArray(raster_coord2d);
+	// Describe our vertices array to OpenGL (it can't guess its format automatically)
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+	glVertexAttribPointer(
+		  raster_coord2d, // attribute
+		  2,                 // number of elements per vertex, here (x,y,z)
+		  GL_FLOAT,          // the type of each element
+		  GL_FALSE,          // take our values as-is
+		  0,                 // no extra data between each position
+		  0                  // offset of first element
+	);
+	
+	glEnableVertexAttribArray(raster_texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
+	glVertexAttribPointer(
+		raster_texcoord, // attribute
+		2,                  // number of elements per vertex, here (x,y)
+		GL_FLOAT,           // the type of each element
+		GL_FALSE,           // take our values as-is
+		0,                  // no extra data between each position
+		0                   // offset of first element
+	);
+	
+	/* Push each element in buffer_vertices to the vertex shader */
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
+	int size;  
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+	
+	glDisableVertexAttribArray(raster_coord2d);
+	glDisableVertexAttribArray(raster_texcoord);
+      
+    
+    tot_index+=data_len;
+    }
+    
+    
+    return 0;
+
+}
+
+
+
 
