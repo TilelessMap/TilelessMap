@@ -415,7 +415,8 @@ void main(void) { \
     const unsigned char gen_fraster[1024] = "varying vec2 f_texcoord; \
     uniform sampler2D rastertexture; \
     void main(void) { \
-    gl_FragColor = texture2D(rastertexture, f_texcoord); \
+    vec2 flipped_texcoord = vec2(f_texcoord.x, 1.0 - f_texcoord.y); \
+    gl_FragColor = texture2D(rastertexture, flipped_texcoord); \
     }" ;
     
     

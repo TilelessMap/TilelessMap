@@ -404,7 +404,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         for (i=0; i<used_n_poly; i++)
         {
-            size_t  vertex_offset = sizeof(GLuint) * *(poly->polygon_start_indexes->list + i);
+            size_t  vertex_offset = sizeof(GLfloat) * *(poly->polygon_start_indexes->list + i);
 
             // printf("pa_list_index = %d, vertex_list_index_0 = %d\n", poly->polygon_start_indexes->list[i], poly->pa_start_indexes->list[0]);
             // size_t  vertex_offset = sizeof(GLuint) * poly->pa_start_indexes->list[poly->polygon_start_indexes->list[i]];
@@ -972,7 +972,8 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     GLuint i;
     unsigned int tot_index = 0;
     RASTER_LIST *rast = oneLayer->rast;
-    
+    LINESTRING_LIST *line = oneLayer->lines;
+    size_t  vertex_offset = 0;
     GLuint vbo_cube_texcoords;
 	GLfloat cube_texcoords[2*4] = {
 		// front
@@ -985,7 +986,16 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texcoords), cube_texcoords, GL_STATIC_DRAW);
 	
-    
+      //  GLuint vbo_cube_vertices;
+        
+        /*
+	glGenBuffers(1, &vbo_cube_vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(line->vertex_array->used*sizeof(GLfloat)), line->vertex_array->list, GL_STATIC_DRAW);
+	*/
+        
+        
+        //	 int i,j, offset=0;
     
     GLuint ibo_cube_elements;
 	GLushort cube_elements[] = {
@@ -999,8 +1009,6 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     
         
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	
 	glUseProgram(raster_program);
 	
@@ -1035,22 +1043,35 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         
         
         
-        GLfloat cube_vertices[8];
-        cube_vertices[0] = *(rast->bboxes->list + i*4 + 0);
-        cube_vertices[1] = *(rast->bboxes->list + i*4 + 3);
-        cube_vertices[2] = *(rast->bboxes->list + i*4 + 1);
-        cube_vertices[3] = *(rast->bboxes->list + i*4 + 3);
-        cube_vertices[4] = *(rast->bboxes->list + i*4 + 1);
-        cube_vertices[5] = *(rast->bboxes->list + i*4 + 2);
-        cube_vertices[6] = *(rast->bboxes->list + i*4 + 0);
-        cube_vertices[7] = *(rast->bboxes->list + i*4 + 2);
         
+        GLfloat *d = line->vertex_array->list+vertex_offset;
+    /*
+    printf("vertex_offset = %zu of %zu\n", vertex_offset, line->vertex_array->used);
+        int z;
+        for (z=0;z<8;z++)
+        {
+         printf("val %d = %f and tile_size = %zu \n",z, d[z], data_len);   
+        }*/
+        
+        
+        GLfloat cube_vertices[8];
+        cube_vertices[0] = d[0];
+        cube_vertices[1] = d[1];
+        cube_vertices[2] = d[2];
+        cube_vertices[3] = d[3];
+        cube_vertices[4] = d[4];
+        cube_vertices[5] = d[5];
+        cube_vertices[6] = d[6];
+        cube_vertices[7] = d[7];
+        
+        
+        
+                
         GLuint vbo_cube_vertices;
 	glGenBuffers(1, &vbo_cube_vertices);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 	
-        
         
         
         
@@ -1069,9 +1090,13 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 		  GL_FLOAT,          // the type of each element
 		  GL_FALSE,          // take our values as-is
 		  0,                 // no extra data between each position
-		  0                  // offset of first element
+		  0 //(GLvoid*) vertex_offset                  // offset of first element
 	);
-	
+    
+    
+        
+    
+   // size_t  vertex_offset = 8*i*sizeof(GLfloat);
 	glEnableVertexAttribArray(raster_texcoord);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
 	glVertexAttribPointer(
@@ -1087,12 +1112,14 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
 	int size;  
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    
 	glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 	
 	glDisableVertexAttribArray(raster_coord2d);
 	glDisableVertexAttribArray(raster_texcoord);
       
     
+	vertex_offset =  *(line->line_start_indexes->list + i);
     tot_index+=data_len;
     }
     

@@ -98,7 +98,8 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
             
             if(oneLayer->geometryType >= RASTER)
                 loadandRenderRaster( oneLayer, map_matrix->matrix);
-            
+             //           continue;
+                
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);

@@ -193,32 +193,25 @@ void *twkb_fromSQLiteBBOX(void *theL)
     if(err)
         log_this(1,"sqlite problem 2, %d\n",err);
 
-    if(theLayer->geometryType == RASTER)
-    {
-        GLfloat box[4];
+   
         while (sqlite3_step(prepared_statement)==SQLITE_ROW)
         {
-                 if(get_blob(prepared_statement,0, &res, &res_len))
-                {
-                    fprintf(stderr, "Failed to select data\n");
+            
+            if(theLayer->geometryType == RASTER)
+            {
 
-                    sqlite3_close(projectDB);
-                    return NULL;
-                }
-        box[0] = sqlite3_column_double(prepared_statement, 1);
-        box[1] = sqlite3_column_double(prepared_statement, 2);
-        box[2] = sqlite3_column_double(prepared_statement, 3);
-        box[3] = sqlite3_column_double(prepared_statement, 4);
-        addbatch2uint8_list(theLayer->rast->data,res_len, res);
-        addbatch2glfloat_list(theLayer->rast->bboxes,4,box );
-        add2gluint_list(theLayer->rast->raster_start_indexes, res_len);
+                    if(get_blob(prepared_statement,1, &res, &res_len))
+                    {
+                        fprintf(stderr, "Failed to select data\n");
+
+                        sqlite3_close(projectDB);
+                        return NULL;
+                    }
+            addbatch2uint8_list(theLayer->rast->data,res_len, res);
+            add2gluint_list(theLayer->rast->raster_start_indexes, res_len);
+        
+        
         }
-        log_this(100,"orto buffer loaded with %d tiles, total of %d bytes\n", theLayer->rast->raster_start_indexes->used, theLayer->rast->data->used);
-    }
-    else
-    {
-        while (sqlite3_step(prepared_statement)==SQLITE_ROW)
-        {
             ts.id = sqlite3_column_int(prepared_statement, 3);
             // printf("id fra db = %ld\n",ts.id);
             ts.styleID = sqlite3_column_int(prepared_statement, 4);
@@ -276,7 +269,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
             }
 
         }
-    }
+    
     sqlite3_clear_bindings(prepared_statement);
     sqlite3_reset(prepared_statement);
 

@@ -143,8 +143,8 @@ static int load_styles()
 
     char *sqlStyles = "SELECT "
                       /*fields for attaching the database*/
-                      "rowid, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
-                      "from styles;";
+                      "styleid, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
+                      "from styles order by styleid;";
 
     rc = sqlite3_prepare_v2(projectDB, sqlStyles, -1, &preparedStylesLoading, 0);
 
@@ -310,7 +310,7 @@ static int load_layers(TEXT *missing_db)
 
             if(!strcmp(stylefield,  "__raster__"))
             {
-                    snprintf(sql, 2048, "SELECT data_fld, id_fld, spatial_idx, utm_zone, hemisphere from %s.raster_columns where layer_name='%s';", dbname, layername);
+                    snprintf(sql, 2048, "SELECT geometry_fld,data_fld, id_fld,spatial_idx,  utm_zone, hemisphere from %s.raster_columns where layer_name='%s';", dbname, layername);
 
                 log_this(100, "Get info from raster_columns : %s\n",sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
@@ -327,17 +327,18 @@ static int load_layers(TEXT *missing_db)
                 }
                 i++;
                 oneLayer->geometryType = RASTER;
-                oneLayer->type = 0;
+                oneLayer->type = 16;
                 
-                const unsigned char *data_fld = sqlite3_column_text(prepared_geo_col, 0);
-                const unsigned char *idfield = sqlite3_column_text(prepared_geo_col, 1);
-                const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 2);
-                oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 3);
-                oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 4);
+                const unsigned char *geometry_fld = sqlite3_column_text(prepared_geo_col, 0);
+                const unsigned char *data_fld = sqlite3_column_text(prepared_geo_col, 1);
+                const unsigned char *idfield = sqlite3_column_text(prepared_geo_col, 2);
+                const unsigned char *geometryindex = sqlite3_column_text(prepared_geo_col, 3);
+                oneLayer->utm_zone =  (uint8_t) sqlite3_column_int(prepared_geo_col, 4);
+                oneLayer->hemisphere =  (uint8_t) sqlite3_column_int(prepared_geo_col, 5);
 
                 
-                snprintf(sql, 2048, "select %s, i.minx, i.maxx, i.miny, i.maxy from %s.%s o inner join %s.%s i on o.%s = i.id where  i.minX<? and i.maxX>? and i.minY<? and i.maxY >?;",
-                         data_fld,dbname, layername, dbname, geometryindex, idfield);
+                snprintf(sql, 2048, "select %s, %s,%s, %s,0, x,y from %s.%s o inner join %s.%s i on o.%s = i.id where  i.minX<? and i.maxX>? and i.minY<? and i.maxY >? order by x, y;",
+                         geometry_fld,data_fld,idfield, idfield, dbname, layername, dbname, geometryindex, idfield);
                          
                 rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
                 log_this(100, "sql %s\n",sql );
@@ -346,7 +347,10 @@ static int load_layers(TEXT *missing_db)
                     sqlite3_close(projectDB);
                     return 1;
                 }
+                oneLayer->n_dims = 2;
                 oneLayer->preparedStatement = preparedLayer;
+                
+                
                 
             }
             else
