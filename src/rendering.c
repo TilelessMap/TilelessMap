@@ -1035,15 +1035,15 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         
         
         
-        GLfloat cube_vertices[6];
+        GLfloat cube_vertices[8];
         cube_vertices[0] = *(rast->bboxes->list + i*4 + 0);
         cube_vertices[1] = *(rast->bboxes->list + i*4 + 3);
         cube_vertices[2] = *(rast->bboxes->list + i*4 + 1);
         cube_vertices[3] = *(rast->bboxes->list + i*4 + 3);
         cube_vertices[4] = *(rast->bboxes->list + i*4 + 1);
         cube_vertices[5] = *(rast->bboxes->list + i*4 + 2);
-        cube_vertices[4] = *(rast->bboxes->list + i*4 + 0);
-        cube_vertices[5] = *(rast->bboxes->list + i*4 + 2);
+        cube_vertices[6] = *(rast->bboxes->list + i*4 + 0);
+        cube_vertices[7] = *(rast->bboxes->list + i*4 + 2);
         
         GLuint vbo_cube_vertices;
 	glGenBuffers(1, &vbo_cube_vertices);
