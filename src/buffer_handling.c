@@ -626,7 +626,7 @@ int destroy_buffers(LAYER_RUNTIME *layer)
     destroy_int64_list(layer->twkb_id);
     
     if(layer->geometryType == RASTER)
-        layer->rast = destroy_raster_list(layer->rast);
+        destroy_raster_list(layer->rast);
     return 0;
 }
 

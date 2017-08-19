@@ -514,15 +514,16 @@ static int render_data_layers(GLfloat *theMatrix)
     {
         oneLayer = layerRuntime + i;
 
-        if(oneLayer->geometryType >= RASTER)
-            continue;
+       /* if(oneLayer->geometryType >= RASTER)
+            continue;*/
         int type = oneLayer->type;
 
         if(oneLayer->visible)
         {
 
 //~ log_this(10, "render : %d\n",oneLayer->geometryType);
-
+           /* if(oneLayer->geometryType >= RASTER)
+                loadandRenderRaster( oneLayer, theMatrix);*/
             //     log_this(10, "render point");
             if (type & 32)
                 render_text(oneLayer, theMatrix);

@@ -143,8 +143,8 @@ static int load_styles()
 
     char *sqlStyles = "SELECT "
                       /*fields for attaching the database*/
-                      "styleid, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
-                      "from styles order by styleid;";
+                      "rowid, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit "
+                      "from styles;";
 
     rc = sqlite3_prepare_v2(projectDB, sqlStyles, -1, &preparedStylesLoading, 0);
 
