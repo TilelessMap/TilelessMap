@@ -191,9 +191,13 @@ typedef struct
 {
     UINT8_LIST *data;
     GLUINT_LIST *raster_start_indexes;
-    GLFLOAT_LIST *bboxes; //each 4 glfloat represents minx, maxx, miny, maxy in world coordinates
+    GLUINT_LIST *tileidxy; //each 4 glfloat represents minx, maxx, miny, maxy in world coordinates
+    GLuint tex;
+    GLuint tex_vbo;
+    GLuint tex_ebo;
     GLuint vbo;
-
+    GLuint tilewidth;
+    GLuint tileheight;
 }
 RASTER_LIST;
 
@@ -443,6 +447,9 @@ int  renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int render_data(SDL_Window* window,GLfloat *theMatrix);
 int render_info(SDL_Window* window,GLfloat *theMatrix);
 
+
+int loadRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
+int renderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 
 FINGEREVENT* init_touch_que();
@@ -590,5 +597,6 @@ int n_tri;
 int n_words;
 int n_letters;
 
+GLuint  texes[256];
 GLenum err;
 #endif

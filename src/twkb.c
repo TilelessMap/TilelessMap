@@ -209,6 +209,12 @@ void *twkb_fromSQLiteBBOX(void *theL)
                     }
             addbatch2uint8_list(theLayer->rast->data,res_len, res);
             add2gluint_list(theLayer->rast->raster_start_indexes, res_len);
+            
+            
+            int x = sqlite3_column_int(prepared_statement,5);
+            add2gluint_list(theLayer->rast->tileidxy, x);
+            int y = sqlite3_column_int(prepared_statement,6);
+            add2gluint_list(theLayer->rast->tileidxy, y);
         
         
         }

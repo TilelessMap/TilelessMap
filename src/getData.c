@@ -97,7 +97,8 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
             // rc = 0;
             
             if(oneLayer->geometryType >= RASTER)
-                loadandRenderRaster( oneLayer, map_matrix->matrix);
+                // loadRaster( oneLayer, map_matrix->matrix);
+               loadandRenderRaster( oneLayer, map_matrix->matrix);
              //           continue;
                 
             if (rc) {

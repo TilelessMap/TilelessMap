@@ -378,8 +378,11 @@ static RASTER_LIST* init_raster_list()
     RASTER_LIST *res = st_malloc(sizeof(RASTER_LIST));
     res->data = init_uint8_list();
     res->raster_start_indexes = init_gluint_list();
-    res->bboxes = init_glfloat_list();
+    res->tileidxy = init_gluint_list();
+    glGenBuffers(1, &(res->tex_vbo));
+    glGenBuffers(1, &(res->tex_ebo));
     glGenBuffers(1, &(res->vbo));
+    glGenTextures(1, &(res->tex));
     return res;
 }
 static POINT_LIST* init_point_list()
@@ -423,7 +426,7 @@ static POLYGON_LIST* init_polygon_list()
 
 static int reset_raster_list(RASTER_LIST *l)
 {
-    reset_glfloat_list(l->bboxes);
+    reset_gluint_list(l->tileidxy);
     reset_gluint_list(l->raster_start_indexes);
     reset_uint8_list(l->data);
     return 0;
@@ -460,7 +463,7 @@ static int reset_polygon_list(POLYGON_LIST *l)
 
 static int destroy_raster_list(RASTER_LIST *l)
 {
-    destroy_glfloat_list(l->bboxes);
+    destroy_gluint_list(l->tileidxy);
     destroy_gluint_list(l->raster_start_indexes);
     destroy_uint8_list(l->data);
     free(l);

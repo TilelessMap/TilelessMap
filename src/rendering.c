@@ -116,6 +116,8 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
     printf("load, i = %d, v = %f\n", i,*(oneLayer->wide_lines->vertex_array->list+i));
     }*/
+    if(oneLayer->geometryType == RASTER)
+        return 0;
     if(oneLayer->type & 8)
     {
         LINESTRING_LIST *line = oneLayer->wide_lines;
@@ -139,7 +141,8 @@ int loadLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 //void render_tri(SDL_Window* window, OUTBUFFER *linje, GLuint vb)
 {
-
+    if(oneLayer->geometryType == RASTER)
+        return 0;
     LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
     GLfloat *color,*color2,z, lw=0, lw2=0;
@@ -522,8 +525,8 @@ static int render_data_layers(GLfloat *theMatrix)
         {
 
 //~ log_this(10, "render : %d\n",oneLayer->geometryType);
-           /* if(oneLayer->geometryType >= RASTER)
-                loadandRenderRaster( oneLayer, theMatrix);*/
+            if(oneLayer->geometryType >= RASTER)
+                loadandRenderRaster( oneLayer, theMatrix);
             //     log_this(10, "render point");
             if (type & 32)
                 render_text(oneLayer, theMatrix);
@@ -732,6 +735,13 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_
 }
 
 static inline GLfloat max_f(GLfloat a, GLfloat b)
+{
+    if (b > a)
+        return b;
+    else
+        return a;
+}
+static inline GLfloat max_i(GLint a, GLint b)
 {
     if (b > a)
         return b;
@@ -962,11 +972,6 @@ int renderGPS(GLfloat *theMatrix)
 }
 
 
-
-
-
-
-
 int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
@@ -1055,23 +1060,13 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         }*/
         
         
-        GLfloat cube_vertices[8];
-        cube_vertices[0] = d[0];
-        cube_vertices[1] = d[1];
-        cube_vertices[2] = d[2];
-        cube_vertices[3] = d[3];
-        cube_vertices[4] = d[4];
-        cube_vertices[5] = d[5];
-        cube_vertices[6] = d[6];
-        cube_vertices[7] = d[7];
-        
         
         
                 
         GLuint vbo_cube_vertices;
 	glGenBuffers(1, &vbo_cube_vertices);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, d, GL_STATIC_DRAW);
 	
         
         

@@ -158,7 +158,9 @@ static ATLAS* create_atlas(FT_Face face, int height)
         }
 
         glTexSubImage2D(GL_TEXTURE_2D, 0, ox, oy, g->bitmap.width, g->bitmap.rows, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
-
+              while ((err = glGetError()) != GL_NO_ERROR) {
+           fprintf(stderr,"FONT - opengl error:%d\n", err);
+       }
         //     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, g->bitmap.width, g->bitmap.rows, 0, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
 
         a->metrics[i].ax = (float) (g->advance.x >> 6);
