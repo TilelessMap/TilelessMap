@@ -31,77 +31,112 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     if(oneLayer->type & 32)
     {
-
         render_text(oneLayer,theMatrix);
         return 0;
     }
-//   GLESSTRUCT *rb = oneLayer->res_buf;
-    /*
-        glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->first_free-rb->vertex_array), rb->vertex_array, GL_STATIC_DRAW);
-
-        renderPoint( oneLayer, theMatrix);*/
+ /*  POINT_LIST *rb = oneLayer->points;
+    
+        glBindBuffer(GL_ARRAY_BUFFER, rb->vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->points->used), rb->points->list, GL_STATIC_DRAW);
+*/
+        renderPoint( oneLayer, theMatrix);
     return 0;
 }
 
 int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-#ifdef __use_points__
-    int ndims = 2;
-    uint32_t i;//, np, pi;
-    GLfloat *color;
-    GLfloat c[4];
-
-    glBindBuffer(GL_ARRAY_BUFFER, oneLayer->points->vbo);
     
-    glPointSize(2);
-    glUseProgram(std_program);
-    glEnableVertexAttribArray(std_coord2d);
-    /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
+    
+    int symbol = 1, i;
+    
+   POINT_LIST *rb = oneLayer->points;
+    
+    GLfloat radius1=0, radius2=0, radius3 = 0;
+    GLfloat color1[4] = {0.5,0.5,0.5,0.2};
+    GLfloat color2[4] = {0,0,0,1};
+    GLfloat color3[4] = {0,1,0,1};
+    GLfloat *p;
+
+
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
+
+    GLfloat px_Matrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+
+
+    glBindBuffer(GL_ARRAY_BUFFER, global_symbols->points->vbo);
+
+    glUseProgram(sym_program);
+
+
+    glEnableVertexAttribArray(sym_norm);
+
+
     glVertexAttribPointer(
-        std_coord2d, // attribute
-        ndims,                 // number of elements per vertex, here (x,y)
+        sym_norm, // attribute
+        2,                 // number of elements per vertex, here (x,y)
         GL_FLOAT,          // the type of each element
         GL_FALSE,          // take our values as-is
         0,                 // no extra data between each position
-        0                  // offset of first element
+        (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
     );
-    /*   while ((err = glGetError()) != GL_NO_ERROR) {
-           log_this(10, "Problem1\n");
-           fprintf(stderr,"opengl error:%d\n", err);
-       }*/
-//    glUniform1fv(uniform_bbox, 4, bbox);
-    glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
-    /*
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            log_this(10, "Problem3: %d\n", err);
-            fprintf(stderr,"opengl error:%d\n", err);
-        }*/
-    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
-        printf("There is a mismatch between number of labels and number of corresponding points\n");
+    log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
 
-    for (i=0; i<rb->used_n_pa; i++)
+
+    glUniformMatrix4fv(sym_matrix, 1, GL_FALSE,theMatrix );
+
+    
+    int sym_npoints;
+    
+    if (symbol == 0)
+        sym_npoints = global_symbols->points->point_start_indexes->list[0];
+    else
+        sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
+        
+for (i=0;i<global_symbols->points->point_start_indexes->used;i++)
+{
+ printf("npoints til %d = %d diff = %d\n", i,global_symbols->points->point_start_indexes->list[i],global_symbols->points->point_start_indexes->list[i] - global_symbols->points->point_start_indexes->list[i -1]);    
+}
+
+    radius1 = 20;
+    radius2 = 11;
+    radius3 = 10;
+    p = rb->points->list;
+    for (i=0;i<rb->point_start_indexes->used;i++)
     {
-        total_points += *(rb->npoints+i);
-        Uint32 styleID = *(rb->styleID+i);
-        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
-        {
-            color = global_styles[styleID].color;
-        }
-        else
-        {
-            c[0] = c[1] = c[2] = 100;
-            c[3] = 255;
-            color = c;
-        }
-        glUniform4fv(std_color,1,color );
-        glDrawArrays(GL_POINTS, *(rb->start_index+i), *(rb->npoints+i));
+        
+        printf("used points = %d, startindex = %d, used vals\n",rb->point_start_indexes->used, rb->point_start_indexes->list[i], rb->points->used);
+        
+        
+        printf("p: %f, %f\n", *(p), *(p+1));
+    glUniform2fv(sym_coord2d,1,p);
+    
+    
+        glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
+        glUniform4fv(sym_color,1,color1 );
+        glUniform1fv(sym_radius,1,&radius1 );
+        glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
 
+        glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
+        glUniform4fv(sym_color,1,color2 );
+        glUniform1fv(sym_radius,1,&radius2 );
+        glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
+
+        glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
+        glUniform4fv(sym_color,1,color3 );
+        glUniform1fv(sym_radius,1,&radius3 );
+        glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
+        
+        p = rb->points->list + rb->point_start_indexes->list[i];
     }
-    glDisableVertexAttribArray(std_coord2d
-                              );
-#endif
+        while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(100, "gl problem\n");
+        fprintf(stderr,"opengl problem :%d\n", err);
+    }
+
+    glDisableVertexAttribArray(sym_norm);
+
     return 0;
 
 }
@@ -530,8 +565,9 @@ static int render_data_layers(GLfloat *theMatrix)
             //     log_this(10, "render point");
             if (type & 32)
                 render_text(oneLayer, theMatrix);
-
-            //   renderPoint(oneLayer, theMatrix);
+            
+            if(type & (224-32))
+               renderPoint(oneLayer, theMatrix);
 
             if(type & 8)
                 renderLineTri(oneLayer,theMatrix);
@@ -880,6 +916,15 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
 
 
 
+int loadSymbols()
+{
+
+    glGenBuffers(1, &(global_symbols->points->vbo));
+    glBindBuffer(GL_ARRAY_BUFFER, global_symbols->points->vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*global_symbols->points->points->used, global_symbols->points->points->list, GL_STATIC_DRAW);
+    return 0;
+}
+
 
 int loadGPS(GLfloat *gps_circle)
 {
@@ -889,6 +934,7 @@ int loadGPS(GLfloat *gps_circle)
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*((gps_npoints+2) * 2), gps_circle, GL_STATIC_DRAW);
     return 0;
 }
+
 
 
 

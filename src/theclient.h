@@ -273,7 +273,10 @@ typedef struct
 LAYER_RUNTIME;
 
 
-
+typedef struct
+{
+    POINT_LIST *points;
+}SYMBOLS;
 
 
 
@@ -486,8 +489,10 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername);
 
 void gps_in(double latitude, double longitude, double acc);
 int renderGPS(GLfloat *theMatrix);
-int loadGPS(GLfloat *theMatrix);
+int loadGPS(GLfloat *gps_circle);
+int loadSymbols();
 GLfloat* create_circle(int npoints);
+GLfloat* create_symbol(int npoints, float even, float odd,float rotation);
 void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, uint8_t hemi_out);
 int check_column(const unsigned char *dbname,const unsigned char * layername, const unsigned char  *col_name);
 
@@ -520,6 +525,8 @@ LAYER_RUNTIME *infoRenderLayer;
 
 STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
+SYMBOLS *global_symbols;
+size_t length_global_symbols;
 void render_text_test(const char *text, float x, float y, float sx, float sy);
 
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
@@ -568,6 +575,14 @@ GLint gps_radius;
 GLint gps_color;
 GLint gps_matrix;
 GLint gps_px_matrix;
+
+GLuint sym_program;
+GLint sym_norm;
+GLint sym_coord2d;
+GLint sym_radius;
+GLint sym_color;
+GLint sym_matrix;
+GLint sym_px_matrix;
 
 GLuint raster_program;
 GLint raster_coord2d;

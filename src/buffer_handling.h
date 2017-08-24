@@ -29,3 +29,9 @@ int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);
 GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id);
 GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id);
 int pa_end(LAYER_RUNTIME *l, int64_t id);
+
+
+
+int init_symbols();
+int addsymbol(int id, size_t n_points, GLfloat *points);
+int destroy_symbols();

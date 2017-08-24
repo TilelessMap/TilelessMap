@@ -190,6 +190,58 @@ static int load_styles()
     return 0;
 }
 
+
+/******************************************************
+ * Load Symbols
+ * ***************************************************/
+static int load_symbols()
+{
+
+    if (!(check_layer((const unsigned char *) "main", (const unsigned char *) "symbols")))
+         return 0;
+    int rc, i;
+    sqlite3_stmt *preparedCountSymbol;
+    sqlite3_stmt * preparedSymbolsLoading;
+    GLfloat z;
+
+
+    /********************************************************************************
+      Put all the symbools in an array
+    */
+
+
+    char *sqlSymbols = "SELECT "
+                      "symbol_id, n_dirs, length_second, rotation  "
+                      "from symbols order by symbol_id;";
+
+    rc = sqlite3_prepare_v2(projectDB, sqlSymbols, -1, &preparedSymbolsLoading, 0);
+
+    if (rc != SQLITE_OK ) {
+        log_this(1, "SQL error in %s\n",sqlSymbols );
+        sqlite3_close(projectDB);
+        return 1;
+    }
+    init_symbols();
+     while(sqlite3_step(preparedSymbolsLoading)==SQLITE_ROW)
+    {
+
+        int symbolid = sqlite3_column_int(preparedSymbolsLoading, 0);
+           
+        int n_dirs = sqlite3_column_int(preparedSymbolsLoading, 1);
+        float length_second = sqlite3_column_double(preparedSymbolsLoading, 2);
+        float rotation= sqlite3_column_double(preparedSymbolsLoading, 3);
+        
+        GLfloat* points = create_symbol(n_dirs,1, length_second, rotation);
+        addsymbol(symbolid, (n_dirs + 2) * 2, points);
+    }
+
+    sqlite3_finalize(preparedSymbolsLoading);
+    
+    
+    
+    return 0;
+}
+
 static int load_layers(TEXT *missing_db)
 {
 
@@ -607,8 +659,9 @@ static int load_layers(TEXT *missing_db)
 }
 static int init_gps()
 {
-    gps_npoints = 32;
-    gps_circle = create_circle(gps_npoints);
+    gps_npoints = 10;
+   gps_circle = create_circle(gps_npoints);
+   //  gps_circle = create_symbol(4, 4,4, 0.5);
     loadGPS(gps_circle);
     return 0;
 }
@@ -651,7 +704,8 @@ int init_resources(char *dir)
     attach_db(dir, missing_db);
 
     load_styles();
-
+    load_symbols();
+    loadSymbols();
     load_layers(missing_db);
     destroy_txt(missing_db);
     init_gps();

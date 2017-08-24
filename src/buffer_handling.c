@@ -636,6 +636,49 @@ int destroy_buffers(LAYER_RUNTIME *layer)
 
 
 
+int init_symbols()
+{
+ global_symbols = st_malloc(sizeof(SYMBOLS));
+  global_symbols->points = init_point_list();
+    
+    return 0;
+}
+
+int addsymbol(int id, size_t n_points, GLfloat *points)
+{
+    if(id<global_symbols->points->point_start_indexes->used)
+        return 1;
+    
+    //If not all symbol ids exist we have to fill the list with dummy-posts 
+    while (id>global_symbols->points->point_start_indexes->used)
+    {
+       add2gluint_list(global_symbols->points->point_start_indexes, global_symbols->points->points->used);  
+    }
+    
+    addbatch2glfloat_list(global_symbols->points->points, n_points, points);
+    add2gluint_list(global_symbols->points->point_start_indexes, global_symbols->points->points->used);
+    return 0;
+       
+}
+
+int destroy_symbols()
+{
+ destroy_point_list(global_symbols->points);
+    free(global_styles);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
