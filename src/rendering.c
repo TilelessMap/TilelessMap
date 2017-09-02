@@ -47,7 +47,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     
     
-    int symbol = 1, i;
+    int symbol = 2, i;
     
    POINT_LIST *rb = oneLayer->points;
     

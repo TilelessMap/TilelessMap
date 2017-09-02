@@ -197,12 +197,13 @@ GLfloat* create_symbol(int npoints, float even, float odd,float rotation)
     double rad;
     int i, res_pos = 0;
     float e=odd;
+    float rot_rad = rotation * 2 * M_PI/360;
     //add center of point at 0,0
     res[res_pos++] = 0;
     res[res_pos++] = 0;    
   for (i = 0; i<npoints; i++)
     {
-        rad = (i+rotation) * 2* M_PI/npoints;
+        rad = rot_rad + i * 2* M_PI/npoints;
         res[res_pos++] = sin(rad)*e;
         res[res_pos++] = cos(rad)*e;
         if(e==odd)
@@ -212,7 +213,7 @@ GLfloat* create_symbol(int npoints, float even, float odd,float rotation)
 
     }
     //add first point again
-    rad = rotation * M_PI/(npoints/2);
+    rad = rot_rad + 2 *M_PI;
     res[res_pos++] = sin(rad)*e;
     res[res_pos++] = cos(rad)*e;
 
