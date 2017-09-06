@@ -25,6 +25,8 @@
 #include "interface/interface.h"
 #include "mem.h"
 #include "SDL_image.h"
+#include "uthash.h"
+
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
@@ -178,6 +180,8 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     if(oneLayer->geometryType == RASTER)
         return 0;
+    
+    int style_key_type = oneLayer->style_key_type;
     LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
     GLfloat *color,*color2,z, lw=0, lw2=0;
@@ -233,28 +237,59 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
      printf("load, i = %d, v = %f\n", i,*(line->vertex_array->list+i));
     }*/
+    
+    
+    
+    
+    GLint *intlist;
+    char *charlist;
+    struct STYLES *style = NULL;
+    struct STYLES *default_style = NULL;
+    
+        if(style_key_type == INT_TYPE)
+            intlist =  (GLint*) line->style_id->list ;
+        else if (style_key_type == STRING_TYPE)
+            charlist = (char*) line->style_id->list ;
+    
+    
+    
+    
     for (i=0; i<line->line_start_indexes->used; i++)
     {
 
-
         //    Uint32 styleID = *(rb->styleID+i);
-        Uint32 styleID = *(line->style_id->list+i);
+        
+        if(style_key_type == INT_TYPE)
+        {
+         int key = *(charlist+i);
+        HASH_FIND_INT( oneLayer->styles, key, style);   
+            
+        }
+        else if (style_key_type == STRING_TYPE)
+        {
+         char *key = charlist+i;
+        HASH_FIND_STR( oneLayer->styles, key, style);   
+        }
 
-
+        if(!style)
+        {
+            if(!default_style)               
+                HASH_FIND_INT( oneLayer->styles, "default", default_style);  
+        style = default;
+        }
 
         //   total_points += *(rb->npoints+i);
 
 
 
         n_vals = *(line->line_start_indexes->list + i)/vals_per_point - n_vals_acc;
-        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+        int r;
+        for (r = 0;r<style->line_styles->nsyms;r++)
         {
-            lw = (GLfloat) (global_styles[styleID].lineWidth * 0.5);
-            if(!lw)
-                lw = 0.5;
+            lw = style->line_styles->width->list[r];
 
 
-            z = (GLfloat) (global_styles[styleID].z);
+            z = style->line_styles->z->list[r];
             if(!z)
                 z = 0;
 
@@ -271,12 +306,6 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             lw2 = (GLfloat) (global_styles[styleID].lineWidth2 * 0.5);
 
             color2 = global_styles[styleID].outlinecolor;
-        }
-        else
-        {
-            c[0] = c[1] = c[2] = 100;
-            c[3] = 255;
-            color = c;
         }
 
         if(oneLayer->type & 6)

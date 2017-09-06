@@ -194,6 +194,7 @@ static int load_styles()
 /******************************************************
  * Load Symbols
  * ***************************************************/
+#ifdef symininit
 static int load_symbols()
 {
 
@@ -241,7 +242,7 @@ static int load_symbols()
     
     return 0;
 }
-
+#endif
 static int load_layers(TEXT *missing_db)
 {
 
@@ -297,7 +298,8 @@ static int load_layers(TEXT *missing_db)
                              "rotation_fld,"  // 10
                              "anchor_fld,"  // 11
                              "txt_fld,"  // 12
-                             "title";  // 13
+                             "title,"  // 13
+                             "sld";  // 14
     
     char *sqlLayerLoading2 = " FROM layers l "
                              "INNER JOIN dbs d on l.source = d.name "
@@ -357,7 +359,9 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 11);
         const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
         const unsigned char *title =  sqlite3_column_text(preparedLayerLoading, 13);
+        const unsigned char *sld =  sqlite3_column_text(preparedLayerLoading, 14);
 
+        load_sld(oneLayer, sld);
         
         if (check_layer(dbname, layername))
         {

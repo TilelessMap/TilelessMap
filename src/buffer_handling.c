@@ -2,10 +2,16 @@
 #include "mem.h"
 #include "buffer_handling.h"
 
+
+
+
+
+
+
 /************* GL Float List ********************/
 
 
-static GLFLOAT_LIST* init_glfloat_list()
+GLFLOAT_LIST* init_glfloat_list()
 {
     GLFLOAT_LIST *res = (GLFLOAT_LIST*) st_malloc(sizeof(GLFLOAT_LIST));
 
@@ -234,7 +240,7 @@ int setzero2int64_list(INT64_LIST *list,int64_t n_vals)
 }
 
 /************* GL UShort List ********************/
-static GLUSHORT_LIST* init_glushort_list()
+GLUSHORT_LIST* init_glushort_list()
 {
     GLUSHORT_LIST *res = (GLUSHORT_LIST*) st_malloc(sizeof(GLUSHORT_LIST));
 
@@ -304,7 +310,7 @@ int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals)
 }
 
 /************* UINT8_LIST List ********************/
-static UINT8_LIST* init_uint8_list()
+UINT8_LIST* init_uint8_list()
 {
     UINT8_LIST *res = (UINT8_LIST*) st_malloc(sizeof(UINT8_LIST));
 
@@ -373,6 +379,100 @@ int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals)
     return 0;
 }
 
+
+
+/************* union List ********************/
+
+
+UNION_LIST* init_union_list()
+{
+    UNION_LIST *res = (UNION_LIST*) st_malloc(sizeof(UNION_LIST));
+
+    res->list =  st_malloc(INIT_LIST_SIZE * 4); //we use 4 as an expected common space per unit since both int and float uses 4 bytes. It doesn't matter since it will be realloced at need
+    res->alloced = sizeof(res->list);
+    res->used = 0;
+    res->s_start_indexes = init_gluint_list();
+
+    return res;
+}
+
+
+
+static int increase_union_list(UNION_LIST *l, size_t needed_space)
+{
+
+    size_t available_space = l->alloced-l->used;
+
+    if (available_space >= needed_space)
+        return 0;
+
+
+    size_t new_size = l->alloced;
+
+    while (available_space < needed_space)
+    {
+        new_size*=2;
+        available_space = new_size - l->used;
+    }
+    l->list = st_realloc(l->list, new_size);
+    l->alloced = new_size;
+    return 0;
+}
+
+static int reset_union_list(UNION_LIST *l)
+{
+    l->used = 0;
+    return 0;
+}
+
+
+static int destroy_union_list(UNION_LIST *l)
+{
+    free(l->list);
+    l->list = NULL;
+    l->used = 0;
+    l->alloced = 0;
+    destroy_gluint_list(l->s_start_indexes);
+    free(l);
+    l = NULL;
+    return 0;
+}
+
+int add2union_list(UNION_LIST *list, void *val)
+{
+    
+    if(list->list_type == INT_TYPE)
+    {
+        
+        increase_union_list(list, sizeof(GLint));
+        memcpy((GLint*)list->list + list->used,val, sizeof(GLint));
+        list->used += sizeof(GLint);
+    }
+     if(list->list_type == FLOAT_TYPE)
+    {
+        
+        increase_union_list(list, sizeof(GLfloat));
+        memcpy((GLfloat*) list->list + list->used,val, sizeof(GLfloat));
+        list->used += sizeof(GLfloat);
+    }
+     if(list->list_type == STRING_TYPE)
+    {        
+        size_t len = strlen(val)+1;
+        increase_union_list(list, len);
+        memcpy((char*) list->list + list->used,val, len);
+        add2gluint_list(list->s_start_indexes, list->used);
+        list->used += len;
+    } 
+    return 0;
+}
+
+
+
+
+
+
+
+
 static RASTER_LIST* init_raster_list()
 {
     RASTER_LIST *res = st_malloc(sizeof(RASTER_LIST));
@@ -389,7 +489,7 @@ static POINT_LIST* init_point_list()
 {
     POINT_LIST *res = st_malloc(sizeof(POINT_LIST));
     res->points = init_glfloat_list();
-    res->style_id = init_gluint_list();
+    res->style_id = init_union_list();
     res->point_start_indexes = init_gluint_list();
     glGenBuffers(1, &(res->vbo));
     return res;
@@ -400,7 +500,7 @@ static LINESTRING_LIST* init_linestring_list()
     LINESTRING_LIST *res = st_malloc(sizeof(LINESTRING_LIST));
     res->vertex_array = init_glfloat_list();
     res->line_start_indexes = init_gluint_list();
-    res->style_id = init_gluint_list();
+    res->style_id = init_union_list();
     glGenBuffers(1, &(res->vbo));
 
     return res;
@@ -414,8 +514,7 @@ static POLYGON_LIST* init_polygon_list()
     res->polygon_start_indexes = init_gluint_list();
     res->element_array = init_glushort_list();
     res->element_start_indexes = init_gluint_list();
-    res->outline_style_id = init_gluint_list();
-    res->area_style_id = init_gluint_list();
+    res->style_id = init_union_list();
 
     glGenBuffers(1, &(res->vbo));
     glGenBuffers(1, &(res->ebo));
@@ -435,7 +534,7 @@ static int reset_point_list(POINT_LIST *l)
 {
     reset_glfloat_list(l->points);
     reset_gluint_list(l->point_start_indexes);
-    reset_gluint_list(l->style_id);
+    reset_union_list(l->style_id);
     return 0;
 }
 
@@ -443,7 +542,7 @@ static int reset_linestring_list(LINESTRING_LIST *l)
 {
     reset_glfloat_list(l->vertex_array);
     reset_gluint_list(l->line_start_indexes);
-    reset_gluint_list(l->style_id);
+    reset_union_list(l->style_id);
 
     return 0;
 }
@@ -455,8 +554,7 @@ static int reset_polygon_list(POLYGON_LIST *l)
     reset_gluint_list(l->polygon_start_indexes);
     reset_glushort_list(l->element_array);
     reset_gluint_list(l->element_start_indexes);
-    reset_gluint_list(l->outline_style_id);
-    reset_gluint_list(l->area_style_id);
+    reset_union_list(l->style_id);
     return 0;
 }
 
@@ -473,7 +571,7 @@ static int destroy_point_list(POINT_LIST *l)
 {
     destroy_glfloat_list(l->points);
     destroy_gluint_list(l->point_start_indexes);
-    destroy_gluint_list(l->style_id);
+    destroy_union_list(l->style_id);
     free(l);
     return 0;
 }
@@ -483,7 +581,7 @@ static int destroy_linestring_list(LINESTRING_LIST *l)
 
     destroy_glfloat_list(l->vertex_array);
     destroy_gluint_list(l->line_start_indexes);
-    destroy_gluint_list(l->style_id);
+    destroy_union_list(l->style_id);
     free(l);
     return 0;
 
@@ -496,8 +594,7 @@ static int destroy_polygon_list(POLYGON_LIST *l)
     destroy_gluint_list(l->polygon_start_indexes);
     destroy_glushort_list(l->element_array);
     destroy_gluint_list(l->element_start_indexes);
-    destroy_gluint_list(l->outline_style_id);
-    destroy_gluint_list(l->area_style_id);
+    destroy_union_list(l->style_id);
     free(l);
     return 0;
 }
@@ -557,24 +654,23 @@ int reset_buffers(LAYER_RUNTIME *layer)
 }
 
 
-GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
+GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
 //   add2gluint_list(l->style_id, style_id);
     int type = l->type;
     if(type & 224)
     {
-        add2gluint_list(l->points->style_id, style_id);
+        add2union_list(l->points->style_id, &(ts->styleID));
         return l->points->points;
     }
     else if(type & 16)
     {
-        add2gluint_list(l->lines->style_id, style_id);
+        add2union_list(l->lines->style_id, &(ts->styleID));
         return l->lines->vertex_array;
     }
 
     else if(type & 6)
     {
-        add2gluint_list(l->polygons->outline_style_id, style_id);
         return l->polygons->vertex_array;
     }
     else
@@ -584,10 +680,10 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, GLuint style_id)
 }
 
 
-GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, GLuint style_id)
+GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
 
-    add2gluint_list(l->wide_lines->style_id, style_id);
+    add2union_list(l->wide_lines->style_id, &(ts->styleID));
     return l->wide_lines->vertex_array;
 
 }
@@ -665,6 +761,7 @@ int destroy_symbols()
 {
  destroy_point_list(global_symbols->points);
     free(global_styles);
+    return 0;
 }
 
 
