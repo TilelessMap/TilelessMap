@@ -51,7 +51,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     
     
     int style_key_type = oneLayer->style_key_type;
-    int symbol = 2, i;
+    int symbol = 2, last_symbol = 0, i;
     
    POINT_LIST *points = oneLayer->points;
     
@@ -74,33 +74,14 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glEnableVertexAttribArray(sym_norm);
 
 
-    glVertexAttribPointer(
-        sym_norm, // attribute
-        2,                 // number of elements per vertex, here (x,y)
-        GL_FLOAT,          // the type of each element
-        GL_FALSE,          // take our values as-is
-        0,                 // no extra data between each position
-        (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
-    );
-
-    log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
-
-
     glUniformMatrix4fv(sym_matrix, 1, GL_FALSE,theMatrix );
-
-    
-    int sym_npoints;
-    
-    if (symbol == 0)
-        sym_npoints = global_symbols->points->point_start_indexes->list[0];
-    else
-        sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
-        
     
     
 
  
     p = points->points->list;
+   
+    int sym_npoints;
     for (i=0;i<points->point_start_indexes->used;i++)
     {
         
@@ -121,9 +102,38 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                
            // printf("r=%d\n",r);
             
+                symbol = *(style->symbol->list + r);
                 color = style->color->list + 4*r;
                 radius = *(style->size->list + r);
         
+                
+                if(symbol != last_symbol)
+                {
+                    last_symbol = symbol;
+    glVertexAttribPointer(
+        sym_norm, // attribute
+        2,                 // number of elements per vertex, here (x,y)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // take our values as-is
+        0,                 // no extra data between each position
+        (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
+    );
+
+    log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
+
+
+
+    
+    
+    if (symbol == 0)
+        sym_npoints = global_symbols->points->point_start_indexes->list[0];
+    else
+        sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
+        
+                }      
+                
+                
+                
         
     //    printf("used points = %d, startindex = %d, used vals\n",points->point_start_indexes->used, points->point_start_indexes->list[i], points->points->used);
         
@@ -520,7 +530,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             n_vals = *(poly->pa_start_indexes->list + i)/ndims - n_vals_acc;
             
             
-               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->style_id->list +i);
+               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->line_style_id->list +i);
             if(!styles)
                 styles=system_default_style;
             style = styles->line_styles;
@@ -685,16 +695,6 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     n_words += nw;
     total_points += nw;
 
-    GLint *intlist;
-    char *charlist;
-    struct STYLES *styles = NULL;
-    TEXT_STYLE *style = NULL;
-    struct STYLES *default_style = NULL;
-    
-        if(style_key_type == INT_TYPE)
-            intlist =  (GLint*) point->style_id->list ;
-        else if (style_key_type == STRING_TYPE)
-            charlist = (char*) point->style_id->list ;
 
     for (i=0; i<nw; i++)
     {
@@ -706,26 +706,12 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         
         
+               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)point->style_id->list +i);
+            if(!styles)
+                styles=system_default_style;
+            TEXT_STYLE *style = styles->text_styles;
         
-        if(style_key_type == INT_TYPE)
-        {
-         int key = *(charlist+i);
-        HASH_FIND_INT( oneLayer->styles, &key, styles);   
-            
-        }
-        else if (style_key_type == STRING_TYPE)
-        {
-         char *key = charlist+i;
-        HASH_FIND_STR( oneLayer->styles, key, styles);   
-        }
-
-        if(!styles)
-        {
-            if(!default_style)               
-                HASH_FIND_STR( oneLayer->styles, "default", default_style);  
-        styles = default_style;
-        }
-        style = styles->text_styles;
+        
         int r;
         for (r = 0;r<style->nsyms;r++)
         {

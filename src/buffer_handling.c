@@ -593,6 +593,7 @@ static POLYGON_LIST* init_polygon_list()
     res->element_array = init_glushort_list();
     res->element_start_indexes = init_gluint_list();
     res->style_id = init_pointer_list();
+    res->line_style_id = init_pointer_list();
 
     glGenBuffers(1, &(res->vbo));
     glGenBuffers(1, &(res->ebo));
@@ -633,6 +634,7 @@ static int reset_polygon_list(POLYGON_LIST *l)
     reset_glushort_list(l->element_array);
     reset_gluint_list(l->element_start_indexes);
     reset_pointer_list(l->style_id);
+    reset_pointer_list(l->line_style_id);
     return 0;
 }
 
@@ -673,6 +675,7 @@ static int destroy_polygon_list(POLYGON_LIST *l)
     destroy_glushort_list(l->element_array);
     destroy_gluint_list(l->element_start_indexes);
     destroy_pointer_list(l->style_id);
+    destroy_pointer_list(l->line_style_id);
     free(l);
     return 0;
 }
@@ -773,6 +776,7 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 
     else if(type & 6)
     {
+        get_style(l->styles, l->polygons->line_style_id, &(ts->styleID), ts->styleid_type);
         return l->polygons->vertex_array;
     }
     else

@@ -111,6 +111,7 @@ typedef struct
     GLUSHORT_LIST *element_array;    // a long array of triangle indexes
     GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
     POINTER_LIST *style_id;
+    POINTER_LIST *line_style_id;
     GLuint vbo;
     GLuint ebo;
 }

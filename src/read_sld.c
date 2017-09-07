@@ -50,7 +50,24 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
     }
     else if (key_type == INT_TYPE)
     {
+        const char *key_txt = mxmlGetOpaque(mxmlFindElement(node, tree, "ogc:Literal",  NULL, NULL,  MXML_DESCEND));
+       //  printf("key = %s\n",key);
+        if(!key_txt)
+            key_txt = "default";
         
+        long int key = strtol(key_txt, NULL, 10);
+        HASH_FIND_INT( oneLayer->styles, &key, s);
+        if(!s)
+        {
+         s = st_malloc(sizeof(struct STYLES));   
+         s->key_type = INT_TYPE;
+         s->point_styles = NULL;
+         s->line_styles = NULL;
+         s->polygon_styles = NULL;         
+         s->int_key = (int) key;
+         HASH_ADD_INT(oneLayer->styles, int_key, s);  
+        }
+
         
     }
     *a = s;
@@ -78,17 +95,49 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
      s->point_styles->units = init_glushort_list();
     }
     
+    
         for (symbolizer = mxmlFindElement(node, node,"se:PointSymbolizer",  NULL, NULL, MXML_DESCEND);
          symbolizer != NULL;
          symbolizer = mxmlFindElement(symbolizer, node,"se:PointSymbolizer",NULL, NULL,MXML_DESCEND))
        { 
+           
+                    /*This is ugly because the sld standard sometimes is ugly
+                     * If a symbol is given as map units we find that from searching 
+                     * for a special uri in the symbolizer tag*/
+                    int unit = PIXEL_UNIT;
+                    if(mxmlFindElement(node, node,"se:PointSymbolizer",  "uom", NULL,MXML_DESCEND))
+                    {
+                    const char *u = mxmlElementGetAttr(n, "uom");
+                    if (!strcmp(u,"http://www.opengeospatial.org/se/units/metre"))
+                        unit = METER_UNIT;
+                    }
+                    add2glushort_list(s->point_styles->units,unit);
+
+           //We start investigating the Mark tag
                 mxml_node_t *Mark = mxmlFindElement(node, tree, "se:Mark", NULL, NULL,  MXML_DESCEND);
-                const char *symbol = mxmlGetOpaque(mxmlFindPath(Mark, "se:WellKnownName"));
-                    const char *size = mxmlGetOpaque(mxmlFindPath(node, "se:PointSymbolizer/se:Graphic/se:Size"));
                 
-                        for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
-                        n != NULL;
-                        n = mxmlFindElement(n, Mark,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                /*Symbol*/
+                const char *symbol = mxmlGetOpaque(mxmlFindPath(Mark, "se:WellKnownName"));
+                if(!strcmp(symbol, "square") )          
+                    add2uint8_list(s->point_styles->symbol,SQUARE_SYMBOL);
+                else if(!strcmp(symbol, "circle") )          
+                    add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
+                else if(!strcmp(symbol, "triangle") )          
+                    add2uint8_list(s->point_styles->symbol,TRIANGLE_SYMBOL);
+                else if(!strcmp(symbol, "star") )          
+                    add2uint8_list(s->point_styles->symbol,STAR_SYMBOL);
+                else
+                    add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
+
+                /*Symbol size*/
+                    const char *size = mxmlGetOpaque(mxmlFindPath(node, "se:PointSymbolizer/se:Graphic/se:Size"));
+                    add2glfloat_list(s->point_styles->size, strtof(size, NULL));
+                
+                /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
+                 * to know what type of value it holds. Seems to be a waeknes of mini xml*/
+                    for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                    n != NULL;
+                    n = mxmlFindElement(n, Mark,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
                     {
                         const char *attr = mxmlElementGetAttr(n, "name");
                         if(!strcmp(attr, "fill"))
@@ -109,52 +158,243 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
                         {               
                             opacity = mxmlGetOpaque(n);
                         }
-                        
-                        
                     }
-                        if(opacity)            
-                            c[3] = strtof(opacity, NULL);
-                        else
-                            c[3] = 1;
+                    
+                    if(opacity)            
+                        c[3] = strtof(opacity, NULL);
+                    else
+                        c[3] = 1;
                         
-                        addbatch2glfloat_list(s->point_styles->color, 4, c);
-                        int unit = PIXEL_UNIT;
-                        if(mxmlFindElement(n, Mark,"se:PointSymbolizer",  "uom", NULL,MXML_DESCEND))
-                        {
-                        const char *u = mxmlElementGetAttr(n, "uom");
-                        if (!strcmp(u,"http://www.opengeospatial.org/se/units/metre"))
-                            unit = METER_UNIT;
-                        }
-                        add2glushort_list(s->point_styles->units,unit);
+                    addbatch2glfloat_list(s->point_styles->color, 4, c);
+                
+                     /*To get the layers rendered in the right order
+                      * we use the reversed symbol order in the sld as z-value*/
+                    add2glushort_list(s->point_styles->z,z);
+                    
+                    s->point_styles->nsyms++;
+                    
+                    printf("writing size %f and %zu is used\n",strtof(size, NULL), s->point_styles->size->used);
                         
-                        add2glushort_list(s->point_styles->z,z);
-                        
-                        add2glfloat_list(s->point_styles->size, strtof(size, NULL));
-                        
-                        printf("writing size %f and %zu is used\n",strtof(size, NULL), s->point_styles->size->used);
-                        
-                        if(!strcmp(symbol, "square") )          
-                            add2uint8_list(s->point_styles->symbol,SQUARE_SYMBOL);
-                        else if(!strcmp(symbol, "circle") )          
-                            add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
-                        else if(!strcmp(symbol, "triangle") )          
-                            add2uint8_list(s->point_styles->symbol,TRIANGLE_SYMBOL);
-                        else if(!strcmp(symbol, "start") )          
-                            add2uint8_list(s->point_styles->symbol,STAR_SYMBOL);
-                        
-                        s->point_styles->nsyms++;
        }
    //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
     return 0;
 }
+
+
+
+
+
+
 static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
 {
     
+    struct STYLES *s = NULL;
+    check_and_add_style(oneLayer, tree, node, key_type, &s);
+   mxml_node_t *n, *symbolizer;
+   GLfloat c[4];
+    
+    const char *opacity = NULL;
+    
+    if( ! s->line_styles)
+    {
+     s->line_styles =  st_malloc(sizeof(LINE_STYLE));
+     s->line_styles->nsyms = 0;
+     s->line_styles->color = init_glfloat_list();
+     s->line_styles->width = init_glfloat_list();
+     s->line_styles->z = init_glushort_list();
+     s->line_styles->units = init_glushort_list();
+    }
+    
+    
+        for (symbolizer = mxmlFindElement(node, node,"se:LineSymbolizer",  NULL, NULL, MXML_DESCEND);
+         symbolizer != NULL;
+         symbolizer = mxmlFindElement(symbolizer, node,"se:LineSymbolizer",NULL, NULL,MXML_DESCEND))
+       { 
+           
+                    /*This is ugly because the sld standard sometimes is ugly
+                     * If a symbol is given as map units we find that from searching 
+                     * for a special uri in the symbolizer tag*/
+                    int unit = PIXEL_UNIT;
+                    if(mxmlFindElement(node, node,"se:LineSymbolizer",  "uom", NULL,MXML_DESCEND))
+                    {
+                    const char *u = mxmlElementGetAttr(n, "uom");
+                    if (!strcmp(u,"http://www.opengeospatial.org/se/units/metre"))
+                        unit = METER_UNIT;
+                    }
+                    add2glushort_list(s->line_styles->units,unit);
+
+                mxml_node_t *Stroke = mxmlFindElement(node, tree, "se:Stroke", NULL, NULL,  MXML_DESCEND);
+                
+
+                    
+                
+                /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
+                 * to know what type of value it holds. Seems to be a waeknes of mini xml*/
+                    for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                    n != NULL;
+                    n = mxmlFindElement(n, Stroke,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                    {
+                        const char *attr = mxmlElementGetAttr(n, "name");
+                        if(!strcmp(attr, "fill"))
+                        {
+                            const char *color = mxmlGetOpaque(n);
+                            read_color(color,c);
+                        }
+                        else if (!strcmp(attr, "stroke"))
+                        {               
+                            const char *stroke_color = mxmlGetOpaque(n);
+                            
+                        }
+                        else if (!strcmp(attr, "stroke-width"))
+                        {               
+                            const char *width = mxmlGetOpaque(n);
+                            add2glfloat_list(s->line_styles->width, strtof(width, NULL));
+                        }
+                        else if (!strcmp(attr, "fill-opacity"))
+                        {               
+                            opacity = mxmlGetOpaque(n);
+                        }
+                    }
+                    
+                    if(opacity)            
+                        c[3] = strtof(opacity, NULL);
+                    else
+                        c[3] = 1;
+                        
+                    addbatch2glfloat_list(s->line_styles->color, 4, c);
+                
+                     /*To get the layers rendered in the right order
+                      * we use the reversed symbol order in the sld as z-value*/
+                    add2glushort_list(s->line_styles->z,z);
+                    
+                    s->line_styles->nsyms++;                    
+       }
+   //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
     return 0;
 }
 static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
 {
     
+    struct STYLES *s = NULL;
+    check_and_add_style(oneLayer, tree, node, key_type, &s);
+   mxml_node_t *n, *symbolizer;
+   GLfloat c[4];
+    
+    const char *opacity = NULL;
+    
+    if( ! s->polygon_styles)
+    {
+     s->polygon_styles =  st_malloc(sizeof(POLYGON_STYLE));
+     s->polygon_styles->nsyms = 0;
+     s->polygon_styles->color = init_glfloat_list();
+     s->polygon_styles->z = init_glushort_list();
+     s->polygon_styles->units = init_glushort_list();
+    }
+    
+    if( ! s->line_styles)
+    {
+     s->line_styles =  st_malloc(sizeof(LINE_STYLE));
+     s->line_styles->nsyms = 0;
+     s->line_styles->color = init_glfloat_list();
+     s->line_styles->width = init_glfloat_list();
+     s->line_styles->z = init_glushort_list();
+     s->line_styles->units = init_glushort_list();
+    }
+    
+    
+        for (symbolizer = mxmlFindElement(node, node,"se:PolygonSymbolizer",  NULL, NULL, MXML_DESCEND);
+         symbolizer != NULL;
+         symbolizer = mxmlFindElement(symbolizer, node,"se:PolygonSymbolizer",NULL, NULL,MXML_DESCEND))
+       { 
+           
+                    /*This is ugly because the sld standard sometimes is ugly
+                     * If a symbol is given as map units we find that from searching 
+                     * for a special uri in the symbolizer tag*/
+                    int unit = PIXEL_UNIT;
+                    if(mxmlFindElement(node, node,"se:PolygonSymbolizer",  "uom", NULL,MXML_DESCEND))
+                    {
+                    const char *u = mxmlElementGetAttr(n, "uom");
+                    if (!strcmp(u,"http://www.opengeospatial.org/se/units/metre"))
+                        unit = METER_UNIT;
+                    }
+                    add2glushort_list(s->polygon_styles->units,unit);
+
+                mxml_node_t *Fill = mxmlFindElement(node, tree, "se:Fill", NULL, NULL,  MXML_DESCEND);
+                
+
+                    
+                
+                /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
+                 * to know what type of value it holds. Seems to be a waeknes of mini xml*/
+                    for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                    n != NULL;
+                    n = mxmlFindElement(n, Fill,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                    {
+                        const char *attr = mxmlElementGetAttr(n, "name");
+                        if(!strcmp(attr, "fill"))
+                        {
+                            const char *color = mxmlGetOpaque(n);
+                            read_color(color,c);
+                        } 
+                        else if (!strcmp(attr, "fill-opacity"))
+                        {               
+                            opacity = mxmlGetOpaque(n);
+                        }
+                    }
+                    
+                    if(opacity)            
+                        c[3] = strtof(opacity, NULL);
+                    else
+                        c[3] = 1;
+                        
+                    addbatch2glfloat_list(s->polygon_styles->color, 4, c);
+                
+                     /*To get the layers rendered in the right order
+                      * we use the reversed symbol order in the sld as z-value*/
+                    add2glushort_list(s->polygon_styles->z,z);
+                    
+                    s->polygon_styles->nsyms++;                    
+                    
+                    
+                    
+                    
+                    
+                mxml_node_t *Stroke = mxmlFindElement(node, tree, "se:Stroke", NULL, NULL,  MXML_DESCEND);
+                
+
+                    
+                
+                /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
+                 * to know what type of value it holds. Seems to be a waeknes of mini xml*/
+                    for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                    n != NULL;
+                    n = mxmlFindElement(n, Stroke,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                    {
+                        const char *attr = mxmlElementGetAttr(n, "name");
+
+                        if (!strcmp(attr, "stroke"))
+                        {               
+                            const char *stroke_color = mxmlGetOpaque(n);                            
+                            read_color(stroke_color,c);
+                        }
+                        else if (!strcmp(attr, "stroke-width"))
+                        {               
+                            const char *width = mxmlGetOpaque(n);
+                            add2glfloat_list(s->line_styles->width, strtof(width, NULL));
+                        }
+                    }
+                    
+                        c[3] = 1;
+                        
+                    addbatch2glfloat_list(s->line_styles->color, 4, c);
+                
+                     /*To get the layers rendered in the right order
+                      * we use the reversed symbol order in the sld as z-value*/
+                    add2glushort_list(s->line_styles->z,z);
+                    
+                    s->line_styles->nsyms++;                    
+       }
+   //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
     return 0;
 }
 static int parse_textstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
