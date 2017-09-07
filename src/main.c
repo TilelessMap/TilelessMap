@@ -404,7 +404,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     destroy_layer_runtime(layerRuntime,nLayers);
     destroy_layer_runtime(infoLayer,1);
     free(gps_circle);
-
+    destroy_symbol_list(global_symbols);
     destroy_font(fonts[0]);
     
 /*    free(font_normal[0]);

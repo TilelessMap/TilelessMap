@@ -72,8 +72,6 @@
 
 #define INIT_PS_POOL_SIZE 10
 
-#define PIXELUNIT 0
-#define MAPUNIT 1
 
 
 typedef struct
@@ -121,6 +119,7 @@ typedef struct
 {
         GLFLOAT_LIST *color;
         GLUSHORT_LIST *z;
+        GLUSHORT_LIST *units;        
         int nsyms;
 }
 POLYGON_STYLE;
@@ -130,6 +129,7 @@ typedef struct
         GLFLOAT_LIST *color;
         GLFLOAT_LIST *width;
         GLUSHORT_LIST *z;
+        GLUSHORT_LIST *units;   
         int nsyms;
 }
 LINE_STYLE;
@@ -140,9 +140,19 @@ typedef struct
         GLFLOAT_LIST *color;
         GLFLOAT_LIST *size;
         GLUSHORT_LIST *z;
+        GLUSHORT_LIST *units;  
         int nsyms;
 }
 POINT_STYLE;
+
+typedef struct
+{
+        GLFLOAT_LIST *color;
+        GLFLOAT_LIST *size;
+        GLUSHORT_LIST *z;
+        int nsyms;
+}
+TEXT_STYLE;
 
 
 
@@ -154,6 +164,7 @@ struct STYLES
         POLYGON_STYLE *polygon_styles;
         LINE_STYLE *line_styles;
         POINT_STYLE *point_styles;
+        TEXT_STYLE *text_styles;
         UT_hash_handle hh;         /* makes this structure hashable */        
 };
 
@@ -341,7 +352,6 @@ LAYER_RUNTIME *infoRenderLayer;
 
 STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
-SYMBOLS *global_symbols;
 size_t length_global_symbols;
 void render_text_test(const char *text, float x, float y, float sx, float sy);
 
@@ -427,6 +437,7 @@ int n_polys;
 int n_tri;
 int n_words;
 int n_letters;
+
 
 GLuint  texes[256];
 GLenum err;

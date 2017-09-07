@@ -134,6 +134,7 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->utm_zone = 0;
         theLayer->hemisphere = 0; //1 is southern hemisphere and 0 is northern
 //        theLayer->close_ring = 0;
+        theLayer->styles = NULL;
     }
     return lr;
 }

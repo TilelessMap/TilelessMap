@@ -424,7 +424,8 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts)
 
 
     npoints = (uint32_t) buffer_read_uvarint(ts.tb);
-    add2union_list(theLayer->polygons->style_id, &(old_ts->styleID));
+   // add2union_list(theLayer->polygons->style_id, &(old_ts->styleID));
+        get_style(theLayer->styles, theLayer->polygons->style_id, &(old_ts->styleID), old_ts->styleid_type);
 
     for( i = 0; i < npoints; i++ )
     {

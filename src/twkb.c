@@ -192,7 +192,13 @@ void *twkb_fromSQLiteBBOX(void *theL)
     err = sqlite3_errcode(projectDB);
     if(err)
         log_this(1,"sqlite problem 2, %d\n",err);
-
+    
+    if(theLayer->points)
+        theLayer->points->style_id->list_type = theLayer->style_key_type;
+    if(theLayer->lines)
+        theLayer->lines->style_id->list_type = theLayer->style_key_type;
+    if(theLayer->polygons)
+        theLayer->polygons->style_id->list_type = theLayer->style_key_type;
    
         while (sqlite3_step(prepared_statement)==SQLITE_ROW)
         {
@@ -217,23 +223,23 @@ void *twkb_fromSQLiteBBOX(void *theL)
             add2gluint_list(theLayer->rast->tileidxy, y);
         
         
-        }
+            }
             ts.id = sqlite3_column_int(prepared_statement, 3);
             // printf("id fra db = %ld\n",ts.id);
             ts.styleid_type = theLayer->style_key_type;
             if(ts.styleid_type == INT_TYPE)
             {
-                ts.styleID.int_type = sqlite3_column_int(prepared_statement, 4);
+                ts.styleID.int_type = sqlite3_column_int(prepared_statement, 4);                
             }
             else if(ts.styleid_type == STRING_TYPE)
             {
                 const unsigned char *str = sqlite3_column_text(prepared_statement, 4);
-                strcpy(ts.styleID.string_type,str);
+                strcpy(ts.styleID.string_type,(const char*) str);
             }
             else
             {
                 log_this(100, "Error, invalid style key type: %d\n", ts.styleid_type);
-                return 1;                
+                return NULL;                
             }
             if(get_blob(prepared_statement,0, &res, &res_len))
             {

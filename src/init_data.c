@@ -25,8 +25,8 @@
 #include "buffer_handling.h"
 #include "theclient.h"
 #include "interface/interface.h"
-
-
+#include "read_sld.h"
+#include "symbols.h"
 /********************************************************************************
   Attach all databases with data for the project
 */
@@ -258,7 +258,7 @@ static int load_layers(TEXT *missing_db)
 
     LAYER_RUNTIME *oneLayer;
 
-    char *styleselect;
+    char styleselect[128];
     char stylejoin[128];
     char stylewhere[128];
     char textselect[128];
@@ -361,13 +361,12 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *title =  sqlite3_column_text(preparedLayerLoading, 13);
         const unsigned char *sld =  sqlite3_column_text(preparedLayerLoading, 14);
 
-        load_sld(oneLayer, sld);
         
         if (check_layer(dbname, layername))
         {
 
 
-            if(!strcmp(stylefield,  "__raster__"))
+            if(!strcmp((const char*) stylefield,  "__raster__"))
             {
                     snprintf(sql, 2048, "SELECT geometry_fld,data_fld, id_fld,spatial_idx,  utm_zone, hemisphere, tilewidth, tileheight from %s.raster_columns where layer_name='%s';", dbname, layername);
 
@@ -417,6 +416,8 @@ static int load_layers(TEXT *missing_db)
             }
             else
             {
+                
+                char *sld_style_field = load_sld(oneLayer,(const char*) sld);
                     //Get the basic layer info from geometry columns table in data db
 
                 if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
@@ -424,6 +425,8 @@ static int load_layers(TEXT *missing_db)
                 else
                     snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
                     
+                
+                
                 log_this(100, "Get info from geometry_columns : %s\n",sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
@@ -511,24 +514,17 @@ static int load_layers(TEXT *missing_db)
                     snprintf(tri_idx_fld, sizeof(tri_idx_fld), "%s","'a'" );
                 }
 
-                if(stylefield)
+                if(sld_style_field && check_column(dbname,layername,(const unsigned char *) sld_style_field))
                 {
-                    styleselect = ", s.rowid ";
-                    if(strcmp((const char *)stylefield, "__everything__"))
-                    {
-                        snprintf(stylejoin,sizeof(stylejoin), "%s%s%s", " inner join styles s on e.", stylefield, "=s.value " );
-                    }
-                    else
-                    {
-                        snprintf(stylejoin,sizeof(stylejoin), "%s", " , styles s " );
-                    }
-                    snprintf(stylewhere,sizeof(stylewhere), "%s%d", " and s.layerID=", layerid);
+                        
+                        snprintf(styleselect,sizeof(styleselect), ", %s",  sld_style_field  );
+                    
+
                 }
                 else
                 {
-                    styleselect = "\0";
-                    stylejoin[0] = '\0';
-                    stylewhere[0] =  '\0';
+                        snprintf(styleselect, sizeof(styleselect), ", %s","-1" );
+                        oneLayer->style_key_type = INT_TYPE;
                 }
 
                 if(show_text)
@@ -540,7 +536,7 @@ static int load_layers(TEXT *missing_db)
                     textselect[0] = '\0';
                 }
 
-                snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id %s where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >? %s",
+                snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s,e.%s %s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >?",
                         geometryfield,
                         tri_idx_fld,
                         idx_idfield,
@@ -551,9 +547,7 @@ static int load_layers(TEXT *missing_db)
                         layername,
                         dbname,
                         geometryindex,
-                        idx_idfield,
-                        stylejoin,
-                        stylewhere );
+                        idx_idfield);
 
                 /*
 
@@ -707,8 +701,9 @@ int init_resources(char *dir)
 
     attach_db(dir, missing_db);
 
-    load_styles();
-    load_symbols();
+ //   load_styles();
+   add_system_default_style();
+    init_symbols();
     loadSymbols();
     load_layers(missing_db);
     destroy_txt(missing_db);

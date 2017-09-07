@@ -16,7 +16,8 @@
 #define FLOAT_TYPE 2
 #define STRING_TYPE 3
 
-
+#define PIXEL_UNIT 0
+#define METER_UNIT 1
 
 typedef struct
 {
@@ -59,6 +60,14 @@ typedef struct
 }
 INT64_LIST;
 
+typedef struct
+{
+    void* *list;
+    size_t alloced;
+    size_t used;
+}
+POINTER_LIST;
+
 
 
 typedef struct
@@ -76,7 +85,7 @@ typedef struct
 {
     GLFLOAT_LIST *points;
     GLUINT_LIST *point_start_indexes;
-    UNION_LIST *style_id;
+    POINTER_LIST *style_id;
     GLuint vbo;
 
 }
@@ -87,7 +96,7 @@ typedef struct
 {
     GLFLOAT_LIST *vertex_array;
     GLUINT_LIST *line_start_indexes;
-    UNION_LIST *style_id;
+    POINTER_LIST *style_id;
     GLuint vbo;
 
 }
@@ -101,7 +110,7 @@ typedef struct
     GLUINT_LIST *polygon_start_indexes; //start index in vertex_array above for each polygon
     GLUSHORT_LIST *element_array;    // a long array of triangle indexes
     GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
-    UNION_LIST *style_id;
+    POINTER_LIST *style_id;
     GLuint vbo;
     GLuint ebo;
 }
@@ -295,7 +304,13 @@ typedef struct
 
 
 
+typedef struct
+{
+    POINT_LIST *points;
+}SYMBOLS;
 
+
+SYMBOLS *global_symbols;
 
 
 
@@ -306,17 +321,21 @@ typedef struct
 
 int init_buffers(LAYER_RUNTIME *layer);
 int destroy_buffers(LAYER_RUNTIME *layer);
-
+int destroy_symbol_list(SYMBOLS *l);
 int reset_buffers(LAYER_RUNTIME *layer);
 
 
 UINT8_LIST* init_uint8_list();
 GLFLOAT_LIST* init_glfloat_list();
 GLUSHORT_LIST* init_glushort_list();
+SYMBOLS* init_symbol_list();
+UNION_LIST* init_union_list();
 
 int add2glfloat_list(GLFLOAT_LIST *list, GLfloat val);
 int add2gluint_list(GLUINT_LIST *list, GLuint val);
 int add2int64_list(INT64_LIST *list, int64_t val);
+int add2glushort_list(GLUSHORT_LIST *list, GLshort val);
+int add2uint8_list(UINT8_LIST *list, uint8_t val);
 
 int addbatch2glfloat_list(GLFLOAT_LIST *list,GLuint n_vals, GLfloat *vals);
 int addbatch2int64_list(INT64_LIST *list,GLuint n_vals, int64_t *vals);
@@ -325,7 +344,6 @@ int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals);
 
 
 int add2union_list(UNION_LIST *list, void *val);
-UNION_LIST* init_union_list();
 
 
 int setzero2gluint_list(GLUINT_LIST *list,GLuint n_vals);
@@ -340,12 +358,13 @@ int pa_end(LAYER_RUNTIME *l, int64_t id);
 
 
 int init_symbols();
-int addsymbol(int id, size_t n_points, GLfloat *points);
+int addsym(int id, size_t n_points, GLfloat *points);
 int destroy_symbols();
 
 
 
 
+int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type);
 
 
 
@@ -354,6 +373,7 @@ int destroy_symbols();
 
 
 
+struct STYLES *system_default_style;
 
 
 

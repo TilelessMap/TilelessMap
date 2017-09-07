@@ -27,6 +27,7 @@
 #include "SDL_image.h"
 #include "uthash.h"
 
+
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
@@ -49,14 +50,13 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     
     
+    int style_key_type = oneLayer->style_key_type;
     int symbol = 2, i;
     
-   POINT_LIST *rb = oneLayer->points;
+   POINT_LIST *points = oneLayer->points;
     
-    GLfloat radius1=0, radius2=0, radius3 = 0;
-    GLfloat color1[4] = {0.5,0.5,0.5,0.2};
-    GLfloat color2[4] = {0,0,0,1};
-    GLfloat color3[4] = {0,1,0,1};
+    GLfloat radius;
+    GLfloat *color;
     GLfloat *p;
 
 
@@ -96,41 +96,54 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     else
         sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
         
-for (i=0;i<global_symbols->points->point_start_indexes->used;i++)
-{
- printf("npoints til %d = %d diff = %d\n", i,global_symbols->points->point_start_indexes->list[i],global_symbols->points->point_start_indexes->list[i] - global_symbols->points->point_start_indexes->list[i -1]);    
-}
+    
+    
 
-    radius1 = 20;
-    radius2 = 11;
-    radius3 = 10;
-    p = rb->points->list;
-    for (i=0;i<rb->point_start_indexes->used;i++)
+ 
+    p = points->points->list;
+    for (i=0;i<points->point_start_indexes->used;i++)
     {
         
-        printf("used points = %d, startindex = %d, used vals\n",rb->point_start_indexes->used, rb->point_start_indexes->list[i], rb->points->used);
+        
+
+            struct STYLES *styles = (struct STYLES *) *((struct STYLES **)points->style_id->list +i);
+            if(!styles)
+                styles=system_default_style;
+            POINT_STYLE *style = styles->point_styles;
+            
+            
+            
+          //  printf("start checking %p\n", style);
+          //  printf("style->nsyms=%d\n",style->nsyms);
+                    int r;
+            for (r = 0;r<style->nsyms;r++)
+            {
+               
+           // printf("r=%d\n",r);
+            
+                color = style->color->list + 4*r;
+                radius = *(style->size->list + r);
         
         
-        printf("p: %f, %f\n", *(p), *(p+1));
+    //    printf("used points = %d, startindex = %d, used vals\n",points->point_start_indexes->used, points->point_start_indexes->list[i], points->points->used);
+        
+        
+     //   printf("p: %f, %f\n", *(p), *(p+1));
     glUniform2fv(sym_coord2d,1,p);
     
+            int unit = style->units->list[r];
+                if(unit == PIXEL_UNIT)
+                    glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
+                else
+                    glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
     
-        glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
-        glUniform4fv(sym_color,1,color1 );
-        glUniform1fv(sym_radius,1,&radius1 );
+       // glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
+        glUniform4fv(sym_color,1,color );
+        glUniform1fv(sym_radius,1,&radius );
         glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
 
-        glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
-        glUniform4fv(sym_color,1,color2 );
-        glUniform1fv(sym_radius,1,&radius2 );
-        glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
-
-        glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
-        glUniform4fv(sym_color,1,color3 );
-        glUniform1fv(sym_radius,1,&radius3 );
-        glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
-        
-        p = rb->points->list + rb->point_start_indexes->list[i];
+            }
+        p = points->points->list + points->point_start_indexes->list[i];
     }
         while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(100, "gl problem\n");
@@ -239,19 +252,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }*/
     
     
-    
-    
-    GLint *intlist;
-    char *charlist;
-    struct STYLES *style = NULL;
-    struct STYLES *default_style = NULL;
-    
-        if(style_key_type == INT_TYPE)
-            intlist =  (GLint*) line->style_id->list ;
-        else if (style_key_type == STRING_TYPE)
-            charlist = (char*) line->style_id->list ;
-    
-    
+        
     
     
     for (i=0; i<line->line_start_indexes->used; i++)
@@ -259,74 +260,38 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         //    Uint32 styleID = *(rb->styleID+i);
         
-        if(style_key_type == INT_TYPE)
-        {
-         int key = *(charlist+i);
-        HASH_FIND_INT( oneLayer->styles, key, style);   
-            
-        }
-        else if (style_key_type == STRING_TYPE)
-        {
-         char *key = charlist+i;
-        HASH_FIND_STR( oneLayer->styles, key, style);   
-        }
-
-        if(!style)
-        {
-            if(!default_style)               
-                HASH_FIND_INT( oneLayer->styles, "default", default_style);  
-        style = default;
-        }
-
-        //   total_points += *(rb->npoints+i);
-
+               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
+            if(!styles)
+                styles=system_default_style;
+            LINE_STYLE *style = styles->line_styles;
 
 
         n_vals = *(line->line_start_indexes->list + i)/vals_per_point - n_vals_acc;
         int r;
-        for (r = 0;r<style->line_styles->nsyms;r++)
+        for (r = 0;r<style->nsyms;r++)
         {
-            lw = style->line_styles->width->list[r];
+            lw = style->width->list[r];
 
 
-            z = style->line_styles->z->list[r];
+            z = style->z->list[r];
             if(!z)
                 z = 0;
 
-            if(unit != (GLfloat) (global_styles[styleID].unit))
-            {   unit = (GLfloat) (global_styles[styleID].unit);
-                if(unit == PIXELUNIT)
+            unit = style->units->list[r];
+                if(unit == PIXEL_UNIT)
                     glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
                 else
                     glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,theMatrix );
-            }
+            
             glUniform1fv(lw_z,1,&z );
-            color = global_styles[styleID].color;
+            color = style->color->list + 4*r;
 
-            lw2 = (GLfloat) (global_styles[styleID].lineWidth2 * 0.5);
-
-            color2 = global_styles[styleID].outlinecolor;
-        }
-
-        if(oneLayer->type & 6)
-        {
-            color = color2;
-            lw2 = 0;
-
-        }
-        else if(lw2)
-        {
-            glUniform4fv(lw_color,1,color2 );
-            glUniform1fv(lw_linewidth,1,&lw2 );
+        
+            glUniform4fv(lw_color,1,color );
+            glUniform1fv(lw_linewidth,1,&lw );
             glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
+        
         }
-
-        z = z-0.01;
-        glUniform1fv(lw_z,1,&z );
-        glUniform4fv(lw_color,1,color );
-        glUniform1fv(lw_linewidth,1,&lw );
-        glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
-
 
 //printf("i = %d, startindex = %d, npoints = %d\n", i, n_vals_acc, n_vals);
         // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -350,6 +315,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
+    int style_key_type = oneLayer->style_key_type;
     LINESTRING_LIST *line = oneLayer->lines;
 
     unsigned int n_vals = 0, n_vals_acc = 0;
@@ -379,29 +345,34 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     n_lines += used_n_pa;
     total_points += line->vertex_array->used/ndims;
     printf("used_lines = %d\n",used_n_pa);
+    
+    
+        
     for (i=0; i<used_n_pa; i++)
     {
 
 
-
-        styleID = *(line->style_id->list+i);
+               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
+            if(!styles)
+                styles=system_default_style;
+            LINE_STYLE *style = styles->line_styles;
 
         n_vals = *(line->line_start_indexes->list + i)/ndims - n_vals_acc;
-        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+        
+        
+
+        int r;
+        for (r = 0;r<style->nsyms;r++)
         {
-            color = global_styles[styleID].color;
-            lw = global_styles[styleID].lineWidth;
+            color = style->color->list + 4*r;
 
 
-
-            if(lw)
-            {
                 glUniform4fv(std_color,1,color );
 
 
                 glDrawArrays(GL_LINE_STRIP, n_vals_acc, n_vals);
 
-            }
+            
         }
         n_vals_acc = *(line->line_start_indexes->list + i)/ndims;
 
@@ -437,6 +408,7 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     log_this(10, "Entering renderPolygon\n");
+    int style_key_type = oneLayer->style_key_type;
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
     GLfloat c[4];
@@ -453,8 +425,10 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     unsigned int used_n_poly;
 
 
+    
     if(oneLayer->type & 4)
     {
+        POLYGON_STYLE *style = NULL;
         used_n_poly = poly->polygon_start_indexes->used;
 
         glUseProgram(std_program);
@@ -469,6 +443,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         //total_points += poly->vertex_array->used/ndims;
         //n_tri += poly->element_array->used/3;
 
+    
         for (i=0; i<used_n_poly; i++)
         {
             size_t  vertex_offset = sizeof(GLfloat) * *(poly->polygon_start_indexes->list + i);
@@ -486,22 +461,23 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 (GLvoid*) vertex_offset                  // offset of first element
             );
 
-            styleID = *(poly->area_style_id->list+i);
-
-            if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+            
+               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->style_id->list +i);
+            if(!styles)
+                styles=system_default_style;
+           style = styles->polygon_styles;
+            
+            
+            
+            
+                    int r;
+            for (r = 0;r<style->nsyms;r++)
             {
-                color = global_styles[styleID].color;
+
+        
+                color = style->color->list + 4*r;
+                glUniform4fv(std_color,1,color );
             }
-            else
-            {
-                c[0] = c[1] = c[2] = 100;
-                c[3] = 255;
-                color = c;
-            }
-
-
-            glUniform4fv(std_color,1,color );
-
 
             n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
             n_vals_acc = *(poly->element_start_indexes->list + i);
@@ -515,6 +491,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
     if(!(oneLayer->type & 8))
     {
+        LINE_STYLE *style = NULL;
         glBindBuffer(GL_ARRAY_BUFFER, oneLayer->polygons->vbo);
 
 
@@ -539,23 +516,29 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         for (i=0; i<used_n_pa; i++)
         {
 
-            styleID = *(poly->outline_style_id->list+i);
 
             n_vals = *(poly->pa_start_indexes->list + i)/ndims - n_vals_acc;
-            if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
+            
+            
+               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->style_id->list +i);
+            if(!styles)
+                styles=system_default_style;
+            style = styles->line_styles;
+            
+            
+            
+            int r;
+            for (r = 0;r<style->nsyms;r++)
             {
-                color = global_styles[styleID].outlinecolor;
-                lw = global_styles[styleID].lineWidth;
+                color = style->color->list + 4*r;
 
 
 
-                if(lw)
-                {
                     glUniform4fv(std_color,1,color );
 
 
                     glDrawArrays(GL_LINE_LOOP, n_vals_acc, n_vals);
-                }
+                
             }
             n_vals_acc = *(poly->pa_start_indexes->list + i)/ndims;
 
@@ -662,6 +645,7 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     ATLAS *a;
+    int style_key_type = oneLayer->style_key_type;
     log_this(10, "Entering renderText\n");
     int i;
     GLfloat *color;
@@ -701,6 +685,16 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     n_words += nw;
     total_points += nw;
 
+    GLint *intlist;
+    char *charlist;
+    struct STYLES *styles = NULL;
+    TEXT_STYLE *style = NULL;
+    struct STYLES *default_style = NULL;
+    
+        if(style_key_type == INT_TYPE)
+            intlist =  (GLint*) point->style_id->list ;
+        else if (style_key_type == STRING_TYPE)
+            charlist = (char*) point->style_id->list ;
 
     for (i=0; i<nw; i++)
     {
@@ -710,16 +704,33 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 //log_this(10, "psz = %d \n",psz);
 
-        Uint32 styleID = *(point->style_id->list+i);
-        if(styleID<length_global_styles && global_styles[styleID].styleID == styleID)
-            color = global_styles[styleID].color;
-        else
+        
+        
+        
+        if(style_key_type == INT_TYPE)
         {
-            c[0] = c[1] = c[2] = 100;
-            c[3] = 255;
-            color = c;
+         int key = *(charlist+i);
+        HASH_FIND_INT( oneLayer->styles, &key, styles);   
+            
+        }
+        else if (style_key_type == STRING_TYPE)
+        {
+         char *key = charlist+i;
+        HASH_FIND_STR( oneLayer->styles, key, styles);   
         }
 
+        if(!styles)
+        {
+            if(!default_style)               
+                HASH_FIND_STR( oneLayer->styles, "default", default_style);  
+        styles = default_style;
+        }
+        style = styles->text_styles;
+        int r;
+        for (r = 0;r<style->nsyms;r++)
+        {
+
+            color = style->color->list + 4*r;
         /*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
                 point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
 
@@ -741,7 +752,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     
     
         draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
-
+        }
 
 
 

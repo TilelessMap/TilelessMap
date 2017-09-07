@@ -178,6 +178,8 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 int search_string(const char *w,const char *s)
 {
 	int i, n;
+    if(w==NULL ||s==NULL)
+        return 0;
 	int w_len = strlen(w);
 	int s_len = strlen(s);	
 

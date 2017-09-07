@@ -29,10 +29,12 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
     struct STYLES *s;
     if(key_type == STRING_TYPE)
     {
-        const char *key = mxmlGetText(mxmlFindElement(node, tree, "ogc:Literal",  NULL, NULL,  MXML_DESCEND), 0);
-         printf("key = %s\n",key);
+        const char *key = mxmlGetOpaque(mxmlFindElement(node, tree, "ogc:Literal",  NULL, NULL,  MXML_DESCEND));
+       //  printf("key = %s\n",key);
         if(!key)
             key = "default";
+        
+        printf("key = %s, oneLayer styles = %p\n",key, oneLayer->styles);
         HASH_FIND_STR( oneLayer->styles, key, s);
         if(!s)
         {
@@ -60,61 +62,89 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
     
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
-   mxml_node_t *n;
+   mxml_node_t *n, *symbolizer;
    GLfloat c[4];
     
-    const char *opacity = NULL
-    ;
+    const char *opacity = NULL;
+    
     if( ! s->point_styles)
     {
      s->point_styles =  st_malloc(sizeof(POINT_STYLE));
+     s->point_styles->nsyms = 0;
      s->point_styles->symbol = init_uint8_list();
      s->point_styles->color = init_glfloat_list();
      s->point_styles->size = init_glfloat_list();
      s->point_styles->z = init_glushort_list();
+     s->point_styles->units = init_glushort_list();
     }
     
-    
-   mxml_node_t *Mark = mxmlFindElement(node, tree, "se:Mark", NULL, NULL,  MXML_DESCEND);
-   const char *symbol = mxmlGetText(mxmlFindPath(Mark, "se:WellKnownName"), 0);
-    const char *color = mxmlGetText(mxmlFindElement(Mark, tree, "se:SvgParameter",  "name", NULL,  MXML_DESCEND), 0);
-   
-          for (n = mxmlFindElement(Mark, Mark,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
-         n != NULL;
-         n = mxmlFindElement(n, Mark,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
-       {
-        const char *attr = mxmlElementGetAttr(n, "name");
-           if(!strcmp(attr, "fill"))
-           {
-            const char *color = mxmlGetText(n, 0);
-            read_color(color,c);
-           }
-           else if (!strcmp(attr, "stroke"))
-           {               
-            const char *stroke_color = mxmlGetText(n, 0);
-            printf("color = %s\n",stroke_color);
-            
-           }
-           else if (!strcmp(attr, "stroke-width"))
-           {               
-            const char *width = mxmlGetText(n, 0);
-            printf("color = %s\n",width);
-           }
-            else if (!strcmp(attr, "fill-opacity"))
-           {               
-            opacity = mxmlGetText(n, 0);
-           }
-           
-           
+        for (symbolizer = mxmlFindElement(node, node,"se:PointSymbolizer",  NULL, NULL, MXML_DESCEND);
+         symbolizer != NULL;
+         symbolizer = mxmlFindElement(symbolizer, node,"se:PointSymbolizer",NULL, NULL,MXML_DESCEND))
+       { 
+                mxml_node_t *Mark = mxmlFindElement(node, tree, "se:Mark", NULL, NULL,  MXML_DESCEND);
+                const char *symbol = mxmlGetOpaque(mxmlFindPath(Mark, "se:WellKnownName"));
+                    const char *size = mxmlGetOpaque(mxmlFindPath(node, "se:PointSymbolizer/se:Graphic/se:Size"));
+                
+                        for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                        n != NULL;
+                        n = mxmlFindElement(n, Mark,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                    {
+                        const char *attr = mxmlElementGetAttr(n, "name");
+                        if(!strcmp(attr, "fill"))
+                        {
+                            const char *color = mxmlGetOpaque(n);
+                            read_color(color,c);
+                        }
+                        else if (!strcmp(attr, "stroke"))
+                        {               
+                            const char *stroke_color = mxmlGetOpaque(n);
+                            
+                        }
+                        else if (!strcmp(attr, "stroke-width"))
+                        {               
+                            const char *width = mxmlGetOpaque(n);
+                        }
+                            else if (!strcmp(attr, "fill-opacity"))
+                        {               
+                            opacity = mxmlGetOpaque(n);
+                        }
+                        
+                        
+                    }
+                        if(opacity)            
+                            c[3] = strtof(opacity, NULL);
+                        else
+                            c[3] = 1;
+                        
+                        addbatch2glfloat_list(s->point_styles->color, 4, c);
+                        int unit = PIXEL_UNIT;
+                        if(mxmlFindElement(n, Mark,"se:PointSymbolizer",  "uom", NULL,MXML_DESCEND))
+                        {
+                        const char *u = mxmlElementGetAttr(n, "uom");
+                        if (!strcmp(u,"http://www.opengeospatial.org/se/units/metre"))
+                            unit = METER_UNIT;
+                        }
+                        add2glushort_list(s->point_styles->units,unit);
+                        
+                        add2glushort_list(s->point_styles->z,z);
+                        
+                        add2glfloat_list(s->point_styles->size, strtof(size, NULL));
+                        
+                        printf("writing size %f and %zu is used\n",strtof(size, NULL), s->point_styles->size->used);
+                        
+                        if(!strcmp(symbol, "square") )          
+                            add2uint8_list(s->point_styles->symbol,SQUARE_SYMBOL);
+                        else if(!strcmp(symbol, "circle") )          
+                            add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
+                        else if(!strcmp(symbol, "triangle") )          
+                            add2uint8_list(s->point_styles->symbol,TRIANGLE_SYMBOL);
+                        else if(!strcmp(symbol, "start") )          
+                            add2uint8_list(s->point_styles->symbol,STAR_SYMBOL);
+                        
+                        s->point_styles->nsyms++;
        }
-        if(opacity)            
-            c[3] = strtof(opacity, NULL);
-        else
-            c[3] = 1;
-        
-        addbatch2glfloat_list(s->point_styles->color, 4, c);
    //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
-    printf("symbol = %s color = %s\n",symbol, color);
     return 0;
 }
 static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
@@ -123,6 +153,11 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
     return 0;
 }
 static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
+{
+    
+    return 0;
+}
+static int parse_textstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
 {
     
     return 0;
@@ -152,7 +187,7 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
     int key_type = INT_TYPE;
     char *checknum;
     
-    tree = mxmlLoadString(NULL, sld, MXML_TEXT_CALLBACK);
+    tree = mxmlLoadString(NULL, sld, MXML_OPAQUE_CALLBACK);
     
     mxml_node_t *rule, propname, propval;
 
@@ -164,7 +199,7 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
          rule = mxmlFindElement(rule, tree,"se:Rule",NULL, NULL,MXML_DESCEND))
        {
            
-        const char *propname = mxmlGetText(mxmlFindElement(rule, tree, "ogc:PropertyName",  NULL, NULL,  MXML_DESCEND), 0);
+        const char *propname = mxmlGetOpaque(mxmlFindElement(rule, tree, "ogc:PropertyName",  NULL, NULL,  MXML_DESCEND));
            
         if(last_propname && strcmp(propname, last_propname))
         {
@@ -173,12 +208,12 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
         }
         else
         {
-         last_propname = st_malloc(strlen(propname + 1));
+         last_propname = st_malloc(strlen(propname) + 1);
          strcpy(last_propname, propname);
         }
         if(key_type == INT_TYPE)
         {
-            const char *val_txt = mxmlGetText(mxmlFindElement(rule,tree,"ogc:Literal", NULL,NULL,MXML_DESCEND),0);
+            const char *val_txt = mxmlGetOpaque(mxmlFindElement(rule,tree,"ogc:Literal", NULL,NULL,MXML_DESCEND));
             printf("val = %s\n", val_txt);
             if(val_txt)
             {
@@ -204,28 +239,78 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
          rule = mxmlFindElement(rule, tree,"se:Rule",NULL, NULL,MXML_DESCEND))
        {
            
-        if( mxmlGetText(mxmlFindElement(rule, tree, "se:PolygonSymbolizer",  NULL, NULL,  MXML_DESCEND), 0))
+        if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:PolygonSymbolizer",  NULL, NULL,  MXML_DESCEND)))
            parse_polygonstyle(oneLayer,tree, rule, key_type, z);
         
-       if( mxmlGetText(mxmlFindElement(rule, tree, "se:PointSymbolizer",  NULL, NULL,  MXML_DESCEND), 0))
+       if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:PointSymbolizer",  NULL, NULL,  MXML_DESCEND)))
            parse_pointstyle(oneLayer,tree, rule, key_type, z);
         
-       if( mxmlGetText(mxmlFindElement(rule, tree, "se:LineSymbolizer",  NULL, NULL,  MXML_DESCEND), 0))
+       if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:LineSymbolizer",  NULL, NULL,  MXML_DESCEND)))
            parse_linestyle(oneLayer,tree, rule, key_type, z);
+       
+       if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:TextSymbolizer",  NULL, NULL,  MXML_DESCEND)))
+           parse_textstyle(oneLayer,tree, rule, key_type, z);
         
         nvals++;
        z--;
         printf("nvals = %d\n",nvals);
     
        }     
-        
-        
+        oneLayer->style_key_type = key_type;
         
     mxmlDelete(tree);
+    printf("returning propname %s\n",last_propname);
     return last_propname;
     
 }
 
-
+int add_system_default_style()
+{
+    struct STYLES *s;
+    GLfloat color[]={1,1,1,0.5};
+            s = st_malloc(sizeof(struct STYLES)); 
+            s->int_key = 0;
+         s->string_key = NULL;
+         
+         //point
+    s->point_styles =  st_malloc(sizeof(POINT_STYLE));
+     s->point_styles->symbol = init_uint8_list();
+     s->point_styles->color = init_glfloat_list();
+     s->point_styles->size = init_glfloat_list();
+     s->point_styles->z = init_glushort_list();
+     s->point_styles->units = init_glushort_list();
+     
+     add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
+     addbatch2glfloat_list(s->point_styles->color,4,color);
+     add2glfloat_list(s->point_styles->size,7);
+     add2glushort_list(s->point_styles->z,1);
+     add2glushort_list(s->point_styles->units,PIXEL_UNIT);
+     s->point_styles->nsyms=1;
+     
+         //line
+    s->line_styles =  st_malloc(sizeof(LINE_STYLE));
+     s->line_styles->color = init_glfloat_list();
+     s->line_styles->width = init_glfloat_list();
+     s->line_styles->z = init_glushort_list();
+     s->line_styles->units = init_glushort_list();
+     
+     addbatch2glfloat_list(s->line_styles->color,4,color);
+     add2glfloat_list(s->line_styles->width,1);
+     add2glushort_list(s->line_styles->z,1);
+     add2glushort_list(s->line_styles->units,PIXEL_UNIT);
+     s->line_styles->nsyms=1;
+     
+         //polygon
+    s->polygon_styles =  st_malloc(sizeof(POLYGON_STYLE));
+     s->polygon_styles->color = init_glfloat_list();
+     s->polygon_styles->z = init_glushort_list();
+     s->polygon_styles->units = init_glushort_list();
+     
+     addbatch2glfloat_list(s->polygon_styles->color,4,color);
+     add2glushort_list(s->polygon_styles->z,1);
+     add2glushort_list(s->polygon_styles->units,PIXEL_UNIT);
+     s->polygon_styles->nsyms=1;
+     system_default_style = s;
+}
 
 

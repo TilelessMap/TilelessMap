@@ -1,32 +1,68 @@
 #include "symbols.h"
 #include "mem.h"
-#include "buffer_handling.h"
 #include <math.h>
-#include "mem.h"
-
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>
 #else
 #include <GL/glew.h>
 #endif
 
+#include "buffer_handling.h"
 
 int init_symbols()
 {
 
         GLfloat* points, first_len, second_len, rotation;
-        int n_dirs;
-        char *symbolid;
         
+        global_symbols = init_symbol_list();
+        int n_dirs;
+        int symbolid;
+        
+        /*Create a square*/
+        symbolid = SQUARE_SYMBOL;
+        n_dirs = 4;
+        first_len = 1;
+        second_len = 1;
+        rotation = 90;
+        
+        points = create_symbol(n_dirs,first_len, second_len, rotation);        
+        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        
+           
         /*Create a circle*/
-        symbolid = "circle";
+        symbolid = CIRCLE_SYMBOL;
         n_dirs = 16;
         first_len = 1;
         second_len = 1;
         rotation = 0;
         
-        points = create_symbol(n_dirs,first_len, second_len, rotation);
-        addsymbol(symbolid, (n_dirs + 2) * 2, points);   
+        points = create_symbol(n_dirs,first_len, second_len, rotation);        
+        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        
+           
+        /*Create a triangle*/
+        symbolid = TRIANGLE_SYMBOL;
+        n_dirs = 3;
+        first_len = 1;
+        second_len = 1;
+        rotation = 0;
+        
+        points = create_symbol(n_dirs,first_len, second_len, rotation);        
+        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        
+           
+        /*Create a star*/
+        symbolid = STAR_SYMBOL;
+        n_dirs = 10;
+        first_len = 1;
+        second_len = 0.3;
+        rotation = 0;
+        
+        points = create_symbol(n_dirs,first_len, second_len, rotation);        
+        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        
+        
+        
         return 0;
     
 }
