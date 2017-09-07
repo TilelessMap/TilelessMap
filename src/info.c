@@ -310,7 +310,7 @@ int identify(MATRIX *map_matrix, int x, int y)
 
     }
 
-    setzero2gluint_list(renderpoly->style_id->list, renderpoly->polygon_start_indexes->used);
+    setzero2pointer_list(renderpoly->style_id, renderpoly->polygon_start_indexes->used);
 
 
     //render_info(window,map_matrix->matrix);

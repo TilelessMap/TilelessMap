@@ -23,7 +23,7 @@ int init_symbols()
         n_dirs = 4;
         first_len = 1;
         second_len = 1;
-        rotation = 90;
+        rotation = 45;
         
         points = create_symbol(n_dirs,first_len, second_len, rotation);        
         addsym(symbolid, (n_dirs + 2) * 2, points);   

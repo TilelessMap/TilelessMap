@@ -347,7 +347,7 @@ int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals);
 int add2union_list(UNION_LIST *list, void *val);
 
 
-int setzero2gluint_list(GLUINT_LIST *list,GLuint n_vals);
+int setzero2pointer_list(POINTER_LIST *list,GLuint n_vals);
 int setzero2int64_list(INT64_LIST *list,int64_t n_vals);
 
 int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);

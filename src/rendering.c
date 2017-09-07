@@ -50,7 +50,6 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     
     
-    int style_key_type = oneLayer->style_key_type;
     int symbol = 2, last_symbol = 0, i;
     
    POINT_LIST *points = oneLayer->points;
@@ -110,25 +109,25 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 if(symbol != last_symbol)
                 {
                     last_symbol = symbol;
-    glVertexAttribPointer(
-        sym_norm, // attribute
-        2,                 // number of elements per vertex, here (x,y)
-        GL_FLOAT,          // the type of each element
-        GL_FALSE,          // take our values as-is
-        0,                 // no extra data between each position
-        (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
-    );
+                    glVertexAttribPointer(
+                        sym_norm, // attribute
+                        2,                 // number of elements per vertex, here (x,y)
+                        GL_FLOAT,          // the type of each element
+                        GL_FALSE,          // take our values as-is
+                        0,                 // no extra data between each position
+                        (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
+                    );
 
-    log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
+                    log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
 
 
 
-    
-    
-    if (symbol == 0)
-        sym_npoints = global_symbols->points->point_start_indexes->list[0];
-    else
-        sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
+                    
+                    
+                    if (symbol == 0)
+                        sym_npoints = global_symbols->points->point_start_indexes->list[0];
+                    else
+                        sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
         
                 }      
                 
@@ -204,7 +203,6 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     if(oneLayer->geometryType == RASTER)
         return 0;
     
-    int style_key_type = oneLayer->style_key_type;
     LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
     GLfloat *color,*color2,z, lw=0, lw2=0;
@@ -283,7 +281,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             lw = style->width->list[r];
 
 
-            z = style->z->list[r];
+           z = style->z->list[r] - 0.00001*r;
             if(!z)
                 z = 0;
 
@@ -293,14 +291,18 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 else
                     glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,theMatrix );
             
-            glUniform1fv(lw_z,1,&z );
             color = style->color->list + 4*r;
 
+          //  printf("color = %f, %f, %f, %f, z=%f, unit=%d, width=%f\n",color[0],color[1], color[2],color[3], z, unit, lw);
         
+            glUniform1fv(lw_z,1,&z );
             glUniform4fv(lw_color,1,color );
             glUniform1fv(lw_linewidth,1,&lw );
             glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
-        
+        while ((err = glGetError()) != GL_NO_ERROR) {
+           log_this(10, "Problem1\n");
+           fprintf(stderr,"opengl error:%d\n", err);
+       }
         }
 
 //printf("i = %d, startindex = %d, npoints = %d\n", i, n_vals_acc, n_vals);
@@ -325,7 +327,6 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
     GLfloat *color, lw;
-    int style_key_type = oneLayer->style_key_type;
     LINESTRING_LIST *line = oneLayer->lines;
 
     unsigned int n_vals = 0, n_vals_acc = 0;
@@ -479,6 +480,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             
             
             
+            n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
+            n_vals_acc = *(poly->element_start_indexes->list + i);
             
                     int r;
             for (r = 0;r<style->nsyms;r++)
@@ -487,12 +490,11 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         
                 color = style->color->list + 4*r;
                 glUniform4fv(std_color,1,color );
-            }
 
-            n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
-            n_vals_acc = *(poly->element_start_indexes->list + i);
 
-            glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
+                glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
+             }
+            
             index_offset = sizeof(GLushort) * *(poly->element_start_indexes->list + i);
 
         }
@@ -541,14 +543,15 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             for (r = 0;r<style->nsyms;r++)
             {
                 color = style->color->list + 4*r;
-
-
-
+                GLfloat width = *(style->width->list + r);
+              //  printf("width = %f\n",width);
+                if(width>0)
+                {
                     glUniform4fv(std_color,1,color );
 
 
                     glDrawArrays(GL_LINE_LOOP, n_vals_acc, n_vals);
-                
+                }
             }
             n_vals_acc = *(poly->pa_start_indexes->list + i)/ndims;
 

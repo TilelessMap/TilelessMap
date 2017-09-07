@@ -153,13 +153,6 @@ int addbatch2gluint_list(GLUINT_LIST *list,GLuint n_vals, GLuint *vals)
     return 0;
 }
 
-int setzero2gluint_list(GLUINT_LIST *list,GLuint n_vals)
-{
-    increase_gluint_list(list, n_vals);
-    memset(list->list + list->used, 0, n_vals * sizeof(GLuint));
-    list->used += n_vals;
-    return 0;
-}
 
 
 /************* int64 List ********************/
@@ -452,6 +445,13 @@ int addbatch2pointer_list(POINTER_LIST *list,GLuint n_vals, void *vals)
 }
 
 
+int setzero2pointer_list(POINTER_LIST *list,GLuint n_vals)
+{
+    increase_pointer_list(list, n_vals);
+    memset(list->list + list->used, 0, n_vals * sizeof(void*));
+    list->used += n_vals;
+    return 0;
+}
 
 /************* union List ********************/
 
@@ -789,7 +789,8 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
 
-    add2union_list(l->wide_lines->style_id, &(ts->styleID));
+    get_style(l->styles, l->wide_lines->style_id, &(ts->styleID), ts->styleid_type);
+ //   add2union_list(l->wide_lines->style_id, &(ts->styleID));
     return l->wide_lines->vertex_array;
 
 }
