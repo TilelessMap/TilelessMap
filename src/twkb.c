@@ -192,10 +192,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
     err = sqlite3_errcode(projectDB);
     if(err)
         log_this(1,"sqlite problem 2, %d\n",err);
-<<<<<<< HEAD
-    
-   
-=======
+
     /*
     if(theLayer->points)
         theLayer->points->style_id->list_type = theLayer->style_key_type;
@@ -204,7 +201,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
     if(theLayer->polygons)
         theLayer->polygons->style_id->list_type = theLayer->style_key_type;
    */
->>>>>>> 987afc992e5342429ebeb6f3d0a1e74f3ccef593
+
         while (sqlite3_step(prepared_statement)==SQLITE_ROW)
         {
             
