@@ -1,6 +1,6 @@
 
 #include "read_sld.h"
-#include <mxml.h>
+#include "ext/mxml/mxml.h"
 #include <limits.h>
 #include "mem.h"
 #include "buffer_handling.h"
@@ -492,7 +492,9 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
          rule = mxmlFindElement(rule, tree,"se:Rule",NULL, NULL,MXML_DESCEND))
        {
            
-        int z = nvals*0.0001; 
+        int z = nvals*0.002; //this value is set to support 500 symbols in a layer before getting a z-value over 1(which will prevent rendering
+        if(z>1)
+            z=1;
         if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:PolygonSymbolizer",  NULL, NULL,  MXML_DESCEND)))
            parse_polygonstyle(oneLayer,tree, rule, key_type, z);
         

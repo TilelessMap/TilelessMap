@@ -281,7 +281,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             lw = style->width->list[r];
 
 
-           z = style->z->list[r] - 0.00001*r;
+           z = style->z->list[r] - 0.001*r;
             if(!z)
                 z = 0;
 
