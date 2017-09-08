@@ -120,7 +120,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
                     add2glushort_list(s->point_styles->units,unit);
 
            //We start investigating the Mark tag
-                mxml_node_t *Mark = mxmlFindElement(node, tree, "se:Mark", NULL, NULL,  MXML_DESCEND);
+                mxml_node_t *Mark = mxmlFindElement(symbolizer, symbolizer, "se:Mark", NULL, NULL,  MXML_DESCEND);
                 
                 /*Symbol*/
                 const char *symbol = mxmlGetOpaque(mxmlFindPath(Mark, "se:WellKnownName"));
@@ -141,7 +141,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
                 
                 /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
                  * to know what type of value it holds. Seems to be a waeknes of mini xml*/
-                    for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                    for (n = mxmlFindElement(Mark, Mark,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
                     n != NULL;
                     n = mxmlFindElement(n, Mark,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
                     {
@@ -211,12 +211,12 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
      s->line_styles->units = init_glushort_list();
     }
     
-    
+   // printf("ny style\n");
         for (symbolizer = mxmlFindElement(node, node,"se:LineSymbolizer",  NULL, NULL, MXML_DESCEND);
          symbolizer != NULL;
          symbolizer = mxmlFindElement(symbolizer, node,"se:LineSymbolizer",NULL, NULL,MXML_DESCEND))
        { 
-           
+      //     printf(" ny symbolizer %p ok\n", symbolizer);
                     /*This is ugly because the sld standard sometimes is ugly
                      * If a symbol is given as map units we find that from searching 
                      * for a special uri in the symbolizer tag*/
@@ -230,14 +230,14 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                     }
                     add2glushort_list(s->line_styles->units,unit);
 
-                mxml_node_t *Stroke = mxmlFindElement(node, tree, "se:Stroke", NULL, NULL,  MXML_DESCEND);
+                mxml_node_t *Stroke = mxmlFindElement(symbolizer, symbolizer, "se:Stroke", NULL, NULL,  MXML_DESCEND);
                 
-
+                opacity = NULL;
                     
                 const char *width;
                 /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
                  * to know what type of value it holds. Seems to be a waeknes of mini xml*/
-                    for (n = mxmlFindElement(symbolizer, symbolizer,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                    for (n = mxmlFindElement(Stroke, Stroke,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
                     n != NULL;
                     n = mxmlFindElement(n, Stroke,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
                     {
@@ -245,8 +245,9 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                         
                         if(!strcmp(attr, "stroke"))
                         {
-                            const char *color = mxmlGetOpaque(n);
+                            const char *color = mxmlGetOpaque(n);                            
                             read_color(color,c);
+                          //  printf("        c = %f, %f, %f, %f,color = %s\n",c[0],c[1], c[2],c[3], color);
                         }
                         else if (!strcmp(attr, "stroke-width"))
                         {               
@@ -256,19 +257,20 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                         else if (!strcmp(attr, "stroke-opacity"))
                         {               
                             opacity = mxmlGetOpaque(n);
+                         //   printf("opacity = %s\n",opacity);
                         }
                     }
                     
-                    if(opacity)            
-                        c[3] = strtof(opacity, NULL);
-                    else
-                        c[3] = 1;
+                  // if(opacity)            
+                 //       c[3] = strtof(opacity, NULL);
+               //     else
+                        c[3] = 0.5;
                         
                     
-            printf("color = %f, %f, %f, %f,z=%d, unit=%d, width=%s style = %p\n",c[0],c[1], c[2],c[3], z, unit, width, s->line_styles->color->list);
+          //  printf("        color = %f, %f, %f, %f,z=%d, unit=%d, width=%s style = %p, used colors= %d\n",c[0],c[1], c[2],c[3], z, unit, width, s->line_styles->color->list, s->line_styles->color->used);
                     addbatch2glfloat_list(s->line_styles->color, 4, c);
                 
-            printf("color = %f, %f, %f, %f\n",s->line_styles->color->list[s->line_styles->color->used-4],s->line_styles->color->list[s->line_styles->color->used-3],s->line_styles->color->list[s->line_styles->color->used-2],s->line_styles->color->list[s->line_styles->color->used-1]);
+           // printf("color = %f, %f, %f, %f\n",s->line_styles->color->list[s->line_styles->color->used-4],s->line_styles->color->list[s->line_styles->color->used-3],s->line_styles->color->list[s->line_styles->color->used-2],s->line_styles->color->list[s->line_styles->color->used-1]);
                      /*To get the layers rendered in the right order
                       * we use the reversed symbol order in the sld as z-value*/
                     add2glushort_list(s->line_styles->z,z);
@@ -325,7 +327,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
                     }
                     add2glushort_list(s->polygon_styles->units,unit);
 
-                mxml_node_t *Fill = mxmlFindElement(node, tree, "se:Fill", NULL, NULL,  MXML_DESCEND);
+                mxml_node_t *Fill = mxmlFindElement(symbolizer, symbolizer, "se:Fill", NULL, NULL,  MXML_DESCEND);
                 
 
                     
