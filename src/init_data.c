@@ -27,6 +27,7 @@
 #include "interface/interface.h"
 #include "read_sld.h"
 #include "symbols.h"
+#include "mem.h"
 /********************************************************************************
   Attach all databases with data for the project
 */
@@ -261,7 +262,7 @@ static int load_layers(TEXT *missing_db)
     char styleselect[128];
     char stylejoin[128];
     char stylewhere[128];
-    char textselect[128];
+    char textselect[256];
     char sql[2048];
     uint8_t type = 0;
     char sqlSel2[15];
@@ -336,11 +337,19 @@ static int load_layers(TEXT *missing_db)
     layerRuntime = init_layer_runtime(count_layers());
     //  for (i =0; i<nLayers; i++)
     i=0;
-    while(sqlite3_step(preparedLayerLoading) ==  SQLITE_ROW)
+    while(1)
     {
+        int res =  sqlite3_step(preparedLayerLoading) ;
+        
+         printf("res = %d\n",res);
+        if(res !=  SQLITE_ROW)
+        {
+            break;
+        }
+        
         oneLayer=layerRuntime + i;
         //   sqlite3_step(preparedLayerLoading);
-
+        printf("get layer ----------------------------------------------------\n");
 //       oneLayer->close_ring = 0;
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
@@ -416,10 +425,20 @@ static int load_layers(TEXT *missing_db)
             }
             else
             {
+                char *text_field = NULL;
                 
-                char *sld_style_field = load_sld(oneLayer,(const char*) sld);
+                char *sld_style_field = NULL;
+                if(sld && strlen((const char*)sld) >0)
+                {
+                size_t sld_len = strlen((const char*) sld);
+                char *sld_copy = st_malloc(sld_len+1);
+                strcpy(sld_copy, (const char*) sld);
+    
+    
+                sld_style_field = load_sld(oneLayer,sld_copy, &text_field);
+                free(sld_copy);
                     //Get the basic layer info from geometry columns table in data db
-
+                }
                 if(check_column(dbname,(const unsigned char*) "geometry_columns",(const unsigned char*) "idx_id_fld"))
                     snprintf(sql, 2048, "SELECT geometry_type, geometry_fld, idx_id_fld,id_fld, spatial_idx_fld, tri_idx_fld, utm_zone, hemisphere, n_dims from %s.geometry_columns where layer_name='%s';", dbname, layername);
                 else
@@ -529,7 +548,11 @@ static int load_layers(TEXT *missing_db)
 
                 if(show_text)
                 {
-                    snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",txt_fld, size_fld, rotation_fld, anchor_fld);
+                    if(text_field)
+                        snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",text_field, size_fld, rotation_fld, anchor_fld);
+                    else
+                        snprintf(textselect, sizeof(textselect), ",'text_field is missing', e.%s,e.%s,e.%s", size_fld, rotation_fld, anchor_fld);
+                        
                 }
                 else
                 {
@@ -581,6 +604,8 @@ static int load_layers(TEXT *missing_db)
                 
                 
                 
+                if (oneLayer->type & 32)
+                    oneLayer->text =  init_text_buf();
                 
                     
             }      
@@ -592,8 +617,6 @@ static int load_layers(TEXT *missing_db)
                     if (oneLayer->type & 4)
                         oneLayer->tri_index =  init_element_buf();
                 */
-                if (oneLayer->type & 32)
-                    oneLayer->text =  init_text_buf();
                     
                 oneLayer->name = malloc(2 * strlen((char*) layername)+1);
                 strcpy(oneLayer->name,(char*) layername);
@@ -605,8 +628,7 @@ static int load_layers(TEXT *missing_db)
                 
                 sqlite3_finalize(prepared_geo_col);
             
-            
-            
+                
         }
         else
         {
@@ -614,7 +636,7 @@ static int load_layers(TEXT *missing_db)
             continue;
         }
  
-
+    printf("layer loaded\n");
     }
     nLayers = i;
     sqlite3_finalize(preparedLayerLoading);
@@ -705,7 +727,8 @@ int init_resources(char *dir)
    add_system_default_style();
     init_symbols();
     loadSymbols();
-    load_layers(missing_db);
+    if(load_layers(missing_db))
+        log_this(100, "There is a problem loading layers");
     destroy_txt(missing_db);
     init_gps();
     init_info_Layer();

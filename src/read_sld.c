@@ -43,7 +43,8 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
          s->key_type = STRING_TYPE;
          s->point_styles = NULL;
          s->line_styles = NULL;
-         s->polygon_styles = NULL;         
+         s->polygon_styles = NULL;  
+         s->text_styles = NULL;         
          s->string_key = st_malloc(strlen(key) + 1);
          strcpy(s->string_key, key);
          HASH_ADD_KEYPTR( hh, oneLayer->styles, s->string_key, strlen(s->string_key), s );   
@@ -64,7 +65,8 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
          s->key_type = INT_TYPE;
          s->point_styles = NULL;
          s->line_styles = NULL;
-         s->polygon_styles = NULL;         
+         s->polygon_styles = NULL;  
+         s->text_styles = NULL;               
          s->int_key = (int) key;
          HASH_ADD_INT(oneLayer->styles, int_key, s);  
         }
@@ -81,7 +83,6 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
    mxml_node_t *n, *symbolizer;
-   GLfloat c[4];
     
     const char *opacity = NULL;
     
@@ -105,6 +106,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
          symbolizer != NULL;
          symbolizer = mxmlFindElement(symbolizer, node,"se:PointSymbolizer",NULL, NULL,MXML_DESCEND))
        { 
+   GLfloat c[4];
            
                     /*This is ugly because the sld standard sometimes is ugly
                      * If a symbol is given as map units we find that from searching 
@@ -197,7 +199,6 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
    mxml_node_t *n, *symbolizer;
-   GLfloat c[4];
     
     const char *opacity = NULL;
     
@@ -216,6 +217,7 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
          symbolizer != NULL;
          symbolizer = mxmlFindElement(symbolizer, node,"se:LineSymbolizer",NULL, NULL,MXML_DESCEND))
        { 
+            GLfloat c[4];
       //     printf(" ny symbolizer %p ok\n", symbolizer);
                     /*This is ugly because the sld standard sometimes is ugly
                      * If a symbol is given as map units we find that from searching 
@@ -261,10 +263,10 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                         }
                     }
                     
-                  // if(opacity)            
-                 //       c[3] = strtof(opacity, NULL);
-               //     else
-                        c[3] = 0.5;
+                   if(opacity)            
+                       c[3] = strtof(opacity, NULL);
+                    else
+                        c[3] = 1;
                         
                     
           //  printf("        color = %f, %f, %f, %f,z=%d, unit=%d, width=%s style = %p, used colors= %d\n",c[0],c[1], c[2],c[3], z, unit, width, s->line_styles->color->list, s->line_styles->color->used);
@@ -286,7 +288,6 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
    mxml_node_t *n, *symbolizer;
-   GLfloat c[4];
     
     const char *opacity = NULL;
     
@@ -315,6 +316,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
          symbolizer = mxmlFindElement(symbolizer, node,"se:PolygonSymbolizer",NULL, NULL,MXML_DESCEND))
        { 
            
+                    GLfloat c[4];
                     /*This is ugly because the sld standard sometimes is ugly
                      * If a symbol is given as map units we find that from searching 
                      * for a special uri in the symbolizer tag*/
@@ -411,8 +413,104 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
    //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
     return 0;
 }
-static int parse_textstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
+static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
 {
+    
+    *parsed_text_attr = NULL;
+    
+    struct STYLES *s = NULL;
+    check_and_add_style(oneLayer, tree, node, key_type, &s);
+   mxml_node_t *n, *symbolizer;
+    
+    const char *opacity = NULL;
+    
+    if( ! s->text_styles)
+    {
+     s->text_styles =  st_malloc(sizeof(LINE_STYLE));
+     s->text_styles->nsyms = 0;
+     s->text_styles->color = init_glfloat_list();
+     s->text_styles->size = init_glfloat_list();
+     s->text_styles->z = init_glushort_list();
+    }
+    
+   // printf("ny style\n");
+        for (symbolizer = mxmlFindElement(node, node,"se:TextSymbolizer",  NULL, NULL, MXML_DESCEND);
+         symbolizer != NULL;
+         symbolizer = mxmlFindElement(symbolizer, node,"se:TextSymbolizer",NULL, NULL,MXML_DESCEND))
+       { 
+           
+           const char *PropertyName = mxmlGetOpaque(mxmlFindPath(symbolizer, "se:Label/ogc:PropertyName"));
+           if(PropertyName)
+           {
+                *parsed_text_attr = st_malloc(strlen(PropertyName)+1);
+               strcpy(*parsed_text_attr, PropertyName);
+           }
+            GLfloat c[4];
+            
+                
+                opacity = NULL;
+                    
+                const char *size;
+                /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
+                 * to know what type of value it holds. Seems to be a waeknes of mini xml*/
+                mxml_node_t *Font = mxmlFindElement(symbolizer, symbolizer, "se:Font", NULL, NULL,  MXML_DESCEND);
+                for (n = mxmlFindElement(Font, Font,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                n != NULL;
+                n = mxmlFindElement(n, Font,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                {
+                    const char *attr = mxmlElementGetAttr(n, "name");
+                    
+                    if(!strcmp(attr, "font-size"))
+                    {
+                        size = mxmlGetOpaque(n);  
+                    }
+                    
+                }
+             /*   if(size)
+                    
+                        add2glfloat_list(s->text_styles->size, strtof(size, NULL));
+                else
+                    
+                        add2glfloat_list(s->text_styles->size,12);*/
+                        add2glfloat_list(s->text_styles->size,2);
+
+                mxml_node_t *Fill = mxmlFindElement(symbolizer, symbolizer, "se:Fill", NULL, NULL,  MXML_DESCEND);
+                for (n = mxmlFindElement(Fill, Fill,"se:SvgParameter",  "name", NULL, MXML_DESCEND);
+                n != NULL;
+                n = mxmlFindElement(n, Fill,"se:SvgParameter",  "name", NULL,MXML_DESCEND))
+                {
+                    const char *attr = mxmlElementGetAttr(n, "name");
+                    
+                    if(!strcmp(attr, "fill"))
+                    {
+                                       
+                            const char *stroke_color = mxmlGetOpaque(n);                            
+                            read_color(stroke_color,c);
+                    }
+                }
+                if(size)
+                    
+                        add2glfloat_list(s->text_styles->size, strtof(size, NULL));
+                else
+                    
+                        add2glfloat_list(s->text_styles->size,12);
+                 
+                    
+                        c[3] = 1;
+                        
+                    addbatch2glfloat_list(s->text_styles->color, 4, c);
+                        
+                
+           // printf("color = %f, %f, %f, %f\n",s->line_styles->color->list[s->line_styles->color->used-4],s->line_styles->color->list[s->line_styles->color->used-3],s->line_styles->color->list[s->line_styles->color->used-2],s->line_styles->color->list[s->line_styles->color->used-1]);
+                     /*To get the layers rendered in the right order
+                      * we use the reversed symbol order in the sld as z-value*/
+                    add2glushort_list(s->text_styles->z,z);
+                    
+                    s->text_styles->nsyms++;                    
+       }
+   //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
+    return 0;
+    
     
     return 0;
 }
@@ -425,12 +523,13 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
 
 
 
-char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
+char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
 {
     
     if(!sld || strlen(sld) ==0)
         return 0;
-    
+    *text_attr = NULL;
+    char *parsed_text_attr = NULL;
        const char *txt;
     const char *attr;
     int max_val = 0,min_val = INT_MAX, nvals=0, n_codes;
@@ -454,16 +553,17 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
        {
            
         const char *propname = mxmlGetOpaque(mxmlFindElement(rule, tree, "ogc:PropertyName",  NULL, NULL,  MXML_DESCEND));
-           
+        
         if(last_propname && strcmp(propname, last_propname))
         {
             log_this(100, "TilelessMap only supports 1 property_name\n");
             return NULL;
-        }
-        else
+        }          
+        if(!last_propname && propname)
         {
-         last_propname = st_malloc(strlen(propname) + 1);
-         strcpy(last_propname, propname);
+
+            last_propname = st_malloc(strlen(propname) + 1);
+            strcpy(last_propname, propname);
         }
         if(key_type == INT_TYPE)
         {
@@ -505,8 +605,26 @@ char* load_sld(LAYER_RUNTIME *oneLayer,const char *sld)
            parse_linestyle(oneLayer,tree, rule, key_type, z);
        
        if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:TextSymbolizer",  NULL, NULL,  MXML_DESCEND)))
-           parse_textstyle(oneLayer,tree, rule, key_type, z);
-        
+       {
+           parse_textstyle(oneLayer,&parsed_text_attr, tree, rule, key_type, z);
+           if(*text_attr && parsed_text_attr)
+           {
+               if(strcmp(parsed_text_attr, *text_attr))
+                   log_this(100, "Only one text attribute is supported per layer not both %s and %s. only %s will be used\n",*parsed_text_attr, *text_attr, *text_attr);
+           }
+           else
+           {
+               if(parsed_text_attr)
+               {
+                   *text_attr = st_malloc(strlen(parsed_text_attr)+1);
+                   strcpy(*text_attr,parsed_text_attr);
+               }
+               
+        }
+           
+       }
+       if((parsed_text_attr))
+           free(parsed_text_attr);
         nvals++;
        z--;
         printf("nvals = %d\n",nvals);
@@ -567,6 +685,8 @@ int add_system_default_style()
      add2glushort_list(s->polygon_styles->units,PIXEL_UNIT);
      s->polygon_styles->nsyms=1;
      system_default_style = s;
+    return 0;
+    
 }
 
 

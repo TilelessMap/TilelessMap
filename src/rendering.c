@@ -95,6 +95,8 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             
           //  printf("start checking %p\n", style);
           //  printf("style->nsyms=%d\n",style->nsyms);
+            if(!style)
+                continue;
                     int r;
             for (r = 0;r<style->nsyms;r++)
             {
@@ -275,6 +277,9 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
         n_vals = *(line->line_start_indexes->list + i)/vals_per_point - n_vals_acc;
+        
+            if(!style)
+                continue;
         int r;
         for (r = 0;r<style->nsyms;r++)
         {
@@ -370,6 +375,8 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         n_vals = *(line->line_start_indexes->list + i)/ndims - n_vals_acc;
         
+            if(!style)
+                continue;
         
 
         int r;
@@ -483,6 +490,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
             n_vals_acc = *(poly->element_start_indexes->list + i);
             
+            if(!style)
+                continue;
                     int r;
             for (r = 0;r<style->nsyms;r++)
             {
@@ -491,7 +500,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 color = style->color->list + 4*r;
                 glUniform4fv(std_color,1,color );
 
-
+            //    printf("color = %f, %f, %f,  %f\n", color[0], color[1], color[2], color[3]);
                 glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
              }
             
@@ -539,6 +548,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             
             
             
+            if(!style)
+                continue;
             int r;
             for (r = 0;r<style->nsyms;r++)
             {
@@ -714,8 +725,9 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 styles=system_default_style;
             TEXT_STYLE *style = styles->text_styles;
         
-        
-        int r;
+        if(!style)
+            continue;
+        int r;        
         for (r = 0;r<style->nsyms;r++)
         {
 

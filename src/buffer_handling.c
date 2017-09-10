@@ -768,8 +768,6 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
     }
     else if(type & 16)
     {
-        
-      //  add2union_list(l->lines->style_id, &(ts->styleID));        
         get_style(l->styles, l->lines->style_id, &(ts->styleID), ts->styleid_type);
         return l->lines->vertex_array;
     }

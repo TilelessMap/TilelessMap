@@ -240,8 +240,11 @@ void *twkb_fromSQLiteBBOX(void *theL)
             }
             else
             {
-                log_this(100, "Error, invalid style key type: %d\n", ts.styleid_type);
-                return NULL;                
+                if(theLayer->geometryType != RASTER)
+                {
+                    log_this(100, "Error, invalid style key type: %d\n", ts.styleid_type);
+                    return NULL;                
+                }
             }
             if(get_blob(prepared_statement,0, &res, &res_len))
             {
