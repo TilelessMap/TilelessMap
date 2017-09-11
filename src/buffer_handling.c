@@ -742,16 +742,23 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
     struct STYLES *s = NULL;
        if(val_type == INT_TYPE)
             {
-                HASH_FIND_INT( styles, val, s);   
+              //  printf("val = %d\n", *((int*) val));
+                HASH_FIND_INT( styles, val, s);
+                if(!s)
+            {
+                int v = -1;
+                HASH_FIND_INT(styles, &v, s);
+            } 
             }
             else if (val_type == STRING_TYPE)
             {
-                HASH_FIND_STR(styles, val, s);   
+                HASH_FIND_STR(styles, val, s);  
+                if(!s)
+                {
+                    HASH_FIND_STR(styles, "-1", s);
+                }
             }
-            if(!s)
-            {
-                HASH_FIND_STR(styles, "default", s);
-            }
+
             add2pointer_list(list, s);
     return 0;
 }

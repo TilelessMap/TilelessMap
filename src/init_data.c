@@ -371,6 +371,13 @@ static int load_layers(TEXT *missing_db)
         const unsigned char *sld =  sqlite3_column_text(preparedLayerLoading, 14);
 
         
+        oneLayer->name = malloc(2 * strlen((char*) layername)+1);
+        strcpy(oneLayer->name,(char*) layername);
+        oneLayer->db = malloc(2 * strlen((char*) dbname)+1);
+        strcpy(oneLayer->db,(char*) dbname);
+        
+        oneLayer->title = malloc(2 * strlen((char*) title)+1);
+        strcpy(oneLayer->title,(char*) title);
         if (check_layer(dbname, layername))
         {
 
@@ -618,13 +625,6 @@ static int load_layers(TEXT *missing_db)
                         oneLayer->tri_index =  init_element_buf();
                 */
                     
-                oneLayer->name = malloc(2 * strlen((char*) layername)+1);
-                strcpy(oneLayer->name,(char*) layername);
-                oneLayer->db = malloc(2 * strlen((char*) dbname)+1);
-                strcpy(oneLayer->db,(char*) dbname);
-                
-                oneLayer->title = malloc(2 * strlen((char*) title)+1);
-                strcpy(oneLayer->title,(char*) title);
                 
                 sqlite3_finalize(prepared_geo_col);
             

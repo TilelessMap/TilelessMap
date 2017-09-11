@@ -31,11 +31,9 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
     if(key_type == STRING_TYPE)
     {
         const char *key = mxmlGetOpaque(mxmlFindElement(node, tree, "ogc:Literal",  NULL, NULL,  MXML_DESCEND));
-       //  printf("key = %s\n",key);
         if(!key)
-            key = "default";
+            key = "-1";
         
-        printf("key = %s, oneLayer styles = %p\n",key, oneLayer->styles);
         HASH_FIND_STR( oneLayer->styles, key, s);
         if(!s)
         {
@@ -53,9 +51,8 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
     else if (key_type == INT_TYPE)
     {
         const char *key_txt = mxmlGetOpaque(mxmlFindElement(node, tree, "ogc:Literal",  NULL, NULL,  MXML_DESCEND));
-       //  printf("key = %s\n",key);
         if(!key_txt)
-            key_txt = "default";
+            key_txt = "-1";
         
         long int key = strtol(key_txt, NULL, 10);
         HASH_FIND_INT( oneLayer->styles, &key, s);
@@ -77,7 +74,7 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
     return 0;
 }
 
-static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
+static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, GLfloat z)
 {
     
     struct STYLES *s = NULL;
@@ -93,7 +90,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
      s->point_styles->symbol = init_uint8_list();
      s->point_styles->color = init_glfloat_list();
      s->point_styles->size = init_glfloat_list();
-     s->point_styles->z = init_glushort_list();
+     s->point_styles->z = init_glfloat_list();
      s->point_styles->units = init_glushort_list();
     }
     else
@@ -177,11 +174,10 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
                 
                      /*To get the layers rendered in the right order
                       * we use the reversed symbol order in the sld as z-value*/
-                    add2glushort_list(s->point_styles->z,z);
+                    add2glfloat_list(s->point_styles->z,z);
                     
                     s->point_styles->nsyms++;
                     
-                    printf("writing size %f and %zu is used\n",strtof(size, NULL), s->point_styles->size->used);
                         
        }
    //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
@@ -193,7 +189,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
 
 
 
-static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
+static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, GLfloat z)
 {
     
     struct STYLES *s = NULL;
@@ -208,17 +204,16 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
      s->line_styles->nsyms = 0;
      s->line_styles->color = init_glfloat_list();
      s->line_styles->width = init_glfloat_list();
-     s->line_styles->z = init_glushort_list();
+     s->line_styles->z = init_glfloat_list();
      s->line_styles->units = init_glushort_list();
     }
     
-   // printf("ny style\n");
         for (symbolizer = mxmlFindElement(node, node,"se:LineSymbolizer",  NULL, NULL, MXML_DESCEND);
          symbolizer != NULL;
          symbolizer = mxmlFindElement(symbolizer, node,"se:LineSymbolizer",NULL, NULL,MXML_DESCEND))
        { 
             GLfloat c[4];
-      //     printf(" ny symbolizer %p ok\n", symbolizer);
+            
                     /*This is ugly because the sld standard sometimes is ugly
                      * If a symbol is given as map units we find that from searching 
                      * for a special uri in the symbolizer tag*/
@@ -249,7 +244,6 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                         {
                             const char *color = mxmlGetOpaque(n);                            
                             read_color(color,c);
-                          //  printf("        c = %f, %f, %f, %f,color = %s\n",c[0],c[1], c[2],c[3], color);
                         }
                         else if (!strcmp(attr, "stroke-width"))
                         {               
@@ -269,20 +263,18 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                         c[3] = 1;
                         
                     
-          //  printf("        color = %f, %f, %f, %f,z=%d, unit=%d, width=%s style = %p, used colors= %d\n",c[0],c[1], c[2],c[3], z, unit, width, s->line_styles->color->list, s->line_styles->color->used);
-                    addbatch2glfloat_list(s->line_styles->color, 4, c);
+                      addbatch2glfloat_list(s->line_styles->color, 4, c);
                 
-           // printf("color = %f, %f, %f, %f\n",s->line_styles->color->list[s->line_styles->color->used-4],s->line_styles->color->list[s->line_styles->color->used-3],s->line_styles->color->list[s->line_styles->color->used-2],s->line_styles->color->list[s->line_styles->color->used-1]);
-                     /*To get the layers rendered in the right order
+                        /*To get the layers rendered in the right order
                       * we use the reversed symbol order in the sld as z-value*/
-                    add2glushort_list(s->line_styles->z,z);
+                    add2glfloat_list(s->line_styles->z,z);
                     
                     s->line_styles->nsyms++;                    
        }
    //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
     return 0;
 }
-static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
+static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, GLfloat z)
 {
     
     struct STYLES *s = NULL;
@@ -296,7 +288,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
      s->polygon_styles =  st_malloc(sizeof(POLYGON_STYLE));
      s->polygon_styles->nsyms = 0;
      s->polygon_styles->color = init_glfloat_list();
-     s->polygon_styles->z = init_glushort_list();
+     s->polygon_styles->z = init_glfloat_list();
      s->polygon_styles->units = init_glushort_list();
     }
     
@@ -306,7 +298,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
      s->line_styles->nsyms = 0;
      s->line_styles->color = init_glfloat_list();
      s->line_styles->width = init_glfloat_list();
-     s->line_styles->z = init_glushort_list();
+     s->line_styles->z = init_glfloat_list();
      s->line_styles->units = init_glushort_list();
     }
     
@@ -361,7 +353,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
                 
                      /*To get the layers rendered in the right order
                       * we use the reversed symbol order in the sld as z-value*/
-                    add2glushort_list(s->polygon_styles->z,z);
+                    add2glfloat_list(s->polygon_styles->z,z);
                     
                     s->polygon_styles->nsyms++;                    
                     
@@ -406,14 +398,14 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
                 
                      /*To get the layers rendered in the right order
                       * we use the reversed symbol order in the sld as z-value*/
-                    add2glushort_list(s->line_styles->z,z);
+                    add2glfloat_list(s->line_styles->z,z);
                     
                     s->line_styles->nsyms++;                    
        }
    //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);
     return 0;
 }
-static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml_node_t *tree, mxml_node_t *node, int key_type, int z)
+static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml_node_t *tree, mxml_node_t *node, int key_type, GLfloat z)
 {
     
     *parsed_text_attr = NULL;
@@ -430,10 +422,9 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
      s->text_styles->nsyms = 0;
      s->text_styles->color = init_glfloat_list();
      s->text_styles->size = init_glfloat_list();
-     s->text_styles->z = init_glushort_list();
+     s->text_styles->z = init_glfloat_list();
     }
     
-   // printf("ny style\n");
         for (symbolizer = mxmlFindElement(node, node,"se:TextSymbolizer",  NULL, NULL, MXML_DESCEND);
          symbolizer != NULL;
          symbolizer = mxmlFindElement(symbolizer, node,"se:TextSymbolizer",NULL, NULL,MXML_DESCEND))
@@ -501,10 +492,9 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
                     addbatch2glfloat_list(s->text_styles->color, 4, c);
                         
                 
-           // printf("color = %f, %f, %f, %f\n",s->line_styles->color->list[s->line_styles->color->used-4],s->line_styles->color->list[s->line_styles->color->used-3],s->line_styles->color->list[s->line_styles->color->used-2],s->line_styles->color->list[s->line_styles->color->used-1]);
-                     /*To get the layers rendered in the right order
+                      /*To get the layers rendered in the right order
                       * we use the reversed symbol order in the sld as z-value*/
-                    add2glushort_list(s->text_styles->z,z);
+                    add2glfloat_list(s->text_styles->z,z);
                     
                     s->text_styles->nsyms++;                    
        }
@@ -512,7 +502,6 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
     return 0;
     
     
-    return 0;
 }
 
 
@@ -552,37 +541,33 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
          rule = mxmlFindElement(rule, tree,"se:Rule",NULL, NULL,MXML_DESCEND))
        {
            
-        const char *propname = mxmlGetOpaque(mxmlFindElement(rule, tree, "ogc:PropertyName",  NULL, NULL,  MXML_DESCEND));
-        
-        if(last_propname && strcmp(propname, last_propname))
-        {
-            log_this(100, "TilelessMap only supports 1 property_name\n");
-            return NULL;
-        }          
-        if(!last_propname && propname)
-        {
-
-            last_propname = st_malloc(strlen(propname) + 1);
-            strcpy(last_propname, propname);
-        }
-        if(key_type == INT_TYPE)
-        {
-            const char *val_txt = mxmlGetOpaque(mxmlFindElement(rule,tree,"ogc:Literal", NULL,NULL,MXML_DESCEND));
-            printf("val = %s\n", val_txt);
-            if(val_txt)
+            const char *propname = mxmlGetOpaque(mxmlFindElement(rule, tree, "ogc:PropertyName",  NULL, NULL,  MXML_DESCEND));
+            
+            if(last_propname && propname && strcmp(propname, last_propname))
             {
-                val = strtol(val_txt,&checknum,10);
-                if(val == 0 && val_txt == checknum) //ok, there where no numbers so we switch to text type
-                    key_type = STRING_TYPE;
+                log_this(100, "TilelessMap only supports 1 property_name\n");
+                return NULL;
+            }          
+            if(!last_propname && propname)
+            {
+                last_propname = st_malloc(strlen(propname) + 1);
+                strcpy(last_propname, propname);
             }
-        }
-        nvals++;
+            if(key_type == INT_TYPE)
+            {
+                const char *val_txt = mxmlGetOpaque(mxmlFindElement(rule,tree,"ogc:Literal", NULL,NULL,MXML_DESCEND));
+                if(val_txt)
+                {
+                    val = strtol(val_txt,&checknum,10);
+                    if(val == 0 && val_txt == checknum) //ok, there where no numbers so we switch to text type
+                        key_type = STRING_TYPE;
+                }
+            }
+            nvals++;
        }
     
-    printf("nvals = %d, maxval = %d\n", nvals, max_val);
     
     
- //   styles = st_malloc(nvals * sizeof(struct STYLES));
     
     
     nvals = 0;
@@ -592,7 +577,7 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
          rule = mxmlFindElement(rule, tree,"se:Rule",NULL, NULL,MXML_DESCEND))
        {
            
-        int z = nvals*0.002; //this value is set to support 500 symbols in a layer before getting a z-value over 1(which will prevent rendering
+        GLfloat z = nvals*0.002; //this value is set to support 500 symbols in a layer before getting a z-value over 1(which will prevent rendering
         if(z>1)
             z=1;
         if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:PolygonSymbolizer",  NULL, NULL,  MXML_DESCEND)))
@@ -627,20 +612,22 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
            free(parsed_text_attr);
         nvals++;
        z--;
-        printf("nvals = %d\n",nvals);
     
        }     
         oneLayer->style_key_type = key_type;
         
     mxmlDelete(tree);
-    printf("returning propname %s\n",last_propname);
+ //   printf("returning propname %s\n",last_propname);
     return last_propname;
     
 }
 
 int add_system_default_style()
 {
+    
+    //Styling when style is missing in layer
     struct STYLES *s;
+    GLfloat z = 0.5;
     GLfloat color[]={1,1,1,0.5};
             s = st_malloc(sizeof(struct STYLES)); 
             s->int_key = 0;
@@ -651,13 +638,13 @@ int add_system_default_style()
      s->point_styles->symbol = init_uint8_list();
      s->point_styles->color = init_glfloat_list();
      s->point_styles->size = init_glfloat_list();
-     s->point_styles->z = init_glushort_list();
+     s->point_styles->z = init_glfloat_list();
      s->point_styles->units = init_glushort_list();
      
      add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
      addbatch2glfloat_list(s->point_styles->color,4,color);
      add2glfloat_list(s->point_styles->size,7);
-     add2glushort_list(s->point_styles->z,1);
+     add2glfloat_list(s->point_styles->z,z);
      add2glushort_list(s->point_styles->units,PIXEL_UNIT);
      s->point_styles->nsyms=1;
      
@@ -665,26 +652,81 @@ int add_system_default_style()
     s->line_styles =  st_malloc(sizeof(LINE_STYLE));
      s->line_styles->color = init_glfloat_list();
      s->line_styles->width = init_glfloat_list();
-     s->line_styles->z = init_glushort_list();
+     s->line_styles->z = init_glfloat_list();
      s->line_styles->units = init_glushort_list();
      
      addbatch2glfloat_list(s->line_styles->color,4,color);
      add2glfloat_list(s->line_styles->width,1);
-     add2glushort_list(s->line_styles->z,1);
+     add2glfloat_list(s->line_styles->z,z);
      add2glushort_list(s->line_styles->units,PIXEL_UNIT);
      s->line_styles->nsyms=1;
      
          //polygon
     s->polygon_styles =  st_malloc(sizeof(POLYGON_STYLE));
      s->polygon_styles->color = init_glfloat_list();
-     s->polygon_styles->z = init_glushort_list();
+     s->polygon_styles->z = init_glfloat_list();
      s->polygon_styles->units = init_glushort_list();
      
      addbatch2glfloat_list(s->polygon_styles->color,4,color);
-     add2glushort_list(s->polygon_styles->z,1);
+     add2glfloat_list(s->polygon_styles->z,z);
      add2glushort_list(s->polygon_styles->units,PIXEL_UNIT);
      s->polygon_styles->nsyms=1;
      system_default_style = s;
+     
+     
+     
+     
+     //style used for info-lookup
+     
+    //Styling when style is missing in layer
+    struct STYLES *info_s;
+    GLfloat info_z = 0.5;
+    GLfloat info_color[]={1,0,0,0.5};
+    info_s = st_malloc(sizeof(struct STYLES)); 
+    info_s->int_key = 0;
+    info_s->string_key = NULL;
+        
+         //point
+    info_s->point_styles =  st_malloc(sizeof(POINT_STYLE));
+     info_s->point_styles->symbol = init_uint8_list();
+     info_s->point_styles->color = init_glfloat_list();
+     info_s->point_styles->size = init_glfloat_list();
+     info_s->point_styles->z = init_glfloat_list();
+     info_s->point_styles->units = init_glushort_list();
+     
+     add2uint8_list(info_s->point_styles->symbol,CIRCLE_SYMBOL);
+     addbatch2glfloat_list(info_s->point_styles->color,4,info_color);
+     add2glfloat_list(info_s->point_styles->size,7);
+     add2glfloat_list(info_s->point_styles->z,info_z);
+     add2glushort_list(info_s->point_styles->units,PIXEL_UNIT);
+     info_s->point_styles->nsyms=1;
+     
+         //line
+    info_s->line_styles =  st_malloc(sizeof(LINE_STYLE));
+     info_s->line_styles->color = init_glfloat_list();
+     info_s->line_styles->width = init_glfloat_list();
+     info_s->line_styles->z = init_glfloat_list();
+     info_s->line_styles->units = init_glushort_list();
+     
+     addbatch2glfloat_list(info_s->line_styles->color,4,info_color);
+     add2glfloat_list(info_s->line_styles->width,1);
+     add2glfloat_list(info_s->line_styles->z,info_z);
+     add2glushort_list(info_s->line_styles->units,PIXEL_UNIT);
+     info_s->line_styles->nsyms=1;
+     
+         //polygon
+    info_s->polygon_styles =  st_malloc(sizeof(POLYGON_STYLE));
+     info_s->polygon_styles->color = init_glfloat_list();
+     info_s->polygon_styles->z = init_glfloat_list();
+     info_s->polygon_styles->units = init_glushort_list();
+     
+     addbatch2glfloat_list(info_s->polygon_styles->color,4,info_color);
+     add2glfloat_list(info_s->polygon_styles->z,info_z);
+     add2glushort_list(info_s->polygon_styles->units,PIXEL_UNIT);
+     info_s->polygon_styles->nsyms=1;
+     system_default_info_style = info_s;
+     printf("info_s = %p\n",info_s);
+     
     return 0;
     
 }

@@ -118,7 +118,7 @@ STYLES_RUNTIME;
 typedef struct
 {
         GLFLOAT_LIST *color;
-        GLUSHORT_LIST *z;
+        GLFLOAT_LIST *z;
         GLUSHORT_LIST *units;        
         int nsyms;
 }
@@ -128,7 +128,7 @@ typedef struct
 {
         GLFLOAT_LIST *color;
         GLFLOAT_LIST *width;
-        GLUSHORT_LIST *z;
+        GLFLOAT_LIST *z;
         GLUSHORT_LIST *units;   
         int nsyms;
 }
@@ -139,7 +139,7 @@ typedef struct
         UINT8_LIST *symbol;
         GLFLOAT_LIST *color;
         GLFLOAT_LIST *size;
-        GLUSHORT_LIST *z;
+        GLFLOAT_LIST *z;
         GLUSHORT_LIST *units;  
         int nsyms;
 }
@@ -149,7 +149,7 @@ typedef struct
 {
         GLFLOAT_LIST *color;
         GLFLOAT_LIST *size;
-        GLUSHORT_LIST *z;
+        GLFLOAT_LIST *z;
         int nsyms;
 }
 TEXT_STYLE;

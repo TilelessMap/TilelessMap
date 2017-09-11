@@ -47,7 +47,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
                 add_txt(layer_info_sql, ", ");
             
             const unsigned char *field = sqlite3_column_text(prepared_info, 0);
-            printf("test header = %s, field = %s\n",(char*) sqlite3_column_text(prepared_info, 3), (char*) field);
+//            printf("test header = %s, field = %s\n",(char*) sqlite3_column_text(prepared_info, 3), (char*) field);
             add_txt(layer_info_sql, (const char*) field);               
                
             i++;
@@ -181,6 +181,7 @@ int identify(MATRIX *map_matrix, int x, int y)
     LAYER_RUNTIME *theLayer;
     POLYGON_LIST *poly = infoLayer->polygons;
     POLYGON_LIST *renderpoly = infoRenderLayer->polygons;
+    infoLayer->style_key_type = 1; //just to avoid protests when parsing data;
 
     reset_buffers(infoRenderLayer);
     infoRenderLayer->visible = 0;
@@ -279,7 +280,8 @@ int identify(MATRIX *map_matrix, int x, int y)
                             log_this(100,"ok, poly for rendering");
                             add2gluint_list(renderpoly->polygon_start_indexes, renderpoly->vertex_array->used); //register start of new polygon to render
                             addbatch2glfloat_list(renderpoly->vertex_array, next_polystart - curr_poly_start, poly->vertex_array->list + curr_poly_start); //memcpy all vertexes in polygon
-
+                            
+                            add2pointer_list(renderpoly->style_id,system_default_info_style);
 
 
                             n_elements = *(poly->element_start_indexes->list + poly_n) - n_elements_acc;
@@ -310,7 +312,7 @@ int identify(MATRIX *map_matrix, int x, int y)
 
     }
 
-    setzero2pointer_list(renderpoly->style_id, renderpoly->polygon_start_indexes->used);
+    //setzero2pointer_list(renderpoly->style_id, renderpoly->polygon_start_indexes->used);
 
 
     //render_info(window,map_matrix->matrix);
