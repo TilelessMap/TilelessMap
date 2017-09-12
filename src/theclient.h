@@ -150,6 +150,7 @@ typedef struct
         GLFLOAT_LIST *color;
         GLFLOAT_LIST *size;
         GLFLOAT_LIST *z;
+        POINTER_LIST *a;
         int nsyms;
 }
 TEXT_STYLE;

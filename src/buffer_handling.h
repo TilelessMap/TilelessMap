@@ -331,6 +331,7 @@ GLFLOAT_LIST* init_glfloat_list();
 GLUSHORT_LIST* init_glushort_list();
 SYMBOLS* init_symbol_list();
 UNION_LIST* init_union_list();
+POINTER_LIST* init_pointer_list();
 
 int add2glfloat_list(GLFLOAT_LIST *list, GLfloat val);
 int add2gluint_list(GLUINT_LIST *list, GLuint val);

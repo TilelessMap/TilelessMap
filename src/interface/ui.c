@@ -26,7 +26,7 @@
 #include "../theclient.h"
 #include "../mem.h"
 #include "interface.h"
-
+#include "../fonts.h"
 
 
 static uint8_t show_layer_control;
@@ -61,7 +61,7 @@ int init_controls()
     multiply_array(info_box, size_factor, 4);
 
     txt = init_textblock(1);
-    append_2_textblock(txt,"INFO", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(txt,"INFO", loadatlas("freesans",BOLD_TYPE, 20));
 
     register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 1,1);
 
@@ -73,7 +73,7 @@ int init_controls()
     show_layer_control = 0;
 
     txt = init_textblock(1);
-    append_2_textblock(txt,"LAYERS", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(txt,"LAYERS", loadatlas("freesans",BOLD_TYPE, 20));
 
     struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
@@ -165,7 +165,7 @@ static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_fun
     {
         //TEXT *txt = init_txt(5);
         TEXTBLOCK *txt = init_textblock(1);
-        append_2_textblock(txt,"X", fonts[0]->fss->fs[character_size].bold);
+        append_2_textblock(txt,"X", loadatlas("freesans",BOLD_TYPE, 20));
 //        add_txt(txt, "X");
         t->txt=txt;
         oneLayer->visible = 1;
@@ -255,7 +255,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
 
         txt = init_textblock(1);
-        append_2_textblock(txt,oneLayer->title, fonts[0]->fss->fs[text_size].bold);
+        append_2_textblock(txt,oneLayer->title, loadatlas("freesans",BOLD_TYPE, 20));
 
 
         GLshort click_box[] = {rowstart_x, rowstart_y-click_size,rowstart_x + click_size,rowstart_y};
@@ -268,7 +268,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
             add_txt(x_txt, "X");
             */
             x_txt = init_textblock(1);
-            append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
+            append_2_textblock(x_txt,"X", loadatlas("freesans",BOLD_TYPE, 20));
 
             new_ctrl = register_control(CHECKBOX, layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,x_txt,box_text_margins, 1,10);
         }
@@ -303,7 +303,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     add_txt(x_txt, "X");
     */
     x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(x_txt,"X",  loadatlas("freesans",BOLD_TYPE, 20));
     register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
 
     return 0;
@@ -349,9 +349,9 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
         int link_to_page = sqlite3_column_int(preparedinfo, 3);
         
         if(bold)
-            font = fonts[0]->fss->fs[text_size].bold;
+            font = loadatlas("freesans",BOLD_TYPE, 12);
         else
-            font = fonts[0]->fss->fs[text_size].normal;
+            font = loadatlas("freesans",BOLD_TYPE, 12);
             
     printf("txt = %s\n", (char*)txt);
             append_2_textblock(tb, (char*)txt, font);
@@ -430,7 +430,7 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
     GLfloat info_color[]= {100,200, 100,200};
     
     TEXTBLOCK *x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"i", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(x_txt,"i", loadatlas("freesans",BOLD_TYPE, 20));
     return register_control(BUTTON, ctrl,ctrl, init_show_info,&page,NULL,info_box,info_color,x_txt,box_text_margins, 1,10);
 
     

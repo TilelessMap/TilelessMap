@@ -4,7 +4,7 @@
 #include <limits.h>
 #include "mem.h"
 #include "buffer_handling.h"
-
+#include "fonts.h"
 static GLfloat* read_color(const char* str, GLfloat *c)
 {
     
@@ -413,9 +413,11 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
    mxml_node_t *n, *symbolizer;
-    
-    const char *opacity = NULL;
-    
+    const char *font_family;
+    const char *opacity;
+    const char* font_weight_txt;
+    int size;
+    int font_weight = 0;
     if( ! s->text_styles)
     {
      s->text_styles =  st_malloc(sizeof(LINE_STYLE));
@@ -423,6 +425,7 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
      s->text_styles->color = init_glfloat_list();
      s->text_styles->size = init_glfloat_list();
      s->text_styles->z = init_glfloat_list();
+     s->text_styles->a = init_pointer_list();
     }
     
         for (symbolizer = mxmlFindElement(node, node,"se:TextSymbolizer",  NULL, NULL, MXML_DESCEND);
@@ -439,9 +442,8 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
             GLfloat c[4];
             
                 
-                opacity = NULL;
                     
-                const char *size;
+                const char *size_txt;
                 /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
                  * to know what type of value it holds. Seems to be a waeknes of mini xml*/
                 mxml_node_t *Font = mxmlFindElement(symbolizer, symbolizer, "se:Font", NULL, NULL,  MXML_DESCEND);
@@ -453,7 +455,21 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
                     
                     if(!strcmp(attr, "font-size"))
                     {
-                        size = mxmlGetOpaque(n);  
+                        size_txt = mxmlGetOpaque(n);  
+                    }
+                    else if(!strcmp(attr, "font-family"))
+                    {
+                        font_family = mxmlGetOpaque(n);                          
+                    }
+                    else if(!strcmp(attr, "font-weight"))
+                    {
+                        font_weight_txt = mxmlGetOpaque(n);              
+                        if(!strcmp(font_weight_txt,"normal"))  
+                            font_weight = NORMAL_TYPE;
+                        else if(!strcmp(font_weight_txt,"bold"))  
+                            font_weight = BOLD_TYPE;
+                        else if(!strcmp(font_weight_txt,"italic"))  
+                            font_weight = ITALIC_TYPE;
                     }
                     
                 }
@@ -479,13 +495,19 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
                             read_color(stroke_color,c);
                     }
                 }
-                if(size)
+                if(size_txt)
                     
-                        add2glfloat_list(s->text_styles->size, strtof(size, NULL));
+                        size = (int) ceil(strtof(size_txt, NULL));
                 else
                     
-                        add2glfloat_list(s->text_styles->size,12);
+                        size = 0;
                  
+                
+                
+                    
+                    ATLAS *a = loadatlas(font_family,font_weight,size);
+                
+                add2pointer_list(s->text_styles->a, a);
                     
                         c[3] = 1;
                         

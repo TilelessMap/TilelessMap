@@ -749,8 +749,8 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         
         
 
-        a = fonts[0]->fss->fs[psz].normal;
-    
+//        a = fonts[0]->fss->fs[psz].normal;
+  a=style->a->list[r];  
     
         draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
         }

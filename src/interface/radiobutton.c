@@ -51,7 +51,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
         }
     }
     txt = init_textblock(1);
-    append_2_textblock(txt,"O", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(txt,"O", loadatlas("freesans",BOLD_TYPE, 20));
     t->txt=txt;
     v = 1;
     func_in_func((void*) t, &v);
