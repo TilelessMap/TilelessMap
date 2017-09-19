@@ -248,7 +248,7 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
                         else if (!strcmp(attr, "stroke-width"))
                         {               
                             width = mxmlGetOpaque(n);
-                            add2glfloat_list(s->line_styles->width, strtof(width, NULL));
+                            add2glfloat_list(s->line_styles->width, strtof(width, NULL)*0.5); //We multiply by 0.5 since the number will be used in both directions in the shader
                         }
                         else if (!strcmp(attr, "stroke-opacity"))
                         {               

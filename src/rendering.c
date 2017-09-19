@@ -751,7 +751,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 //        a = fonts[0]->fss->fs[psz].normal;
   a=style->a->list[r];  
-    
+   // printf("---------------------------------------------  a is %p\n", a);
         draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
         }
 
@@ -834,7 +834,6 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     unsigned int i;
     GLfloat max_used_width = 0;
     reset_wc_txt(tmp_unicode_txt);
-
     glBindTexture(GL_TEXTURE_2D, a->tex);
     //    glUniform1i(text_uniform_tex, 0);
     /* Set up the VBO for our vertex data */

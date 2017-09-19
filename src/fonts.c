@@ -214,6 +214,12 @@ int init_text_resources()
 
 static FONT* check_font(const char *fontname, int fonttype, int size)
 {
+    
+    if(size > MAX_FONT_SIZE)
+    {
+     log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);   
+     size = MAX_FONT_SIZE;
+    }
         int i;
         FONT *font = NULL;
         for (i=0;i<fnts->nfonts;i++)
@@ -234,6 +240,7 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
                 fnts->fonts = st_malloc(sizeof(FONT) * new_nfonts );
             }
             font = fnts->fonts + fnts->nfonts;
+            fnts->nfonts=new_nfonts;
             font->max_size = 0;
             font->fontname = st_malloc(strlen(fontname)+1);
             strcpy(font->fontname, fontname);
@@ -244,14 +251,7 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
         
     if(font->max_size<size)
     {
-        if(font->max_size==0)
-            font->a = st_calloc((size + 1),sizeof(ATLAS*));
-        else    
-        {
-            font->a = st_realloc(font->a, (size + 1) * sizeof(ATLAS*));
-                memset(font->a + font->max_size,0,size - font->max_size); 
-        }
-        
+            font->a = st_calloc((MAX_FONT_SIZE + 1),sizeof(ATLAS*));        
         font->max_size = size;
     }
     
@@ -262,6 +262,11 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
 
 ATLAS* loadatlas(const char* fontname,int fonttype, int size)
 {
+    if(size > MAX_FONT_SIZE)
+    {
+     log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);   
+     size = MAX_FONT_SIZE;
+    }
       log_this(10, "Entering %s\n",__func__);
     char *sql_txt;
     int rc;
@@ -329,8 +334,10 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
 
     log_this(10,"font name = %s\n", face->style_name);
     f = check_font((const char*) res_fontname, res_type, size);
-    f->a[size] = create_atlas(face, size);
+    if(!f->a[size])
+        f->a[size] = create_atlas(face, size);
     
+    log_this(10,"-------------------returning font %s,typ %d, size %d, pointer %p\n", res_fontname, res_type,size, f->a[size]);
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
 

@@ -742,7 +742,7 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
     struct STYLES *s = NULL;
        if(val_type == INT_TYPE)
             {
-              //  printf("val = %d\n", *((int*) val));
+                log_this(10," and val = %d\n", *((int*) val));
                 HASH_FIND_INT( styles, val, s);
                 if(!s)
             {
@@ -752,6 +752,8 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
             }
             else if (val_type == STRING_TYPE)
             {
+                
+    log_this(10,"and val = %s  \n",(char*) val);
                 HASH_FIND_STR(styles, val, s);  
                 if(!s)
                 {
@@ -765,6 +767,7 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
 
 GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
+    log_this(10,"layer = %s  and ",l->name);
 //   add2gluint_list(l->style_id, style_id);
     int type = l->type;
     if(type & 224)

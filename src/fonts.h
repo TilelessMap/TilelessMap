@@ -19,7 +19,7 @@
 #define BOLD_TYPE 2
 #define ITALIC_TYPE 3
 
-
+#define MAX_FONT_SIZE 127
 
 typedef struct {
     float ax;	// advance.x

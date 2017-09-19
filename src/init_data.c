@@ -291,20 +291,15 @@ static int load_layers(TEXT *missing_db)
                              " l.defaultVisible,"  // 2
                              "l.minScale,"  // 3
                              "l.maxScale,"  // 4
-                             "styleField,"  // 5
+                             "type,"  // 5
                              "showText,"  // 6
                              "linewidth,"  // 7
                              "l.layerID, "  // 8
-                             "tc.size_fld,"  // 9
-                             "rotation_fld,"  // 10
-                             "anchor_fld,"  // 11
-                             "txt_fld,"  // 12
-                             "title,"  // 13
-                             "sld";  // 14
+                             "title,"  // 9
+                             "sld";  // 10
     
     char *sqlLayerLoading2 = " FROM layers l "
-                             "INNER JOIN dbs d on l.source = d.name "
-                             "LEFT JOIN text_conf tc on l.layerID=tc.layerID ";
+                             "INNER JOIN dbs d on l.source = d.name ";
     
     
         int info_rel = check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "info_rel");                         
@@ -362,13 +357,13 @@ static int load_layers(TEXT *missing_db)
         int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
 
 
-
+/*
         const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,9);
         const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 10);
         const unsigned char *anchor_fld =  sqlite3_column_text(preparedLayerLoading, 11);
-        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);
-        const unsigned char *title =  sqlite3_column_text(preparedLayerLoading, 13);
-        const unsigned char *sld =  sqlite3_column_text(preparedLayerLoading, 14);
+        const unsigned char *txt_fld =  sqlite3_column_text(preparedLayerLoading, 12);*/
+        const unsigned char *title =  sqlite3_column_text(preparedLayerLoading, 9);
+        const unsigned char *sld =  sqlite3_column_text(preparedLayerLoading, 10);
 
         
         oneLayer->name = malloc(2 * strlen((char*) layername)+1);
@@ -380,9 +375,10 @@ static int load_layers(TEXT *missing_db)
         strcpy(oneLayer->title,(char*) title);
         if (check_layer(dbname, layername))
         {
+            if(!stylefield)
+                continue;
 
-
-            if(!strcmp((const char*) stylefield,  "__raster__"))
+            if(!strcmp((const char*) stylefield,  "raster"))
             {
                     snprintf(sql, 2048, "SELECT geometry_fld,data_fld, id_fld,spatial_idx,  utm_zone, hemisphere, tilewidth, tileheight from %s.raster_columns where layer_name='%s';", dbname, layername);
 
@@ -553,12 +549,26 @@ static int load_layers(TEXT *missing_db)
                         oneLayer->style_key_type = INT_TYPE;
                 }
 
-                if(show_text)
+
+              /*  snprintf(sql,sizeof(sql),"select e.%s, %s,e.%s,e.%s %s from %s.%s e inner join %s.%s ei on e.%s = ei.id where  ei.minX<? and ei.maxX>? and ei.minY<? and ei.maxY >?",
+                        geometryfield,
+                        tri_idx_fld,
+                        idx_idfield,
+                        unique_idfield,
+                        styleselect,
+                        dbname,
+                        layername,
+                        dbname,
+                        geometryindex,
+                        idx_idfield);*/
+
+                
+                 if(show_text)
                 {
                     if(text_field)
-                        snprintf(textselect, sizeof(textselect), ",e.%s, e.%s,e.%s,e.%s",text_field, size_fld, rotation_fld, anchor_fld);
+                        snprintf(textselect, sizeof(textselect), ",e.%s",text_field);
                     else
-                        snprintf(textselect, sizeof(textselect), ",'text_field is missing', e.%s,e.%s,e.%s", size_fld, rotation_fld, anchor_fld);
+                        snprintf(textselect, sizeof(textselect), ",%s","'text_field is missing'");
                         
                 }
                 else
@@ -578,7 +588,6 @@ static int load_layers(TEXT *missing_db)
                         dbname,
                         geometryindex,
                         idx_idfield);
-
                 /*
 
                 snprintf(sql,sizeof(sql), "%s%s %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
