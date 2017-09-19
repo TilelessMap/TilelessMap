@@ -67,7 +67,7 @@ typedef struct
 {
  char *fontname;
  int fonttype;
- FONTSIZES *fss;
+ //FONTSIZES *fss;
  ATLAS **a;
  size_t max_size;
 } FONT;
@@ -81,7 +81,7 @@ typedef struct
 
 
 FONT* init_font(const char* fontname);
-int destroy_font(FONT *f);
+int destroy_font(FONTS *fonts);
 FONT **fonts;
 
 FONTS *fnts;

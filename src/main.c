@@ -405,7 +405,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     destroy_layer_runtime(infoLayer,1);
     free(gps_circle);
     destroy_symbol_list(global_symbols);
-    destroy_font(fonts[0]);
+    destroy_font(fnts);
     
 /*    free(font_normal[0]);
     free(font_normal[1]);
@@ -519,7 +519,6 @@ int main(int argc, char **argv)
     CURR_HEIGHT = r.h;
 
     
-    check_screen_size();
     
     
 //log_this(10, "width =  %d and height = %d\n",r.w, r.h);
@@ -568,6 +567,7 @@ int main(int argc, char **argv)
     }
 
 
+    check_screen_size();
 
     if (init_resources(dir))
         return EXIT_FAILURE;

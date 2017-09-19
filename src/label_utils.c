@@ -81,14 +81,14 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     if(bold)
     {
      //   a = font_bold[atlas_nr-1];
-        a = fonts[0]->fss->fs[size].bold;
+        a = loadatlas("freesans",BOLD_TYPE, size);
         
     }
     else
     {
         //a = font_normal[atlas_nr-1];
         
-        a = fonts[0]->fss->fs[size].normal;
+        a = loadatlas("freesans",NORMAL_TYPE, size);
     }
     
     

@@ -770,7 +770,7 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_
 {
 
     uint32_t p;
-    uint i, c=0;
+    unsigned int i, c=0;
     for(i = 0; i<n_chars; i++)
     {
 

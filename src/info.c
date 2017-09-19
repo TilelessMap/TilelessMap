@@ -94,13 +94,13 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
                 int col = sqlite3_column_int(prepared_info, 2);
                 
                 snprintf(header_tot, 32, "\n%s: ", header);
-                append_2_textblock(tb, (const char*) header_tot, fonts[0]->fss->fs[text_size].bold);
+                append_2_textblock(tb, (const char*) header_tot, text_font_bold);
                 if(type == SQLITE_INTEGER)
                 {
                     int val_int = sqlite3_column_int(prepared_layer_info, i);
                     snprintf(number_text, 32, "%d", val_int);
                     printf("header = %s, row = %d, col = %d, value = %d    \n",header, row, col, val_int);
-                    append_2_textblock(tb, (const char*) number_text, fonts[0]->fss->fs[text_size].normal);
+                    append_2_textblock(tb, (const char*) number_text, text_font_normal);
                     
                 }
                 else if (type == SQLITE_FLOAT)
@@ -108,14 +108,14 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
                     double val_float = sqlite3_column_double(prepared_layer_info, i);
                     snprintf(number_text, 32, "%f", val_float);
                     printf("header = %s, row = %d, col = %d, value = %lf    \n",header, row, col, val_float);
-                    append_2_textblock(tb, (const char*) number_text, fonts[0]->fss->fs[text_size].normal);
+                    append_2_textblock(tb, (const char*) number_text, text_font_normal);
                     
                 }
                 else if (type == SQLITE_TEXT)
                 {
                     const unsigned char *val_txt = sqlite3_column_text(prepared_layer_info, i);
                     printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
-                    append_2_textblock(tb, (const char*) val_txt, fonts[0]->fss->fs[text_size].normal);
+                    append_2_textblock(tb, (const char*) val_txt, text_font_normal);
                   
                 }  
             i++; 
@@ -135,6 +135,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     init_matrix_handler(textbox, 1, 0, 0);
     incharge = textbox;
     
+    
     matrixFromBBOX(textbox->matrix_handler);
     
     GLshort p[] = {0,0};
@@ -147,7 +148,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     GLshort close_box[] = {startx, starty,startx + click_box_width,starty + click_box_height};
     GLfloat close_color[]= {200,100,100,200};
     TEXTBLOCK *x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(x_txt,"X", char_font);
     register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,22); //register text label and 
     
     

@@ -27,7 +27,6 @@
 
 #define MAXWIDTH 1024
 
-#define MAX_FONT_SIZE 60
 
 
 static inline uint32_t max_i(int a, int b)
@@ -41,47 +40,29 @@ static inline uint32_t max_i(int a, int b)
 
 
 
-FONT* init_font(const char* fontname)
-{
-    
-    FONT *f = st_malloc(sizeof(FONT));
-    f->fontname = st_malloc(strlen(fontname)+1);
-    strcpy(f->fontname,fontname);
-    
-    f->fss = st_malloc(sizeof(FONTSIZES));
-    f->fss->fs = st_calloc(MAX_FONT_SIZE, sizeof(FONTSIZE));
-    f->fss->max_size = MAX_FONT_SIZE;   
-    return f;
-}
-
-int destroy_font(FONT *f)
+int destroy_font(FONTS *fonts)
 {
  
-    int i;
+    int i, z;
     
-    for (i=0;i<f->fss->max_size;i++)
+    for (i=0;i<fonts->nfonts;i++)
     {
-   //     log_this(100, "delete fs nr %d of %d\n", i,f->fss->max_size);
-        FONTSIZE fs = f->fss->fs[i];
-        
-        if(fs.normal)
-        {
-            free(fs.normal);
-            fs.normal = NULL;
-        }
-        if(fs.bold)
-        {
-            free(fs.bold);      
-            fs.bold = NULL;
-        }
+      FONT *f = fonts->fonts + i;
+      for (z=0;z<f->max_size;z++)
+      {
+            if(f->a[z])
+            {
+                free(f->a[z]);
+                f->a[z] = NULL;
+            }
+      }
+      free(f->a);
+      f->a=NULL;
+      free(f->fontname);
+      f->fontname = NULL;
     }
     
-    free(f->fss->fs);
-    f->fss->fs = NULL;
-    free(f->fss);
-    f->fss = NULL;
-    free(f);
-    f = NULL;
+    free(fonts->fonts);
     return 0;    
 }
 
@@ -245,15 +226,11 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
             font->fontname = st_malloc(strlen(fontname)+1);
             strcpy(font->fontname, fontname);
             font->fonttype = fonttype;
+            font->a = st_calloc((MAX_FONT_SIZE + 1),sizeof(ATLAS*));        
+        font->max_size = MAX_FONT_SIZE;
         }
         
         
-        
-    if(font->max_size<size)
-    {
-            font->a = st_calloc((MAX_FONT_SIZE + 1),sizeof(ATLAS*));        
-        font->max_size = size;
-    }
     
     
         return font;
