@@ -680,7 +680,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 //   glGenBuffers(1, &text_vbo);
     /* Create a texture that will be used to hold one "glyph" */
 
-    glGenBuffers(1, &text_vbo);
+  //  glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
     GLfloat point_offset[] ={0,0};
 
@@ -714,7 +714,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
 
         total_points += 1;
-        int psz =  *(oneLayer->text->size+i);
+ //       int psz =  *(oneLayer->text->size+i);
 
 //log_this(10, "psz = %d \n",psz);
 
@@ -838,7 +838,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     //    glUniform1i(text_uniform_tex, 0);
     /* Set up the VBO for our vertex data */
     glEnableVertexAttribArray(txt_box);
-    glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
+ //   glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
     glVertexAttribPointer(txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 
@@ -1095,6 +1095,7 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 		0,  1,  2,
 		2,  3,  0
 	};
+    
 	glGenBuffers(1, &ibo_cube_elements);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);

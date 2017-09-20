@@ -350,10 +350,10 @@ LAYER_RUNTIME *layerRuntime;
 LAYER_RUNTIME *infoLayer;
 LAYER_RUNTIME *infoRenderLayer;
 
-
+/*
 STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
-size_t length_global_symbols;
+size_t length_global_symbols;*/
 void render_text_test(const char *text, float x, float y, float sx, float sy);
 
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);

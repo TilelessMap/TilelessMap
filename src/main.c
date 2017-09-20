@@ -33,7 +33,7 @@
 void mainLoop(SDL_Window* window)
 {
     log_this(100, "Entering mainLoop now\n");
-
+//return;
     GLfloat tx,ty;
     int mouse_down = 0;
     int wheel_y;
@@ -400,6 +400,10 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
     glDeleteProgram(std_program);
     glDeleteProgram(txt_program);
     glDeleteProgram(lw_program);
+    
+    glDeleteProgram(gps_program);
+    glDeleteProgram(sym_program);
+    glDeleteProgram(raster_program);
 
     destroy_layer_runtime(layerRuntime,nLayers);
     destroy_layer_runtime(infoLayer,1);
@@ -416,15 +420,19 @@ void free_resources(SDL_Window* window,SDL_GLContext context) {
 
 
     destroy_wc_txt(tmp_unicode_txt);
-    FT_Done_FreeType(ft);
-    free(global_styles);
+    
+ //   free(global_styles);
     destroy_txt_coords();
-    sqlite3_close_v2(projectDB);
+    
+    
+    FT_Done_FreeType(ft);
+    sqlite3_close_v2(projectDB);    
+    sqlite3_shutdown() ;
+    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow( window );
     window = NULL;
     //Quit SDL subsystems
-    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     SDL_Quit();
 }
 
@@ -436,6 +444,7 @@ int main(int argc, char **argv)
     char projectfile[500];
     char *the_file=NULL, *dir=NULL;
 
+    
     while(--argc>0)
     {
         argv++;
@@ -486,7 +495,22 @@ int main(int argc, char **argv)
 
     snprintf(projectfile, 500, "%s",the_file);
     log_this(10, "project file = %s\n", projectfile);
-    SDL_Init(SDL_INIT_VIDEO);
+if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        return 1;
+    }
+
+    SDL_version compiled;
+SDL_version linked;
+
+SDL_VERSION(&compiled);
+SDL_GetVersion(&linked);
+printf("We compiled against SDL version %d.%d.%d ...\n",
+       compiled.major, compiled.minor, compiled.patch);
+printf("But we are linking against SDL version %d.%d.%d.\n",
+       linked.major, linked.minor, linked.patch);
+    
+    
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 
 
@@ -520,7 +544,6 @@ int main(int argc, char **argv)
 
     
     
-    
 //log_this(10, "width =  %d and height = %d\n",r.w, r.h);
     if (window == NULL) {
         log_this(100, "Error: can't create window:  : %s", SDL_GetError());
@@ -541,6 +564,10 @@ int main(int argc, char **argv)
     /*load the db into memory*/
   //  loadOrSaveDb(projectDB, projectfile,0);
 
+  
+  
+    
+    
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (context == NULL) {
         log_this(100, "Error: SDL_GL_CreateContext : %s", SDL_GetError());
@@ -560,6 +587,8 @@ int main(int argc, char **argv)
 #endif
 
 
+
+
     if (init_text_resources())
     {
         log_this(100,"Problems in init_text_resources");
@@ -567,10 +596,23 @@ int main(int argc, char **argv)
     }
 
 
+    
+    
+    
+
     check_screen_size();
 
+    
+   // destroy_txt_coords();
+    
     if (init_resources(dir))
         return EXIT_FAILURE;
+    
+    
+    
+    
+    
+    
 //if (init_text_resources())
     //      return EXIT_FAILURE;
 
@@ -581,7 +623,6 @@ int main(int argc, char **argv)
 
     mainLoop(window);
 
-    sqlite3_close(projectDB);
     free_resources(window, context);
     return EXIT_SUCCESS;
 }

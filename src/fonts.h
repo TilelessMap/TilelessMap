@@ -82,6 +82,7 @@ typedef struct
 
 FONT* init_font(const char* fontname);
 int destroy_font(FONTS *fonts);
+int destroy_atlas(ATLAS *a);
 FONT **fonts;
 
 FONTS *fnts;

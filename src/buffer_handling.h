@@ -353,6 +353,14 @@ int setzero2int64_list(INT64_LIST *list,int64_t n_vals);
 
 int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);
 
+
+int destroy_glfloat_list(GLFLOAT_LIST *l);
+int destroy_gluint_list(GLUINT_LIST *l);
+int destroy_int64_list(INT64_LIST *l);
+int destroy_glushort_list(GLUSHORT_LIST *l);
+int destroy_pointer_list(POINTER_LIST *l);
+int destroy_uint8_list(UINT8_LIST *l);
+
 GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts);
 GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts);
 int pa_end(LAYER_RUNTIME *l, int64_t id);
@@ -361,7 +369,7 @@ int pa_end(LAYER_RUNTIME *l, int64_t id);
 
 int init_symbols();
 int addsym(int id, size_t n_points, GLfloat *points);
-int destroy_symbols();
+//int destroy_symbols();
 
 
 

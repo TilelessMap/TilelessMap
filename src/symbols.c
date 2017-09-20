@@ -26,7 +26,8 @@ int init_symbols()
         rotation = 45;
         
         points = create_symbol(n_dirs,first_len, second_len, rotation);        
-        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        addsym(symbolid, (n_dirs + 2) * 2, points);     
+        st_free(points);
         
            
         /*Create a circle*/
@@ -37,7 +38,8 @@ int init_symbols()
         rotation = 0;
         
         points = create_symbol(n_dirs,first_len, second_len, rotation);        
-        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        addsym(symbolid, (n_dirs + 2) * 2, points);     
+        st_free(points);
         
            
         /*Create a triangle*/
@@ -49,7 +51,7 @@ int init_symbols()
         
         points = create_symbol(n_dirs,first_len, second_len, rotation);        
         addsym(symbolid, (n_dirs + 2) * 2, points);   
-        
+        st_free(points);
            
         /*Create a star*/
         symbolid = STAR_SYMBOL;
@@ -59,13 +61,16 @@ int init_symbols()
         rotation = 0;
         
         points = create_symbol(n_dirs,first_len, second_len, rotation);        
-        addsym(symbolid, (n_dirs + 2) * 2, points);   
+        addsym(symbolid, (n_dirs + 2) * 2, points);     
+        st_free(points);
         
         
         
         return 0;
     
 }
+
+
 
 GLfloat* create_circle(int npoints)
 {

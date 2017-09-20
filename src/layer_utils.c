@@ -25,6 +25,7 @@
 
 #include "theclient.h"
 #include "buffer_handling.h"
+#include "mem.h"
 
 int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 {
@@ -106,6 +107,8 @@ LAYER_RUNTIME* init_layer_runtime(int n)
     {
         theLayer = lr+i;
         theLayer->name = NULL;
+        theLayer->db = NULL;
+        theLayer->title = NULL;
         theLayer->visible = 0;
         theLayer->info_active = 0;
         theLayer->preparedStatement = NULL;
@@ -135,9 +138,95 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->hemisphere = 0; //1 is southern hemisphere and 0 is northern
 //        theLayer->close_ring = 0;
         theLayer->styles = NULL;
+        theLayer->style_key_type = INT_TYPE;
     }
     return lr;
 }
+
+
+static int destroy_polygon_style(POLYGON_STYLE *s)
+{
+ destroy_glfloat_list(s->color);  
+ destroy_glfloat_list(s->z);  
+ destroy_glushort_list(s->units);
+ st_free(s);
+ return 0;
+}
+
+static int destroy_line_style(LINE_STYLE *s)
+{
+ destroy_glfloat_list(s->color);  
+ destroy_glfloat_list(s->z);  
+ destroy_glushort_list(s->units);
+ destroy_glfloat_list(s->width);
+ st_free(s);
+ return 0;
+}
+
+static int destroy_point_style(POINT_STYLE *s)
+{
+ destroy_glfloat_list(s->color);  
+ destroy_glfloat_list(s->z);  
+ destroy_glfloat_list(s->size);  
+ destroy_glushort_list(s->units);
+ destroy_uint8_list(s->symbol);
+ st_free(s);
+ return 0;
+}
+
+static int destroy_text_style(TEXT_STYLE *s)
+{
+ destroy_glfloat_list(s->color);  
+ destroy_glfloat_list(s->size);  
+ destroy_glfloat_list(s->z);  
+destroy_pointer_list(s->a);
+st_free(s);
+ return 0;
+}
+
+static int destroy_style(struct STYLES *s)
+{
+ if(s->key_type == STRING_TYPE && s->string_key)
+     st_free(s->string_key);
+ 
+ if(s->polygon_styles)
+    destroy_polygon_style(s->polygon_styles);
+ if(s->line_styles)
+    destroy_line_style(s->line_styles);
+ if(s->point_styles)
+    destroy_point_style(s->point_styles);
+ if(s->text_styles)
+    destroy_text_style(s->text_styles);
+    st_free(s);
+    return 0;
+    
+}
+
+
+
+
+
+
+
+
+
+static void delete_styles(LAYER_RUNTIME *l) {
+  struct STYLES *current_style, *tmp;
+
+
+     HASH_ITER(hh, l->styles, current_style, tmp)
+     {
+    HASH_DEL(l->styles,current_style);  /* delete; users advances to next */
+    destroy_style(current_style);
+    current_style=NULL;
+      
+  }
+  
+  
+ 
+}
+
+
 
 void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
 {
@@ -156,9 +245,11 @@ void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
         if(theLayer->type & 32)
             text_destroy_buffer(theLayer->text);
 
-        free(theLayer->name);
+        delete_styles(theLayer);
+        st_free(theLayer->name);
+        st_free(theLayer->db);
+        st_free(theLayer->title);
         sqlite3_finalize(theLayer->preparedStatement);
-
 
     }
     free(lr);

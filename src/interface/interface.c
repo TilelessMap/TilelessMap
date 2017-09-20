@@ -64,7 +64,10 @@ int check_screen_size()
         character_size = 20;
         text_size = 10;
     }
-
+    
+    text_font_normal = NULL;
+    text_font_bold = NULL;
+    char_font = NULL;
         text_font_normal = loadatlas("freesans",NORMAL_TYPE, text_size);
         text_font_bold = loadatlas("freesans",BOLD_TYPE, text_size);
         char_font = loadatlas("freesans",BOLD_TYPE, character_size);

@@ -37,7 +37,18 @@ static inline uint32_t max_i(int a, int b)
         return a;
 }
 
-
+int destroy_atlas(ATLAS *a)
+{
+    if(!a)
+        return 0;
+                    glDeleteTextures(1, &(a->tex));
+                    while ((err = glGetError()) != GL_NO_ERROR) {
+           fprintf(stderr,"FONT - opengl error:%d\n", err);
+       }
+                free(a);
+                a=NULL;
+                return 0;
+}
 
 
 int destroy_font(FONTS *fonts)
@@ -52,8 +63,7 @@ int destroy_font(FONTS *fonts)
       {
             if(f->a[z])
             {
-                free(f->a[z]);
-                f->a[z] = NULL;
+                destroy_atlas(f->a[z]);
             }
       }
       free(f->a);
@@ -62,7 +72,8 @@ int destroy_font(FONTS *fonts)
       f->fontname = NULL;
     }
     
-    free(fonts->fonts);
+    st_free(fonts->fonts);
+    st_free(fnts);
     return 0;    
 }
 
@@ -175,6 +186,7 @@ int init_text_resources()
     
     fnts = st_malloc(sizeof(FONTS));
     fnts->nfonts = 0;
+    fnts->fonts = NULL;
 
     
 
@@ -314,6 +326,7 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
     if(!f->a[size])
         f->a[size] = create_atlas(face, size);
     
+    FT_Done_Face(face);
     log_this(10,"-------------------returning font %s,typ %d, size %d, pointer %p\n", res_fontname, res_type,size, f->a[size]);
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);

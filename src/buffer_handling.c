@@ -52,7 +52,7 @@ static int reset_glfloat_list(GLFLOAT_LIST *l)
 }
 
 
-static int destroy_glfloat_list(GLFLOAT_LIST *l)
+int destroy_glfloat_list(GLFLOAT_LIST *l)
 {
     free(l->list);
     l->list = NULL;
@@ -126,7 +126,7 @@ static int reset_gluint_list(GLUINT_LIST *l)
 }
 
 
-static int destroy_gluint_list(GLUINT_LIST *l)
+int destroy_gluint_list(GLUINT_LIST *l)
 {
     free(l->list);
     l->list = NULL;
@@ -197,7 +197,7 @@ static int reset_int64_list(INT64_LIST *l)
 }
 
 
-static int destroy_int64_list(INT64_LIST *l)
+int destroy_int64_list(INT64_LIST *l)
 {
     free(l->list);
     l->list = NULL;
@@ -274,7 +274,7 @@ static int reset_glushort_list(GLUSHORT_LIST *l)
 }
 
 
-static int destroy_glushort_list(GLUSHORT_LIST *l)
+int destroy_glushort_list(GLUSHORT_LIST *l)
 {
     free(l->list);
     l->list = NULL;
@@ -344,7 +344,7 @@ static int reset_uint8_list(UINT8_LIST *l)
 }
 
 
-static int destroy_uint8_list(UINT8_LIST *l)
+int destroy_uint8_list(UINT8_LIST *l)
 {
     free(l->list);
     l->list = NULL;
@@ -415,7 +415,7 @@ static int reset_pointer_list(POINTER_LIST *l)
 }
 
 
-static int destroy_pointer_list(POINTER_LIST *l)
+int destroy_pointer_list(POINTER_LIST *l)
 {
     free(l->list);
     l->list = NULL;
@@ -604,6 +604,8 @@ static POLYGON_LIST* init_polygon_list()
 
 static int reset_raster_list(RASTER_LIST *l)
 {
+    if(!l)
+        return 0;
     reset_gluint_list(l->tileidxy);
     reset_gluint_list(l->raster_start_indexes);
     reset_uint8_list(l->data);
@@ -611,6 +613,8 @@ static int reset_raster_list(RASTER_LIST *l)
 }
 static int reset_point_list(POINT_LIST *l)
 {
+    if(!l)
+        return 0;
     reset_glfloat_list(l->points);
     reset_gluint_list(l->point_start_indexes);
     reset_pointer_list(l->style_id);
@@ -619,6 +623,8 @@ static int reset_point_list(POINT_LIST *l)
 
 static int reset_linestring_list(LINESTRING_LIST *l)
 {
+    if(!l)
+        return 0;
     reset_glfloat_list(l->vertex_array);
     reset_gluint_list(l->line_start_indexes);
     reset_pointer_list(l->style_id);
@@ -628,6 +634,8 @@ static int reset_linestring_list(LINESTRING_LIST *l)
 
 static int reset_polygon_list(POLYGON_LIST *l)
 {
+    if(!l)
+        return 0;
     reset_glfloat_list(l->vertex_array);
     reset_gluint_list(l->pa_start_indexes);
     reset_gluint_list(l->polygon_start_indexes);
@@ -641,6 +649,8 @@ static int reset_polygon_list(POLYGON_LIST *l)
 
 static int destroy_raster_list(RASTER_LIST *l)
 {
+    if(!l)
+        return 0;
     destroy_gluint_list(l->tileidxy);
     destroy_gluint_list(l->raster_start_indexes);
     destroy_uint8_list(l->data);
@@ -649,6 +659,8 @@ static int destroy_raster_list(RASTER_LIST *l)
 }
 static int destroy_point_list(POINT_LIST *l)
 {
+    if(!l)
+        return 0;
     destroy_glfloat_list(l->points);
     destroy_gluint_list(l->point_start_indexes);
     destroy_pointer_list(l->style_id);
@@ -658,6 +670,8 @@ static int destroy_point_list(POINT_LIST *l)
 
 static int destroy_linestring_list(LINESTRING_LIST *l)
 {
+    if(!l)
+        return 0;
 
     destroy_glfloat_list(l->vertex_array);
     destroy_gluint_list(l->line_start_indexes);
@@ -669,6 +683,8 @@ static int destroy_linestring_list(LINESTRING_LIST *l)
 
 static int destroy_polygon_list(POLYGON_LIST *l)
 {
+    if(!l)
+        return 0;
     destroy_glfloat_list(l->vertex_array);
     destroy_gluint_list(l->pa_start_indexes);
     destroy_gluint_list(l->polygon_start_indexes);
@@ -742,8 +758,8 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
     struct STYLES *s = NULL;
        if(val_type == INT_TYPE)
             {
-                log_this(10," and val = %d\n", *((int*) val));
                 HASH_FIND_INT( styles, val, s);
+                log_this(10,"  val = %d and style is %p\n", *((int*) val), s);
                 if(!s)
             {
                 int v = -1;
@@ -753,8 +769,9 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
             else if (val_type == STRING_TYPE)
             {
                 
-    log_this(10,"and val = %s  \n",(char*) val);
                 HASH_FIND_STR(styles, val, s);  
+                
+    log_this(10," val = %s and style is %p \n",(char*) val, s);
                 if(!s)
                 {
                     HASH_FIND_STR(styles, "-1", s);
@@ -876,14 +893,14 @@ int addsym(int id, size_t n_points, GLfloat *points)
     return 0;
        
 }
-
+/*
 int destroy_symbols()
 {
  destroy_point_list(global_symbols->points);
     free(global_styles);
     return 0;
 }
-
+*/
 
 
 

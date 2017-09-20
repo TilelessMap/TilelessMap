@@ -56,3 +56,9 @@ void* st_calloc(int n, size_t s)
     return res;
 }
 
+int st_free(void *s)
+{
+    if(s)
+        free(s);
+    return 0;
+}

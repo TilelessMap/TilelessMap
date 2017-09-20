@@ -105,6 +105,7 @@ static int count_layers()
 /******************************************************
  * Load Styles
  * ***************************************************/
+#ifdef __load_styles_old_way__
 static int load_styles()
 {
 
@@ -190,8 +191,7 @@ static int load_styles()
     sqlite3_finalize(preparedStylesLoading);
     return 0;
 }
-
-
+#endif
 /******************************************************
  * Load Symbols
  * ***************************************************/
@@ -368,7 +368,7 @@ static int load_layers(TEXT *missing_db)
         
         oneLayer->name = malloc(2 * strlen((char*) layername)+1);
         strcpy(oneLayer->name,(char*) layername);
-        oneLayer->db = malloc(2 * strlen((char*) dbname)+1);
+        oneLayer->db = st_malloc(2 * strlen((char*) dbname)+1);
         strcpy(oneLayer->db,(char*) dbname);
         
         oneLayer->title = malloc(2 * strlen((char*) title)+1);
@@ -623,6 +623,10 @@ static int load_layers(TEXT *missing_db)
                 if (oneLayer->type & 32)
                     oneLayer->text =  init_text_buf();
                 
+                if(text_field)
+                    free(text_field);
+                if(sld_style_field)
+                    free(sld_style_field);
                     
             }      
                     
