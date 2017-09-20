@@ -37,23 +37,23 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         render_text(oneLayer,theMatrix);
         return 0;
     }
- /*  POINT_LIST *rb = oneLayer->points;
-    
-        glBindBuffer(GL_ARRAY_BUFFER, rb->vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->points->used), rb->points->list, GL_STATIC_DRAW);
-*/
-        renderPoint( oneLayer, theMatrix);
+    /*  POINT_LIST *rb = oneLayer->points;
+
+           glBindBuffer(GL_ARRAY_BUFFER, rb->vbo);
+           glBufferData(GL_ARRAY_BUFFER, sizeof(float)*(rb->points->used), rb->points->list, GL_STATIC_DRAW);
+    */
+    renderPoint( oneLayer, theMatrix);
     return 0;
 }
 
 int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-    
-    
+
+
     int symbol = 2, last_symbol = 0, i;
-    
-   POINT_LIST *points = oneLayer->points;
-    
+
+    POINT_LIST *points = oneLayer->points;
+
     GLfloat radius;
     GLfloat *color;
     GLfloat *p;
@@ -74,89 +74,89 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
     glUniformMatrix4fv(sym_matrix, 1, GL_FALSE,theMatrix );
-    
-    
 
- 
+
+
+
     p = points->points->list;
-   
+
     int sym_npoints;
-    for (i=0;i<points->point_start_indexes->used;i++)
+    for (i=0; i<points->point_start_indexes->used; i++)
     {
-        
-        
 
-            struct STYLES *styles = (struct STYLES *) *((struct STYLES **)points->style_id->list +i);
-            if(!styles)
-                styles=system_default_style;
-            POINT_STYLE *style = styles->point_styles;
-            
-            
-            
-          //  printf("start checking %p\n", style);
-          //  printf("style->nsyms=%d\n",style->nsyms);
-            if(!style)
-                continue;
-                    int r;
-            for (r = 0;r<style->nsyms;r++)
+
+
+        struct STYLES *styles = (struct STYLES *) *((struct STYLES **)points->style_id->list +i);
+        if(!styles)
+            styles=system_default_style;
+        POINT_STYLE *style = styles->point_styles;
+
+
+
+        //  printf("start checking %p\n", style);
+        //  printf("style->nsyms=%d\n",style->nsyms);
+        if(!style)
+            continue;
+        int r;
+        for (r = 0; r<style->nsyms; r++)
+        {
+
+            // printf("r=%d\n",r);
+
+            symbol = *(style->symbol->list + r);
+            color = style->color->list + 4*r;
+            radius = *(style->size->list + r);
+
+
+            if(symbol != last_symbol)
             {
-               
-           // printf("r=%d\n",r);
-            
-                symbol = *(style->symbol->list + r);
-                color = style->color->list + 4*r;
-                radius = *(style->size->list + r);
-        
-                
-                if(symbol != last_symbol)
-                {
-                    last_symbol = symbol;
-                    glVertexAttribPointer(
-                        sym_norm, // attribute
-                        2,                 // number of elements per vertex, here (x,y)
-                        GL_FLOAT,          // the type of each element
-                        GL_FALSE,          // take our values as-is
-                        0,                 // no extra data between each position
-                        (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
-                    );
+                last_symbol = symbol;
+                glVertexAttribPointer(
+                    sym_norm, // attribute
+                    2,                 // number of elements per vertex, here (x,y)
+                    GL_FLOAT,          // the type of each element
+                    GL_FALSE,          // take our values as-is
+                    0,                 // no extra data between each position
+                    (GLvoid*) (sizeof(GLfloat) *  *(global_symbols->points->point_start_indexes->list + symbol - 1) )               // offset of first element
+                );
 
-                    log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
+                log_this(10, "%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f,%f, %f",theMatrix[0],theMatrix[1],theMatrix[2],theMatrix[3],theMatrix[4],theMatrix[5],theMatrix[6],theMatrix[7],theMatrix[8],theMatrix[9],theMatrix[10],theMatrix[11],theMatrix[12],theMatrix[13],theMatrix[14],theMatrix[15]);
 
 
 
-                    
-                    
-                    if (symbol == 0)
-                        sym_npoints = global_symbols->points->point_start_indexes->list[0];
-                    else
-                        sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
-        
-                }      
-                
-                
-                
-        
-    //    printf("used points = %d, startindex = %d, used vals\n",points->point_start_indexes->used, points->point_start_indexes->list[i], points->points->used);
-        
-        
-     //   printf("p: %f, %f\n", *(p), *(p+1));
-    glUniform2fv(sym_coord2d,1,p);
-    
-            int unit = style->units->list[r];
-                if(unit == PIXEL_UNIT)
-                    glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
+
+
+                if (symbol == 0)
+                    sym_npoints = global_symbols->points->point_start_indexes->list[0];
                 else
-                    glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
-    
-       // glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
-        glUniform4fv(sym_color,1,color );
-        glUniform1fv(sym_radius,1,&radius );
-        glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
+                    sym_npoints = global_symbols->points->point_start_indexes->list[symbol] - global_symbols->points->point_start_indexes->list[symbol -1];
 
             }
+
+
+
+
+            //    printf("used points = %d, startindex = %d, used vals\n",points->point_start_indexes->used, points->point_start_indexes->list[i], points->points->used);
+
+
+            //   printf("p: %f, %f\n", *(p), *(p+1));
+            glUniform2fv(sym_coord2d,1,p);
+
+            int unit = style->units->list[r];
+            if(unit == PIXEL_UNIT)
+                glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,px_Matrix );
+            else
+                glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
+
+            // glUniformMatrix4fv(sym_px_matrix, 1, GL_FALSE,theMatrix );
+            glUniform4fv(sym_color,1,color );
+            glUniform1fv(sym_radius,1,&radius );
+            glDrawArrays(GL_TRIANGLE_FAN, 0, sym_npoints/2);
+
+        }
         p = points->points->list + points->point_start_indexes->list[i];
     }
-        while ((err = glGetError()) != GL_NO_ERROR) {
+    while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(100, "gl problem\n");
         fprintf(stderr,"opengl problem :%d\n", err);
     }
@@ -204,7 +204,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     if(oneLayer->geometryType == RASTER)
         return 0;
-    
+
     LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
     GLfloat *color,*color2,z, lw=0, lw2=0;
@@ -260,54 +260,54 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
      printf("load, i = %d, v = %f\n", i,*(line->vertex_array->list+i));
     }*/
-    
-    
-        
-    
-    
+
+
+
+
+
     for (i=0; i<line->line_start_indexes->used; i++)
     {
 
         //    Uint32 styleID = *(rb->styleID+i);
-        
-               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
-            if(!styles)
-                styles=system_default_style;
-            LINE_STYLE *style = styles->line_styles;
+
+        struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
+        if(!styles)
+            styles=system_default_style;
+        LINE_STYLE *style = styles->line_styles;
 
 
         n_vals = *(line->line_start_indexes->list + i)/vals_per_point - n_vals_acc;
-        
-            if(!style)
-                continue;
+
+        if(!style)
+            continue;
         int r;
-        for (r = 0;r<style->nsyms;r++)
+        for (r = 0; r<style->nsyms; r++)
         {
             lw = style->width->list[r];
 
 
-           z = style->z->list[r] - 0.001*r;
+            z = style->z->list[r] - 0.001*r;
             if(!z)
                 z = 0;
 
             unit = style->units->list[r];
-                if(unit == PIXEL_UNIT)
-                    glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
-                else
-                    glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,theMatrix );
-            
+            if(unit == PIXEL_UNIT)
+                glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
+            else
+                glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,theMatrix );
+
             color = style->color->list + 4*r;
 
-          //  printf("color = %f, %f, %f, %f, z=%f, unit=%d, width=%f\n",color[0],color[1], color[2],color[3], z, unit, lw);
-        
+            //  printf("color = %f, %f, %f, %f, z=%f, unit=%d, width=%f\n",color[0],color[1], color[2],color[3], z, unit, lw);
+
             glUniform1fv(lw_z,1,&z );
             glUniform4fv(lw_color,1,color );
             glUniform1fv(lw_linewidth,1,&lw );
             glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
-        while ((err = glGetError()) != GL_NO_ERROR) {
-           log_this(10, "Problem1\n");
-           fprintf(stderr,"opengl error:%d\n", err);
-       }
+            while ((err = glGetError()) != GL_NO_ERROR) {
+                log_this(10, "Problem1\n");
+                fprintf(stderr,"opengl error:%d\n", err);
+            }
         }
 
 //printf("i = %d, startindex = %d, npoints = %d\n", i, n_vals_acc, n_vals);
@@ -361,36 +361,36 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     n_lines += used_n_pa;
     total_points += line->vertex_array->used/ndims;
     printf("used_lines = %d\n",used_n_pa);
-    
-    
-        
+
+
+
     for (i=0; i<used_n_pa; i++)
     {
 
 
-               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
-            if(!styles)
-                styles=system_default_style;
-            LINE_STYLE *style = styles->line_styles;
+        struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
+        if(!styles)
+            styles=system_default_style;
+        LINE_STYLE *style = styles->line_styles;
 
         n_vals = *(line->line_start_indexes->list + i)/ndims - n_vals_acc;
-        
-            if(!style)
-                continue;
-        
+
+        if(!style)
+            continue;
+
 
         int r;
-        for (r = 0;r<style->nsyms;r++)
+        for (r = 0; r<style->nsyms; r++)
         {
             color = style->color->list + 4*r;
 
 
-                glUniform4fv(std_color,1,color );
+            glUniform4fv(std_color,1,color );
 
 
-                glDrawArrays(GL_LINE_STRIP, n_vals_acc, n_vals);
+            glDrawArrays(GL_LINE_STRIP, n_vals_acc, n_vals);
 
-            
+
         }
         n_vals_acc = *(line->line_start_indexes->list + i)/ndims;
 
@@ -443,7 +443,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     unsigned int used_n_poly;
 
 
-    
+
     if(oneLayer->type & 4)
     {
         POLYGON_STYLE *style = NULL;
@@ -461,7 +461,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         //total_points += poly->vertex_array->used/ndims;
         //n_tri += poly->element_array->used/3;
 
-    
+
         for (i=0; i<used_n_poly; i++)
         {
             size_t  vertex_offset = sizeof(GLfloat) * *(poly->polygon_start_indexes->list + i);
@@ -479,31 +479,31 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
                 (GLvoid*) vertex_offset                  // offset of first element
             );
 
-            
-               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->style_id->list +i);
+
+            struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->style_id->list +i);
             if(!styles)
                 styles=system_default_style;
-           style = styles->polygon_styles;
-            
-            
-            
+            style = styles->polygon_styles;
+
+
+
             n_vals = *(poly->element_start_indexes->list + i) - n_vals_acc;
             n_vals_acc = *(poly->element_start_indexes->list + i);
-            
+
             if(!style)
                 continue;
-                    int r;
-            for (r = 0;r<style->nsyms;r++)
+            int r;
+            for (r = 0; r<style->nsyms; r++)
             {
 
-        
+
                 color = style->color->list + 4*r;
                 glUniform4fv(std_color,1,color );
 
-            //    printf("color = %f, %f, %f,  %f\n", color[0], color[1], color[2], color[3]);
+                //    printf("color = %f, %f, %f,  %f\n", color[0], color[1], color[2], color[3]);
                 glDrawElements(GL_TRIANGLES, n_vals,GL_UNSIGNED_SHORT,(GLvoid*) index_offset);
-             }
-            
+            }
+
             index_offset = sizeof(GLushort) * *(poly->element_start_indexes->list + i);
 
         }
@@ -539,23 +539,23 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
             n_vals = *(poly->pa_start_indexes->list + i)/ndims - n_vals_acc;
-            
-            
-               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->line_style_id->list +i);
+
+
+            struct STYLES *styles = (struct STYLES *) *((struct STYLES **)poly->line_style_id->list +i);
             if(!styles)
                 styles=system_default_style;
             style = styles->line_styles;
-            
-            
-            
+
+
+
             if(!style)
                 continue;
             int r;
-            for (r = 0;r<style->nsyms;r++)
+            for (r = 0; r<style->nsyms; r++)
             {
                 color = style->color->list + 4*r;
                 GLfloat width = *(style->width->list + r);
-              //  printf("width = %f\n",width);
+                //  printf("width = %f\n",width);
                 if(width>0)
                 {
                     glUniform4fv(std_color,1,color );
@@ -588,8 +588,8 @@ static int render_data_layers(GLfloat *theMatrix)
     {
         oneLayer = layerRuntime + i;
 
-       /* if(oneLayer->geometryType >= RASTER)
-            continue;*/
+        /* if(oneLayer->geometryType >= RASTER)
+             continue;*/
         int type = oneLayer->type;
 
         if(oneLayer->visible)
@@ -601,9 +601,9 @@ static int render_data_layers(GLfloat *theMatrix)
             //     log_this(10, "render point");
             if (type & 32)
                 render_text(oneLayer, theMatrix);
-            
+
             if(type & (224-32))
-               renderPoint(oneLayer, theMatrix);
+                renderPoint(oneLayer, theMatrix);
 
             if(type & 8)
                 renderLineTri(oneLayer,theMatrix);
@@ -680,9 +680,9 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 //   glGenBuffers(1, &text_vbo);
     /* Create a texture that will be used to hold one "glyph" */
 
-  //  glGenBuffers(1, &text_vbo);
+    //  glGenBuffers(1, &text_vbo);
     GLfloat point_coord[2];
-    GLfloat point_offset[] ={0,0};
+    GLfloat point_offset[] = {0,0};
 
     //  GLESSTRUCT *rb = oneLayer->res_buf;
 
@@ -714,45 +714,45 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     {
 
         total_points += 1;
- //       int psz =  *(oneLayer->text->size+i);
+//       int psz =  *(oneLayer->text->size+i);
 
 //log_this(10, "psz = %d \n",psz);
 
-        
-        
-               struct STYLES *styles = (struct STYLES *) *((struct STYLES **)point->style_id->list +i);
-            if(!styles)
-                styles=system_default_style;
-            TEXT_STYLE *style = styles->text_styles;
-        
+
+
+        struct STYLES *styles = (struct STYLES *) *((struct STYLES **)point->style_id->list +i);
+        if(!styles)
+            styles=system_default_style;
+        TEXT_STYLE *style = styles->text_styles;
+
         if(!style)
             continue;
-        int r;        
-        for (r = 0;r<style->nsyms;r++)
+        int r;
+        for (r = 0; r<style->nsyms; r++)
         {
 
             color = style->color->list + 4*r;
-        /*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
-                point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
+            /*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
+                    point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
 
-        point_coord[0] =  *(point->points->list + i*ndims);
-        point_coord[1] =  *(point->points->list + i*ndims + 1);
-        */
-        point_coord[0] =  *(point->points->list + offset);
-        point_coord[1] =  *(point->points->list + offset + 1);
+            point_coord[0] =  *(point->points->list + i*ndims);
+            point_coord[1] =  *(point->points->list + i*ndims + 1);
+            */
+            point_coord[0] =  *(point->points->list + offset);
+            point_coord[1] =  *(point->points->list + offset + 1);
 
-        offset = *(point->point_start_indexes->list + i);
-        //  printf("c1 = %f, c2 = %f\n", point_coord[0], point_coord[1]);
+            offset = *(point->point_start_indexes->list + i);
+            //  printf("c1 = %f, c2 = %f\n", point_coord[0], point_coord[1]);
 
-        txt = oneLayer->text->char_array+used;
-        used+=strlen(txt)+1;
-        
-        
+            txt = oneLayer->text->char_array+used;
+            used+=strlen(txt)+1;
+
+
 
 //        a = fonts[0]->fss->fs[psz].normal;
-  a=style->a->list[r];  
-   // printf("---------------------------------------------  a is %p\n", a);
-        draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
+            a=style->a->list[r];
+            // printf("---------------------------------------------  a is %p\n", a);
+            draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
         }
 
 
@@ -838,7 +838,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     //    glUniform1i(text_uniform_tex, 0);
     /* Set up the VBO for our vertex data */
     glEnableVertexAttribArray(txt_box);
- //   glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
+//   glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
     glVertexAttribPointer(txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 
@@ -849,16 +849,16 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     // max_width = 255;
 
     //TODO, fix dynamic allocation.
-    
+
     size_t npoints = 6 * strlen(txt);
     size_t coordssize = npoints * sizeof(POINT_T);
-    
+
     check_and_realloc_txt_coords(npoints);
-    
+
     POINT_T *coords = txt_coords->coords+txt_coords->used;
-    
+
     //txt_coords->used += npoints;
-    
+
     //POINT_T coords[6000];
     int c = 0;
 
@@ -894,7 +894,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
             {
                 n_chars_in_line += n_chars_in_word;
                 c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
-                line_start = i;                
+                line_start = i;
                 max_used_width = max_f(max_used_width, line_width);
                 word_width = line_width = 0;
                 n_chars_in_line = n_chars_in_word =0;
@@ -920,7 +920,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
                     n_chars_in_line =0;
 
                 }
-                nlines++; 
+                nlines++;
                 offset[0] = x = 0;
             }
         }
@@ -931,7 +931,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
             line_width += word_width;
             c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
         }
-        
+
         max_used_width = max_f(max_used_width, line_width);
         offset[0] += line_width;
         offset[1] -= rh_pixels*nlines;
@@ -940,7 +940,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     else
         c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
 
-    
+
     /* Draw all the character on the screen in one go */
     glBufferData(GL_ARRAY_BUFFER, coordssize, coords, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, c);
@@ -948,7 +948,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
 
     glDisableVertexAttribArray(txt_box);
-    
+
     return max_used_width;
 }
 
@@ -1067,146 +1067,146 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     LINESTRING_LIST *line = oneLayer->lines;
     size_t  vertex_offset = 0;
     GLuint vbo_cube_texcoords;
-	GLfloat cube_texcoords[2*4] = {
-		// front
-		0.0, 0.0,
-		1.0, 0.0,
-		1.0, 1.0,
-		0.0, 1.0,
-	};
-	glGenBuffers(1, &vbo_cube_texcoords);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texcoords), cube_texcoords, GL_STATIC_DRAW);
-	
-      //  GLuint vbo_cube_vertices;
-        
-        /*
-	glGenBuffers(1, &vbo_cube_vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(line->vertex_array->used*sizeof(GLfloat)), line->vertex_array->list, GL_STATIC_DRAW);
-	*/
-        
-        
-        //	 int i,j, offset=0;
-    
-    GLuint ibo_cube_elements;
-	GLushort cube_elements[] = {
-		// front
-		0,  1,  2,
-		2,  3,  0
-	};
-    
-	glGenBuffers(1, &ibo_cube_elements);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);
+    GLfloat cube_texcoords[2*4] = {
+        // front
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+    };
+    glGenBuffers(1, &vbo_cube_texcoords);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texcoords), cube_texcoords, GL_STATIC_DRAW);
 
-    
-        
-	
-	glUseProgram(raster_program);
-	
-	glActiveTexture(GL_TEXTURE0);
-    
-        glUniformMatrix4fv(raster_matrix, 1, GL_FALSE,theMatrix );
-    for (i=0;i<rast->raster_start_indexes->used;i++)
+    //  GLuint vbo_cube_vertices;
+
+    /*
+    glGenBuffers(1, &vbo_cube_vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(line->vertex_array->used*sizeof(GLfloat)), line->vertex_array->list, GL_STATIC_DRAW);
+    */
+
+
+    //	 int i,j, offset=0;
+
+    GLuint ibo_cube_elements;
+    GLushort cube_elements[] = {
+        // front
+        0,  1,  2,
+        2,  3,  0
+    };
+
+    glGenBuffers(1, &ibo_cube_elements);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);
+
+
+
+
+    glUseProgram(raster_program);
+
+    glActiveTexture(GL_TEXTURE0);
+
+    glUniformMatrix4fv(raster_matrix, 1, GL_FALSE,theMatrix );
+    for (i=0; i<rast->raster_start_indexes->used; i++)
     {
         uint8_t *data = rast->data->list + tot_index;
         size_t data_len = rast->raster_start_indexes->list[i];
         SDL_Surface* res_texture =  IMG_Load_RW(SDL_RWFromMem(data, data_len), 1);
-        
-        if (res_texture == NULL) 
+
+        if (res_texture == NULL)
         {
             continue;
         }
         GLuint texture_id;
         glGenTextures(1, &texture_id);
         glBindTexture(GL_TEXTURE_2D, texture_id);
-        
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, // target
-		0,  // level, 0 = base, no minimap,
-		GL_RGB, // internalformat
-		res_texture->w,  // width
-		res_texture->h,  // height
-		0,  // border, always 0 in OpenGL ES
-		GL_RGB,  // format
-		GL_UNSIGNED_BYTE, // type
-		res_texture->pixels);
+                     0,  // level, 0 = base, no minimap,
+                     GL_RGB, // internalformat
+                     res_texture->w,  // width
+                     res_texture->h,  // height
+                     0,  // border, always 0 in OpenGL ES
+                     GL_RGB,  // format
+                     GL_UNSIGNED_BYTE, // type
+                     res_texture->pixels);
         SDL_FreeSurface(res_texture);
-        
-        
-        
-        
+
+
+
+
         GLfloat *d = line->vertex_array->list+vertex_offset;
-    /*
-    printf("vertex_offset = %zu of %zu\n", vertex_offset, line->vertex_array->used);
-        int z;
-        for (z=0;z<8;z++)
-        {
-         printf("val %d = %f and tile_size = %zu \n",z, d[z], data_len);   
-        }*/
-        
-        
-        
-        
-                
+        /*
+        printf("vertex_offset = %zu of %zu\n", vertex_offset, line->vertex_array->used);
+            int z;
+            for (z=0;z<8;z++)
+            {
+             printf("val %d = %f and tile_size = %zu \n",z, d[z], data_len);
+            }*/
+
+
+
+
+
         GLuint vbo_cube_vertices;
-	glGenBuffers(1, &vbo_cube_vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, d, GL_STATIC_DRAW);
-	
-        
-        
-        
-        
-        
-        
-	glUniform1i(raster_texture, /*GL_TEXTURE*/0);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	
-	glEnableVertexAttribArray(raster_coord2d);
-	// Describe our vertices array to OpenGL (it can't guess its format automatically)
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-	glVertexAttribPointer(
-		  raster_coord2d, // attribute
-		  2,                 // number of elements per vertex, here (x,y,z)
-		  GL_FLOAT,          // the type of each element
-		  GL_FALSE,          // take our values as-is
-		  0,                 // no extra data between each position
-		  0 //(GLvoid*) vertex_offset                  // offset of first element
-	);
-    
-    
-        
-    
-   // size_t  vertex_offset = 8*i*sizeof(GLfloat);
-	glEnableVertexAttribArray(raster_texcoord);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
-	glVertexAttribPointer(
-		raster_texcoord, // attribute
-		2,                  // number of elements per vertex, here (x,y)
-		GL_FLOAT,           // the type of each element
-		GL_FALSE,           // take our values as-is
-		0,                  // no extra data between each position
-		0                   // offset of first element
-	);
-	
-	/* Push each element in buffer_vertices to the vertex shader */
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
-	int size;  
-    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-    
-	glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-	
-	glDisableVertexAttribArray(raster_coord2d);
-	glDisableVertexAttribArray(raster_texcoord);
-      
-    
-	vertex_offset =  *(line->line_start_indexes->list + i);
-    tot_index+=data_len;
+        glGenBuffers(1, &vbo_cube_vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, d, GL_STATIC_DRAW);
+
+
+
+
+
+
+
+        glUniform1i(raster_texture, /*GL_TEXTURE*/0);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+
+        glEnableVertexAttribArray(raster_coord2d);
+        // Describe our vertices array to OpenGL (it can't guess its format automatically)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+        glVertexAttribPointer(
+            raster_coord2d, // attribute
+            2,                 // number of elements per vertex, here (x,y,z)
+            GL_FLOAT,          // the type of each element
+            GL_FALSE,          // take our values as-is
+            0,                 // no extra data between each position
+            0 //(GLvoid*) vertex_offset                  // offset of first element
+        );
+
+
+
+
+        // size_t  vertex_offset = 8*i*sizeof(GLfloat);
+        glEnableVertexAttribArray(raster_texcoord);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
+        glVertexAttribPointer(
+            raster_texcoord, // attribute
+            2,                  // number of elements per vertex, here (x,y)
+            GL_FLOAT,           // the type of each element
+            GL_FALSE,           // take our values as-is
+            0,                  // no extra data between each position
+            0                   // offset of first element
+        );
+
+        /* Push each element in buffer_vertices to the vertex shader */
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
+        int size;
+        glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+        glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+        glDisableVertexAttribArray(raster_coord2d);
+        glDisableVertexAttribArray(raster_texcoord);
+
+
+        vertex_offset =  *(line->line_start_indexes->list + i);
+        tot_index+=data_len;
     }
-    
-    
+
+
     return 0;
 
 }

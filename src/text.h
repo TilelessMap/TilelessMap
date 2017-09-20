@@ -51,11 +51,11 @@ typedef struct
     ATLAS **font;
     int n_txts;
     int max_n_txts;
-}TEXTBLOCK;
-    
-    
-    
-typedef struct 
+} TEXTBLOCK;
+
+
+
+typedef struct
 {
     GLfloat x;
     GLfloat y;
@@ -65,9 +65,9 @@ typedef struct
 
 typedef struct
 {
- POINT_T *coords;   
- size_t used;
- size_t alloced;    
+    POINT_T *coords;
+    size_t used;
+    size_t alloced;
 } TEXTCOORDS;
 
 

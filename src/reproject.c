@@ -63,7 +63,7 @@ void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, 
 
     if(utm_in == utm_out && hemi_in == hemi_out)
         return;
-    
+
     double N,T,C,A, AA,M, phi,lng, lngd, x, y;
     int zcm;
     int south;

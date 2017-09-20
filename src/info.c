@@ -8,136 +8,136 @@
 
 static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
 {
-    
-    
+
+
     sqlite3_stmt *prepared_info;
     sqlite3_stmt *prepared_layer_info;
     TEXTBLOCK *tb;
     int i = 0;
-    
-    
+
+
     char number_text[32];
     char header_tot[32];
-        
+
 
     GLshort click_box_width = 50;
     GLshort click_box_height = 50;
 
     char *info_sql = "select field, row, column, header from info where layerID = ? order by row, column";
-    
+
     int rc = sqlite3_prepare_v2(projectDB, info_sql, -1,&prepared_info, 0);
     if (rc != SQLITE_OK ) {
         log_this(100, "SQL error in %s\n",info_sql );
         sqlite3_close(projectDB);
         return 1;
-    }       
-        
-     TEXT *layer_info_sql = init_txt(512);
-        
-        
-        sqlite3_bind_int(prepared_info, 1,theLayer->layer_id);
-        
-        
-        
-        add_txt(layer_info_sql, "SELECT ");
-        while (sqlite3_step(prepared_info)==SQLITE_ROW)
-        {
-            
-            if(i>0)
-                add_txt(layer_info_sql, ", ");
-            
-            const unsigned char *field = sqlite3_column_text(prepared_info, 0);
+    }
+
+    TEXT *layer_info_sql = init_txt(512);
+
+
+    sqlite3_bind_int(prepared_info, 1,theLayer->layer_id);
+
+
+
+    add_txt(layer_info_sql, "SELECT ");
+    while (sqlite3_step(prepared_info)==SQLITE_ROW)
+    {
+
+        if(i>0)
+            add_txt(layer_info_sql, ", ");
+
+        const unsigned char *field = sqlite3_column_text(prepared_info, 0);
 //            printf("test header = %s, field = %s\n",(char*) sqlite3_column_text(prepared_info, 3), (char*) field);
-            add_txt(layer_info_sql, (const char*) field);               
-               
-            i++;
-        }
-        add_txt(layer_info_sql, " FROM ");
-        if(theLayer->info_rel)
-            add_txt(layer_info_sql, theLayer->info_rel);
-        else{
-            add_txt(layer_info_sql,  theLayer->db );
-            add_txt(layer_info_sql, ".");
-            add_txt(layer_info_sql, theLayer->name);
-        }
-        //TODO get rid of hardcoded id field
-        add_txt(layer_info_sql, " where twkb_id = ?;");
-        
-        
-        sqlite3_reset(prepared_info);
-       
+        add_txt(layer_info_sql, (const char*) field);
+
+        i++;
+    }
+    add_txt(layer_info_sql, " FROM ");
+    if(theLayer->info_rel)
+        add_txt(layer_info_sql, theLayer->info_rel);
+    else {
+        add_txt(layer_info_sql,  theLayer->db );
+        add_txt(layer_info_sql, ".");
+        add_txt(layer_info_sql, theLayer->name);
+    }
+    //TODO get rid of hardcoded id field
+    add_txt(layer_info_sql, " where twkb_id = ?;");
+
+
+    sqlite3_reset(prepared_info);
+
     rc = sqlite3_prepare_v2(projectDB, layer_info_sql->txt, -1,&prepared_layer_info, 0);
     if (rc != SQLITE_OK ) {
         log_this(100, "SQL error in %s\n",layer_info_sql->txt );
         sqlite3_close(projectDB);
         return 1;
-    }        
-        
-        
-     
-        sqlite3_bind_int(prepared_layer_info, 1,twkb_id);   
-        
+    }
+
+
+
+    sqlite3_bind_int(prepared_layer_info, 1,twkb_id);
+
     tb = init_textblock(8);
-        
-        while (sqlite3_step(prepared_layer_info)==SQLITE_ROW)
+
+    while (sqlite3_step(prepared_layer_info)==SQLITE_ROW)
+    {
+
+        i=0;
+        while (sqlite3_step(prepared_info)==SQLITE_ROW)
         {
-    
-    i=0;
-            while (sqlite3_step(prepared_info)==SQLITE_ROW)
+            int type = sqlite3_column_type(prepared_layer_info, i);
+
+
+            const unsigned char *header = sqlite3_column_text(prepared_info, 3);
+            printf("header = %s\n", header);
+            int row = sqlite3_column_int(prepared_info, 1);
+            int col = sqlite3_column_int(prepared_info, 2);
+
+            snprintf(header_tot, 32, "\n%s: ", header);
+            append_2_textblock(tb, (const char*) header_tot, text_font_bold);
+            if(type == SQLITE_INTEGER)
             {
-                int type = sqlite3_column_type(prepared_layer_info, i);
-                
-                
-                const unsigned char *header = sqlite3_column_text(prepared_info, 3);   
-                printf("header = %s\n", header);
-                int row = sqlite3_column_int(prepared_info, 1);
-                int col = sqlite3_column_int(prepared_info, 2);
-                
-                snprintf(header_tot, 32, "\n%s: ", header);
-                append_2_textblock(tb, (const char*) header_tot, text_font_bold);
-                if(type == SQLITE_INTEGER)
-                {
-                    int val_int = sqlite3_column_int(prepared_layer_info, i);
-                    snprintf(number_text, 32, "%d", val_int);
-                    printf("header = %s, row = %d, col = %d, value = %d    \n",header, row, col, val_int);
-                    append_2_textblock(tb, (const char*) number_text, text_font_normal);
-                    
-                }
-                else if (type == SQLITE_FLOAT)
-                {
-                    double val_float = sqlite3_column_double(prepared_layer_info, i);
-                    snprintf(number_text, 32, "%f", val_float);
-                    printf("header = %s, row = %d, col = %d, value = %lf    \n",header, row, col, val_float);
-                    append_2_textblock(tb, (const char*) number_text, text_font_normal);
-                    
-                }
-                else if (type == SQLITE_TEXT)
-                {
-                    const unsigned char *val_txt = sqlite3_column_text(prepared_layer_info, i);
-                    printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
-                    append_2_textblock(tb, (const char*) val_txt, text_font_normal);
-                  
-                }  
-            i++; 
+                int val_int = sqlite3_column_int(prepared_layer_info, i);
+                snprintf(number_text, 32, "%d", val_int);
+                printf("header = %s, row = %d, col = %d, value = %d    \n",header, row, col, val_int);
+                append_2_textblock(tb, (const char*) number_text, text_font_normal);
+
             }
-            
+            else if (type == SQLITE_FLOAT)
+            {
+                double val_float = sqlite3_column_double(prepared_layer_info, i);
+                snprintf(number_text, 32, "%f", val_float);
+                printf("header = %s, row = %d, col = %d, value = %lf    \n",header, row, col, val_float);
+                append_2_textblock(tb, (const char*) number_text, text_font_normal);
+
+            }
+            else if (type == SQLITE_TEXT)
+            {
+                const unsigned char *val_txt = sqlite3_column_text(prepared_layer_info, i);
+                printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
+                append_2_textblock(tb, (const char*) val_txt, text_font_normal);
+
+            }
+            i++;
         }
-        GLshort box[4];
-        box[0] = box[1] = 30;
-        box[2] = CURR_WIDTH - 30;
-        box[3] = CURR_HEIGHT - 30;
-        GLfloat color[] = {200,255,200,150};
-        GLshort txt_margin[] = {50,50};
-        multiply_array(txt_margin, size_factor, 2);
-    struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);    
+
+    }
+    GLshort box[4];
+    box[0] = box[1] = 30;
+    box[2] = CURR_WIDTH - 30;
+    box[3] = CURR_HEIGHT - 30;
+    GLfloat color[] = {200,255,200,150};
+    GLshort txt_margin[] = {50,50};
+    multiply_array(txt_margin, size_factor, 2);
+    struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);
     add_txt_2_textbox(textbox, tb);
-    
+
     init_matrix_handler(textbox, 1, 0, 0);
     incharge = textbox;
-    
-    
+
+
     matrixFromBBOX(textbox->matrix_handler);
-    
+
     GLshort p[] = {0,0};
     GLshort box_text_margins[] = {2,2};
     get_top_right(textbox, p);
@@ -149,9 +149,9 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     GLfloat close_color[]= {200,100,100,200};
     TEXTBLOCK *x_txt = init_textblock(1);
     append_2_textblock(x_txt,"X", char_font);
-    register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,22); //register text label and 
-    
-    
+    register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,22); //register text label and
+
+
     return 1;
 }
 
@@ -281,7 +281,7 @@ int identify(MATRIX *map_matrix, int x, int y)
                             log_this(100,"ok, poly for rendering");
                             add2gluint_list(renderpoly->polygon_start_indexes, renderpoly->vertex_array->used); //register start of new polygon to render
                             addbatch2glfloat_list(renderpoly->vertex_array, next_polystart - curr_poly_start, poly->vertex_array->list + curr_poly_start); //memcpy all vertexes in polygon
-                            
+
                             add2pointer_list(renderpoly->style_id,system_default_info_style);
 
 
@@ -289,7 +289,7 @@ int identify(MATRIX *map_matrix, int x, int y)
 
                             addbatch2glushort_list(renderpoly->element_array, n_elements, poly->element_array->list + n_elements_acc); //memcpy all vertexes in polygon
                             add2gluint_list(renderpoly->element_start_indexes, renderpoly->element_array->used); //register start of new polygon to render
-                            
+
                             printinfo(theLayer,id);
                             infoRenderLayer->visible = 1;
                         }

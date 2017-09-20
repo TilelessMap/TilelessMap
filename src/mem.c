@@ -28,7 +28,7 @@ void* st_realloc(void *ptr, size_t len)
     log_this(10, "Entering function %s",__func__);
 
     void *res = realloc(ptr, len);
-  //  printf("new pointer is %p old pointer is %p\n", res, ptr);
+    //  printf("new pointer is %p old pointer is %p\n", res, ptr);
     if(res==NULL)
     {
         free(ptr);

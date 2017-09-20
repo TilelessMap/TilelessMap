@@ -172,7 +172,7 @@ typedef struct
     sqlite3_stmt *preparedStatement;
     GLfloat *BBOX; // the requested bounding box (window)
     uint8_t geometryType;
-    uint8_t type; 
+    uint8_t type;
     uint8_t n_dims;
     GLfloat minScale;
     GLfloat maxScale;
@@ -282,10 +282,10 @@ typedef struct
     sqlite3_stmt *prepared_statement;
     sqlite3_stmt *info_prepared_statement;
     int64_t id;  //the current id
-    union{ 
+    union {
         int int_type;
         char string_type[128];
-    }styleID;  //the current styleID
+    } styleID; //the current styleID
     int styleid_type;
     uint8_t line_width;  //If we shall calculate triangels to get line width
     uint8_t utm_zone;
@@ -308,7 +308,7 @@ typedef struct
 typedef struct
 {
     POINT_LIST *points;
-}SYMBOLS;
+} SYMBOLS;
 
 
 SYMBOLS *global_symbols;

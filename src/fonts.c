@@ -41,40 +41,40 @@ int destroy_atlas(ATLAS *a)
 {
     if(!a)
         return 0;
-                    glDeleteTextures(1, &(a->tex));
-                    while ((err = glGetError()) != GL_NO_ERROR) {
-           fprintf(stderr,"FONT - opengl error:%d\n", err);
-       }
-                free(a);
-                a=NULL;
-                return 0;
+    glDeleteTextures(1, &(a->tex));
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr,"FONT - opengl error:%d\n", err);
+    }
+    free(a);
+    a=NULL;
+    return 0;
 }
 
 
 int destroy_font(FONTS *fonts)
 {
- 
+
     int i, z;
-    
-    for (i=0;i<fonts->nfonts;i++)
+
+    for (i=0; i<fonts->nfonts; i++)
     {
-      FONT *f = fonts->fonts + i;
-      for (z=0;z<f->max_size;z++)
-      {
+        FONT *f = fonts->fonts + i;
+        for (z=0; z<f->max_size; z++)
+        {
             if(f->a[z])
             {
                 destroy_atlas(f->a[z]);
             }
-      }
-      free(f->a);
-      f->a=NULL;
-      free(f->fontname);
-      f->fontname = NULL;
+        }
+        free(f->a);
+        f->a=NULL;
+        free(f->fontname);
+        f->fontname = NULL;
     }
-    
+
     st_free(fonts->fonts);
     st_free(fnts);
-    return 0;    
+    return 0;
 }
 
 
@@ -82,12 +82,12 @@ static ATLAS* create_atlas(FT_Face face, int height)
 {
     FT_Set_Pixel_Sizes(face, 0, height);
     FT_GlyphSlot g = face->glyph;
-    
-    
+
+
     int i;
     unsigned int roww = 0;
     unsigned int rowh = 0;
-    
+
     ATLAS *a = st_malloc(sizeof(ATLAS));
     a->w = 0;
     a->h = 0;
@@ -150,9 +150,9 @@ static ATLAS* create_atlas(FT_Face face, int height)
         }
 
         glTexSubImage2D(GL_TEXTURE_2D, 0, ox, oy, g->bitmap.width, g->bitmap.rows, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
-              while ((err = glGetError()) != GL_NO_ERROR) {
-           fprintf(stderr,"FONT - opengl error:%d\n", err);
-       }
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            fprintf(stderr,"FONT - opengl error:%d\n", err);
+        }
         //     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, g->bitmap.width, g->bitmap.rows, 0, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
 
         a->metrics[i].ax = (float) (g->advance.x >> 6);
@@ -180,15 +180,15 @@ static ATLAS* create_atlas(FT_Face face, int height)
 int init_text_resources()
 {
     log_this(10, "Entering %s\n",__func__);
-   
+
     FT_Error fterr;
 
-    
+
     fnts = st_malloc(sizeof(FONTS));
     fnts->nfonts = 0;
     fnts->fonts = NULL;
 
-    
+
 
 
     /* Initialize the FreeType2 library */
@@ -199,53 +199,53 @@ int init_text_resources()
 
 
     init_txt_coords();
-    
-    
-    
+
+
+
     return 0;
 }
 
 static FONT* check_font(const char *fontname, int fonttype, int size)
 {
-    
+
     if(size > MAX_FONT_SIZE)
     {
-     log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);   
-     size = MAX_FONT_SIZE;
+        log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);
+        size = MAX_FONT_SIZE;
     }
-        int i;
-        FONT *font = NULL;
-        for (i=0;i<fnts->nfonts;i++)
+    int i;
+    FONT *font = NULL;
+    for (i=0; i<fnts->nfonts; i++)
+    {
+        if(!strcmp(fontname, fnts->fonts[i].fontname) && fonttype == fnts->fonts[i].fonttype)
         {
-            if(!strcmp(fontname, fnts->fonts[i].fontname) && fonttype == fnts->fonts[i].fonttype)
-            {
-                font = fnts->fonts+i;
+            font = fnts->fonts+i;
             break;
-            }
         }
-        if(!font)
+    }
+    if(!font)
+    {
+        int new_nfonts = fnts->nfonts + 1;
+        if(fnts->nfonts>0)
+            fnts->fonts = st_realloc(fnts->fonts,sizeof(FONT) * new_nfonts );
+        else
         {
-            int new_nfonts = fnts->nfonts + 1;
-            if(fnts->nfonts>0)
-                fnts->fonts = st_realloc(fnts->fonts,sizeof(FONT) * new_nfonts );
-            else
-            {
-                fnts->fonts = st_malloc(sizeof(FONT) * new_nfonts );
-            }
-            font = fnts->fonts + fnts->nfonts;
-            fnts->nfonts=new_nfonts;
-            font->max_size = 0;
-            font->fontname = st_malloc(strlen(fontname)+1);
-            strcpy(font->fontname, fontname);
-            font->fonttype = fonttype;
-            font->a = st_calloc((MAX_FONT_SIZE + 1),sizeof(ATLAS*));        
-        font->max_size = MAX_FONT_SIZE;
+            fnts->fonts = st_malloc(sizeof(FONT) * new_nfonts );
         }
-        
-        
-    
-    
-        return font;
+        font = fnts->fonts + fnts->nfonts;
+        fnts->nfonts=new_nfonts;
+        font->max_size = 0;
+        font->fontname = st_malloc(strlen(fontname)+1);
+        strcpy(font->fontname, fontname);
+        font->fonttype = fonttype;
+        font->a = st_calloc((MAX_FONT_SIZE + 1),sizeof(ATLAS*));
+        font->max_size = MAX_FONT_SIZE;
+    }
+
+
+
+
+    return font;
 }
 
 
@@ -253,18 +253,18 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
 {
     if(size > MAX_FONT_SIZE)
     {
-     log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);   
-     size = MAX_FONT_SIZE;
+        log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);
+        size = MAX_FONT_SIZE;
     }
-      log_this(10, "Entering %s\n",__func__);
+    log_this(10, "Entering %s\n",__func__);
     char *sql_txt;
     int rc;
     sqlite3_stmt *preparedFonts;
     FT_Face face;
-    
+
     FONT *f;
-    
-    
+
+
     int len;
     char *font_data;
     FT_Error fterr;
@@ -273,12 +273,12 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
         size = 12;
     if(!fonttype)
         fonttype = 1;
-    
 
-/*By doing this ordering the first result will be right font name if exists, 
- * right type if exists for that font name or the one with highest priority 
- * (default style with right type) This means right type gets prioritized before font type
- * This could be discussed if it is right*/
+
+    /*By doing this ordering the first result will be right font name if exists,
+     * right type if exists for that font name or the one with highest priority
+     * (default style with right type) This means right type gets prioritized before font type
+     * This could be discussed if it is right*/
     sql_txt = "select name,type, font from main.fonts order by \"name\" = ? desc ,type = ? desc, prio;";
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
@@ -291,26 +291,26 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
         sqlite3_bind_text(preparedFonts,1,fontname,-1,NULL);
     else
         sqlite3_bind_text(preparedFonts,1,"default",-1,NULL);//just a dummy name that will result in default set in db
-    
+
     sqlite3_bind_int(preparedFonts,2,fonttype);
     if(sqlite3_step(preparedFonts)!= SQLITE_ROW)
     {
         log_this(100, "Problem loading font!");
-        
+
     }
     // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
 
     log_this(10,"namn = %s\n",sqlite3_column_text(preparedFonts, 0));
     const unsigned char *res_fontname = sqlite3_column_text(preparedFonts, 0);
     int res_type=sqlite3_column_int(preparedFonts, 1);
-    
+
     len = sqlite3_column_bytes(preparedFonts, 2);
- 
-    
-   font_data = malloc(len);
+
+
+    font_data = malloc(len);
     memcpy(font_data, sqlite3_column_blob(preparedFonts, 2), len);
-    
-    
+
+
     if (font_data == NULL) {
         log_this(100,"Could not load font data ");
         return NULL;
@@ -325,7 +325,7 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
     f = check_font((const char*) res_fontname, res_type, size);
     if(!f->a[size])
         f->a[size] = create_atlas(face, size);
-    
+
     FT_Done_Face(face);
     log_this(10,"-------------------returning font %s,typ %d, size %d, pointer %p\n", res_fontname, res_type,size, f->a[size]);
     sqlite3_clear_bindings(preparedFonts);
@@ -334,5 +334,5 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
     sqlite3_finalize(preparedFonts);
     free(font_data);
     return f->a[size];
-    
+
 }

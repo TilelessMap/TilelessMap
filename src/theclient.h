@@ -117,41 +117,41 @@ STYLES_RUNTIME;
 
 typedef struct
 {
-        GLFLOAT_LIST *color;
-        GLFLOAT_LIST *z;
-        GLUSHORT_LIST *units;        
-        int nsyms;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *z;
+    GLUSHORT_LIST *units;
+    int nsyms;
 }
 POLYGON_STYLE;
 
 typedef struct
 {
-        GLFLOAT_LIST *color;
-        GLFLOAT_LIST *width;
-        GLFLOAT_LIST *z;
-        GLUSHORT_LIST *units;   
-        int nsyms;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *width;
+    GLFLOAT_LIST *z;
+    GLUSHORT_LIST *units;
+    int nsyms;
 }
 LINE_STYLE;
 
 typedef struct
 {
-        UINT8_LIST *symbol;
-        GLFLOAT_LIST *color;
-        GLFLOAT_LIST *size;
-        GLFLOAT_LIST *z;
-        GLUSHORT_LIST *units;  
-        int nsyms;
+    UINT8_LIST *symbol;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *size;
+    GLFLOAT_LIST *z;
+    GLUSHORT_LIST *units;
+    int nsyms;
 }
 POINT_STYLE;
 
 typedef struct
 {
-        GLFLOAT_LIST *color;
-        GLFLOAT_LIST *size;
-        GLFLOAT_LIST *z;
-        POINTER_LIST *a;
-        int nsyms;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *size;
+    GLFLOAT_LIST *z;
+    POINTER_LIST *a;
+    int nsyms;
 }
 TEXT_STYLE;
 
@@ -159,14 +159,14 @@ TEXT_STYLE;
 
 struct STYLES
 {
-        int key_type;
-        int int_key;
-        char *string_key;
-        POLYGON_STYLE *polygon_styles;
-        LINE_STYLE *line_styles;
-        POINT_STYLE *point_styles;
-        TEXT_STYLE *text_styles;
-        UT_hash_handle hh;         /* makes this structure hashable */        
+    int key_type;
+    int int_key;
+    char *string_key;
+    POLYGON_STYLE *polygon_styles;
+    LINE_STYLE *line_styles;
+    POINT_STYLE *point_styles;
+    TEXT_STYLE *text_styles;
+    UT_hash_handle hh;         /* makes this structure hashable */
 };
 
 

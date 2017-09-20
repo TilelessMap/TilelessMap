@@ -48,7 +48,7 @@ static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
     tb->end_pos=buf+buf_len;
     //printf("allocate buffer at %p\n",tb->start_pos);
     return 0;
-    
+
 }*/
 
 
@@ -200,107 +200,107 @@ void *twkb_fromSQLiteBBOX(void *theL)
         theLayer->lines->style_id->list_type = theLayer->style_key_type;
     if(theLayer->polygons)
         theLayer->polygons->style_id->list_type = theLayer->style_key_type;
-   */
+    */
 
-        while (sqlite3_step(prepared_statement)==SQLITE_ROW)
+    while (sqlite3_step(prepared_statement)==SQLITE_ROW)
+    {
+
+        if(theLayer->geometryType == RASTER)
         {
-            
-            if(theLayer->geometryType == RASTER)
+
+            if(get_blob(prepared_statement,1, &res, &res_len))
             {
+                fprintf(stderr, "Failed to select data\n");
 
-                    if(get_blob(prepared_statement,1, &res, &res_len))
-                    {
-                        fprintf(stderr, "Failed to select data\n");
-
-                        sqlite3_close(projectDB);
-                        return NULL;
-                    }
+                sqlite3_close(projectDB);
+                return NULL;
+            }
             addbatch2uint8_list(theLayer->rast->data,res_len, res);
             add2gluint_list(theLayer->rast->raster_start_indexes, res_len);
-            
-            
+
+
             int x = sqlite3_column_int(prepared_statement,5);
             add2gluint_list(theLayer->rast->tileidxy, x);
             int y = sqlite3_column_int(prepared_statement,6);
             add2gluint_list(theLayer->rast->tileidxy, y);
-        
-        
-            }
-            ts.id = sqlite3_column_int(prepared_statement, 3);
-            // printf("id fra db = %ld\n",ts.id);
-            ts.styleid_type = theLayer->style_key_type;
-            if(ts.styleid_type == INT_TYPE)
+
+
+        }
+        ts.id = sqlite3_column_int(prepared_statement, 3);
+        // printf("id fra db = %ld\n",ts.id);
+        ts.styleid_type = theLayer->style_key_type;
+        if(ts.styleid_type == INT_TYPE)
+        {
+            ts.styleID.int_type = sqlite3_column_int(prepared_statement, 4);
+        }
+        else if(ts.styleid_type == STRING_TYPE)
+        {
+            const unsigned char *str = sqlite3_column_text(prepared_statement, 4);
+            strcpy(ts.styleID.string_type,(const char*) str);
+        }
+        else
+        {
+            if(theLayer->geometryType != RASTER)
             {
-                ts.styleID.int_type = sqlite3_column_int(prepared_statement, 4);                
+                log_this(100, "Error, invalid style key type: %d\n", ts.styleid_type);
+                return NULL;
             }
-            else if(ts.styleid_type == STRING_TYPE)
+        }
+        if(get_blob(prepared_statement,0, &res, &res_len))
+        {
+
+            log_this(1,"Failed to select data\n");
+
+            sqlite3_close(projectDB);
+            return NULL;
+        }
+        tb.start_pos = tb.read_pos = res;
+        tb.end_pos=res+res_len;
+        ts.tb=&tb;
+        ts.utm_zone = theLayer->utm_zone;
+        ts.hemisphere = theLayer->hemisphere;
+        while (ts.tb->read_pos<ts.tb->end_pos)
+        {
+            decode_twkb(&ts);//, theLayer->res_buf);
+        }
+        //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
+        free(tb.start_pos);
+        if(theLayer->type & 4)
+        {
+            if(get_blob(prepared_statement,1, &res, &res_len))
             {
-                const unsigned char *str = sqlite3_column_text(prepared_statement, 4);
-                strcpy(ts.styleID.string_type,(const char*) str);
-            }
-            else
-            {
-                if(theLayer->geometryType != RASTER)
-                {
-                    log_this(100, "Error, invalid style key type: %d\n", ts.styleid_type);
-                    return NULL;                
-                }
-            }
-            if(get_blob(prepared_statement,0, &res, &res_len))
-            {
-    
-                log_this(1,"Failed to select data\n");
+                fprintf(stderr, "Failed to select data\n");
 
                 sqlite3_close(projectDB);
                 return NULL;
-            } 
-            tb.start_pos = tb.read_pos = res;            
-            tb.end_pos=res+res_len;  
+            }
+            tb.start_pos = tb.read_pos = res;
+            tb.end_pos=res+res_len;
             ts.tb=&tb;
-            ts.utm_zone = theLayer->utm_zone;
-            ts.hemisphere = theLayer->hemisphere;
+
             while (ts.tb->read_pos<ts.tb->end_pos)
             {
-                decode_twkb(&ts);//, theLayer->res_buf);
+                decode_element_array(&ts);
             }
-    //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
+            //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
             free(tb.start_pos);
-            if(theLayer->type & 4)
-            {
-                if(get_blob(prepared_statement,1, &res, &res_len))
-                {
-                    fprintf(stderr, "Failed to select data\n");
-
-                    sqlite3_close(projectDB);
-                    return NULL;
-                }
-            tb.start_pos = tb.read_pos = res;            
-            tb.end_pos=res+res_len;  
-                ts.tb=&tb;
-
-                while (ts.tb->read_pos<ts.tb->end_pos)
-                {
-                    decode_element_array(&ts);
-                }
-    //printf("start free %p, n_pa = %d\n",tb.start_pos, res_buf->used_n_pa);
-                free(tb.start_pos);
 
 
-
-            }
-            if(theLayer->type & 32)
-            {
-                const char *txt = (const char*) sqlite3_column_text(prepared_statement, 5);
-
-                size = sqlite3_column_int(prepared_statement, 6);
-                rotation = (GLfloat) sqlite3_column_double(prepared_statement, 7);
-                anchor = (GLint) sqlite3_column_double(prepared_statement, 8);
-
-                text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
-            }
 
         }
-    
+        if(theLayer->type & 32)
+        {
+            const char *txt = (const char*) sqlite3_column_text(prepared_statement, 5);
+
+            size = sqlite3_column_int(prepared_statement, 6);
+            rotation = (GLfloat) sqlite3_column_double(prepared_statement, 7);
+            anchor = (GLint) sqlite3_column_double(prepared_statement, 8);
+
+            text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
+        }
+
+    }
+
     sqlite3_clear_bindings(prepared_statement);
     sqlite3_reset(prepared_statement);
 

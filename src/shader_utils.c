@@ -396,9 +396,9 @@ void main(void) { \
 
 
     reset_shaders(vs, fs, gps_program);
-    
-    
-    
+
+
+
 
 
     /*create a shader program symbols*/
@@ -474,10 +474,10 @@ void main(void) { \
 
 
     reset_shaders(vs, fs, sym_program);
-    
-    
-    
-    
+
+
+
+
 
     /*create a shader program raster textures*/
 
@@ -496,9 +496,9 @@ void main(void) { \
     vec2 flipped_texcoord = vec2(f_texcoord.x, 1.0 - f_texcoord.y); \
     gl_FragColor = texture2D(rastertexture, flipped_texcoord); \
     }" ;
-    
-    
-    
+
+
+
 
     raster_program = create_program((unsigned char *) gen_vraster,(unsigned char *)  gen_fraster, &vs, &fs);
 
@@ -531,7 +531,7 @@ void main(void) { \
         return 0;
     }
 
-	raster_texture = glGetUniformLocation(raster_program, "rastertexture");
+    raster_texture = glGetUniformLocation(raster_program, "rastertexture");
     if (raster_texture == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "rastertexture");

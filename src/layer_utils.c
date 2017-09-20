@@ -46,7 +46,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
     {
         //We don't check if layer actually is represented. That will be found without db-error when loading layer
-        if(sqlite3_column_int(prepared_sql, 0)==1) 
+        if(sqlite3_column_int(prepared_sql, 0)==1)
         {
             sqlite3_finalize(prepared_sql);
             return 1;
@@ -69,7 +69,7 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
     int rc, res;
     sqlite3_stmt *prepared_sql;
     snprintf(sql, 1024, "select sql from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
- //   printf("sql = %s\n", sql);
+//   printf("sql = %s\n", sql);
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
     if (rc != SQLITE_OK ) {
@@ -81,7 +81,7 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
     if(sqlite3_step(prepared_sql) ==  SQLITE_ROW)
     {
         const char *w = (const char*) sqlite3_column_text(prepared_sql, 0);
-        
+
         res = search_string(w,(const char*) col_name);
         sqlite3_finalize(prepared_sql);
         return res;
@@ -146,60 +146,60 @@ LAYER_RUNTIME* init_layer_runtime(int n)
 
 static int destroy_polygon_style(POLYGON_STYLE *s)
 {
- destroy_glfloat_list(s->color);  
- destroy_glfloat_list(s->z);  
- destroy_glushort_list(s->units);
- st_free(s);
- return 0;
+    destroy_glfloat_list(s->color);
+    destroy_glfloat_list(s->z);
+    destroy_glushort_list(s->units);
+    st_free(s);
+    return 0;
 }
 
 static int destroy_line_style(LINE_STYLE *s)
 {
- destroy_glfloat_list(s->color);  
- destroy_glfloat_list(s->z);  
- destroy_glushort_list(s->units);
- destroy_glfloat_list(s->width);
- st_free(s);
- return 0;
+    destroy_glfloat_list(s->color);
+    destroy_glfloat_list(s->z);
+    destroy_glushort_list(s->units);
+    destroy_glfloat_list(s->width);
+    st_free(s);
+    return 0;
 }
 
 static int destroy_point_style(POINT_STYLE *s)
 {
- destroy_glfloat_list(s->color);  
- destroy_glfloat_list(s->z);  
- destroy_glfloat_list(s->size);  
- destroy_glushort_list(s->units);
- destroy_uint8_list(s->symbol);
- st_free(s);
- return 0;
+    destroy_glfloat_list(s->color);
+    destroy_glfloat_list(s->z);
+    destroy_glfloat_list(s->size);
+    destroy_glushort_list(s->units);
+    destroy_uint8_list(s->symbol);
+    st_free(s);
+    return 0;
 }
 
 static int destroy_text_style(TEXT_STYLE *s)
 {
- destroy_glfloat_list(s->color);  
- destroy_glfloat_list(s->size);  
- destroy_glfloat_list(s->z);  
-destroy_pointer_list(s->a);
-st_free(s);
- return 0;
+    destroy_glfloat_list(s->color);
+    destroy_glfloat_list(s->size);
+    destroy_glfloat_list(s->z);
+    destroy_pointer_list(s->a);
+    st_free(s);
+    return 0;
 }
 
 static int destroy_style(struct STYLES *s)
 {
- if(s->key_type == STRING_TYPE && s->string_key)
-     st_free(s->string_key);
- 
- if(s->polygon_styles)
-    destroy_polygon_style(s->polygon_styles);
- if(s->line_styles)
-    destroy_line_style(s->line_styles);
- if(s->point_styles)
-    destroy_point_style(s->point_styles);
- if(s->text_styles)
-    destroy_text_style(s->text_styles);
+    if(s->key_type == STRING_TYPE && s->string_key)
+        st_free(s->string_key);
+
+    if(s->polygon_styles)
+        destroy_polygon_style(s->polygon_styles);
+    if(s->line_styles)
+        destroy_line_style(s->line_styles);
+    if(s->point_styles)
+        destroy_point_style(s->point_styles);
+    if(s->text_styles)
+        destroy_text_style(s->text_styles);
     st_free(s);
     return 0;
-    
+
 }
 
 
@@ -211,19 +211,19 @@ static int destroy_style(struct STYLES *s)
 
 
 static void delete_styles(LAYER_RUNTIME *l) {
-  struct STYLES *current_style, *tmp;
+    struct STYLES *current_style, *tmp;
 
 
-     HASH_ITER(hh, l->styles, current_style, tmp)
-     {
-    HASH_DEL(l->styles,current_style);  /* delete; users advances to next */
-    destroy_style(current_style);
-    current_style=NULL;
-      
-  }
-  
-  
- 
+    HASH_ITER(hh, l->styles, current_style, tmp)
+    {
+        HASH_DEL(l->styles,current_style);  /* delete; users advances to next */
+        destroy_style(current_style);
+        current_style=NULL;
+
+    }
+
+
+
 }
 
 

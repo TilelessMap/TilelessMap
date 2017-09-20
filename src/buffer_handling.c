@@ -488,7 +488,7 @@ static int increase_union_list(UNION_LIST *l, size_t needed_space)
     }
     printf("space to be increased to %zu\n",new_size);
     l->list = st_realloc(l->list, new_size);
-    
+
     printf("space increased to %zu\n",new_size);
     l->alloced = new_size;
     return 0;
@@ -516,7 +516,7 @@ static int destroy_union_list(UNION_LIST *l)
 
 int add2union_list(UNION_LIST *list, void *val)
 {
-    
+
     if(list->list_type == INT_TYPE)
     {
         printf("let's write val %d\n",*((int*) val));
@@ -524,23 +524,23 @@ int add2union_list(UNION_LIST *list, void *val)
         memcpy((GLint*)list->list + list->used,val, sizeof(GLint));
         list->used += sizeof(GLint);
     }
-     if(list->list_type == FLOAT_TYPE)
+    if(list->list_type == FLOAT_TYPE)
     {
-        
+
         increase_union_list(list, sizeof(GLfloat));
         memcpy((GLfloat*) list->list + list->used,val, sizeof(GLfloat));
         list->used += sizeof(GLfloat);
     }
-     if(list->list_type == STRING_TYPE)
-    {        
+    if(list->list_type == STRING_TYPE)
+    {
         size_t len = strlen(val)+1;
-       // printf("val = %s\n",(char*) val);
+        // printf("val = %s\n",(char*) val);
         increase_union_list(list, len);
         strcpy((char*) list->list + list->used,(char*)val);
         add2gluint_list(list->s_start_indexes, list->used);
         printf("val = %s and used = %d\n",(char*)val, list->used);
         list->used += len;
-    } 
+    }
     return 0;
 }
 
@@ -722,7 +722,7 @@ int init_buffers(LAYER_RUNTIME *layer)
         layer->polygons = NULL;
 
     layer->twkb_id = init_int64_list();
-    
+
     if(layer->geometryType == RASTER)
         layer->rast = init_raster_list();
     //  layer->style_id = init_gluint_list();
@@ -743,7 +743,7 @@ int reset_buffers(LAYER_RUNTIME *layer)
 
     if(layer->twkb_id)
         reset_int64_list(layer->twkb_id);
-    
+
     if(layer->geometryType == RASTER)
         reset_raster_list(layer->rast);
     //  reset_gluint_list(layer->style_id);
@@ -756,29 +756,29 @@ int reset_buffers(LAYER_RUNTIME *layer)
 int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
 {
     struct STYLES *s = NULL;
-       if(val_type == INT_TYPE)
-            {
-                HASH_FIND_INT( styles, val, s);
-                log_this(10,"  val = %d and style is %p\n", *((int*) val), s);
-                if(!s)
-            {
-                int v = -1;
-                HASH_FIND_INT(styles, &v, s);
-            } 
-            }
-            else if (val_type == STRING_TYPE)
-            {
-                
-                HASH_FIND_STR(styles, val, s);  
-                
-    log_this(10," val = %s and style is %p \n",(char*) val, s);
-                if(!s)
-                {
-                    HASH_FIND_STR(styles, "-1", s);
-                }
-            }
+    if(val_type == INT_TYPE)
+    {
+        HASH_FIND_INT( styles, val, s);
+        log_this(10,"  val = %d and style is %p\n", *((int*) val), s);
+        if(!s)
+        {
+            int v = -1;
+            HASH_FIND_INT(styles, &v, s);
+        }
+    }
+    else if (val_type == STRING_TYPE)
+    {
 
-            add2pointer_list(list, s);
+        HASH_FIND_STR(styles, val, s);
+
+        log_this(10," val = %s and style is %p \n",(char*) val, s);
+        if(!s)
+        {
+            HASH_FIND_STR(styles, "-1", s);
+        }
+    }
+
+    add2pointer_list(list, s);
     return 0;
 }
 
@@ -815,7 +815,7 @@ GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
 
     get_style(l->styles, l->wide_lines->style_id, &(ts->styleID), ts->styleid_type);
- //   add2union_list(l->wide_lines->style_id, &(ts->styleID));
+//   add2union_list(l->wide_lines->style_id, &(ts->styleID));
     return l->wide_lines->vertex_array;
 
 }
@@ -855,7 +855,7 @@ int destroy_buffers(LAYER_RUNTIME *layer)
         destroy_polygon_list(layer->polygons);
 
     destroy_int64_list(layer->twkb_id);
-    
+
     if(layer->geometryType == RASTER)
         destroy_raster_list(layer->rast);
     return 0;
@@ -864,16 +864,16 @@ int destroy_buffers(LAYER_RUNTIME *layer)
 
 SYMBOLS* init_symbol_list()
 {
- SYMBOLS *res = st_malloc(sizeof(SYMBOLS));
- res->points = init_point_list();
- return res;
- 
+    SYMBOLS *res = st_malloc(sizeof(SYMBOLS));
+    res->points = init_point_list();
+    return res;
+
 }
 
 int destroy_symbol_list(SYMBOLS *l)
 {
- destroy_point_list(l->points);
- free(l);
+    destroy_point_list(l->points);
+    free(l);
 }
 
 
@@ -881,17 +881,17 @@ int addsym(int id, size_t n_points, GLfloat *points)
 {
     if(id<global_symbols->points->point_start_indexes->used)
         return 1;
-    
-    //If not all symbol ids exist we have to fill the list with dummy-posts 
+
+    //If not all symbol ids exist we have to fill the list with dummy-posts
     while (id>global_symbols->points->point_start_indexes->used)
     {
-       add2gluint_list(global_symbols->points->point_start_indexes, global_symbols->points->points->used);  
+        add2gluint_list(global_symbols->points->point_start_indexes, global_symbols->points->points->used);
     }
-    
+
     addbatch2glfloat_list(global_symbols->points->points, n_points, points);
     add2gluint_list(global_symbols->points->point_start_indexes, global_symbols->points->points->used);
     return 0;
-       
+
 }
 /*
 int destroy_symbols()

@@ -53,8 +53,8 @@ FT_Library ft;
 
 typedef struct
 {
- ATLAS *normal;
- ATLAS *bold; 
+    ATLAS *normal;
+    ATLAS *bold;
 } FONTSIZE;
 
 typedef struct
@@ -65,18 +65,18 @@ typedef struct
 
 typedef struct
 {
- char *fontname;
- int fonttype;
- //FONTSIZES *fss;
- ATLAS **a;
- size_t max_size;
+    char *fontname;
+    int fonttype;
+//FONTSIZES *fss;
+    ATLAS **a;
+    size_t max_size;
 } FONT;
 
 typedef struct
 {
-        FONT *fonts;
-        size_t nfonts;
-}FONTS;
+    FONT *fonts;
+    size_t nfonts;
+} FONTS;
 
 
 
