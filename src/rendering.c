@@ -591,7 +591,7 @@ static int render_data_layers(GLfloat *theMatrix)
         /* if(oneLayer->geometryType >= RASTER)
              continue;*/
         int type = oneLayer->type;
-
+//printf("render layer %s\n",oneLayer->name);
         if(oneLayer->visible)
         {
 
@@ -687,6 +687,8 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     //  GLESSTRUCT *rb = oneLayer->res_buf;
 
     POINT_LIST *point = oneLayer->points;
+    
+    glBindBuffer(GL_ARRAY_BUFFER, point->vbo);
     glUseProgram(txt_program);
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
@@ -766,7 +768,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, uint n_chars, float sx, float sy,POINT_T *coords )
+static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, unsigned int n_chars, float sx, float sy,POINT_T *coords )
 {
 
     uint32_t p;
@@ -835,6 +837,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     GLfloat max_used_width = 0;
     reset_wc_txt(tmp_unicode_txt);
     glBindTexture(GL_TEXTURE_2D, a->tex);
+    
     //    glUniform1i(text_uniform_tex, 0);
     /* Set up the VBO for our vertex data */
     glEnableVertexAttribArray(txt_box);
