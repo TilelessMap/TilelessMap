@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #endif
 
+#include <stdint.h>
 #include "ext/sqlite/sqlite3.h"
 #define INIT_LIST_SIZE 256
 

@@ -1,5 +1,6 @@
 #include "symbols.h"
 #include "mem.h"
+#define _USE_MATH_DEFINES //This is for windows
 #include <math.h>
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>
@@ -57,7 +58,7 @@ int init_symbols()
     symbolid = STAR_SYMBOL;
     n_dirs = 10;
     first_len = 1;
-    second_len = 0.3;
+    second_len = (GLfloat) 0.3;
     rotation = 0;
 
     points = create_symbol(n_dirs,first_len, second_len, rotation);
@@ -85,18 +86,18 @@ GLfloat* create_circle(int npoints)
     for (i = 0; i<npoints/2; i++)
     {
         rad = i * M_PI/(npoints/2);
-        res[res_pos++] = sin(rad);
-        res[res_pos++] = cos(rad);
+        res[res_pos++] = (GLfloat) sin(rad);
+        res[res_pos++] = (GLfloat)cos(rad);
     }
     for (i = npoints/2; i>0; i--)
     {
         rad = i * M_PI/(npoints/2);
-        res[res_pos++] = -sin(rad);
-        res[res_pos++] = cos(rad);
+        res[res_pos++] = (GLfloat)-sin(rad);
+        res[res_pos++] = (GLfloat)cos(rad);
     }
     //add first point again
-    res[res_pos++] = sin(0);
-    res[res_pos++] = cos(0);
+    res[res_pos++] = (GLfloat)sin(0);
+    res[res_pos++] = (GLfloat)cos(0);
 
     return  res;
 
@@ -111,15 +112,15 @@ GLfloat* create_symbol(int npoints, float even, float odd,float rotation)
     double rad;
     int i, res_pos = 0;
     float e=odd;
-    float rot_rad = rotation * 2 * M_PI/360;
+    float rot_rad = (float) (rotation * 2 * M_PI/360);
     //add center of point at 0,0
     res[res_pos++] = 0;
     res[res_pos++] = 0;
     for (i = 0; i<npoints; i++)
     {
         rad = rot_rad + i * 2* M_PI/npoints;
-        res[res_pos++] = sin(rad)*e;
-        res[res_pos++] = cos(rad)*e;
+        res[res_pos++] = (GLfloat) sin(rad)*e;
+        res[res_pos++] = (GLfloat) cos(rad)*e;
         if(e==odd)
             e = even;
         else
@@ -128,8 +129,8 @@ GLfloat* create_symbol(int npoints, float even, float odd,float rotation)
     }
     //add first point again
     rad = rot_rad + 2 *M_PI;
-    res[res_pos++] = sin(rad)*e;
-    res[res_pos++] = cos(rad)*e;
+    res[res_pos++] = (GLfloat) sin(rad)*e;
+    res[res_pos++] = (GLfloat) cos(rad)*e;
 
     return  res;
 

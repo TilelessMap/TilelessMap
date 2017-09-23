@@ -238,7 +238,7 @@ void mainLoop(SDL_Window* window)
                     tx = ev.tfinger.x;
                     ty = ev.tfinger.y;
 
-                    int tolerance = 10 * size_factor;
+                    int tolerance = (int) (10 * size_factor);
 
                     if(abs(mouse_down_x-mouse_up_x) < tolerance && abs(mouse_down_y-mouse_up_y)<tolerance && !touches[1].active)
                     {
@@ -476,7 +476,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (!(the_file && dir))
+    if (!(the_file))
     {
         log_this(110, "Too few arguments \n");
         return 1;
@@ -518,8 +518,9 @@ int main(int argc, char **argv)
 
 
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
-
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
+//	glEnable(GL_LINE_SMOOTH);
+//	glEnable(GL_POLYGON_SMOOTH);
 
     SDL_Rect r;
     if (SDL_GetDisplayBounds(0, &r) != 0) {
@@ -527,20 +528,20 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    CURR_WIDTH = r.w*0.9;
+    CURR_HEIGHT = r.h*0.9;
 
 #ifndef __ANDROID__
     SDL_Window* window = SDL_CreateWindow("TileLess",
-                                          0, 0, r.w, r.h,
+                                          0, 0, CURR_WIDTH, CURR_HEIGHT,
                                           SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 #else
 
     SDL_Window* window = SDL_CreateWindow("TileLess",
                                           0, 0, r.w, r.h,
-                                          SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+                                          SDL_WINDOW_SHOWN  | SDL_WINDOW_OPENGL);
 
 #endif
-    CURR_WIDTH = r.w;
-    CURR_HEIGHT = r.h;
 
 
 

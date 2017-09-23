@@ -53,8 +53,11 @@ static int attach_db(char *dir, TEXT *missing_db)
         const unsigned char *dbsource = sqlite3_column_text(preparedDb2Attach, 0);
         const unsigned char * dbname= sqlite3_column_text(preparedDb2Attach, 1);
         char sqlAttachDb[128];
-        snprintf(sqlAttachDb,sizeof(sql), "ATTACH '%s//%s' AS %s;", dir, dbsource, dbname);
-        log_this(10, "attachsql = %s\n",sqlAttachDb );
+		if(dir)
+	        snprintf(sqlAttachDb,sizeof(sql), "ATTACH '%s//%s' AS %s;", dir, dbsource, dbname);
+		else
+			snprintf(sqlAttachDb, sizeof(sql), "ATTACH '%s' AS %s;", dbsource, dbname);
+		log_this(10, "attachsql = %s\n",sqlAttachDb );
         rc = sqlite3_exec(projectDB,sqlAttachDb,NULL, NULL, &err_msg);
         if (rc != 0)
         {
@@ -260,8 +263,6 @@ static int load_layers(TEXT *missing_db)
     LAYER_RUNTIME *oneLayer;
 
     char styleselect[128];
-    char stylejoin[128];
-    char stylewhere[128];
     char textselect[256];
     char sql[2048];
     uint8_t type = 0;
