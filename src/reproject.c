@@ -172,8 +172,8 @@ void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, 
         /*
         printf("%f, %f\n",x,y);
           */
-        points[0] = x;
-        points[1] = y;
+        points[0] = (GLfloat) x;
+        points[1] = (GLfloat) y;
     }
     else
     {

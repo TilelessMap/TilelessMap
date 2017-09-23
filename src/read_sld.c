@@ -18,7 +18,7 @@ static GLfloat* read_color(const char* str, GLfloat *c)
         s[0] = str[1+i*2];
         s[1] = str[2+i*2];
 
-        c[i] = strtol(s,NULL,16)/256.0;
+        c[i] = (GLfloat) (strtol(s,NULL,16)/256.0);
     }
     return 0;
 
@@ -27,7 +27,7 @@ static GLfloat* read_color(const char* str, GLfloat *c)
 
 static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node_t *node, int key_type, struct STYLES **a)
 {
-    struct STYLES *s;
+    struct STYLES *s = NULL;
     if(key_type == STRING_TYPE)
     {
         const char *key = mxmlGetOpaque(mxmlFindElement(node, tree, "ogc:Literal",  NULL, NULL,  MXML_DESCEND));
@@ -248,7 +248,7 @@ static int parse_linestyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_node
             else if (!strcmp(attr, "stroke-width"))
             {
                 width = mxmlGetOpaque(n);
-                add2glfloat_list(s->line_styles->width, strtof(width, NULL)*0.5); //We multiply by 0.5 since the number will be used in both directions in the shader
+                add2glfloat_list(s->line_styles->width, (GLfloat) (strtof(width, NULL)*0.5)); //We multiply by 0.5 since the number will be used in both directions in the shader
             }
             else if (!strcmp(attr, "stroke-opacity"))
             {
@@ -279,7 +279,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
 
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
-    mxml_node_t *n, *symbolizer;
+    mxml_node_t *n=NULL, *symbolizer;
 
     const char *opacity = NULL;
 
@@ -413,8 +413,7 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
     struct STYLES *s = NULL;
     check_and_add_style(oneLayer, tree, node, key_type, &s);
     mxml_node_t *n, *symbolizer;
-    const char *font_family;
-    const char *opacity;
+	const char *font_family = NULL;
     const char* font_weight_txt;
     int size;
     int font_weight = 0;
@@ -443,7 +442,7 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
 
 
 
-        const char *size_txt;
+        const char *size_txt = NULL;
         /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
          * to know what type of value it holds. Seems to be a waeknes of mini xml*/
         mxml_node_t *Font = mxmlFindElement(symbolizer, symbolizer, "se:Font", NULL, NULL,  MXML_DESCEND);
@@ -541,19 +540,16 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
         return 0;
     *text_attr = NULL;
     char *parsed_text_attr = NULL;
-    const char *txt;
-    const char *attr;
-    int max_val = 0,min_val = INT_MAX, nvals=0, n_codes;
+    int max_val = 0,min_val = INT_MAX, nvals=0;
     long int val;
     char *last_propname = NULL;
     mxml_node_t *tree;
-    struct STYLES *styles;
     int key_type = INT_TYPE;
     char *checknum;
 
     tree = mxmlLoadString(NULL, sld, MXML_OPAQUE_CALLBACK);
 
-    mxml_node_t *rule, propname, propval;
+    mxml_node_t *rule;
 
     //  node = mxmlFindElement(tree, tree, "se:SvgParameter",  NULL, NULL,  MXML_DESCEND);
   //  if(!strcmp(oneLayer->name, "norge_1000_punkter"))
@@ -600,7 +596,7 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
             rule = mxmlFindElement(rule, tree,"se:Rule",NULL, NULL,MXML_DESCEND))
     {
 
-        GLfloat z = nvals*0.002; //this value is set to support 500 symbols in a layer before getting a z-value over 1(which will prevent rendering
+        GLfloat z = (GLfloat) (nvals*0.002); //this value is set to support 500 symbols in a layer before getting a z-value over 1(which will prevent rendering
         if(z>1)
             z=1;
         if( mxmlGetOpaque(mxmlFindElement(rule, tree, "se:PolygonSymbolizer",  NULL, NULL,  MXML_DESCEND)))

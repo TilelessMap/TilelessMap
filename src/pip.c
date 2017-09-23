@@ -23,7 +23,7 @@
 //    See: Algorithm 1 "Area of Triangles and Polygons"
 inline static int isLeft( GLfloat *P0, GLfloat *P1, GLfloat *P2 )
 {
-    return ( (P1[0] - P0[0]) * (P2[1] - P0[1])
+    return (int) ( (P1[0] - P0[0]) * (P2[1] - P0[1])
              - (P2[0] -  P0[0]) * (P1[1] - P0[1]) );
 }
 //===================================================================

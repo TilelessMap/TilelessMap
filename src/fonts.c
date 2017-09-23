@@ -54,7 +54,7 @@ int destroy_atlas(ATLAS *a)
 int destroy_font(FONTS *fonts)
 {
 
-    int i, z;
+    unsigned int i, z;
 
     for (i=0; i<fonts->nfonts; i++)
     {
@@ -181,7 +181,6 @@ int init_text_resources()
 {
     log_this(10, "Entering %s\n",__func__);
 
-    FT_Error fterr;
 
 
     fnts = st_malloc(sizeof(FONTS));
@@ -213,7 +212,7 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
         log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);
         size = MAX_FONT_SIZE;
     }
-    int i;
+    unsigned int i;
     FONT *font = NULL;
     for (i=0; i<fnts->nfonts; i++)
     {

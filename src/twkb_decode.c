@@ -275,7 +275,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
     uint8_t utm_in, hemi_in;
     uint8_t close_ring = 0;
     LAYER_RUNTIME *theLayer = ts->theLayer;
-    uint type = theLayer->type;
+    unsigned int type = theLayer->type;
 
     //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
 //   theLayer->n_dims = ndims;
