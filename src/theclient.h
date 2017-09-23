@@ -411,6 +411,7 @@ GLint sym_radius;
 GLint sym_color;
 GLint sym_matrix;
 GLint sym_px_matrix;
+GLint sym_z;
 
 GLuint raster_program;
 GLint raster_coord2d;

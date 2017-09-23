@@ -76,6 +76,9 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glUniformMatrix4fv(sym_matrix, 1, GL_FALSE,theMatrix );
 
 
+    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE,16);
+    glEnable (GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
 
     p = points->points->list;
@@ -137,8 +140,12 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
             //    printf("used points = %d, startindex = %d, used vals\n",points->point_start_indexes->used, points->point_start_indexes->list[i], points->points->used);
+            GLfloat z = style->z->list[r] - 0.001*r;
+            
+            if(!z)
+                z = 0;
 
-
+            glUniform1fv(sym_z,1,&z );
             //   printf("p: %f, %f\n", *(p), *(p+1));
             glUniform2fv(sym_coord2d,1,p);
 
@@ -163,6 +170,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     glDisableVertexAttribArray(sym_norm);
 
+    glDisable (GL_DEPTH_TEST);
     return 0;
 
 }

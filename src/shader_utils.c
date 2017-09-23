@@ -406,12 +406,13 @@ void main(void) { \
     const unsigned char gen_vsym[1024] =  "attribute vec2 norm; \
 uniform float radius; \
 uniform vec2 coord2d;  \
+uniform float z;\
 uniform mat4 px_Matrix; \
 uniform mat4 theMatrix; \
 void main(void) {  \
 vec4 delta = vec4(norm * radius,0,0); \
 vec4 npos = px_Matrix * delta; \
-vec4 pos = theMatrix * vec4(coord2d, 0, 1.0);  \
+vec4 pos = theMatrix * vec4(coord2d, z, 1.0);  \
   gl_Position = (pos + npos); \
 }";
 
@@ -448,6 +449,13 @@ void main(void) { \
     if (sym_radius == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "radius");
+        return 0;
+    }
+
+    sym_z = glGetUniformLocation(sym_program, "z");
+    if (sym_z == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "z");
         return 0;
     }
 

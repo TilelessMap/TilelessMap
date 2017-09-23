@@ -135,8 +135,10 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
             add2uint8_list(s->point_styles->symbol,CIRCLE_SYMBOL);
 
         /*Symbol size*/
-        const char *size = mxmlGetOpaque(mxmlFindPath(node, "se:PointSymbolizer/se:Graphic/se:Size"));
-        add2glfloat_list(s->point_styles->size, strtof(size, NULL));
+    //    const char *size = mxmlGetOpaque(mxmlFindPath(symbolizer, "se:PointSymbolizer/se:Graphic/se:Size"));
+        const char *size = mxmlGetOpaque(mxmlFindElement(symbolizer, symbolizer, "se:Size",  NULL, NULL,  MXML_DESCEND));
+        if(size)
+            add2glfloat_list(s->point_styles->size, strtof(size, NULL));
 
         /*This is ugly. We have to iterate SvgParameter tags and check what attribute value they have
          * to know what type of value it holds. Seems to be a waeknes of mini xml*/
