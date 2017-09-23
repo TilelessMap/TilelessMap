@@ -62,8 +62,15 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
         {
             //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = map_matrix->bbox;
-            // rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
+#ifdef THREADING
+#if THREADING >0
+            pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
+#endif
+#else
             twkb_fromSQLiteBBOX((void *) oneLayer);
+#endif
+            
+            
         }
     }
 
@@ -93,9 +100,13 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
         type = oneLayer->type;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-            // rc = pthread_join(threads[t], NULL);
+#ifdef THREADING
+#if THREADING >0
+            rc = pthread_join(threads[t], NULL);
+#endif
+#else
             rc = 0;
-
+#endif
             if(oneLayer->geometryType >= RASTER)
                 // loadRaster( oneLayer, map_matrix->matrix);
                 loadandRenderRaster( oneLayer, map_matrix->matrix);

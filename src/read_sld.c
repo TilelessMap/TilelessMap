@@ -556,7 +556,8 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
     mxml_node_t *rule, propname, propval;
 
     //  node = mxmlFindElement(tree, tree, "se:SvgParameter",  NULL, NULL,  MXML_DESCEND);
-
+  //  if(!strcmp(oneLayer->name, "norge_1000_punkter"))
+    //    printf("%s\n",oneLayer->name);
 
     for (rule = mxmlFindElement(tree, tree,"se:Rule",  NULL, NULL, MXML_DESCEND);
             rule != NULL;

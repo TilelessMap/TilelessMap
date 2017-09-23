@@ -518,7 +518,7 @@ int main(int argc, char **argv)
 
 
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,4);
 
 
     SDL_Rect r;
