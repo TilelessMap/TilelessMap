@@ -186,9 +186,9 @@ int identify(MATRIX *map_matrix, int x, int y)
 
     reset_buffers(infoRenderLayer);
     infoRenderLayer->visible = 0;
-    for (i = 0; i<nLayers; i++)
+    for (i = 0; i<global_layers->nlayers; i++)
     {
-        theLayer = layerRuntime + i;
+        theLayer = global_layers->layers + i;
         //     printf("layer name %s\n",theLayer->name);
         if(theLayer->visible && theLayer->minScale<=meterPerPixel && theLayer->maxScale>meterPerPixel)
         {

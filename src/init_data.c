@@ -23,11 +23,11 @@
 
 
 #include "buffer_handling.h"
-#include "theclient.h"
 #include "interface/interface.h"
 #include "read_sld.h"
 #include "symbols.h"
 #include "mem.h"
+#include "theclient.h"
 /********************************************************************************
   Attach all databases with data for the project
 */
@@ -330,8 +330,7 @@ static int load_layers(TEXT *missing_db)
     */
 
 
-    layerRuntime = init_layer_runtime(count_layers());
-    //  for (i =0; i<nLayers; i++)
+    global_layers = init_layers(count_layers());
     i=0;
     while(1)
     {
@@ -343,7 +342,7 @@ static int load_layers(TEXT *missing_db)
             break;
         }
 
-        oneLayer=layerRuntime + i;
+        oneLayer=global_layers->layers + i;
         //   sqlite3_step(preparedLayerLoading);
         printf("get layer ----------------------------------------------------\n");
 //       oneLayer->close_ring = 0;
@@ -652,7 +651,7 @@ static int load_layers(TEXT *missing_db)
 
         printf("layer loaded\n");
     }
-    nLayers = i;
+    global_layers->nlayers = i;
     sqlite3_finalize(preparedLayerLoading);
 
     /*get init_bbox*/

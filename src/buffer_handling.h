@@ -157,19 +157,20 @@ typedef struct
 TEXTSTRUCT;
 
 
-
-
-
 /**
 
 Information about all the layers in the project is loaded in an array of this structure at start.
 */
 typedef struct
 {
+    //General
     char *name;
     char *db;
     char *title;
     uint8_t visible;
+    int layer_id;
+    
+    //Info for fetching data and rendering
     sqlite3_stmt *preparedStatement;
     GLfloat *BBOX; // the requested bounding box (window)
     uint8_t geometryType;
@@ -177,6 +178,18 @@ typedef struct
     uint8_t n_dims;
     GLfloat minScale;
     GLfloat maxScale;
+    int utm_zone;
+    int hemisphere; //1 is southern hemisphere and 0 is northern
+    
+    //What info to show when identify
+    int info_active;
+    char *info_rel;
+    
+    //Styling
+    struct STYLES *styles;
+    int style_key_type;
+    
+    //Buffers
     POINT_LIST *points;
     LINESTRING_LIST *lines;
     LINESTRING_LIST *wide_lines;
@@ -184,15 +197,19 @@ typedef struct
     TEXTSTRUCT *text;
     INT64_LIST *twkb_id;
     RASTER_LIST *rast;
-    int layer_id;
-    int utm_zone;
-    int hemisphere; //1 is southern hemisphere and 0 is northern
-    int info_active;
-    char *info_rel;
-    struct STYLES *styles;
-    int style_key_type;
+    
 }
 LAYER_RUNTIME;
+
+
+typedef struct
+{
+    LAYER_RUNTIME *layers;
+    int nlayers;
+    int max_nlayers;    
+}
+LAYERS;
+
 
 
 

@@ -4,6 +4,7 @@
 #include "info.h"
 #include "matrix_handling.h"
 #include "log.h"
+#include "cleanup.h"
 
 void free_resources(SDL_Window* window,SDL_GLContext context) 
 {
@@ -17,7 +18,8 @@ void free_resources(SDL_Window* window,SDL_GLContext context)
     glDeleteProgram(sym_program);
     glDeleteProgram(raster_program);
 
-    destroy_layer_runtime(layerRuntime,nLayers);
+ //   destroy_layer_runtime(layerRuntime,nLayers);
+    destroy_layers(global_layers);
     destroy_layer_runtime(infoLayer,1);
     free(gps_circle);
     destroy_symbol_list(global_symbols);

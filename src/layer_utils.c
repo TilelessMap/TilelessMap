@@ -26,6 +26,7 @@
 #include "theclient.h"
 #include "buffer_handling.h"
 #include "mem.h"
+#include "cleanup.h"
 
 int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 {
@@ -94,14 +95,22 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 }
 
 
-
+LAYERS* init_layers(int n)
+{
+    LAYERS *l = st_malloc(sizeof(LAYERS));
+    l->layers = init_layer_runtime(n);
+    l->max_nlayers = n;
+    l->nlayers = n;
+    
+    
+}
 
 
 LAYER_RUNTIME* init_layer_runtime(int n)
 {
     LAYER_RUNTIME *lr, *theLayer;
     int i;
-    lr = malloc(n * sizeof(LAYER_RUNTIME));
+    lr = st_malloc(n * sizeof(LAYER_RUNTIME));
 
     for (i = 0; i<n; i++)
     {
@@ -226,6 +235,16 @@ static void delete_styles(LAYER_RUNTIME *l) {
 
 }
 
+void destroy_layers(LAYERS *l)
+{
+ 
+    destroy_layer_runtime(l->layers, l->nlayers);
+    l->max_nlayers = 0;
+    l->layers = 0;
+    free(l);
+    l=NULL;
+    return;
+}
 
 
 void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
@@ -253,6 +272,6 @@ void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
 
     }
     free(lr);
-
+    lr = NULL;
     return;
 }

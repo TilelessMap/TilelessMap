@@ -592,9 +592,9 @@ static int render_data_layers(GLfloat *theMatrix)
 
 
     total_points=0;
-    for (i=0; i<nLayers; i++)
+    for (i=0; i<global_layers->nlayers; i++)
     {
-        oneLayer = layerRuntime + i;
+        oneLayer = global_layers->layers + i;
 
         /* if(oneLayer->geometryType >= RASTER)
              continue;*/

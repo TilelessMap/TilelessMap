@@ -746,7 +746,6 @@ int add_system_default_style()
     add2glushort_list(info_s->polygon_styles->units,PIXEL_UNIT);
     info_s->polygon_styles->nsyms=1;
     system_default_info_style = info_s;
-    printf("info_s = %p\n",info_s);
 
     return 0;
 

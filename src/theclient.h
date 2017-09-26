@@ -263,8 +263,7 @@ int matrixFromBboxPointZoom(MATRIX *map_matrix,MATRIX *out,GLint px_x_clicked,GL
 //int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
 int matrixFromDeltaMouse(MATRIX *map_matrix,MATRIX *out, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y);
 LAYER_RUNTIME* init_layer_runtime(int n);
-void destroy_layer_runtime(LAYER_RUNTIME *lr, int n);
-
+LAYERS* init_layers(int n);
 int  matrixFromBBOX(MATRIX *map_matrix );
 //int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
 int get_data(SDL_Window* window,MATRIX *map_matrix);
@@ -343,11 +342,12 @@ GLfloat init_y;
 GLint curr_utm;
 GLint curr_hemi;
 GLfloat init_box_width;
-int nLayers;
+//int nLayers;
 int text_scale;
 GLfloat *gps_circle;
 
-LAYER_RUNTIME *layerRuntime;
+LAYERS *global_layers;
+//LAYER_RUNTIME *layerRuntime;
 LAYER_RUNTIME *infoLayer;
 LAYER_RUNTIME *infoRenderLayer;
 

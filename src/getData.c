@@ -43,10 +43,10 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
     GLfloat meterPerPixel = (map_matrix->bbox[3]-map_matrix->bbox[1])/CURR_HEIGHT;
     uint8_t type;
 
-    for (i=0; i<nLayers; i++)
+    for (i=0; i<global_layers->nlayers; i++)
     {
 
-        oneLayer = layerRuntime + i;
+        oneLayer = global_layers->layers + i;
         //   if(oneLayer->geometryType >= RASTER)
         //     continue;
         type = oneLayer->type;
@@ -88,13 +88,13 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
     n_letters=0;
 
 
-    for(t=0; t<nLayers; t++)
+    for(t=0; t<global_layers->nlayers; t++)
 //     for(t=0; t<0; t++)
 
     {
 
 
-        oneLayer = layerRuntime + t;
+        oneLayer = global_layers->layers + t;
 
 
         type = oneLayer->type;

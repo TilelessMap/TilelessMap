@@ -18,15 +18,20 @@ typedef struct
 {
     TLM_LAYER_INFO layers;
     int nlayers;
-} TLM_LAYERS_INFO;
+} TLM_LAYER_LIST;
 
 typedef struct
 {
     char *name;
     char *type;
-} TLM_LAYER_INFO_FIELD;
+} TLM_FIELD;
     
-    
+typedef struct
+{
+    TLM_LAYER_INFO layers;
+    int nlayers;
+} TLM_FIELDS;
+
 
 /*************** Init and close *******************/
 extern int TLM_init(char *f, char *dir);
@@ -35,5 +40,9 @@ extern void TLM_close();
 
 
 /*************** Get info about layers *******************/
-char** TLM_get_layerlist();
-char** TLM_get_active_layerlist();
+TLM_LAYER_LIST *TLM_get_layerlist();
+int    TLM_destroy_layerlist();
+
+TLM_FIELDS *TLM_get_info_fields;
+TLM_FIELDS *TLM_get_fields;
+

@@ -241,13 +241,13 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLshort radio_box[] = {radiostart_x,starty, radiostart_x + radio_width,starty+row_dist};
     struct CTRL *radio_master = init_radio( layers_meny,layers_meny,radio_box,radio_box_color,  NULL, NULL,  1, 0 );
     LAYER_RUNTIME *oneLayer;
-    for (i=0; i<nLayers; i++)
+    for (i=0; i<global_layers->nlayers; i++)
     {
 
         GLshort rowstart_x = startx;
         GLshort rowstart_y = starty - i * row_height;
 
-        oneLayer = layerRuntime + i;
+        oneLayer = global_layers->layers + i;
         /*
                 txt = init_txt(20);
 
