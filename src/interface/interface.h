@@ -1,6 +1,7 @@
 #ifndef _interface_H
 #define _interface_H
 
+#include "../text.h"
 #include "../matrix_handling.h"
 #include "../fonts.h"
 

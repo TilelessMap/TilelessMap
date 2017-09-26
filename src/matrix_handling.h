@@ -1,6 +1,13 @@
 #ifndef _matrix_handling_H
 #define _matrix_handling_H
 
+#include <stdint.h>
+#ifdef __ANDROID__
+#include <GLES2/gl2.h>
+#else
+#include <GL/glew.h>
+#endif
+
 
 typedef struct
 {
