@@ -1,5 +1,6 @@
 
-
+#ifndef _fonts_H
+#define _fonts_H
 /* Use glew.h instead of gl.h to get all the GL prototypes declared */
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>
@@ -13,6 +14,12 @@
 
 
 #include FT_FREETYPE_H
+
+#define NORMAL_TYPE 1
+#define BOLD_TYPE 2
+#define ITALIC_TYPE 3
+
+#define MAX_FONT_SIZE 127
 
 typedef struct {
     float ax;	// advance.x
@@ -46,8 +53,8 @@ FT_Library ft;
 
 typedef struct
 {
- ATLAS *normal;
- ATLAS *bold; 
+    ATLAS *normal;
+    ATLAS *bold;
 } FONTSIZE;
 
 typedef struct
@@ -58,14 +65,31 @@ typedef struct
 
 typedef struct
 {
- char *fontname;
- FONTSIZES *fss;
+    char *fontname;
+    int fonttype;
+//FONTSIZES *fss;
+    ATLAS **a;
+    size_t max_size;
 } FONT;
 
+typedef struct
+{
+    FONT *fonts;
+    size_t nfonts;
+} FONTS;
+
+
+
 FONT* init_font(const char* fontname);
-int destroy_font(FONT *f);
+int destroy_font(FONTS *fonts);
+int destroy_atlas(ATLAS *a);
 FONT **fonts;
+
+FONTS *fnts;
 
 ATLAS *font_normal[3];
 
 ATLAS *font_bold[3];
+ATLAS* loadatlas(const char* fontname,int fonttype, int size);
+
+#endif

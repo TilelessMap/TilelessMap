@@ -77,7 +77,13 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
 
     ts->id = old_ts->id;
     ts->tb = old_ts->tb;
-    ts->styleID = old_ts->styleID;
+    ts->styleid_type = old_ts->styleid_type;
+    if(ts->styleid_type == INT_TYPE)
+        ts->styleID.int_type = old_ts->styleID.int_type;
+    else if(ts->styleid_type == STRING_TYPE)
+    {
+        strcpy(ts->styleID.string_type,old_ts->styleID.string_type);
+    }
     ts->theLayer = old_ts->theLayer;
     ts->thi = old_ts->thi;
     ts->thi->has_bbox=0;
@@ -269,7 +275,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
     uint8_t utm_in, hemi_in;
     uint8_t close_ring = 0;
     LAYER_RUNTIME *theLayer = ts->theLayer;
-    uint type = theLayer->type;
+    unsigned int type = theLayer->type;
 
     //TODO: This will be overwritten for each geometry. This should be per geometry or a better way to register per data set.
 //   theLayer->n_dims = ndims;
@@ -281,7 +287,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
         hemi_in = ts->theLayer->hemisphere;
     }
 
-    vertex_list = get_coord_list(theLayer, ts->styleID);
+    vertex_list = get_coord_list(theLayer, ts);
 
     if(type & 8)
     {
@@ -295,7 +301,7 @@ read_pointarray(TWKB_PARSE_STATE *ts, uint32_t npoints)
             close_ring = 1;
         POINT_CIRCLE *p_akt = p;
 
-        wide_line = get_wide_line_list(theLayer, ts->styleID);
+        wide_line = get_wide_line_list(theLayer, ts);
 
         for( i = 0; i < npoints; i++ )
         {
@@ -418,7 +424,8 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts)
 
 
     npoints = (uint32_t) buffer_read_uvarint(ts.tb);
-    add2gluint_list(theLayer->polygons->area_style_id, old_ts->styleID);
+    // add2union_list(theLayer->polygons->style_id, &(old_ts->styleID));
+    get_style(theLayer->styles, theLayer->polygons->style_id, &(old_ts->styleID), old_ts->styleid_type);
 
     for( i = 0; i < npoints; i++ )
     {

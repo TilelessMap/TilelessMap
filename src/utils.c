@@ -158,35 +158,6 @@ int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl)
     return 0;
 }
 
-GLfloat* create_circle(int npoints)
-{
-    GLfloat *res = st_malloc((npoints + 2) * 2 * sizeof(GLfloat));
-
-    double rad;
-    int i, res_pos = 0;
-
-    //add center of point at 0,0
-    res[res_pos++] = 0;
-    res[res_pos++] = 0;
-    for (i = 0; i<npoints/2; i++)
-    {
-        rad = i * M_PI/(npoints/2);
-        res[res_pos++] = sin(rad);
-        res[res_pos++] = cos(rad);
-    }
-    for (i = npoints/2; i>0; i--)
-    {
-        rad = i * M_PI/(npoints/2);
-        res[res_pos++] = -sin(rad);
-        res[res_pos++] = cos(rad);
-    }
-    //add first point again
-    res[res_pos++] = sin(0);
-    res[res_pos++] = cos(0);
-
-    return  res;
-
-}
 int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 {
 
@@ -206,25 +177,37 @@ int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale)
 
 int search_string(const char *w,const char *s)
 {
-	int i, n;
-	int w_len = strlen(w);
-	int s_len = strlen(s);	
+    int i, n;
+    if(w==NULL ||s==NULL)
+        return 0;
+    int w_len = strlen(w);
+    int s_len = strlen(s);
 
-	for (i = 0;i<w_len;i++)
-	{
-		if(w[i] == s[0])
-		{
-			n = 1;
-			while(w[i+n] == s[n])
-			{
-				n++;
-			}
-			if(n==s_len)
-				return 1;			
-		}		
-	}	
-	return 0;
+    for (i = 0; i<w_len; i++)
+    {
+        if(w[i] == s[0])
+        {
+            n = 1;
+            while(w[i+n] == s[n])
+            {
+                n++;
+            }
+            if(n==s_len)
+                return 1;
+        }
+    }
+    return 0;
 }
+
+
+
+
+
+
+
+
+
+
 
 #ifdef __ANDROID__
 JNIEXPORT void JNICALL Java_no_jordogskog_app_gps_onNativeGPS(

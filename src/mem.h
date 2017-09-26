@@ -22,5 +22,6 @@ void* st_realloc(void *ptr, size_t len);
  */
 void* st_calloc(int n, size_t s);
 
+int st_free(void *s);
 
 #endif

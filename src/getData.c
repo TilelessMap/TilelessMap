@@ -43,12 +43,12 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
     GLfloat meterPerPixel = (map_matrix->bbox[3]-map_matrix->bbox[1])/CURR_HEIGHT;
     uint8_t type;
 
-    for (i=0; i<nLayers; i++)
+    for (i=0; i<global_layers->nlayers; i++)
     {
-        
-        oneLayer = layerRuntime + i;
-     //   if(oneLayer->geometryType >= RASTER)
-       //     continue;
+
+        oneLayer = global_layers->layers + i;
+        //   if(oneLayer->geometryType >= RASTER)
+        //     continue;
         type = oneLayer->type;
         reset_buffers(oneLayer);
         //   reset_buffer(oneLayer->res_buf);
@@ -62,8 +62,15 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
         {
             //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = map_matrix->bbox;
-            rc = pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
-            //  twkb_fromSQLiteBBOX((void *) oneLayer);
+#ifdef THREADING
+#if THREADING >0
+            pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
+#endif
+#else
+            twkb_fromSQLiteBBOX((void *) oneLayer);
+#endif
+            
+            
         }
     }
 
@@ -81,26 +88,30 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
     n_letters=0;
 
 
-    for(t=0; t<nLayers; t++)
+    for(t=0; t<global_layers->nlayers; t++)
 //     for(t=0; t<0; t++)
 
     {
 
 
-        oneLayer = layerRuntime + t;
-        
-        
+        oneLayer = global_layers->layers + t;
+
+
         type = oneLayer->type;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
+#ifdef THREADING
+#if THREADING >0
             rc = pthread_join(threads[t], NULL);
-            // rc = 0;
-            
+#endif
+#else
+            rc = 0;
+#endif
             if(oneLayer->geometryType >= RASTER)
                 // loadRaster( oneLayer, map_matrix->matrix);
-               loadandRenderRaster( oneLayer, map_matrix->matrix);
-             //           continue;
-                
+                loadandRenderRaster( oneLayer, map_matrix->matrix);
+            //           continue;
+
             if (rc) {
                 printf("ERROR; return code from pthread_join() is %d\n", rc);
                 exit(-1);
@@ -119,7 +130,7 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
 
     if(infoRenderLayer->visible)
         loadPolygon(infoRenderLayer, map_matrix->matrix);
-    
+
     renderGPS(map_matrix->matrix);
     log_this(100, "---------------------let's rendr controls------------------------------\n");
     render_controls(controls, NULL );

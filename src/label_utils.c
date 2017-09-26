@@ -34,7 +34,7 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     char txt_tot[1024];
 
 
-       ATLAS *a;
+    ATLAS *a;
     va_list args;
     va_start (args, txt);
     vsnprintf (txt_tot,1024,txt, args);
@@ -76,22 +76,22 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     }
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
-    
-    
+
+
     if(bold)
     {
-     //   a = font_bold[atlas_nr-1];
-        a = fonts[0]->fss->fs[size].bold;
-        
+        //   a = font_bold[atlas_nr-1];
+        a = loadatlas("freesans",BOLD_TYPE, size);
+
     }
     else
     {
         //a = font_normal[atlas_nr-1];
-        
-        a = fonts[0]->fss->fs[size].normal;
+
+        a = loadatlas("freesans",NORMAL_TYPE, size);
     }
-    
-    
+
+
     draw_it(norm_color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
 
 
@@ -153,13 +153,13 @@ int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int
     }
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
-    
-    
-    for (i=0;i<tb->n_txts;i++)
+
+
+    for (i=0; i<tb->n_txts; i++)
     {
-        draw_it(norm_color,point_coord,point_offset, tb->font[i], txt_box, txt_color, txt_coord2d, tb->txt[i]->txt ,max_width, sx, sy);
+        draw_it(norm_color,point_coord,point_offset, tb->font[i], txt_box, txt_color, txt_coord2d, tb->txt[i]->txt,max_width, sx, sy);
     }
-    
-    
+
+
     return 0;
 }

@@ -38,31 +38,39 @@ int multiply_array(GLshort *a, GLfloat v, GLshort ndims)
 
 int check_screen_size()
 {
+    
+    int character_size, text_size;
     if(CURR_WIDTH > 1000)
     {
         log_this(100,"BIGSCREEN");
         screensize = BIGSCREEN;
         size_factor = 2;
-        character_size = 4;
-        text_size = 3;
+        character_size = 40;
+        text_size = 18;
     }
     else if (CURR_WIDTH >500)
     {
         log_this(100,"MIDDLESCREEN");
         screensize = MIDDLESCREEN;
         size_factor = 1.5;
-        character_size = 3;
-        text_size = 2;
+        character_size = 30;
+        text_size = 14;
     }
     else
     {
         log_this(100,"SMALLSCREEN");
         screensize = SMALLSCREEN;
         size_factor = 1;
-        character_size = 2;
-        text_size = 1;
+        character_size = 20;
+        text_size = 10;
     }
-
+    
+    text_font_normal = NULL;
+    text_font_bold = NULL;
+    char_font = NULL;
+        text_font_normal = loadatlas("freesans",NORMAL_TYPE, text_size);
+        text_font_bold = loadatlas("freesans",BOLD_TYPE, text_size);
+        char_font = loadatlas("freesans",BOLD_TYPE, character_size);
     return 0;
 
 }
@@ -197,9 +205,9 @@ static int remove_child(RELATIONS *t, struct CTRL *child)
 static int destroy_family(RELATIONS *t)
 {
 
-    if (!t->n_children == 0)
+    if (!(t->n_children == 0))
     {
-        printf("Something strange, there are %d children left\n", t->n_children);
+        log_this(100,"Something strange, there are %d children left\n", t->n_children);
         return 0;
     }
     t->max_children=0;
@@ -361,8 +369,9 @@ struct CTRL* add_close_button(struct CTRL *ctrl)
 
     GLfloat close_color[]= {200,100,100,200};
     
+    
     TEXTBLOCK *x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"X", fonts[0]->fss->fs[character_size].bold);
+    append_2_textblock(x_txt,"X", char_font);
     return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
 
     

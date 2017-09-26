@@ -396,10 +396,96 @@ void main(void) { \
 
 
     reset_shaders(vs, fs, gps_program);
-    
-    
-    
-    
+
+
+
+
+
+    /*create a shader program symbols*/
+
+    const unsigned char gen_vsym[1024] =  "attribute vec2 norm; \
+uniform float radius; \
+uniform vec2 coord2d;  \
+uniform float z;\
+uniform mat4 px_Matrix; \
+uniform mat4 theMatrix; \
+void main(void) {  \
+vec4 delta = vec4(norm * radius,0,0); \
+vec4 npos = px_Matrix * delta; \
+vec4 pos = theMatrix * vec4(coord2d, z, 1.0);  \
+  gl_Position = (pos + npos); \
+}";
+
+    const unsigned char gen_fsym[1024] = "uniform vec4 color; \
+void main(void) { \
+  gl_FragColor = color; \
+}";
+
+
+    sym_program = create_program((unsigned char *) gen_vsym,(unsigned char *)  gen_fsym, &vs, &fs);
+
+    if(sym_program == 0)
+    {
+        log_this(100,"problem compiling sym-program");
+        return 0;
+    }
+
+    sym_norm = glGetAttribLocation(sym_program, "norm");
+    if (sym_norm == -1)
+    {
+        fprintf(stderr, "test: Could not bind attribute : %s\n", "norm");
+        return 0;
+    }
+
+
+    sym_coord2d = glGetUniformLocation(sym_program, "coord2d");
+    if (sym_coord2d == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "coord2d");
+        return 0;
+    }
+
+    sym_radius = glGetUniformLocation(sym_program, "radius");
+    if (sym_radius == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "radius");
+        return 0;
+    }
+
+    sym_z = glGetUniformLocation(sym_program, "z");
+    if (sym_z == -1)
+    {
+        fprintf(stderr, "test: Could not bind uniform : %s\n", "z");
+        return 0;
+    }
+
+
+    sym_color = glGetUniformLocation(sym_program, "color");
+    if (sym_color == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "color");
+        return 0;
+    }
+    sym_matrix = glGetUniformLocation(sym_program, "theMatrix");
+    if (sym_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
+        return 0;
+    }
+    sym_px_matrix = glGetUniformLocation(sym_program, "px_Matrix");
+    if (sym_px_matrix == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "sym_px_matrix");
+        return 0;
+    }
+
+
+
+    reset_shaders(vs, fs, sym_program);
+
+
+
+
 
     /*create a shader program raster textures*/
 
@@ -418,9 +504,9 @@ void main(void) { \
     vec2 flipped_texcoord = vec2(f_texcoord.x, 1.0 - f_texcoord.y); \
     gl_FragColor = texture2D(rastertexture, flipped_texcoord); \
     }" ;
-    
-    
-    
+
+
+
 
     raster_program = create_program((unsigned char *) gen_vraster,(unsigned char *)  gen_fraster, &vs, &fs);
 
@@ -438,7 +524,7 @@ void main(void) { \
     }
 
     raster_texcoord = glGetAttribLocation(raster_program, "texcoord");
-    if (gps_norm == -1)
+    if (raster_texcoord == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "texcoord");
         return 0;
@@ -453,7 +539,7 @@ void main(void) { \
         return 0;
     }
 
-	raster_texture = glGetUniformLocation(raster_program, "rastertexture");
+    raster_texture = glGetUniformLocation(raster_program, "rastertexture");
     if (raster_texture == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "rastertexture");

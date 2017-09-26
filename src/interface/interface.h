@@ -1,7 +1,9 @@
 #ifndef _interface_H
 #define _interface_H
 
+#include "../text.h"
 #include "../matrix_handling.h"
+#include "../fonts.h"
 
 
 #define MASTER      0
@@ -125,7 +127,7 @@ uint8_t screensize;
 
 GLfloat size_factor;
 int check_screen_size();
-int character_size, text_size;
+ATLAS *text_font_normal,*text_font_bold, *char_font;
 
 #endif
 

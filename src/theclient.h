@@ -55,27 +55,16 @@
 #include "text.h"
 #include "global.h"
 #include "matrix_handling.h"
-
-
-#define NULL ((void *)0)
+#include "symbols.h"
+#include "uthash.h"
+#include "buffer_handling.h"
+#include "twkb.h"
 
 #define INIT_WIDTH 1000
 #define INIT_HEIGHT 500
 
-/*Maximum number of dimmensions that a twkb geoemtry
-can hold according to the specification*/
-#define TWKB_IN_MAXCOORDS 4
-
-/*twkb types*/
-#define	POINTTYPE			1
-#define	LINETYPE			2
-#define	POLYGONTYPE		3
-#define	MULTIPOINTTYPE	4
-#define	MULTILINETYPE		5
-#define	MULTIPOLYGONTYPE	6
-#define	COLLECTIONTYPE		7
-#define	RASTER		        128
-
+//Set this to 0 to do the data fetching in serial. Good for debugging
+#define THREADING 1
 
 #define DEFAULT_TEXT_BUF 1024
 
@@ -84,8 +73,6 @@ can hold according to the specification*/
 
 #define INIT_PS_POOL_SIZE 10
 
-#define PIXELUNIT 0
-#define MAPUNIT 1
 
 
 typedef struct
@@ -108,120 +95,6 @@ FINGEREVENT;
 
 
 
-typedef struct
-{
-    GLfloat *list;
-    size_t alloced;
-    size_t used;
-}
-GLFLOAT_LIST;
-
-
-typedef struct
-{
-    uint8_t *list;
-    size_t alloced;
-    size_t used;
-}
-UINT8_LIST;
-
-typedef struct
-{
-    GLushort *list;
-    size_t alloced;
-    size_t used;
-}
-GLUSHORT_LIST;
-
-typedef struct
-{
-    GLuint *list;
-    size_t alloced;
-    size_t used;
-}
-GLUINT_LIST;
-
-typedef struct
-{
-    int64_t *list;
-    size_t alloced;
-    size_t used;
-}
-INT64_LIST;
-
-typedef struct
-{
-    GLFLOAT_LIST *points;
-    GLUINT_LIST *point_start_indexes;
-    GLUINT_LIST *style_id;
-    GLuint vbo;
-
-}
-POINT_LIST;
-
-
-typedef struct
-{
-    GLFLOAT_LIST *vertex_array;
-    GLUINT_LIST *line_start_indexes;
-    GLUINT_LIST *style_id;
-    GLuint vbo;
-
-}
-LINESTRING_LIST;
-
-
-typedef struct
-{
-    GLFLOAT_LIST *vertex_array;  //all vertex coordinates in a long array
-    GLUINT_LIST *pa_start_indexes; //start index in vertex array above of each point array
-    GLUINT_LIST *polygon_start_indexes; //start index in vertex_array above for each polygon
-    GLUSHORT_LIST *element_array;    // a long array of triangle indexes
-    GLUINT_LIST *element_start_indexes; //indexes telling where each polygon starts
-    GLUINT_LIST *area_style_id;
-    GLUINT_LIST *outline_style_id;
-    GLuint vbo;
-    GLuint ebo;
-}
-POLYGON_LIST;
-
-
-
-typedef struct
-{
-    UINT8_LIST *data;
-    GLUINT_LIST *raster_start_indexes;
-    GLUINT_LIST *tileidxy; //each 4 glfloat represents minx, maxx, miny, maxy in world coordinates
-    GLuint tex;
-    GLuint tex_vbo;
-    GLuint tex_ebo;
-    GLuint vbo;
-    GLuint tilewidth;
-    GLuint tileheight;
-}
-RASTER_LIST;
-
-
-
-
-/**
-
-This is a structsimilar to the above, but instead keeping track text for labeling
-*/
-typedef struct
-{
-    char *char_array; // a list characters. Each string is zeroterminated
-    size_t used_n_chars;
-    size_t max_n_chars;
-    uint32_t used_n_vals;
-    uint32_t max_n_vals;
-    float *rotation; //list if id to corresponding point array
-    GLshort *size; //list if id to corresponding point array
-    uint32_t *anchor;
-    uint32_t *styleID; //array of styleID
-}
-TEXTSTRUCT;
-
 
 /**
 
@@ -240,106 +113,67 @@ typedef struct
 }
 STYLES_RUNTIME;
 
-/**
 
-Information about all the layers in the project is loaded in an array of this structure at start.
-*/
+
+
 typedef struct
 {
-    char *name;
-    char *db;
-    char *title;
-    uint8_t visible;
-    sqlite3_stmt *preparedStatement;
-    GLfloat *BBOX; // the requested bounding box (window)
-    uint8_t geometryType;
-    uint8_t type; 
-    uint8_t n_dims;
-    GLfloat minScale;
-    GLfloat maxScale;
-    POINT_LIST *points;
-    LINESTRING_LIST *lines;
-    LINESTRING_LIST *wide_lines;
-    POLYGON_LIST *polygons;
-    TEXTSTRUCT *text;
-    INT64_LIST *twkb_id;
-    RASTER_LIST *rast;
-    int layer_id;
-    int utm_zone;
-    int hemisphere; //1 is southern hemisphere and 0 is northern
-    int info_active;
-    char *info_rel;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *z;
+    GLUSHORT_LIST *units;
+    int nsyms;
 }
-LAYER_RUNTIME;
-
-
-
-
-
-
-
-/***************************************************************
-			DECODING TWKB						*/
-/*Holds a buffer with the twkb-data during read*/
-typedef struct
-{
-    uint8_t handled_buffer; /*Indicates if this program is resposible for freeing*/
-    uint64_t BufOffsetFromBof;	//Only osed when reading from file
-    uint8_t *start_pos;
-    uint8_t *read_pos;
-    uint8_t *end_pos;
-    uint8_t *max_end_pos;
-
-} TWKB_BUF;
+POLYGON_STYLE;
 
 typedef struct
 {
-    float bbox_min[TWKB_IN_MAXCOORDS];
-    float bbox_max[TWKB_IN_MAXCOORDS];
-} BBOX;
-
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *width;
+    GLFLOAT_LIST *z;
+    GLUSHORT_LIST *units;
+    int nsyms;
+}
+LINE_STYLE;
 
 typedef struct
 {
-    uint8_t has_bbox;
-    uint8_t has_size;
-    uint8_t has_idlist;
-    uint8_t has_z;
-    uint8_t has_m;
-    uint8_t is_empty;
-    uint8_t type;
+    UINT8_LIST *symbol;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *size;
+    GLFLOAT_LIST *z;
+    GLUSHORT_LIST *units;
+    int nsyms;
+}
+POINT_STYLE;
 
-    /* Precision factors to convert ints to double */
-    uint8_t n_decimals[TWKB_IN_MAXCOORDS];
-    /* Precision factors to convert ints to double */
-    double factors[TWKB_IN_MAXCOORDS];
-
-    uint32_t ndims; /* Number of dimensions */
-    /* An array to keep delta values from 4 dimensions */
-    int64_t coords[TWKB_IN_MAXCOORDS];
-
-    BBOX *bbox;
-    size_t next_offset;
-    int32_t id;
-} TWKB_HEADER_INFO;
-
-/* Used for passing the parse state between the parsing functions.*/
 typedef struct
 {
-    TWKB_BUF *tb; /* Points to start of TWKB */
-    //~ buffer_collection *rb;
-    TWKB_HEADER_INFO *thi;
-//    GLESSTRUCT *res_buf;
-    LAYER_RUNTIME *theLayer;
-    sqlite3_stmt *prepared_statement;
-    sqlite3_stmt *info_prepared_statement;
-    int64_t id;  //the current id
-    uint32_t styleID;  //the current styleID
-    uint8_t line_width;  //If we shall calculate triangels to get line width
-    uint8_t utm_zone;
-    uint8_t hemisphere;
-    uint8_t close_ring;
-} TWKB_PARSE_STATE;
+    GLFLOAT_LIST *color;
+    GLFLOAT_LIST *size;
+    GLFLOAT_LIST *z;
+    POINTER_LIST *a;
+    int nsyms;
+}
+TEXT_STYLE;
+
+
+
+struct STYLES
+{
+    int key_type;
+    int int_key;
+    char *string_key;
+    POLYGON_STYLE *polygon_styles;
+    LINE_STYLE *line_styles;
+    POINT_STYLE *point_styles;
+    TEXT_STYLE *text_styles;
+    UT_hash_handle hh;         /* makes this structure hashable */
+};
+
+
+
+
+
 
 
 
@@ -429,8 +263,7 @@ int matrixFromBboxPointZoom(MATRIX *map_matrix,MATRIX *out,GLint px_x_clicked,GL
 //int matrixFromDeltaMouse(GLfloat *currentBBOX,GLfloat *newBBOX,GLfloat mouse_down_x,GLfloat mouse_down_y,GLfloat mouse_up_x,GLfloat mouse_up_y, GLfloat *theMatrix);
 int matrixFromDeltaMouse(MATRIX *map_matrix,MATRIX *out, GLint mouse_down_x, GLint mouse_down_y, GLint mouse_up_x, GLint mouse_up_y);
 LAYER_RUNTIME* init_layer_runtime(int n);
-void destroy_layer_runtime(LAYER_RUNTIME *lr, int n);
-
+LAYERS* init_layers(int n);
 int  matrixFromBBOX(MATRIX *map_matrix );
 //int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
 int get_data(SDL_Window* window,MATRIX *map_matrix);
@@ -486,8 +319,8 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername);
 
 void gps_in(double latitude, double longitude, double acc);
 int renderGPS(GLfloat *theMatrix);
-int loadGPS(GLfloat *theMatrix);
-GLfloat* create_circle(int npoints);
+int loadGPS(GLfloat *gps_circle);
+int loadSymbols();
 void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, uint8_t hemi_out);
 int check_column(const unsigned char *dbname,const unsigned char * layername, const unsigned char  *col_name);
 
@@ -509,17 +342,19 @@ GLfloat init_y;
 GLint curr_utm;
 GLint curr_hemi;
 GLfloat init_box_width;
-int nLayers;
+//int nLayers;
 int text_scale;
 GLfloat *gps_circle;
 
-LAYER_RUNTIME *layerRuntime;
+LAYERS *global_layers;
+//LAYER_RUNTIME *layerRuntime;
 LAYER_RUNTIME *infoLayer;
 LAYER_RUNTIME *infoRenderLayer;
 
-
+/*
 STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
+size_t length_global_symbols;*/
 void render_text_test(const char *text, float x, float y, float sx, float sy);
 
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
@@ -569,6 +404,15 @@ GLint gps_color;
 GLint gps_matrix;
 GLint gps_px_matrix;
 
+GLuint sym_program;
+GLint sym_norm;
+GLint sym_coord2d;
+GLint sym_radius;
+GLint sym_color;
+GLint sym_matrix;
+GLint sym_px_matrix;
+GLint sym_z;
+
 GLuint raster_program;
 GLint raster_coord2d;
 GLint raster_texcoord;
@@ -596,6 +440,7 @@ int n_polys;
 int n_tri;
 int n_words;
 int n_letters;
+
 
 GLuint  texes[256];
 GLenum err;
