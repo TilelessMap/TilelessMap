@@ -18,6 +18,9 @@ LOCAL_CFLAGS += -DSQLITE_ENABLE_RTREE -O3  -funroll-loops
 LOCAL_LDLIBS += -lGLESv1_CM -lGLESv2 -llog
 # Add your application source files here...
 LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.c \
+src/event_loop.c \
+src/cleanup.c \
+src/init.c \
 src/read_sld.c \
 src/symbols.c \
 src/pip.c \

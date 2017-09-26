@@ -97,17 +97,19 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 
 LAYERS* init_layers(int n)
 {
+    log_this(10, "entering init_layers\n");
     LAYERS *l = st_malloc(sizeof(LAYERS));
     l->layers = init_layer_runtime(n);
     l->max_nlayers = n;
     l->nlayers = n;
-    
+    return l;
     
 }
 
 
 LAYER_RUNTIME* init_layer_runtime(int n)
 {
+    log_this(10, "entering init_layer_runtime\n");
     LAYER_RUNTIME *lr, *theLayer;
     int i;
     lr = st_malloc(n * sizeof(LAYER_RUNTIME));

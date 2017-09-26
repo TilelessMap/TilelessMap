@@ -316,8 +316,9 @@ static int load_layers(TEXT *missing_db)
 
 
     log_this(100, "Get Layer sql : %s\n",sqlLayerLoading);
+    
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
-
+    log_this(100, "prepared, ready");
     if (rc != SQLITE_OK ) {
         log_this(110, "SQL error in %s\n",sqlLayerLoading);
         sqlite3_close(projectDB);
@@ -329,22 +330,29 @@ static int load_layers(TEXT *missing_db)
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
 
-
+    log_this(100, "ok, init layers");
     global_layers = init_layers(count_layers());
+    
+    log_this(100, "ok, layers initialized\n");
+    log_this(100, "ok, layers initialized %d layers\n",global_layers->nlayers);
+    
     i=0;
     while(1)
     {
+        log_this(100, "1\n");
         int res =  sqlite3_step(preparedLayerLoading) ;
+        log_this(100, "2 res = %d\n",res);
 
-        printf("res = %d\n",res);
         if(res !=  SQLITE_ROW)
         {
             break;
         }
 
         oneLayer=global_layers->layers + i;
+        
+        log_this(100, "3\n");
         //   sqlite3_step(preparedLayerLoading);
-        printf("get layer ----------------------------------------------------\n");
+        log_this(100,"get layer ----------------------------------------------------\n");
 //       oneLayer->close_ring = 0;
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
@@ -357,6 +365,7 @@ static int load_layers(TEXT *missing_db)
         int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
 
 
+        log_this(100, "3\n");
         /*
                 const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,9);
                 const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 10);
@@ -371,6 +380,8 @@ static int load_layers(TEXT *missing_db)
         oneLayer->db = st_malloc(2 * strlen((char*) dbname)+1);
         strcpy(oneLayer->db,(char*) dbname);
 
+        log_this(100, "prepare layer %s\n",oneLayer->name);
+        
         oneLayer->title = malloc(2 * strlen((char*) title)+1);
         strcpy(oneLayer->title,(char*) title);
         if (check_layer(dbname, layername))
@@ -651,6 +662,7 @@ static int load_layers(TEXT *missing_db)
 
         printf("layer loaded\n");
     }
+    log_this(100,"layers prepared\n");
     global_layers->nlayers = i;
     sqlite3_finalize(preparedLayerLoading);
 
