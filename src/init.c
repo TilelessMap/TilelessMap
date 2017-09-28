@@ -5,6 +5,7 @@
 #include "log.h"
 #include "cleanup.h"
 #include "event_loop.h"
+
 static SDL_Window* window;
 static SDL_GLContext context;
 
@@ -123,9 +124,9 @@ extern int TLM_init(char *f, char *dir)
     return EXIT_SUCCESS;
 }
 
-extern void TLM_start()
+extern void TLM_start(struct CTRL *controls)
 {
-    mainLoop(window);
+    mainLoop(window, controls);
     
 }
 

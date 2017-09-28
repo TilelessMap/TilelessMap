@@ -129,6 +129,8 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     GLfloat color[] = {200,255,200,150};
     GLshort txt_margin[] = {50,50};
     multiply_array(txt_margin, size_factor, 2);
+    
+    CTRL *controls = get_master_control();
     struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);
     add_txt_2_textbox(textbox, tb);
 

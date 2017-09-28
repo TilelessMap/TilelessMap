@@ -79,12 +79,12 @@ int get_parent_origo(struct CTRL *t, GLshort *p)
 {
     p[0] = p[1] = 0;
 
-    struct CTRL *parent = t->spatial_family->parent;
+    struct CTRL *parent = t->spatial_parent->parent;
     while (parent)
     {
         p[0] += parent->box[0];
         p[1] += parent->box[1];
-        parent = parent->spatial_family->parent;
+        parent = parent->spatial_parent->parent;
     }
     return 0;
 }
@@ -223,31 +223,31 @@ int destroy_control(struct CTRL *t)
 {
     int r=0;
 
-    while (t->logical_family->n_children)
+    while (t->caller->n_children)
     {
-        struct CTRL *child = t->logical_family->children[t->logical_family->n_children -1];
+        struct CTRL *child = t->caller->children[t->caller->n_children -1];
         if(child)
         {
             r ++;
             destroy_control(child);
         }
     }
-    free(t->logical_family->children);
+    free(t->caller->children);
 
-    while (t->spatial_family->n_children)
+    while (t->spatial_parent->n_children)
     {
-        struct CTRL *child = t->spatial_family->children[t->spatial_family->n_children -1];
+        struct CTRL *child = t->spatial_parent->children[t->spatial_parent->n_children -1];
         if(child)
         {
             r ++;
             destroy_control(child);
         }
     }
-    free(t->spatial_family->children);
-    remove_child(t->logical_family->parent->logical_family, t);
-    remove_child(t->spatial_family->parent->spatial_family, t);
-    destroy_family(t->logical_family);
-    destroy_family(t->spatial_family);
+    free(t->spatial_parent->children);
+    remove_child(t->caller->parent->caller, t);
+    remove_child(t->spatial_parent->parent->spatial_parent, t);
+    destroy_family(t->caller);
+    destroy_family(t->spatial_parent);
     if(t->txt)
         destroy_textblock(t->txt);
 
@@ -291,8 +291,8 @@ struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL 
     ctrl->type = type;
     ctrl->active = default_active;
     ctrl->z = z;
-    ctrl->logical_family = init_family(logical_parent);
-    ctrl->spatial_family = init_family(spatial_parent);
+    ctrl->caller = init_family(logical_parent);
+    ctrl->spatial_parent = init_family(spatial_parent);
 
     ctrl->on_click.te_func = click_func;
     ctrl->on_click.data = onclick_arg;
@@ -315,9 +315,9 @@ struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL 
     ctrl->txt = txt;
     clone_box(box, ctrl->box);
     if(spatial_parent)
-        add_child(spatial_parent->spatial_family, ctrl);
+        add_child(spatial_parent->spatial_parent, ctrl);
     if(logical_parent)
-        add_child(logical_parent->logical_family, ctrl);
+        add_child(logical_parent->caller, ctrl);
 
     ctrl->matrix_handler = NULL;
 
@@ -386,7 +386,7 @@ int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 
     struct CTRL *t = (struct CTRL *) ctrl;
     incharge = NULL; //move focus back to map
-    destroy_control(t->logical_family->parent);
+    destroy_control(t->caller->parent);
 
 
     return 0;
@@ -414,10 +414,10 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
 //    matrix_hndl = ctrl->matrix_handler;
 
     log_this(100, "checkcontrol, x = %d, y = %d\n",x,y);
-    n_children = ctrl->spatial_family->n_children;
+    n_children = ctrl->spatial_parent->n_children;
     for (i=0; i<n_children; i++)
     {
-        struct CTRL *child = *(ctrl->spatial_family->children+i);
+        struct CTRL *child = *(ctrl->spatial_parent->children+i);
         if(child == incharge)
         {
             GLfloat ny_x = (GLfloat) x, ny_y = (GLfloat) y;
@@ -449,7 +449,7 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
     return 0;
 }
 
-int check_click(int x, int y)
+int check_click(struct  CTRL *controls, int x, int y)
 {
 
     tileless_event te;
@@ -494,10 +494,10 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
     if(ctrl == incharge)
         matrix_hndl = ctrl->matrix_handler;
     render_control(ctrl, matrix_hndl);
-    for (i=0; i < ctrl->logical_family->n_children; i++)
+    for (i=0; i < ctrl->caller->n_children; i++)
     {
 
-        render_controls(ctrl->logical_family->children[i], matrix_hndl);
+        render_controls(ctrl->caller->children[i], matrix_hndl);
 
     }
     return 0;

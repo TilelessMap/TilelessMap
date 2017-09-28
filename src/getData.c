@@ -29,7 +29,7 @@
 
 
 
-int get_data(SDL_Window* window,MATRIX *map_matrix)
+int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls)
 {
 
 
@@ -133,7 +133,7 @@ int get_data(SDL_Window* window,MATRIX *map_matrix)
 
     renderGPS(map_matrix->matrix);
     log_this(100, "---------------------let's rendr controls------------------------------\n");
-    render_controls(controls, NULL );
+    render_controls(controls, NULL);
 
     log_this(100, "--------back from render controls---------\n");
     //  render_simple_rect(5,75,300,225);

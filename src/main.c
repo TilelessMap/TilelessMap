@@ -74,7 +74,9 @@ int main(int argc, char **argv)
     
     TLM_init(projectfile, dir);
     
-    TLM_start();
+    struct CTRL* controls = init_controls();
+    
+    TLM_start(controls);
     
     TLM_close();
 

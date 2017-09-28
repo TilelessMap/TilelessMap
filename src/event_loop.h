@@ -1,2 +1,2 @@
 
-void mainLoop(SDL_Window* window);
+void mainLoop(SDL_Window* window, struct CTRL *controls);

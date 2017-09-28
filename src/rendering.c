@@ -584,7 +584,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
-static int render_data_layers(GLfloat *theMatrix)
+static int render_data_layers(GLfloat *theMatrix, CTRL *controls)
 {
     log_this(10, "Entering render_data\n");
     int i;
@@ -638,12 +638,12 @@ static int render_data_layers(GLfloat *theMatrix)
 
 
 
-int render_data(SDL_Window* window,GLfloat *theMatrix)
+int render_data(SDL_Window* window,GLfloat *theMatrix, CTRL *controls)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    render_data_layers(theMatrix);
+    render_data_layers(theMatrix, controls);
 
     if(infoRenderLayer->visible)
     {

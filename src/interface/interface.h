@@ -41,6 +41,8 @@ typedef struct
 }TL_EV;
 */
 
+typedef struct CTRL CTRL;
+
 typedef struct
 {
     struct CTRL *parent;
@@ -65,8 +67,8 @@ struct CTRL
     uint8_t id;
     uint8_t active;
     GLshort box[4];
-    RELATIONS *logical_family;// a child can be a fullscreen started from a small parent box.
-    RELATIONS *spatial_family;
+    RELATIONS *caller;// a child can be a fullscreen started from a small parent box.
+    RELATIONS *spatial_parent;
     tileless_event on_click;
     GLfloat color[4];
     TEXTBLOCK *txt;
@@ -80,14 +82,14 @@ struct CTRL
 
 
 
-struct CTRL *controls;
 
 
-int check_click(int x, int y);
+int check_click(struct CTRL *controls, int x, int y);
 
 
 int parent_add_child(struct CTRL *parent, struct CTRL *child);
-int init_controls();
+CTRL* init_controls();
+CTRL* get_master_control();
 int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl);
 struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z);
 

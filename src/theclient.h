@@ -26,6 +26,8 @@
  ************************************************************************
 *This is the main header file where all exposed fuctions is declared
 *************************************************************************/
+struct CTRL;
+struct CTRL;
 #ifndef _theclient_H
 #define _theclient_H
 
@@ -266,7 +268,7 @@ LAYER_RUNTIME* init_layer_runtime(int n);
 LAYERS* init_layers(int n);
 int  matrixFromBBOX(MATRIX *map_matrix );
 //int get_data(SDL_Window* window,GLfloat *bbox,GLfloat *theMatrix);
-int get_data(SDL_Window* window,MATRIX *map_matrix);
+int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls);
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
@@ -277,7 +279,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 void render_txt(SDL_Window* window) ;
 int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
-int render_data(SDL_Window* window,GLfloat *theMatrix);
+int render_data(SDL_Window* window,GLfloat *theMatrix, struct CTRL *controls);
 int render_info(SDL_Window* window,GLfloat *theMatrix);
 
 

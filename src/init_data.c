@@ -104,97 +104,6 @@ static int count_layers()
     return n;
 }
 
-
-/******************************************************
- * Load Styles
- * ***************************************************/
-#ifdef __load_styles_old_way__
-static int load_styles()
-{
-
-    int rc, i;
-    sqlite3_stmt *preparedCountStyle;
-    sqlite3_stmt * preparedStylesLoading;
-    GLfloat z;
-
-    /********************************************************************************
-     Count the layers in the project and get maximum styleID in the project
-     */
-    char *sqlCountStyles = "SELECT COUNT(*), MAX(rowid)   "
-                           "FROM styles s ; ";
-
-    rc = sqlite3_prepare_v2(projectDB, sqlCountStyles, -1, &preparedCountStyle, 0);
-
-    if (rc != SQLITE_OK ) {
-        log_this(1, "SQL error in %s\n",sqlCountStyles );
-        sqlite3_close(projectDB);
-        return 1;
-    }
-    sqlite3_step(preparedCountStyle);
-    int nStyles = sqlite3_column_int(preparedCountStyle, 0);
-    int maxStyleID = sqlite3_column_int(preparedCountStyle, 1);
-    sqlite3_finalize(preparedCountStyle);
-
-
-
-    /********************************************************************************
-      Put all the styles in an array of style structures
-    */
-    length_global_styles = maxStyleID + 1;
-
-    size_t thesize = length_global_styles * sizeof(STYLES_RUNTIME) + 1;
-    global_styles = malloc(thesize); // + 1 is for making place for 1-based array
-    memset(global_styles,0,thesize);
-
-    char *sqlStyles = "SELECT "
-                      "rowid, color_r, color_g, color_b, color_a, out_r, out_g, out_b, line_w, line_w2, z, unit, layerid "
-                      "from styles order by layerid;";
-
-    rc = sqlite3_prepare_v2(projectDB, sqlStyles, -1, &preparedStylesLoading, 0);
-
-    if (rc != SQLITE_OK ) {
-        log_this(1, "SQL error in %s\n",sqlStyles );
-        sqlite3_close(projectDB);
-        return 1;
-    }
-    int styleID;
-    for (i =0; i<nStyles; i++)
-    {
-        sqlite3_step(preparedStylesLoading);
-        int layerid = sqlite3_column_int(preparedStylesLoading,12);
-        if(layerid == 0)
-            styleID = 0;
-        else
-            styleID = sqlite3_column_int(preparedStylesLoading, 0);
-        global_styles[styleID].styleID = styleID;
-        global_styles[styleID].color[0] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 1)/255.0);
-        global_styles[styleID].color[1] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 2)/255.0);
-        global_styles[styleID].color[2] =  (GLfloat) (sqlite3_column_int(preparedStylesLoading, 3)/255.0);
-        global_styles[styleID].color[3] =  (GLfloat) (sqlite3_column_int(preparedStylesLoading, 4)/255.0);
-        global_styles[styleID].outlinecolor[0] =  (GLfloat) (sqlite3_column_int(preparedStylesLoading, 5)/255.0);
-        global_styles[styleID].outlinecolor[1] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 6)/255.0);
-        global_styles[styleID].outlinecolor[2] = (GLfloat) (sqlite3_column_int(preparedStylesLoading, 7)/255.0);
-        global_styles[styleID].outlinecolor[3] = 1.0;
-        global_styles[styleID].lineWidth =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 8);
-        global_styles[styleID].lineWidth2 =  (GLfloat) sqlite3_column_double(preparedStylesLoading, 9);
-        z = (GLfloat) sqlite3_column_double(preparedStylesLoading, 10);
-        if(z)
-        {
-            if(z>100)
-                z = 100;
-            if(z < 0)
-                z = 0;
-            global_styles[styleID].z = 1-z*0.01;
-        }
-        else
-            global_styles[styleID].z = 0;
-        global_styles[styleID].unit =  (GLfloat) sqlite3_column_int(preparedStylesLoading, 11);
-    }
-
-    sqlite3_finalize(preparedStylesLoading);
-    return 0;
-}
-#endif
 /******************************************************
  * Load Symbols
  * ***************************************************/
@@ -757,7 +666,6 @@ int init_resources(char *dir)
     destroy_txt(missing_db);
     init_gps();
     init_info_Layer();
-    init_controls();
     tmp_unicode_txt = init_wc_txt(256);
     return 0;
 }

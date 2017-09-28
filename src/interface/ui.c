@@ -38,12 +38,14 @@ static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_fun
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent);
 static struct CTRL* add_tileless_info(struct CTRL *ctrl);
 
-/**********************************************
- * This function must be present, and it defines
- * the buttons and labels and things
- * that apears on the main screen
- * *******************************************/
-int init_controls()
+
+
+
+static struct CTRL *controls;
+
+
+
+struct CTRL* init_controls()
 {
     TEXTBLOCK *txt;
     ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
@@ -79,11 +81,13 @@ int init_controls()
     struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     add_tileless_info(controls);
-    return 0;
+    return controls;
 }
 
-
-
+CTRL* get_master_control()
+{
+ return controls;   
+}
 
 static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 {
@@ -137,7 +141,7 @@ static int hide_layer_selecter(void *ctrl, void *val, tileless_event_func_in_fun
 
     struct CTRL *t = (struct CTRL *) ctrl;
     incharge = NULL; //move focus back to map
-    destroy_control(t->logical_family->parent);
+    destroy_control(t->caller->parent);
 
 
     return 0;

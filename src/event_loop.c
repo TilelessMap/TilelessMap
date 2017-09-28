@@ -30,7 +30,7 @@
 #include "matrix_handling.h"
 #include "log.h"
 
-void mainLoop(SDL_Window* window)
+void mainLoop(SDL_Window* window,struct  CTRL *controls)
 {
     log_this(100, "Entering mainLoop now\n");
 //return;
@@ -83,7 +83,7 @@ void mainLoop(SDL_Window* window)
     }
 
 //    get_data(window, newBBOX, theMatrix);
-    get_data(window, &map_matrix);
+    get_data(window, &map_matrix, controls);
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
@@ -98,7 +98,7 @@ void mainLoop(SDL_Window* window)
 
             if(ev.type == GPSEventType)
             {
-                render_data(window, map_matrix.matrix);
+                render_data(window, map_matrix.matrix, controls);
             }
             else
             {
@@ -122,7 +122,7 @@ void mainLoop(SDL_Window* window)
                     if(mouse_down_x == mouse_up_x && mouse_down_y == mouse_up_y)
                     {
                         //  map_modus_before = map_modus;
-                        int any_hit = check_click(mouse_up_x, mouse_up_y);
+                        int any_hit = check_click(controls, mouse_up_x, mouse_up_y);
 
 
                         if(! map_modus && !any_hit)
@@ -130,7 +130,7 @@ void mainLoop(SDL_Window* window)
                             identify(&map_matrix, mouse_up_x,mouse_up_y);
                             //render_data(window, map_matrix.matrix);
                         }
-                        render_data(window, map_matrix.matrix);
+                        render_data(window, map_matrix.matrix, controls);
 
                     }
                     else
@@ -140,13 +140,13 @@ void mainLoop(SDL_Window* window)
                         if(!incharge)
                         {
                             matrixFromDeltaMouse(&map_matrix,&ref, mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                            get_data(window, &map_matrix);
+                            get_data(window, &map_matrix, controls);
                             //  copyNew2CurrentBBOX(newBBOX, currentBBOX);
                         }
                         else
                         {
                             matrixFromDeltaMouse(incharge->matrix_handler,&ref, mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                            render_data(window, map_matrix.matrix);
+                            render_data(window, map_matrix.matrix, controls);
                         }
                         //}
 
@@ -163,7 +163,7 @@ void mainLoop(SDL_Window* window)
                     else
                         matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 2);
 
-                    get_data(window, &map_matrix);
+                    get_data(window, &map_matrix, controls);
 
                     // copyNew2CurrentBBOX(newBBOX, currentBBOX);
                     //}
@@ -183,12 +183,12 @@ void mainLoop(SDL_Window* window)
                             if(!incharge)
                             {
                                 matrixFromDeltaMouse(&map_matrix,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                render_data(window, map_matrix.matrix);
+                                render_data(window, map_matrix.matrix, controls);
                             }
                             else
                             {
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                render_data(window, map_matrix.matrix);
+                                render_data(window, map_matrix.matrix, controls);
                             }
 
                             //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
@@ -243,12 +243,12 @@ void mainLoop(SDL_Window* window)
                     if(abs(mouse_down_x-mouse_up_x) < tolerance && abs(mouse_down_y-mouse_up_y)<tolerance && !touches[1].active)
                     {
 
-                        int any_hit = check_click((GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
+                        int any_hit = check_click(controls, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
                         if(! map_modus && !any_hit)
                         {
                             identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
                         }
-                        render_data(window, map_matrix.matrix);
+                        render_data(window, map_matrix.matrix, controls);
                         reset_touch_que(touches);
                     }
                     else
@@ -263,7 +263,7 @@ void mainLoop(SDL_Window* window)
                                 {
                                     get_box_from_touches(touches, &map_matrix, &ref);
                                     matrixFromBBOX(&map_matrix);
-                                    get_data(window, &map_matrix);
+                                    get_data(window, &map_matrix, controls);
 
                                 }
                                 else
@@ -271,7 +271,7 @@ void mainLoop(SDL_Window* window)
 
                                     get_box_from_touches(touches, incharge->matrix_handler,&ref);
                                     matrixFromBBOX(incharge->matrix_handler);
-                                    render_data(window, map_matrix.matrix);
+                                    render_data(window, map_matrix.matrix, controls);
                                 }
 
                                 reset_touch_que(touches);
@@ -289,12 +289,12 @@ void mainLoop(SDL_Window* window)
                             if(!incharge)
                             {
                                 matrixFromDeltaMouse(&map_matrix,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                get_data(window, &map_matrix);
+                                get_data(window, &map_matrix, controls);
                             }
                             else
                             {
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                render_data(window, map_matrix.matrix);
+                                render_data(window, map_matrix.matrix, controls);
                             }
 
                             reset_touch_que(touches);
@@ -334,7 +334,7 @@ void mainLoop(SDL_Window* window)
 
 
                         if(n_events<2)
-                            render_data(window, map_matrix.matrix);
+                            render_data(window, map_matrix.matrix, controls);
 
 
                     }
@@ -360,7 +360,7 @@ void mainLoop(SDL_Window* window)
                         }
 
                         if(n_events<2)
-                            render_data(window, map_matrix.matrix);
+                            render_data(window, map_matrix.matrix, controls);
                         //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                     }
                     //}

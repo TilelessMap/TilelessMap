@@ -37,11 +37,11 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
     int i, v;
     struct CTRL *t = (struct CTRL *) ctrl;
     TEXTBLOCK *txt;
-    struct CTRL *radio_master = t->spatial_family->parent;
+    struct CTRL *radio_master = t->spatial_parent->parent;
     v = 0;
-    for (i=0; i<radio_master->spatial_family->n_children; i++)
+    for (i=0; i<radio_master->spatial_parent->n_children; i++)
     {
-        struct CTRL *rb = radio_master->spatial_family->children[i];
+        struct CTRL *rb = radio_master->spatial_parent->children[i];
         func_in_func((void*) rb,(void*) &v);
         // ((LAYER_RUNTIME*) rb->obj)->info_active = 0;
         if(rb->txt)
@@ -79,9 +79,9 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
     GLshort master_width = radio_master->box[2] - radio_master->box[0];
     box[0] = radio_master->box[0] + master_width/2 - size/2;
     struct CTRL *radio_button;
-    if(radio_master->spatial_family->n_children)
+    if(radio_master->spatial_parent->n_children)
     {
-        box[3] = radio_master->spatial_family->children[radio_master->spatial_family->n_children -1]->box[1] - row_dist; //we get miny from the last radiobutton from before
+        box[3] = radio_master->spatial_parent->children[radio_master->spatial_parent->n_children -1]->box[1] - row_dist; //we get miny from the last radiobutton from before
     }
     else
     {
