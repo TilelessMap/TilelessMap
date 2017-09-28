@@ -50,7 +50,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
 
 
-    int symbol = 2, last_symbol = 0, i;
+    unsigned int symbol = 2, last_symbol = 0, i;
 
     POINT_LIST *points = oneLayer->points;
 
@@ -171,6 +171,7 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glDisableVertexAttribArray(sym_norm);
 
     glDisable (GL_DEPTH_TEST);
+    glUseProgram(0);
     return 0;
 
 }
@@ -215,11 +216,11 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
-    GLfloat *color,*color2,z, lw=0, lw2=0;
+    GLfloat *color,z, lw=0;
     unsigned int n_vals = 0, n_vals_acc = 0;
     uint8_t ndims = oneLayer->n_dims;
     uint8_t vals_per_point = ndims*2;
-    GLfloat c[4];
+    
     GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat) (2.0 / CURR_HEIGHT);
 
@@ -280,7 +281,10 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
         struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
         if(!styles)
+        {
             styles=system_default_style;
+        log_this(100, "yes use system default\n");
+        }
         LINE_STYLE *style = styles->line_styles;
 
 
@@ -297,7 +301,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             z = style->z->list[r] - 0.001*r;
             if(!z)
                 z = 0;
-
+            
             unit = style->units->list[r];
             if(unit == PIXEL_UNIT)
                 glUniformMatrix4fv(lw_px_matrix, 1, GL_FALSE,px_Matrix );
@@ -330,6 +334,8 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     glDisableVertexAttribArray(lw_coord2d);
     glDisable (GL_DEPTH_TEST);
+    
+    glUseProgram(0);
     return 0;
 
 }
@@ -339,15 +345,13 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     log_this(10, "Entering renderLine\n");
     uint32_t i;//, np, pi;
-    GLfloat *color, lw;
+    GLfloat *color;
     LINESTRING_LIST *line = oneLayer->lines;
 
     unsigned int n_vals = 0, n_vals_acc = 0;
     uint8_t ndims = oneLayer->n_dims;
     glBindBuffer(GL_ARRAY_BUFFER, line->vbo);
 
-
-    Uint32 styleID;
 
 
     glUseProgram(std_program);
@@ -368,7 +372,6 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     n_lines += used_n_pa;
     total_points += line->vertex_array->used/ndims;
-    printf("used_lines = %d\n",used_n_pa);
 
 
 
@@ -405,6 +408,7 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
     glDisableVertexAttribArray(std_coord2d);
 
+    glUseProgram(0);
     return 0;
 
 }
@@ -434,12 +438,8 @@ int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     log_this(10, "Entering renderPolygon\n");
-    int style_key_type = oneLayer->style_key_type;
     uint32_t i;//, np, pi;
-    GLfloat *color, lw;
-    GLfloat c[4];
-    Uint32 styleID;
-//    GLenum err;
+    GLfloat *color;
     uint8_t ndims = oneLayer->n_dims;
     size_t index_offset = 0;
     POLYGON_LIST *poly = oneLayer->polygons;
@@ -577,6 +577,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         }
         glDisableVertexAttribArray(std_coord2d);
     }
+    
+    glUseProgram(0);
     return 0;
 
 }
@@ -677,11 +679,9 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     ATLAS *a;
-    int style_key_type = oneLayer->style_key_type;
     log_this(10, "Entering renderText\n");
     int i;
     GLfloat *color;
-    GLfloat c[4];
 
     int offset = 0;;
     char *txt;
@@ -770,6 +770,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     }
 
+    glUseProgram(0);
 
     return 0;
 }
@@ -1064,6 +1065,7 @@ int renderGPS(GLfloat *theMatrix)
 
     glDisableVertexAttribArray(gps_norm);
 
+    glUseProgram(0);
     return 0;
 
 }
@@ -1085,7 +1087,7 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         1.0, 1.0,
         0.0, 1.0,
     };
-    glGenBuffers(1, &vbo_cube_texcoords);
+    vbo_cube_texcoords = rast->cvbo;
     glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texcoords), cube_texcoords, GL_STATIC_DRAW);
 
@@ -1107,7 +1109,7 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         2,  3,  0
     };
 
-    glGenBuffers(1, &ibo_cube_elements);
+    ibo_cube_elements = rast->cibo;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);
 
@@ -1162,7 +1164,8 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
         GLuint vbo_cube_vertices;
-        glGenBuffers(1, &vbo_cube_vertices);
+        
+        vbo_cube_vertices = rast->vbo;
         glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, d, GL_STATIC_DRAW);
 
@@ -1218,6 +1221,7 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
 
 
+    glUseProgram(0);
     return 0;
 
 }

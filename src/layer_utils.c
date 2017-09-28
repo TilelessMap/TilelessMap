@@ -113,7 +113,7 @@ LAYER_RUNTIME* init_layer_runtime(int n)
     LAYER_RUNTIME *lr, *theLayer;
     int i;
     lr = st_malloc(n * sizeof(LAYER_RUNTIME));
-
+    
     for (i = 0; i<n; i++)
     {
         theLayer = lr+i;
@@ -122,7 +122,9 @@ LAYER_RUNTIME* init_layer_runtime(int n)
         theLayer->title = NULL;
         theLayer->visible = 0;
         theLayer->info_active = 0;
-        theLayer->preparedStatement = NULL;
+        theLayer->preparedStatement = st_malloc(sizeof(PS_HOLDER));
+        theLayer->preparedStatement->ps=NULL;
+        theLayer->preparedStatement->usage=0;
         /*Buffers*/
         /*Values for shaders*/
         //theLayer->theMatrix[16];
@@ -270,7 +272,14 @@ void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
         st_free(theLayer->name);
         st_free(theLayer->db);
         st_free(theLayer->title);
-        sqlite3_finalize(theLayer->preparedStatement);
+        
+        theLayer->preparedStatement->usage--;
+        if(theLayer->preparedStatement->usage<=0)
+        {
+            sqlite3_finalize(theLayer->preparedStatement->ps);        
+            theLayer->preparedStatement->ps = NULL;        
+            st_free(theLayer->preparedStatement);
+        }
 
     }
     free(lr);

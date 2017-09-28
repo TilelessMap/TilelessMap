@@ -32,7 +32,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context)
 
     FT_Done_FreeType(ft);
     sqlite3_close_v2(projectDB);
-    sqlite3_shutdown() ;
+    sqlite3_shutdown();
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow( window );

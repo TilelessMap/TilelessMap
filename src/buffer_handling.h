@@ -125,9 +125,8 @@ typedef struct
     UINT8_LIST *data;
     GLUINT_LIST *raster_start_indexes;
     GLUINT_LIST *tileidxy; //each 4 glfloat represents minx, maxx, miny, maxy in world coordinates
-    GLuint tex;
-    GLuint tex_vbo;
-    GLuint tex_ebo;
+    GLuint cvbo;
+    GLuint cibo;
     GLuint vbo;
     GLuint tilewidth;
     GLuint tileheight;
@@ -156,6 +155,12 @@ typedef struct
 }
 TEXTSTRUCT;
 
+typedef struct
+{
+    
+    sqlite3_stmt *ps;
+    int usage;
+}PS_HOLDER;
 
 /**
 
@@ -171,7 +176,7 @@ typedef struct
     int layer_id;
     
     //Info for fetching data and rendering
-    sqlite3_stmt *preparedStatement;
+    PS_HOLDER *preparedStatement;
     GLfloat *BBOX; // the requested bounding box (window)
     uint8_t geometryType;
     uint8_t type;
@@ -386,7 +391,7 @@ int pa_end(LAYER_RUNTIME *l, int64_t id);
 
 
 int init_symbols();
-int addsym(int id, size_t n_points, GLfloat *points);
+int addsym(uint8_t id, size_t n_points, GLfloat *points);
 //int destroy_symbols();
 
 

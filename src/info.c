@@ -209,9 +209,14 @@ int identify(MATRIX *map_matrix, int x, int y)
 
             // init_buffers(infoLayer);
 
+            //Check if infoLayer holds an old prepared statemenst
+            //if so unsubscribe from it
+            if(infoLayer->preparedStatement->usage)
+                infoLayer->preparedStatement->usage--;
             //borrow prepared statement
             infoLayer->preparedStatement = theLayer->preparedStatement;
-
+            infoLayer->preparedStatement->usage++;
+            
             //If we in the future will handle 3D, we are prepared
             infoLayer->n_dims = theLayer->n_dims;
 

@@ -47,11 +47,19 @@ static struct CTRL *controls;
 
 struct CTRL* init_controls()
 {
+    GLshort box[] = {0,0,0,0}; //This is just a dummy box that we use for the master control.
+    controls =  register_control(MASTER, NULL,NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,1,0);
+    
+    
+    return controls;
+}
+
+int add_default_controls()
+{
+    
+    
     TEXTBLOCK *txt;
     ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
-    GLshort box[] = {0,0,0,0}; //This is just a dummy box that we use for the master control.
-
-    controls =  register_control(MASTER, NULL,NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,1,0);
 
     //This is the margin (left and bottom) that will be used for the 2 buttons defined below
     GLshort txt_margin[] = {20,20};
@@ -81,8 +89,10 @@ struct CTRL* init_controls()
     struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     add_tileless_info(controls);
-    return controls;
+    
+    return 0;
 }
+
 
 CTRL* get_master_control()
 {
@@ -351,7 +361,7 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
         const unsigned char *txt = sqlite3_column_text(preparedinfo, 0);
         int text_size = sqlite3_column_int(preparedinfo, 1);
         int bold = sqlite3_column_int(preparedinfo, 2);
-        int link_to_page = sqlite3_column_int(preparedinfo, 3);
+  //      int link_to_page = sqlite3_column_int(preparedinfo, 3);
         
         if(bold)
             font = loadatlas("freesans",BOLD_TYPE, 12);
@@ -416,8 +426,8 @@ int init_show_info(void *ctrl, void *val, tileless_event_func_in_func func_in_fu
 struct CTRL* add_tileless_info(struct CTRL *ctrl)
 {
     if (!check_layer((const unsigned char*) "main",(const unsigned char*) "tilelessmap_info"))
-     return 0;
-     ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
+        return 0;
+    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
     int page = 1;
     GLshort box_text_margins[] = {20,10};
     multiply_array(box_text_margins, size_factor, 2);

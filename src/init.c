@@ -5,6 +5,7 @@
 #include "log.h"
 #include "cleanup.h"
 #include "event_loop.h"
+#include "tilelessmap.h"
 
 static SDL_Window* window;
 static SDL_GLContext context;
@@ -133,4 +134,19 @@ extern void TLM_start(struct CTRL *controls)
 extern void TLM_close()
 {
     free_resources(window, context);
+}
+
+
+extern CTRL* TLM_init_controls(int approach)
+{
+    CTRL *controls;
+    if(approach == NATIVE_default || approach == NATIVE_custom)
+    {
+        controls = init_controls(); 
+        
+        if(approach == NATIVE_default)
+            add_default_controls();
+    }    
+    return controls;
+    
 }

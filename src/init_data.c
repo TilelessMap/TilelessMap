@@ -224,10 +224,9 @@ static int load_layers(TEXT *missing_db)
         snprintf(sqlLayerLoading, 2048, "%s %s %s order by l.orderby ;",sqlLayerLoading1, sqlSel2, sqlLayerLoading2);
 
 
-    log_this(100, "Get Layer sql : %s\n",sqlLayerLoading);
+    log_this(10, "Get Layer sql : %s\n",sqlLayerLoading);
     
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
-    log_this(100, "prepared, ready");
     if (rc != SQLITE_OK ) {
         log_this(110, "SQL error in %s\n",sqlLayerLoading);
         sqlite3_close(projectDB);
@@ -239,18 +238,12 @@ static int load_layers(TEXT *missing_db)
      Time to iterate all layers in the project and add data about them in struct layerRuntime
     */
 
-    log_this(100, "ok, init layers");
     global_layers = init_layers(count_layers());
-    
-    log_this(100, "ok, layers initialized\n");
-    log_this(100, "ok, layers initialized %d layers\n",global_layers->nlayers);
     
     i=0;
     while(1)
     {
-        log_this(100, "1\n");
-        int res =  sqlite3_step(preparedLayerLoading) ;
-        log_this(100, "2 res = %d\n",res);
+        int res =  sqlite3_step(preparedLayerLoading);
 
         if(res !=  SQLITE_ROW)
         {
@@ -259,10 +252,6 @@ static int load_layers(TEXT *missing_db)
 
         oneLayer=global_layers->layers + i;
         
-        log_this(100, "3\n");
-        //   sqlite3_step(preparedLayerLoading);
-        log_this(100,"get layer ----------------------------------------------------\n");
-//       oneLayer->close_ring = 0;
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
         oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);
@@ -273,8 +262,6 @@ static int load_layers(TEXT *missing_db)
         line_width =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 7);
         int layerid =  (uint8_t) sqlite3_column_int(preparedLayerLoading, 8);
 
-
-        log_this(100, "3\n");
         /*
                 const unsigned char *size_fld = sqlite3_column_text(preparedLayerLoading,9);
                 const unsigned char *rotation_fld = sqlite3_column_text(preparedLayerLoading, 10);
@@ -289,7 +276,6 @@ static int load_layers(TEXT *missing_db)
         oneLayer->db = st_malloc(2 * strlen((char*) dbname)+1);
         strcpy(oneLayer->db,(char*) dbname);
 
-        log_this(100, "prepare layer %s\n",oneLayer->name);
         
         oneLayer->title = malloc(2 * strlen((char*) title)+1);
         strcpy(oneLayer->title,(char*) title);
@@ -302,7 +288,6 @@ static int load_layers(TEXT *missing_db)
             {
                 snprintf(sql, 2048, "SELECT geometry_fld,data_fld, id_fld,spatial_idx,  utm_zone, hemisphere, tilewidth, tileheight from %s.raster_columns where layer_name='%s';", dbname, layername);
 
-                log_this(100, "Get info from raster_columns : %s\n",sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
                 if (rc != SQLITE_OK ) {
@@ -334,15 +319,15 @@ static int load_layers(TEXT *missing_db)
                          geometry_fld,data_fld,idfield, idfield, dbname, layername, dbname, geometryindex, idfield);
 
                 rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
-                log_this(100, "sql %s\n",sql );
+                log_this(10, "sql %s\n",sql );
                 if (rc != SQLITE_OK ) {
                     log_this(100, "SQL error in %s\n",sql );
                     sqlite3_close(projectDB);
                     return 1;
                 }
                 oneLayer->n_dims = 2;
-                oneLayer->preparedStatement = preparedLayer;
-
+                oneLayer->preparedStatement->ps = preparedLayer;
+                oneLayer->preparedStatement->usage++;
 
 
             }
@@ -369,7 +354,7 @@ static int load_layers(TEXT *missing_db)
 
 
 
-                log_this(100, "Get info from geometry_columns : %s\n",sql);
+                log_this(10, "Get info from geometry_columns : %s\n",sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
                 if (rc != SQLITE_OK ) {
@@ -528,14 +513,15 @@ static int load_layers(TEXT *missing_db)
 
                         */
                 rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
-                log_this(100, "sql %s\n",sql );
+                log_this(10, "sql %s\n",sql );
                 if (rc != SQLITE_OK ) {
                     log_this(100, "SQL error in %s\n",sql );
                     sqlite3_close(projectDB);
                     return 1;
                 }
-                oneLayer->preparedStatement = preparedLayer;
-
+                oneLayer->preparedStatement->ps =  preparedLayer;
+                oneLayer->preparedStatement->usage++;
+                
 
 
 
@@ -569,9 +555,8 @@ static int load_layers(TEXT *missing_db)
             continue;
         }
 
-        printf("layer loaded\n");
     }
-    log_this(100,"layers prepared\n");
+    log_this(10,"layers prepared\n");
     global_layers->nlayers = i;
     sqlite3_finalize(preparedLayerLoading);
 

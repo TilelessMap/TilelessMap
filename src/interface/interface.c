@@ -24,13 +24,13 @@
 #include "../theclient.h"
 #include "../mem.h"
 #include "interface.h"
+#include <GL/glew.h>
 
 int multiply_array(GLshort *a, GLfloat v, GLshort ndims)
 {
     int i;
     for(i=0; i<ndims; i++)
     {
-        printf("a = %d\n", *(a+i));
         *(a+i) *= v;
     }
     return 0;
@@ -285,13 +285,13 @@ int init_matrix_handler(struct CTRL *ctrl, uint8_t vertical_enabled, uint8_t hor
 
 
 //struct CTRL* register_control(struct CTRL *parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,int default_active)
-struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z)
+CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller, tileless_event_function click_func, void* onclick_arg, tileless_event_func_in_func func_in_func, GLshort* box, GLfloat* color, TEXTBLOCK* txt, GLshort* txt_margin, int default_active, int z)
 {
     struct CTRL *ctrl = st_malloc(sizeof(struct CTRL));
     ctrl->type = type;
     ctrl->active = default_active;
     ctrl->z = z;
-    ctrl->caller = init_family(logical_parent);
+    ctrl->caller = init_family(caller);
     ctrl->spatial_parent = init_family(spatial_parent);
 
     ctrl->on_click.te_func = click_func;
@@ -316,8 +316,8 @@ struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL 
     clone_box(box, ctrl->box);
     if(spatial_parent)
         add_child(spatial_parent->spatial_parent, ctrl);
-    if(logical_parent)
-        add_child(logical_parent->caller, ctrl);
+    if(caller)
+        add_child(caller->caller, ctrl);
 
     ctrl->matrix_handler = NULL;
 

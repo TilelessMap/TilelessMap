@@ -46,6 +46,7 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
             s->string_key = st_malloc(strlen(key) + 1);
             strcpy(s->string_key, key);
             HASH_ADD_KEYPTR( hh, oneLayer->styles, s->string_key, strlen(s->string_key), s );
+            log_this(10, "layer %s har style %p for val %s\n", oneLayer->name, s, key);
         }
     }
     else if (key_type == INT_TYPE)
@@ -66,6 +67,7 @@ static int  check_and_add_style(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml
             s->text_styles = NULL;
             s->int_key = (int) key;
             HASH_ADD_INT(oneLayer->styles, int_key, s);
+            log_this(10, "layer %s har style %p for val %ld\n", oneLayer->name, s, key);
         }
 
 
@@ -152,7 +154,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
                 const char *color = mxmlGetOpaque(n);
                 read_color(color,c);
             }
-            else if (!strcmp(attr, "stroke"))
+      /*      else if (!strcmp(attr, "stroke"))
             {
                 const char *stroke_color = mxmlGetOpaque(n);
 
@@ -160,7 +162,7 @@ static int parse_pointstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_nod
             else if (!strcmp(attr, "stroke-width"))
             {
                 const char *width = mxmlGetOpaque(n);
-            }
+            }*/
             else if (!strcmp(attr, "fill-opacity"))
             {
                 opacity = mxmlGetOpaque(n);
@@ -322,6 +324,7 @@ static int parse_polygonstyle(LAYER_RUNTIME *oneLayer, mxml_node_t *tree, mxml_n
                 unit = METER_UNIT;
         }
         add2glushort_list(s->polygon_styles->units,unit);
+        add2glushort_list(s->line_styles->units,unit); 
 
         mxml_node_t *Fill = mxmlFindElement(symbolizer, symbolizer, "se:Fill", NULL, NULL,  MXML_DESCEND);
 
@@ -542,7 +545,7 @@ char* load_sld(LAYER_RUNTIME *oneLayer,char *sld, char** text_attr)
         return 0;
     *text_attr = NULL;
     char *parsed_text_attr = NULL;
-    int max_val = 0,min_val = INT_MAX, nvals=0;
+    int nvals=0;
     long int val;
     char *last_propname = NULL;
     mxml_node_t *tree;

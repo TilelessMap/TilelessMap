@@ -89,11 +89,12 @@ int check_click(struct CTRL *controls, int x, int y);
 
 int parent_add_child(struct CTRL *parent, struct CTRL *child);
 CTRL* init_controls();
+int add_default_controls();
 CTRL* get_master_control();
 int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl);
-struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *logical_parent, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z);
+struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *caller, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z);
 
-
+struct CTRL* add_close_button(struct CTRL *ctrl);
 /*Radiobutton*/
 //struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLfloat *txt_margin,int txt_size,int default_active, int z);
 struct CTRL* init_radio(struct CTRL *spatial_parent,struct CTRL *logical_parent, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin,int default_active, int z);

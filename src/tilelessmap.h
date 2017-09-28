@@ -1,5 +1,6 @@
 
-
+#ifndef _tilelessmap_H
+#define _tilelessmap_H
 #include "interface/interface.h"
 #include "info.h"
 #include "log.h"
@@ -68,11 +69,17 @@ TLM_FIELDS *TLM_get_fields;
  * CUSTOM approach inits no UI functionality at all
  * */
 
-#define NATIVE 1
-#define CUSTOM 2
+#define NATIVE_default 1
+#define NATIVE_custom 2
+#define CUSTOM 3
 
-int TLM_init_controls(int approach);
+CTRL *TLM_init_controls(int approach);
 
 /*If we have choosen TILELESS_NATIVE approach we are done. There is nothing that can be customized
  * But if we choose TILELESS_CUSTOM we need the functions below to build the interface
  * You can copy and paste from UI.c to get started and customize from that*/
+
+
+
+
+#endif

@@ -74,7 +74,7 @@ int main(int argc, char **argv)
     
     TLM_init(projectfile, dir);
     
-    struct CTRL* controls = init_controls();
+    CTRL* controls = TLM_init_controls(NATIVE_default);
     
     TLM_start(controls);
     

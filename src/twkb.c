@@ -89,7 +89,7 @@ void *twkb_fromSQLiteBBOX_thread(void *theL)
 
 void *twkb_fromSQLiteBBOX(void *theL)
 {
-    log_this(10, "Entering twkb_fromSQLiteBBOX, prepared = %p\n", ((LAYER_RUNTIME*) theL)->preparedStatement);
+    log_this(10, "Entering twkb_fromSQLiteBBOX, prepared = %p\n", ((LAYER_RUNTIME*) theL)->preparedStatement->ps);
     /*twkb structures*/
     TWKB_HEADER_INFO thi;
     TWKB_PARSE_STATE ts;
@@ -111,7 +111,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
 //log_this(10, "sqlite_error? %d\n",sqlite3_config(SQLITE_CONFIG_SERIALIZED ));
 
 
-    prepared_statement = theLayer->preparedStatement;
+    prepared_statement = theLayer->preparedStatement->ps;
     ext = theLayer->BBOX;
     //rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
 
@@ -183,7 +183,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
         sqlite3_bind_double(prepared_statement, 2,(float) ext[0]); //minX
         sqlite3_bind_double(prepared_statement, 3,(float) ext[3]); //maxY
         sqlite3_bind_double(prepared_statement, 4,(float) ext[1]); //minY
-        log_this(100, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
+        log_this(10, "1 = %f, 2 = %f, 3 = %f, 4 = %f\n", ext[2],ext[0],ext[3],ext[1]);
 
     }
 

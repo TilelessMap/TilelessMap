@@ -453,99 +453,6 @@ int setzero2pointer_list(POINTER_LIST *list,GLuint n_vals)
     return 0;
 }
 
-/************* union List ********************/
-
-
-UNION_LIST* init_union_list()
-{
-    UNION_LIST *res = (UNION_LIST*) st_malloc(sizeof(UNION_LIST));
-
-    res->list =  st_malloc(INIT_LIST_SIZE * 4); //we use 4 as an expected common space per unit since both int and float uses 4 bytes. It doesn't matter since it will be realloced at need
-    res->alloced = INIT_LIST_SIZE * 4;
-    res->used = 0;
-    res->s_start_indexes = init_gluint_list();
-
-    return res;
-}
-
-
-
-static int increase_union_list(UNION_LIST *l, size_t needed_space)
-{
-
-    size_t available_space = l->alloced-l->used;
-
-    if (available_space >= needed_space)
-        return 0;
-
-
-    size_t new_size = l->alloced;
-
-    while (available_space < needed_space)
-    {
-        new_size*=2;
-        available_space = new_size - l->used;
-    }
-    printf("space to be increased to %zu\n",new_size);
-    l->list = st_realloc(l->list, new_size);
-
-    printf("space increased to %zu\n",new_size);
-    l->alloced = new_size;
-    return 0;
-}
-
-static int reset_union_list(UNION_LIST *l)
-{
-    l->used = 0;
-    reset_gluint_list(l->s_start_indexes);
-    return 0;
-}
-
-
-static int destroy_union_list(UNION_LIST *l)
-{
-    free(l->list);
-    l->list = NULL;
-    l->used = 0;
-    l->alloced = 0;
-    destroy_gluint_list(l->s_start_indexes);
-    free(l);
-    l = NULL;
-    return 0;
-}
-
-int add2union_list(UNION_LIST *list, void *val)
-{
-
-    if(list->list_type == INT_TYPE)
-    {
-        printf("let's write val %d\n",*((int*) val));
-        increase_union_list(list, sizeof(GLint));
-        memcpy((GLint*)list->list + list->used,val, sizeof(GLint));
-        list->used += sizeof(GLint);
-    }
-    if(list->list_type == FLOAT_TYPE)
-    {
-
-        increase_union_list(list, sizeof(GLfloat));
-        memcpy((GLfloat*) list->list + list->used,val, sizeof(GLfloat));
-        list->used += sizeof(GLfloat);
-    }
-    if(list->list_type == STRING_TYPE)
-    {
-        size_t len = strlen(val)+1;
-        // printf("val = %s\n",(char*) val);
-        increase_union_list(list, len);
-        strcpy((char*) list->list + list->used,(char*)val);
-        add2gluint_list(list->s_start_indexes, list->used);
-        printf("val = %s and used = %d\n",(char*)val, list->used);
-        list->used += len;
-    }
-    return 0;
-}
-
-
-
 
 
 
@@ -557,10 +464,9 @@ static RASTER_LIST* init_raster_list()
     res->data = init_uint8_list();
     res->raster_start_indexes = init_gluint_list();
     res->tileidxy = init_gluint_list();
-    glGenBuffers(1, &(res->tex_vbo));
-    glGenBuffers(1, &(res->tex_ebo));
+    glGenBuffers(1, &(res->cvbo));
+    glGenBuffers(1, &(res->cibo));
     glGenBuffers(1, &(res->vbo));
-    glGenTextures(1, &(res->tex));
     return res;
 }
 static POINT_LIST* init_point_list()
@@ -874,10 +780,11 @@ int destroy_symbol_list(SYMBOLS *l)
 {
     destroy_point_list(l->points);
     free(l);
+    return 0;
 }
 
 
-int addsym(int id, size_t n_points, GLfloat *points)
+int addsym(uint8_t id, size_t n_points, GLfloat *points)
 {
     if(id<global_symbols->points->point_start_indexes->used)
         return 1;
