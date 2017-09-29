@@ -791,6 +791,7 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, unsigne
         float y2 = -(y) - a->metrics[p].bt * sy;
         float w = a->metrics[p].bw * sx;
         float h = a->metrics[p].bh * sy;
+ //       float h = a->ch * sy;
 
         /* Advance the cursor to the start of the next character */
         x += a->metrics[p].ax * sx;
@@ -841,7 +842,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
 {
 
     GLfloat x,y;
-    uint32_t p;
+    uint8_t p;
     unsigned int i;
     GLfloat max_used_width = 0;
     reset_wc_txt(tmp_unicode_txt);
@@ -858,9 +859,6 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
 
     glUniform2fv(txt_coord2d,1,startp);
 
-    // max_width = 255;
-
-    //TODO, fix dynamic allocation.
 
     size_t npoints = 6 * strlen(txt);
     size_t coordssize = npoints * sizeof(POINT_T);
@@ -914,7 +912,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
                 offset[0] = x = 0;
 
             }
-            if(line_width + word_width >= max_width)
+            if(line_width + word_width > max_width)
             {
                 if(n_chars_in_line == 0) //there is only 1 word in line, we have to cut the word
                 {
@@ -1090,17 +1088,6 @@ int loadandRenderRaster(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     vbo_cube_texcoords = rast->cvbo;
     glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_texcoords);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texcoords), cube_texcoords, GL_STATIC_DRAW);
-
-    //  GLuint vbo_cube_vertices;
-
-    /*
-    glGenBuffers(1, &vbo_cube_vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(line->vertex_array->used*sizeof(GLfloat)), line->vertex_array->list, GL_STATIC_DRAW);
-    */
-
-
-    //	 int i,j, offset=0;
 
     GLuint ibo_cube_elements;
     GLushort cube_elements[] = {

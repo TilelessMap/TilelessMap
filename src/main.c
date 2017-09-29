@@ -23,9 +23,17 @@
  **********************************************************************/
 
 
-
 #include "tilelessmap.h"
 #include <string.h>
+
+
+
+static int button_test(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
+{
+    log_this(100, "Yes, it works, getting text %s\n", (char*) val);
+    return 0;
+    
+}
 
 int main(int argc, char **argv)
 {
@@ -75,6 +83,13 @@ int main(int argc, char **argv)
     TLM_init(projectfile, dir);
     
     CTRL* controls = TLM_init_controls(NATIVE_default);
+    
+    short box[4] = {500,500,600,600};
+    float color[] = {255,0,0,255};
+    short margins[2] = {50,40};
+    
+    add_button(controls, controls,box ,"Test", button_test,"rundgång", color,80,margins,1);
+    
     
     TLM_start(controls);
     

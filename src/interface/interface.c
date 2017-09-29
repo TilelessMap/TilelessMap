@@ -259,7 +259,7 @@ int destroy_control(struct CTRL *t)
     return 0;
 }
 
-static inline void clone_box(GLshort *box_src, GLshort *box_dest)
+void clone_box(GLshort *box_dest, GLshort *box_src)
 {
     box_dest[0] = box_src[0];
     box_dest[1] = box_src[1];
@@ -313,7 +313,7 @@ CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller,
     }
 
     ctrl->txt = txt;
-    clone_box(box, ctrl->box);
+    clone_box(ctrl->box, box);
     if(spatial_parent)
         add_child(spatial_parent->spatial_parent, ctrl);
     if(caller)
@@ -413,7 +413,7 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
 
 //    matrix_hndl = ctrl->matrix_handler;
 
-    log_this(100, "checkcontrol, x = %d, y = %d\n",x,y);
+    log_this(10, "checkcontrol, x = %d, y = %d\n",x,y);
     n_children = ctrl->spatial_parent->n_children;
     for (i=0; i<n_children; i++)
     {

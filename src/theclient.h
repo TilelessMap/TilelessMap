@@ -26,8 +26,7 @@
  ************************************************************************
 *This is the main header file where all exposed fuctions is declared
 *************************************************************************/
-struct CTRL;
-struct CTRL;
+
 #ifndef _theclient_H
 #define _theclient_H
 
@@ -76,6 +75,7 @@ struct CTRL;
 #define INIT_PS_POOL_SIZE 10
 
 
+struct CTRL;
 
 typedef struct
 {

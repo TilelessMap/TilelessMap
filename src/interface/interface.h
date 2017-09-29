@@ -18,6 +18,7 @@
 #define MIDDLESCREEN    2
 #define SMALLSCREEN     1
 
+#define DEFAULT_TXT_MARGIN 10
 typedef struct
 {
     GLshort minx;
@@ -116,7 +117,7 @@ int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 struct CTRL *incharge; //This variable handles what to mov on events. NULL means map, otherwise there will be a ccontrol that will be scrolled or move in other ways
 
 
-
+void clone_box(GLshort *box_dest, GLshort *box_src);
 
 int get_parent_origo(struct CTRL *t, GLshort *p);
 int get_bottom_left(struct CTRL *t, GLshort *p);
@@ -131,7 +132,9 @@ uint8_t screensize;
 GLfloat size_factor;
 int check_screen_size();
 ATLAS *text_font_normal,*text_font_bold, *char_font;
+//CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_in[],const char *txt, tileless_event_function click_func, GLfloat* color,int font_size,short *txt_margin, int default_active);
 
+CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_in[],const char *txt, tileless_event_function click_func,void *val, GLfloat* color,int font_size,short *txt_margin, int default_active);
 #endif
 
 

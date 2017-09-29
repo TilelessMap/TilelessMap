@@ -560,6 +560,9 @@ static int destroy_raster_list(RASTER_LIST *l)
     destroy_gluint_list(l->tileidxy);
     destroy_gluint_list(l->raster_start_indexes);
     destroy_uint8_list(l->data);
+    glDeleteBuffers(1,&(l->vbo));
+    glDeleteBuffers(1,&(l->cibo));
+    glDeleteBuffers(1,&(l->cvbo));
     free(l);
     return 0;
 }
@@ -570,6 +573,7 @@ static int destroy_point_list(POINT_LIST *l)
     destroy_glfloat_list(l->points);
     destroy_gluint_list(l->point_start_indexes);
     destroy_pointer_list(l->style_id);
+    glDeleteBuffers(1,&(l->vbo));
     free(l);
     return 0;
 }
@@ -582,6 +586,7 @@ static int destroy_linestring_list(LINESTRING_LIST *l)
     destroy_glfloat_list(l->vertex_array);
     destroy_gluint_list(l->line_start_indexes);
     destroy_pointer_list(l->style_id);
+    glDeleteBuffers(1,&(l->vbo));
     free(l);
     return 0;
 
@@ -598,6 +603,8 @@ static int destroy_polygon_list(POLYGON_LIST *l)
     destroy_gluint_list(l->element_start_indexes);
     destroy_pointer_list(l->style_id);
     destroy_pointer_list(l->line_style_id);
+    glDeleteBuffers(1,&(l->vbo));
+    glDeleteBuffers(1,&(l->ebo));
     free(l);
     return 0;
 }
