@@ -26,6 +26,25 @@
 #include "interface.h"
 #include <GL/glew.h>
 
+
+
+static inline int32_t max_i(int a, int b)
+{
+    if (b > a)
+        return b;
+    else
+        return a;
+}
+
+static inline float max_f(float a, float b)
+{
+    if (b > a)
+        return b;
+    else
+        return a;
+}
+
+
 int multiply_array(GLshort *a, GLfloat v, GLshort ndims)
 {
     int i;
@@ -79,12 +98,12 @@ int get_parent_origo(struct CTRL *t, GLshort *p)
 {
     p[0] = p[1] = 0;
 
-    struct CTRL *parent = t->spatial_parent->parent;
+    struct CTRL *parent = t->relatives->parent;
     while (parent)
     {
         p[0] += parent->box[0];
         p[1] += parent->box[1];
-        parent = parent->spatial_parent->parent;
+        parent = parent->relatives->parent;
     }
     return 0;
 }
@@ -234,20 +253,20 @@ int destroy_control(struct CTRL *t)
     }
     free(t->caller->children);
 
-    while (t->spatial_parent->n_children)
+    while (t->relatives->n_children)
     {
-        struct CTRL *child = t->spatial_parent->children[t->spatial_parent->n_children -1];
+        struct CTRL *child = t->relatives->children[t->relatives->n_children -1];
         if(child)
         {
             r ++;
             destroy_control(child);
         }
     }
-    free(t->spatial_parent->children);
+    free(t->relatives->children);
     remove_child(t->caller->parent->caller, t);
-    remove_child(t->spatial_parent->parent->spatial_parent, t);
+    remove_child(t->relatives->parent->relatives, t);
     destroy_family(t->caller);
-    destroy_family(t->spatial_parent);
+    destroy_family(t->relatives);
     if(t->txt)
         destroy_textblock(t->txt);
 
@@ -292,7 +311,7 @@ CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller,
     ctrl->active = default_active;
     ctrl->z = z;
     ctrl->caller = init_family(caller);
-    ctrl->spatial_parent = init_family(spatial_parent);
+    ctrl->relatives = init_family(spatial_parent);
 
     ctrl->on_click.te_func = click_func;
     ctrl->on_click.data = onclick_arg;
@@ -315,7 +334,7 @@ CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller,
     ctrl->txt = txt;
     clone_box(ctrl->box, box);
     if(spatial_parent)
-        add_child(spatial_parent->spatial_parent, ctrl);
+        add_child(spatial_parent->relatives, ctrl);
     if(caller)
         add_child(caller->caller, ctrl);
 
@@ -414,10 +433,10 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
 //    matrix_hndl = ctrl->matrix_handler;
 
     log_this(10, "checkcontrol, x = %d, y = %d\n",x,y);
-    n_children = ctrl->spatial_parent->n_children;
+    n_children = ctrl->relatives->n_children;
     for (i=0; i<n_children; i++)
     {
-        struct CTRL *child = *(ctrl->spatial_parent->children+i);
+        struct CTRL *child = *(ctrl->relatives->children+i);
         if(child == incharge)
         {
             GLfloat ny_x = (GLfloat) x, ny_y = (GLfloat) y;
@@ -496,10 +515,50 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
     render_control(ctrl, matrix_hndl);
     for (i=0; i < ctrl->caller->n_children; i++)
     {
-
         render_controls(ctrl->caller->children[i], matrix_hndl);
-
     }
     return 0;
 }
 
+
+int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *height)
+{
+    int w=0, h=0,current_row_height=0, current_row_width=0,pw, ph; 
+    int len, i;
+    
+    //using tmp_unicode_txt here makes it not thread-safe.
+    //But it saves a lot of malloc
+    
+    reset_wc_txt(tmp_unicode_txt);
+    add_utf8_2_wc_txt(tmp_unicode_txt,txt);
+    
+    
+    len = strlen(txt);
+    uint8_t p;
+    for(i=0;i<len;i++)
+    {
+        p = tmp_unicode_txt->txt[i];
+        
+        if(p=='\n')
+        {
+            h+=current_row_height;
+            current_row_height = 0;
+            w = max_i(w, current_row_width);
+            current_row_width = 0;
+        }
+        else
+        {
+            ph = font->ch;
+            pw = font->metrics[p].ax;
+            
+            current_row_height = max_i(current_row_height, ph);
+            current_row_width+=pw;
+        }                    
+    }    
+    *(height) = h+=current_row_height;
+    *(width) = max_i(w, current_row_width);
+    
+
+    return 0;
+    
+}

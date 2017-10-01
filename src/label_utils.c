@@ -124,9 +124,8 @@ int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int
     if(matrix_hndl)
         theMatrix = matrix_hndl->matrix;
     else
-    {
         theMatrix = (GLfloat *) matrix_array;
-    }
+
 
 
     glGenBuffers(1, &text_vbo);

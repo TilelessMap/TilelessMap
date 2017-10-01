@@ -1,63 +1,6 @@
 #include "interface.h"
 
 
-static inline int32_t max_i(int a, int b)
-{
-    if (b > a)
-        return b;
-    else
-        return a;
-}
-
-static inline float max_f(float a, float b)
-{
-    if (b > a)
-        return b;
-    else
-        return a;
-}
-
-int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *height)
-{
-    int w=0, h=0,current_row_height=0, current_row_width=0,pw, ph; 
-    int len, i;
-    
-    //using tmp_unicode_txt here makes it not thread-safe.
-    //But it saves a lot of malloc
-    
-    reset_wc_txt(tmp_unicode_txt);
-    add_utf8_2_wc_txt(tmp_unicode_txt,txt);
-    
-    
-    len = strlen(txt);
-    uint8_t p;
-    for(i=0;i<len;i++)
-    {
-        p = tmp_unicode_txt->txt[i];
-        
-        if(p=='\n')
-        {
-            h+=current_row_height;
-            current_row_height = 0;
-            w = max_i(w, current_row_width);
-            current_row_width = 0;
-        }
-        else
-        {
-            ph = font->ch;
-            pw = font->metrics[p].ax;
-            
-            current_row_height = max_i(current_row_height, ph);
-            current_row_width+=pw;
-        }                    
-    }    
-    *(height) = h+=current_row_height;
-    *(width) = max_i(w, current_row_width);
-    
-
-    return 0;
-    
-}
 
 
 CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_in[],const char *txt, tileless_event_function click_func,void *val, GLfloat* color,int font_size,short *txt_margin, int default_active)

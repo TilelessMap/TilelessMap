@@ -158,11 +158,25 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                     SDL_GetMouseState(&px_x_clicked, &px_y_clicked);
                     /*  if(map_modus)
                       {*/
-                    if(wheel_y > 0)
-                        matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 0.5);
-                    else
-                        matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 2);
+                    if(incharge)
+                    {
+                        
+                        if(wheel_y > 0)
+                            matrixFromBboxPointZoom(incharge->matrix_handler,incharge->matrix_handler,px_x_clicked, px_y_clicked, 0.5);
+                        else
+                            matrixFromBboxPointZoom(incharge->matrix_handler,incharge->matrix_handler,px_x_clicked, px_y_clicked, 2);
 
+                    }
+                    else
+                    {
+                        
+                        if(wheel_y > 0)
+                            matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 0.5);
+                        else
+                            matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 2);
+
+                    }
+                   
                     get_data(window, &map_matrix, controls);
 
                     // copyNew2CurrentBBOX(newBBOX, currentBBOX);
@@ -183,14 +197,15 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                             if(!incharge)
                             {
                                 matrixFromDeltaMouse(&map_matrix,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                render_data(window, map_matrix.matrix, controls);
+                             //   render_data(window, map_matrix.matrix, controls);
                             }
                             else
                             {
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                render_data(window, map_matrix.matrix, controls);
+                            //    render_data(window, map_matrix.matrix, controls);
                             }
-
+                                render_data(window, map_matrix.matrix, controls);
+                     
                             //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                             while ((err = glGetError()) != GL_NO_ERROR) {
                                 log_this(10, "Problem 2\n");

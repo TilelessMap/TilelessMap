@@ -13,6 +13,9 @@
 #define CHECKBOX    4
 #define RADIOBUTTON 5
 #define RADIOMASTER 6
+#define TABLE 7
+#define TABLE_ROW 8
+#define TABLE_CELL 9
 
 #define BIGSCREEN       3
 #define MIDDLESCREEN    2
@@ -63,13 +66,22 @@ typedef struct
 
 } tileless_event;
 
+typedef struct
+{
+    short max_children;
+    short *widths_list;
+    short *heights_list;
+    short *x_list;
+    short *y_list;
+}CTRL_CHILD_CONSTRINTS;
+
 struct CTRL
 {
     uint8_t id;
     uint8_t active;
     GLshort box[4];
     RELATIONS *caller;// a child can be a fullscreen started from a small parent box.
-    RELATIONS *spatial_parent;
+    RELATIONS *relatives;
     tileless_event on_click;
     GLfloat color[4];
     TEXTBLOCK *txt;
@@ -79,6 +91,7 @@ struct CTRL
     int z; //used both for rendering, but more importingly to decide which click event wins if many are triggered
     MATRIX *matrix_handler;
     int type;
+    CTRL_CHILD_CONSTRINTS *child_constriants;
 };
 
 
@@ -135,6 +148,11 @@ ATLAS *text_font_normal,*text_font_bold, *char_font;
 //CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_in[],const char *txt, tileless_event_function click_func, GLfloat* color,int font_size,short *txt_margin, int default_active);
 
 CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_in[],const char *txt, tileless_event_function click_func,void *val, GLfloat* color,int font_size,short *txt_margin, int default_active);
+
+
+int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *height);
+
+
 #endif
 
 
