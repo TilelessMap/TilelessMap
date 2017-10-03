@@ -845,7 +845,6 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     uint8_t p;
     unsigned int i;
     GLfloat max_used_width = 0;
-    reset_wc_txt(tmp_unicode_txt);
     glBindTexture(GL_TEXTURE_2D, a->tex);
     
     //    glUniform1i(text_uniform_tex, 0);
@@ -863,7 +862,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     size_t npoints = 6 * strlen(txt);
     size_t coordssize = npoints * sizeof(POINT_T);
 
-    check_and_realloc_txt_coords(npoints);
+    check_and_realloc_txt_coords(txt_coords, npoints);
 
     POINT_T *coords = txt_coords->coords+txt_coords->used;
 
@@ -872,6 +871,7 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     //POINT_T coords[6000];
     int c = 0;
 
+    reset_wc_txt(tmp_unicode_txt);
     add_utf8_2_wc_txt(tmp_unicode_txt, txt);
 
     /* Loop through all characters */

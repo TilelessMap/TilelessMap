@@ -390,7 +390,8 @@ struct CTRL* add_close_button(struct CTRL *ctrl)
     
     
     TEXTBLOCK *x_txt = init_textblock(1);
-    append_2_textblock(x_txt,"X", char_font);
+    GLfloat fontcolor[] = {0,0,0,255};
+    append_2_textblock(x_txt,"X", char_font, fontcolor,0, NEW_STRING);
     return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
 
     

@@ -22,6 +22,7 @@
  *
  **********************************************************************/
 #include "theclient.h"
+#include "text.h"
 #include "mem.h"
 
 
@@ -197,7 +198,7 @@ int init_text_resources()
     }
 
 
-    init_txt_coords();
+    txt_coords = init_txt_coords(2048);
 
 
 

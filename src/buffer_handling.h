@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include "ext/sqlite/sqlite3.h"
-#define INIT_LIST_SIZE 256
+#define INIT_LIST_SIZE 4
 
 
 #define INT_TYPE 1
@@ -355,6 +355,7 @@ GLUSHORT_LIST* init_glushort_list();
 SYMBOLS* init_symbol_list();
 UNION_LIST* init_union_list();
 POINTER_LIST* init_pointer_list();
+GLUINT_LIST* init_gluint_list();
 
 int add2glfloat_list(GLFLOAT_LIST *list, GLfloat val);
 int add2gluint_list(GLUINT_LIST *list, GLuint val);
@@ -373,7 +374,7 @@ int add2union_list(UNION_LIST *list, void *val);
 int add2pointer_list(POINTER_LIST *list, void *val);
 int setzero2pointer_list(POINTER_LIST *list,GLuint n_vals);
 int setzero2int64_list(INT64_LIST *list,int64_t n_vals);
-
+int reset_gluint_list(GLUINT_LIST *l);
 int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);
 
 

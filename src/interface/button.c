@@ -16,11 +16,9 @@ CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_i
         margin_x = DEFAULT_TXT_MARGIN;
         margin_y = DEFAULT_TXT_MARGIN;
     }
-    int MIN_MARGIN = 2;
     int txt_width, txt_height;
     ATLAS *font = loadatlas("freesans",BOLD_TYPE, font_size);
     
-    GLshort text_margin[2];
     GLshort box[4];
     clone_box(box, box_in);
     
@@ -35,9 +33,10 @@ CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_i
     if(box_height - txt_height < 2*margin_y)
         box[3] += 2*margin_y - (box_height - txt_height);    
     
+    GLfloat fontcolor[] = {0,255,0,255};
     int z = spatial_parent->z + 1;
     TEXTBLOCK *txt_block = init_textblock(strlen(txt));
-    append_2_textblock(txt_block,txt, font);
+    append_2_textblock(txt_block,txt, font, fontcolor,0, NEW_STRING);
     
     return register_control(BUTTON,spatial_parent,caller,click_func, val, NULL,box,color, txt_block,txt_margin, default_active, z);
 

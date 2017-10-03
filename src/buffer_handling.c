@@ -83,9 +83,8 @@ int addbatch2glfloat_list(GLFLOAT_LIST *list,GLuint n_vals, GLfloat *vals)
 
 
 
-
 /************* GLUInt List ********************/
-static GLUINT_LIST* init_gluint_list()
+GLUINT_LIST* init_gluint_list()
 {
     GLUINT_LIST *res = (GLUINT_LIST*) st_malloc(sizeof(GLUINT_LIST));
 
@@ -119,7 +118,7 @@ static int increase_gluint_list(GLUINT_LIST *l, size_t needed_space)
     return 0;
 }
 
-static int reset_gluint_list(GLUINT_LIST *l)
+int reset_gluint_list(GLUINT_LIST *l)
 {
     l->used = 0;
     return 0;
@@ -152,7 +151,6 @@ int addbatch2gluint_list(GLUINT_LIST *list,GLuint n_vals, GLuint *vals)
     list->used += n_vals;
     return 0;
 }
-
 
 
 /************* int64 List ********************/
@@ -452,8 +450,6 @@ int setzero2pointer_list(POINTER_LIST *list,GLuint n_vals)
     list->used += n_vals;
     return 0;
 }
-
-
 
 
 

@@ -35,6 +35,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
 {
     log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
     int i, v;
+    GLfloat fontcolor[] = {0,0,0,255};
     struct CTRL *t = (struct CTRL *) ctrl;
     TEXTBLOCK *txt;
     struct CTRL *radio_master = t->relatives->parent;
@@ -51,7 +52,7 @@ static int radio_clicked(void *ctrl, void *val, tileless_event_func_in_func func
         }
     }
     txt = init_textblock(1);
-    append_2_textblock(txt,"O", char_font);
+    append_2_textblock(txt,"O", char_font, fontcolor,0, NEW_STRING);
     t->txt=txt;
     v = 1;
     func_in_func((void*) t, &v);
@@ -79,6 +80,7 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
     GLshort master_width = radio_master->box[2] - radio_master->box[0];
     box[0] = radio_master->box[0] + master_width/2 - size/2;
     struct CTRL *radio_button;
+    GLfloat fontcolor[] = {0,0,0,255};
     if(radio_master->relatives->n_children)
     {
         box[3] = radio_master->relatives->children[radio_master->relatives->n_children -1]->box[1] - row_dist; //we get miny from the last radiobutton from before
@@ -117,7 +119,7 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
         TEXTBLOCK *txt;
 
         txt = init_textblock(1);
-        append_2_textblock(txt,"O", char_font);
+        append_2_textblock(txt,"O", char_font, fontcolor,0, NEW_STRING);
 
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, txt, text_margins, default_active,radio_master->z + 1);
 

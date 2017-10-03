@@ -27,7 +27,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context)
 
     destroy_wc_txt(tmp_unicode_txt);
 
-    destroy_txt_coords();
+    destroy_txt_coords(txt_coords);
 
 
     FT_Done_FreeType(ft);

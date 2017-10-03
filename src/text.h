@@ -25,8 +25,22 @@
 #ifndef _text_H
 #define _text_H
 
-#include "theclient.h"
+
+
 #include "matrix_handling.h"
+#include "buffer_handling.h"
+#include "theclient.h"
+
+
+
+#define LEFT_ALIGNMENT 1
+#define CENTER_ALIGNMENT 2
+#define RIGHT_ALIGNMENT 3
+
+
+#define APPENDING_STRING 0
+#define NEW_STRING 1
+
 typedef struct
 {
     char *txt;
@@ -44,17 +58,6 @@ typedef struct
 WCHAR_TEXT;
 
 
-
-typedef struct
-{
-    TEXT **txt;
-    ATLAS **font;
-    int n_txts;
-    int max_n_txts;
-} TEXTBLOCK;
-
-
-
 typedef struct
 {
     GLfloat x;
@@ -70,6 +73,40 @@ typedef struct
     size_t alloced;
 } TEXTCOORDS;
 
+/*This is used for styling a text in a text_block
+ * It holds pointer to beginning and end of parts of text in textblock.
+ * This way we kan have different style quite easy on a single row*/
+
+typedef struct
+{
+    POINTER_LIST *txt_index;
+    GLFLOAT_LIST *color;
+    POINTER_LIST *font;
+    size_t nstyles;
+}TXT_FORMATING;
+
+typedef struct
+{    
+    POINTER_LIST *txt_index;    
+    POINTER_LIST *coord_index;
+    TEXTCOORDS *coords;
+    POINTER_LIST *linebreaks;
+    GLFLOAT_LIST *line_widths; 
+    GLFLOAT_LIST *max_widths;
+    GLFLOAT_LIST *widths;
+    GLFLOAT_LIST *heights;    
+}TXT_DIMS;
+typedef struct
+{
+    TEXT *txt;
+    TXT_FORMATING *formating;
+    TXT_DIMS *dims;
+    float cursor_x;
+    float cursor_y;
+    float rowheight;
+} TEXTBLOCK;
+
+
 
 TEXT* init_txt(size_t s);
 int add_txt(TEXT *t,const char *in);
@@ -77,30 +114,32 @@ char* get_txt(TEXT *t);
 int reset_txt(TEXT *t);
 int destroy_txt(TEXT *t);
 
+
 WCHAR_TEXT* init_wc_txt(size_t s);
 int add_wc_txt(TEXT *t);
 int add_utf8_2_wc_txt(WCHAR_TEXT *t,const char *in);
+int add_n_utf8_2_wc_txt(WCHAR_TEXT *t,const char *in, size_t len);
 int reset_wc_txt(WCHAR_TEXT *t);
 int destroy_wc_txt(WCHAR_TEXT *t);
 
 uint32_t utf82unicode(const char *text,const char **the_rest);
 
 
-TEXTBLOCK* init_textblock(size_t s);
+TEXTBLOCK* init_textblock();
 int destroy_textblock(TEXTBLOCK *tb);
-int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font);
-
+//int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font);
+int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width, int newstring);
 
 
 
 int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
 int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb);
 
-int init_txt_coords();
-int check_and_realloc_txt_coords(size_t needed);
-int destroy_txt_coords();
+TEXTCOORDS* init_txt_coords(size_t size);
+int check_and_realloc_txt_coords(TEXTCOORDS *tc, size_t needed);
+int destroy_txt_coords(TEXTCOORDS *tc);
 WCHAR_TEXT  *tmp_unicode_txt;
-
+int calc_dims(TEXTBLOCK *tb,int max_width, int alignment);
 /*TODO This is just temporary
  * Later there will be something holding all txt_coordinates from all layers and controls
  * and all of it will be rendered from there. */

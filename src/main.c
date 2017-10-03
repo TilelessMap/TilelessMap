@@ -31,6 +31,8 @@
 static int button_test(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 {
     log_this(100, "Yes, it works, getting text %s\n", (char*) val);
+        init_matrix_handler(ctrl, 1, 1,1);    
+    incharge = ctrl;
     return 0;
     
 }
@@ -88,9 +90,9 @@ int main(int argc, char **argv)
     float color[] = {255,0,0,255};
     short margins[2] = {50,40};
     
-    add_button(controls, controls,box ,"Test", button_test,"rundgång", color,80,margins,1);
+    CTRL *button = add_button(controls, controls,box ,"Test", button_test,"rundgång", color,80,margins,1);
     
-    
+        init_matrix_handler(button, 1, 1,1);    
     TLM_start(controls);
     
     TLM_close();
