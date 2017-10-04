@@ -25,7 +25,7 @@
 #include "../mem.h"
 #include "interface.h"
 #include <GL/glew.h>
-
+#include "../utils.h"
 
 
 static inline int32_t max_i(int a, int b)
@@ -36,24 +36,9 @@ static inline int32_t max_i(int a, int b)
         return a;
 }
 
-static inline float max_f(float a, float b)
-{
-    if (b > a)
-        return b;
-    else
-        return a;
-}
 
 
-int multiply_array(GLshort *a, GLfloat v, GLshort ndims)
-{
-    int i;
-    for(i=0; i<ndims; i++)
-    {
-        *(a+i) *= v;
-    }
-    return 0;
-}
+
 
 int check_screen_size()
 {
@@ -375,7 +360,7 @@ struct CTRL* add_close_button(struct CTRL *ctrl)
 {
     
     GLshort box_text_margins[] = {4,4};
-    multiply_array(box_text_margins, size_factor, 2);
+    multiply_short_array(box_text_margins, size_factor, 2);
     
     GLshort click_size = 30 * size_factor;
     GLshort startx, starty, p[] = {0,0};
@@ -391,7 +376,7 @@ struct CTRL* add_close_button(struct CTRL *ctrl)
     
     TEXTBLOCK *x_txt = init_textblock(1);
     GLfloat fontcolor[] = {0,0,0,255};
-    append_2_textblock(x_txt,"X", char_font, fontcolor,0, NEW_STRING);
+    append_2_textblock(x_txt,"X", char_font, fontcolor,0,V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT, NEW_STRING);
     return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
 
     
@@ -493,12 +478,27 @@ static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
 
         //log_this(100,"render control text %s\n", ctrl->txt->txt);
         GLfloat point_coord[2] = {ctrl->box[0] + ctrl->txt_margin[0], ctrl->box[3] - ctrl->txt_margin[1]};
-        GLfloat color[4] = {0,0,0,255};
-        //   print_txt(point_coord, color,1,0,300, "Normal text ");
-        //   printf("x = %f, y = %f\n", point_coord[0], point_coord[1]);
-        GLfloat max_width = ctrl->box[2]-ctrl->box[0] - 2 *ctrl->txt_margin[0]; //here we say that max text width = box width - 2 margins (left and right margin)
+        
+        unsigned int alignment = ctrl->txt->txt_info->alignment->list[0]; //We only support 1 text per control for now, so only 1 alignment
 
-        print_txtblock(point_coord, matrix_hndl, color,max_width, ctrl->txt);
+   
+        if(alignment & H_CENTER_ALIGNMENT)
+            point_coord[0] = ctrl->box[0] + 0.5 * (ctrl->box[2] - ctrl->box[0]);
+        
+        else if(alignment & H_RIGHT_ALIGNMENT)
+            point_coord[0] = ctrl->box[2] - ctrl->txt_margin[0];
+            
+        else
+            point_coord[0] = ctrl->box[0] + ctrl->txt_margin[0];
+
+       if(alignment & V_CENTER_ALIGNMENT)
+            point_coord[1] = ctrl->box[1] + 0.5 * (ctrl->box[3] - ctrl->box[1]);
+        else if(alignment & V_TOP_ALIGNMENT)
+            point_coord[1] = ctrl->box[3] - ctrl->txt_margin[1];
+        else 
+            point_coord[1] = ctrl->box[1] + ctrl->txt_margin[1];
+     
+        print_txtblock(point_coord, matrix_hndl, ctrl->txt);
 
 
     }
@@ -520,6 +520,7 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
     }
     return 0;
 }
+
 
 
 int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *height)

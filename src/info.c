@@ -3,7 +3,7 @@
 #include "info.h"
 #include "text.h"
 #include "interface/interface.h"
-
+#include "utils.h"
 
 
 static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
@@ -96,13 +96,13 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
 
             snprintf(header_tot, 32, "\n%s: ", header);
             
-            append_2_textblock(tb, (const char*) header_tot, text_font_bold, fontcolor,0, NEW_STRING);
+            append_2_textblock(tb, (const char*) header_tot, text_font_bold, fontcolor,0,H_LEFT_ALIGNMENT | V_BOTTOM_ALIGNMENT, NEW_STRING);
             if(type == SQLITE_INTEGER)
             {
                 int val_int = sqlite3_column_int(prepared_layer_info, i);
                 snprintf(number_text, 32, "%d", val_int);
                 printf("header = %s, row = %d, col = %d, value = %d    \n",header, row, col, val_int);
-                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,0, NEW_STRING);
+                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,0,H_LEFT_ALIGNMENT | V_BOTTOM_ALIGNMENT, NEW_STRING);
 
             }
             else if (type == SQLITE_FLOAT)
@@ -110,14 +110,14 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
                 double val_float = sqlite3_column_double(prepared_layer_info, i);
                 snprintf(number_text, 32, "%f", val_float);
                 printf("header = %s, row = %d, col = %d, value = %lf    \n",header, row, col, val_float);
-                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,0, NEW_STRING);
+                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,0,H_LEFT_ALIGNMENT | V_BOTTOM_ALIGNMENT, NEW_STRING);
 
             }
             else if (type == SQLITE_TEXT)
             {
                 const unsigned char *val_txt = sqlite3_column_text(prepared_layer_info, i);
                 printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
-                append_2_textblock(tb, (const char*) val_txt, text_font_normal, fontcolor,0, NEW_STRING);
+                append_2_textblock(tb, (const char*) val_txt, text_font_normal, fontcolor,0,H_LEFT_ALIGNMENT | V_BOTTOM_ALIGNMENT, NEW_STRING);
 
             }
             i++;
@@ -130,7 +130,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     box[3] = CURR_HEIGHT - 30;
     GLfloat color[] = {200,255,200,150};
     GLshort txt_margin[] = {50,50};
-    multiply_array(txt_margin, size_factor, 2);
+    multiply_short_array(txt_margin, size_factor, 2);
     
     CTRL *controls = get_master_control();
     struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);
@@ -152,7 +152,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     GLshort close_box[] = {startx, starty,startx + click_box_width,starty + click_box_height};
     GLfloat close_color[]= {200,100,100,200};
     TEXTBLOCK *x_txt = init_textblock();
-    append_2_textblock(x_txt,"X", char_font, fontcolor,0, NEW_STRING);
+    append_2_textblock(x_txt,"X", char_font, fontcolor,0, H_CENTER_ALIGNMENT| V_CENTER_ALIGNMENT,NEW_STRING);
     register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,22); //register text label and
 
 

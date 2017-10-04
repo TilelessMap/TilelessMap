@@ -154,20 +154,20 @@ void main(void) { \
 
     std_coord2d = glGetAttribLocation(std_program, "coord2d");
     if (std_coord2d == -1) {
-        log_this(1, "Could not bind attribute : %s\n", "coord2d");
-        return 0;
+        log_this(100, "Could not bind attribute : %s\n", "coord2d");
+        return 1;
     }
 
     std_matrix = glGetUniformLocation(std_program, "theMatrix");
     if (std_matrix == -1) {
-        log_this(1, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
+        log_this(100, "Could not bind uniform : %s\n", "theMatrix");
+        return 100;
     }
 
     std_color = glGetUniformLocation(std_program, "color");
     if (std_color == -1) {
-        log_this(1, "Could not bind uniform : %s\n", "color");
-        return 0;
+        log_this(100, "Could not bind uniform : %s\n", "color");
+        return 1;
     }
 
 
@@ -204,36 +204,113 @@ void main(void) {\
 
     txt_box = glGetAttribLocation(txt_program, "box");
     if (txt_box == -1) {
-        log_this(1, "Could not bind attribute : %s\n", "box");
-        return 0;
+        log_this(100, "Could not bind attribute : %s\n", "box");
+        return 1;
     }
 
     txt_matrix = glGetUniformLocation(txt_program, "theMatrix");
     if (txt_matrix == -1) {
-        log_this(1, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
+        log_this(100, "Could not bind uniform : %s\n", "theMatrix");
+        return 1;
     }
 
     txt_color = glGetUniformLocation(txt_program, "color");
     if (txt_color == -1) {
-        log_this(1, "Could not bind uniform : %s\n", "color");
-        return 0;
+        log_this(100, "Could not bind uniform : %s\n", "color");
+        return 1;
     }
 
     txt_coord2d = glGetUniformLocation(txt_program, "coord2d");
     if (txt_coord2d == -1) {
-        log_this(1, "Could not bind uniform : %s\n", "coord2d");
-        return 0;
+        log_this(100, "Could not bind uniform : %s\n", "coord2d");
+        return 1;
     }
     txt_tex = glGetUniformLocation(txt_program, "tex");
 
     if (txt_tex == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "tex");
-        return 0;
+        return 1;
     }
 
     reset_shaders(vs, fs, txt_program);
+
+
+
+
+
+    /*Build new text program*/
+
+
+
+    const unsigned char gen_vtxt2[2048] =  "attribute vec4 box;\
+uniform vec2 coord2d; \
+uniform mat4 theMatrix; \
+uniform mat4 px_Matrix; \
+uniform vec2 delta; \
+uniform vec4 color; \
+varying vec2 texpos;\
+void main(void) {\
+vec4 npos = px_Matrix * vec4(box.xy, 0.0, 0.0); \
+vec4 dpos = px_Matrix * vec4(delta,0,0); \
+vec4 pos = theMatrix * vec4(coord2d, 1.0, 1.0);  \
+  gl_Position = (pos + npos + dpos); \
+  texpos = box.zw;\
+    }";
+
+    const unsigned char gen_ftxt2[1024] = "varying vec2 texpos;\
+uniform sampler2D tex;\
+uniform vec4 color;\
+void main(void) {\
+  gl_FragColor = vec4(1, 1, 1, texture2D(tex, texpos).a) * color;\
+}\
+";
+
+    txt2_program = create_program(gen_vtxt2, gen_ftxt2, &vs, &fs);
+
+
+    txt2_box = glGetAttribLocation(txt2_program, "box");
+    if (txt2_box == -1) {
+        log_this(100, "Could not bind attribute : %s\n", "box");
+        return 1;
+    }
+
+    txt2_matrix = glGetUniformLocation(txt2_program, "theMatrix");
+    if (txt2_matrix == -1) {
+        log_this(100, "Could not bind uniform : %s\n", "theMatrix");
+        return 1;
+    }
+    txt2_px_matrix = glGetUniformLocation(txt2_program, "px_Matrix");
+    if (txt2_px_matrix == -1) {
+        log_this(100, "Could not bind uniform : %s\n", "px_Matrix");
+        return 1;
+    }
+    
+    txt2_delta = glGetUniformLocation(txt2_program, "delta");
+    if (txt2_delta == -1) {
+        log_this(100, "Could not bind uniform : %s\n", "delta");
+        return 1;
+    }
+
+    txt2_color = glGetUniformLocation(txt2_program, "color");
+    if (txt2_color == -1) {
+        log_this(100, "Could not bind uniform : %s\n", "color");
+        return 1;
+    }
+
+    txt2_coord2d = glGetUniformLocation(txt2_program, "coord2d");
+    if (txt2_coord2d == -1) {
+        log_this(100, "Could not bind uniform : %s\n", "coord2d");
+        return 1;
+    }
+    txt_tex = glGetUniformLocation(txt2_program, "tex");
+    if (txt2_tex == -1)
+    {
+        fprintf(stderr, "Could not bind uniform : %s\n", "tex");
+        return 1;
+    }
+
+    reset_shaders(vs, fs, txt2_program);
 
 
 
@@ -264,21 +341,21 @@ void main(void) { \
     lw_program = create_program((unsigned char *) gen_vlw,(unsigned char *)  gen_flw, &vs, &fs);
 
     if(lw_program == 0)
-        return 0;
+        return 1;
 
 
     lw_coord2d = glGetAttribLocation(lw_program, "coord2d");
     if (lw_coord2d == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "coord2d");
-        return 0;
+        return 1;
     }
 
     lw_norm = glGetAttribLocation(lw_program, "norm");
     if (lw_norm == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "norm");
-        return 0;
+        return 1;
     }
 
 
@@ -286,33 +363,33 @@ void main(void) { \
     if (lw_linewidth == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "linewidth");
-        return 0;
+        return 1;
     }
 
     lw_z = glGetUniformLocation(lw_program, "z");
     if (lw_z == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "z");
-        return 0;
+        return 1;
     }
 
     lw_color = glGetUniformLocation(lw_program, "color");
     if (lw_color == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "color");
-        return 0;
+        return 1;
     }
     lw_matrix = glGetUniformLocation(lw_program, "theMatrix");
     if (lw_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
+        return 1;
     }
     lw_px_matrix = glGetUniformLocation(lw_program, "px_Matrix");
     if (lw_px_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "lw_px_matrix");
-        return 0;
+        return 1;
     }
 
 
@@ -348,14 +425,14 @@ void main(void) { \
     if(gps_program == 0)
     {
         log_this(100,"problem compiling gps-program");
-        return 0;
+        return 1;
     }
 
     gps_norm = glGetAttribLocation(gps_program, "norm");
     if (gps_norm == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "norm");
-        return 0;
+        return 1;
     }
 
 
@@ -363,14 +440,14 @@ void main(void) { \
     if (gps_coord2d == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "coord2d");
-        return 0;
+        return 1;
     }
 
     gps_radius = glGetUniformLocation(gps_program, "radius");
     if (gps_radius == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "radius");
-        return 0;
+        return 1;
     }
 
 
@@ -378,19 +455,19 @@ void main(void) { \
     if (gps_color == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "color");
-        return 0;
+        return 1;
     }
     gps_matrix = glGetUniformLocation(gps_program, "theMatrix");
     if (gps_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
+        return 1;
     }
     gps_px_matrix = glGetUniformLocation(gps_program, "px_Matrix");
     if (gps_px_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "gps_px_matrix");
-        return 0;
+        return 1;
     }
 
 
@@ -427,14 +504,14 @@ void main(void) { \
     if(sym_program == 0)
     {
         log_this(100,"problem compiling sym-program");
-        return 0;
+        return 1;
     }
 
     sym_norm = glGetAttribLocation(sym_program, "norm");
     if (sym_norm == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "norm");
-        return 0;
+        return 1;
     }
 
 
@@ -442,21 +519,21 @@ void main(void) { \
     if (sym_coord2d == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "coord2d");
-        return 0;
+        return 1;
     }
 
     sym_radius = glGetUniformLocation(sym_program, "radius");
     if (sym_radius == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "radius");
-        return 0;
+        return 1;
     }
 
     sym_z = glGetUniformLocation(sym_program, "z");
     if (sym_z == -1)
     {
         fprintf(stderr, "test: Could not bind uniform : %s\n", "z");
-        return 0;
+        return 1;
     }
 
 
@@ -464,19 +541,19 @@ void main(void) { \
     if (sym_color == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "color");
-        return 0;
+        return 1;
     }
     sym_matrix = glGetUniformLocation(sym_program, "theMatrix");
     if (sym_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
+        return 1;
     }
     sym_px_matrix = glGetUniformLocation(sym_program, "px_Matrix");
     if (sym_px_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "sym_px_matrix");
-        return 0;
+        return 1;
     }
 
 
@@ -513,21 +590,21 @@ void main(void) { \
     if(raster_program == 0)
     {
         log_this(100,"problem compiling raster-program");
-        return 0;
+        return 1;
     }
 
     raster_coord2d = glGetAttribLocation(raster_program, "coord2d");
     if (gps_norm == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "coord2d");
-        return 0;
+        return 1;
     }
 
     raster_texcoord = glGetAttribLocation(raster_program, "texcoord");
     if (raster_texcoord == -1)
     {
         fprintf(stderr, "test: Could not bind attribute : %s\n", "texcoord");
-        return 0;
+        return 1;
     }
 
 
@@ -536,14 +613,14 @@ void main(void) { \
     if (raster_matrix == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "theMatrix");
-        return 0;
+        return 1;
     }
 
     raster_texture = glGetUniformLocation(raster_program, "rastertexture");
     if (raster_texture == -1)
     {
         fprintf(stderr, "Could not bind uniform : %s\n", "rastertexture");
-        return 0;
+        return 1;
     }
 
     reset_shaders(vs, fs, raster_program);

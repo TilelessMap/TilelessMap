@@ -48,6 +48,7 @@ void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
     map_matrix->bbox[2] = x+width/2;
     map_matrix->bbox[3] = y+height/2;
 }
+
 int reset_matrix(MATRIX *matrix_handl)
 {
     memset(matrix_handl->bbox, 0,4 *sizeof(GLfloat));
@@ -202,10 +203,41 @@ int search_string(const char *w,const char *s)
 
 
 
+int multiply_short_array(GLshort *a, GLfloat v, GLshort ndims)
+{
+    int i;
+    for(i=0; i<ndims; i++)
+    {
+        *(a+i) *= v;
+    }
+    return 0;
+}
 
 
+int multiply_float_array(float *a, float v, GLshort ndims)
+{
+    int i;
+    for(i=0; i<ndims; i++)
+    {
+        *(a+i) *= v;
+    }
+    return 0;
+}
 
-
+float max_f(float a, float b)
+{
+    if (b > a)
+        return b;
+    else
+        return a;
+}
+float min_f(float a, float b)
+{
+    if (b < a)
+        return b;
+    else
+        return a;
+}
 
 
 

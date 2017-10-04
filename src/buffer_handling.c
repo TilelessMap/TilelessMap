@@ -472,6 +472,7 @@ static POINT_LIST* init_point_list()
     res->style_id = init_pointer_list();
     res->point_start_indexes = init_gluint_list();
     glGenBuffers(1, &(res->vbo));
+    glGenBuffers(1, &(res->tbo)); //For text
     return res;
 }
 
@@ -776,7 +777,11 @@ SYMBOLS* init_symbol_list()
     SYMBOLS *res = st_malloc(sizeof(SYMBOLS));
     res->points = init_point_list();
     return res;
+}
 
+POINT_LIST* init_tb_point_list()
+{
+    return init_point_list();
 }
 
 int destroy_symbol_list(SYMBOLS *l)

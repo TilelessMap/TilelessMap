@@ -21,15 +21,9 @@
  *
  **********************************************************************/
 #include "theclient.h"
-
-
-static inline float max_f(float a, float b)
-{
-    if (b > a)
-        return b;
-    else
-        return a;
-}
+#include "buffer_handling.h"
+#include "utils.h"
+#include "rendering.h"
 
 
 
@@ -79,7 +73,7 @@ static inline int add_line(ATLAS *a,GLfloat *x, GLfloat y, uint32_t *txt, unsign
     return c;
 }
 
-int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
+int calc_dims(TEXTBLOCK *tb,int max_width)
 {
     GLfloat x,y, *x_p, *y_p;
     uint8_t p;
@@ -91,7 +85,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
     char *txt_start, *txt, *txt_end;
     int list_size;
     list_size = tb->formating->txt_index->used;
-    
+    unsigned int text_start_index, total_line_length;
     
     if(list_size < 2)
     {
@@ -100,15 +94,16 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
         txt_end = txt_start + strlen(error_txt);
     }
     else
-    {       
-        txt_start = txt = tb->formating->txt_index->list[list_size-2];
-        txt_end = tb->formating->txt_index->list[list_size-1];  
+    {    
+        text_start_index = total_line_length = tb->formating->txt_index->list[list_size-2];
+        txt_start = txt = tb->txt->txt + text_start_index;
+        txt_end = tb->txt->txt + tb->formating->txt_index->list[list_size-1];  
     }
     
     char* last_block_start, *last_block_end;
     list_size = tb->dims->txt_index->used;
-    last_block_start = tb->dims->txt_index->list[list_size-2];
-    last_block_end = tb->dims->txt_index->list[list_size-1];
+    last_block_start = tb->txt->txt + tb->dims->txt_index->list[list_size-2];
+    last_block_end = tb->txt->txt + tb->dims->txt_index->list[list_size-1];
     
      str_len = txt_end-txt_start;
     size_t npoints = 6 * str_len;
@@ -133,8 +128,11 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
     GLfloat rh = max_f(tb->rowheight, a->ch); //If there has been used a larger font on the same row we have to use that height
     
     
-        GLfloat line_width = 0, word_width = 0;
+        GLfloat line_width = x, word_width = 0;
+        
         int nlines=0;
+        if(x==0)
+            nlines++;
         unsigned int line_start=0;
     if(max_width)
     {
@@ -146,8 +144,9 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
 
             word_width += a->metrics[p].ax;
             n_chars_in_word++;
-
-            if(p==32)
+            if(p=='\0')
+                break;
+            else if(p==32)
             {
                 n_chars_in_line += n_chars_in_word;
                 line_width += word_width;
@@ -156,7 +155,8 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
             }
             else if (p=='\n')
             {
-                add2pointer_list(tb->dims->linebreaks, txt_start+i);
+                total_line_length += i;
+                add2gluint_list(tb->dims->linestart,total_line_length);
                 add2glfloat_list(tb->dims->line_widths, line_width);
                 n_chars_in_line += n_chars_in_word;
                 c += add_line(a,&x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line,  coords+c) ;
@@ -169,8 +169,10 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
             }
             if(line_width + word_width > max_width)
             {
-                if(n_chars_in_line == 0) //there is only 1 word in line, we have to cut the word
+                if(line_width == 0) //there is only 1 word in line, we have to cut the word
                 {
+                    
+                total_line_length += n_chars_in_word-1;
                     c += add_line(a,&x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_word-1,  coords+c) ;
                     line_start = i;
                     word_width = line_width = 1;
@@ -179,6 +181,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
                 }
                 else //we put the last word on the next line instead
                 {
+                    total_line_length += n_chars_in_line;
                     c += add_line(a,&x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line,  coords+c) ;
                     max_used_width = max_f(max_used_width, line_width);
                     line_start += n_chars_in_line;
@@ -186,7 +189,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
                     n_chars_in_line =0;
                 }
 
-                    add2pointer_list(tb->dims->linebreaks, txt_start+line_start);
+                    add2gluint_list(tb->dims->linestart,total_line_length);
                 nlines++;
                 x = 0;
             }
@@ -203,20 +206,19 @@ int calc_dims(TEXTBLOCK *tb,int max_width, int alignment)
     }
     else
     {
-        c += add_line(a,&x,y,tmp_unicode_txt->txt,str_len,  coords);
-        nlines++;
+        c += add_line(a,&x,y - rh*nlines,tmp_unicode_txt->txt,str_len,  coords);
         max_used_width = x;
     }
     tb->dims->coords->used+=c;
-    
+    printf("used coords %d and tot %zu\n", c, tb->dims->coords->used);
     tb->cursor_x =x;
     tb->cursor_y -= rh*nlines;    
     
     tb->dims->max_widths->list[tb->dims->max_widths->used-1] = max_f(tb->dims->max_widths->list[tb->dims->max_widths->used-1], max_width);
     tb->dims->widths->list[tb->dims->widths->used-1] = max_f(tb->dims->widths->list[tb->dims->widths->used-1], max_used_width);
-    tb->dims->heights->list[tb->dims->heights->used-1] -=rh*nlines;
+    tb->dims->heights->list[tb->dims->heights->used-1] +=rh*nlines;
     
-
+return 0;
 }
 
 
@@ -299,7 +301,7 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
 
 
 
-int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb)
+int print_txtblock2(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb)
 {
     int i;
     GLfloat point_offset[] = {0,0};
@@ -345,6 +347,62 @@ int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int
     {
         draw_it(norm_color,point_coord,point_offset, tb->formating->font->list[i], txt_box, txt_color, txt_coord2d, tb->formating->txt_index->list[i],max_width, sx, sy);
     }
+
+
+    return 0;
+}
+
+
+int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl,  TEXTBLOCK *tb)
+{
+    int i;
+    GLfloat point_offset[] = {0,0};
+    GLfloat *theMatrix;
+    GLfloat sx = (GLfloat) (2.0 / CURR_WIDTH);
+    GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
+
+    GLfloat matrix_array[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
+    if(matrix_hndl)
+        theMatrix = matrix_hndl->matrix;
+    else
+        theMatrix = (GLfloat *) matrix_array;
+
+    if(!tb->txt_info->points)
+    {
+        tb->txt_info->points = init_tb_point_list();
+        addbatch2glfloat_list(tb->txt_info->points->points,2,point_coord);
+        add2gluint_list(tb->txt_info->points->point_start_indexes, 0); 
+    glBindBuffer(GL_ARRAY_BUFFER, tb->txt_info->points->tbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*(tb->dims->coords->used), tb->dims->coords->coords, GL_STATIC_DRAW);       
+    }
+       while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr,"1 - opengl error:%d in func %s\n", err, __func__);
+        }
+   
+          while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr,"3 - opengl error:%d in func %s\n", err, __func__);
+        }
+ 
+    
+    glUseProgram(txt2_program);
+
+
+
+    /*   GLfloat point_coord[2];
+
+       point_coord[0]= x;
+       point_coord[1]= y;
+     */
+    //  glUniform4fv(txt_color,1,norm_color );
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error wt:%d\n", err);
+    }
+
+
+
+    draw_txt(tb,theMatrix, theMatrix);
 
 
     return 0;

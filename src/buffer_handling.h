@@ -88,6 +88,7 @@ typedef struct
     GLUINT_LIST *point_start_indexes;
     POINTER_LIST *style_id;
     GLuint vbo;
+    GLuint tbo;
 
 }
 POINT_LIST;
@@ -356,6 +357,8 @@ SYMBOLS* init_symbol_list();
 UNION_LIST* init_union_list();
 POINTER_LIST* init_pointer_list();
 GLUINT_LIST* init_gluint_list();
+POINT_LIST* init_tb_point_list();
+
 
 int add2glfloat_list(GLFLOAT_LIST *list, GLfloat val);
 int add2gluint_list(GLUINT_LIST *list, GLuint val);

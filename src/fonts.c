@@ -44,7 +44,7 @@ int destroy_atlas(ATLAS *a)
         return 0;
     glDeleteTextures(1, &(a->tex));
     while ((err = glGetError()) != GL_NO_ERROR) {
-        fprintf(stderr,"FONT - opengl error:%d\n", err);
+        fprintf(stderr,"FONT - opengl error:%d in func %s\n", err, __func__);
     }
     free(a);
     a=NULL;
@@ -121,6 +121,7 @@ static ATLAS* create_atlas(FT_Face face, int height)
     glBindTexture(GL_TEXTURE_2D, a->tex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, a->w, a->h, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
+        
     /* We require 1 byte alignment when uploading texture data */
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -150,9 +151,10 @@ static ATLAS* create_atlas(FT_Face face, int height)
             ox = 0;
         }
 
+ 
         glTexSubImage2D(GL_TEXTURE_2D, 0, ox, oy, g->bitmap.width, g->bitmap.rows, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
         while ((err = glGetError()) != GL_NO_ERROR) {
-            fprintf(stderr,"FONT - opengl error:%d\n", err);
+        fprintf(stderr," FONT - opengl error:%d in func %s\n", err, __func__);
         }
         //     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, g->bitmap.width, g->bitmap.rows, 0, GL_ALPHA, GL_UNSIGNED_BYTE, g->bitmap.buffer);
 

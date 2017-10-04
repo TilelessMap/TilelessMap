@@ -27,6 +27,7 @@
 #include "buffer_handling.h"
 #include "mem.h"
 #include "cleanup.h"
+#include "utils.h"
 
 int check_layer(const unsigned char *dbname, const unsigned char  *layername)
 {

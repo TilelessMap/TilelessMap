@@ -26,7 +26,7 @@
 #include "mem.h"
 #include "SDL_image.h"
 #include "uthash.h"
-
+#include "utils.h"
 
 int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
@@ -172,6 +172,11 @@ int renderPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     glDisable (GL_DEPTH_TEST);
     glUseProgram(0);
+    
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
+
     return 0;
 
 }
@@ -318,7 +323,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
             glDrawArrays(GL_TRIANGLE_STRIP, n_vals_acc, n_vals);
             while ((err = glGetError()) != GL_NO_ERROR) {
                 log_this(10, "Problem1\n");
-                fprintf(stderr,"opengl error:%d\n", err);
+                fprintf(stderr,"opengl error:%d in %s\n", err, __func__);
             }
         }
 
@@ -336,6 +341,11 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glDisable (GL_DEPTH_TEST);
     
     glUseProgram(0);
+    
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
+
     return 0;
 
 }
@@ -409,6 +419,9 @@ int renderLine(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glDisableVertexAttribArray(std_coord2d);
 
     glUseProgram(0);
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
     return 0;
 
 }
@@ -579,6 +592,9 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     }
     
     glUseProgram(0);
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
     return 0;
 
 }
@@ -635,6 +651,9 @@ static int render_data_layers(GLfloat *theMatrix, CTRL *controls)
     render_controls(controls, NULL);
     //  pthread_mutex_destroy(&mutex);
 //render(window,res_buf);
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
     return 0;
 }
 
@@ -823,20 +842,6 @@ static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, unsigne
     return c;
 }
 
-static inline GLfloat max_f(GLfloat a, GLfloat b)
-{
-    if (b > a)
-        return b;
-    else
-        return a;
-}
-static inline GLfloat max_i(GLint a, GLint b)
-{
-    if (b > a)
-        return b;
-    else
-        return a;
-}
 
 int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_nr,int bold*/,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
 {
@@ -958,13 +963,111 @@ int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_
     // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
 
     glDisableVertexAttribArray(txt_box);
-
+while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
     return max_used_width;
 }
 
 
 
+int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix)
+{
+    
+    log_this(10, "Entering renderLine\n");
+    uint32_t i, j;//, np, pi;
+    GLfloat *color, *startp;
+    
+    TXT_INFO *ti = tb->txt_info;
+    POINT_LIST *point = ti->points;
 
+    unsigned int n_vals = 0, n_vals_acc = 0;
+    uint8_t ndims = 2;
+    
+    glUniformMatrix4fv(txt2_matrix, 1, GL_FALSE,theMatrix );
+    
+    glUniformMatrix4fv(txt2_px_matrix, 1, GL_FALSE,pxMatrix );
+    
+    glBindBuffer(GL_ARRAY_BUFFER, point->tbo);
+    
+    glUseProgram(txt2_program);
+    glEnableVertexAttribArray(txt2_box);
+    /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
+    
+    
+    glVertexAttribPointer(
+        txt2_box,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+    
+    
+int tot_points = 0;
+float delta[2];
+
+    for (i=0; i<ti->ntexts; i++)
+    {
+        startp = point->points->list + point->point_start_indexes->list[i];
+        printf("startp: %f, %f\n",startp[0], startp[1]);
+        glUniform2fv(txt2_coord2d,1,startp);
+        
+        unsigned int alignment = ti->alignment->list[i]; //We only support 1 text per control for now, so only 1 alignment
+        float w = tb->dims->widths->list[i];
+        float h = tb->dims->heights->list[i];
+   
+        if(alignment & H_CENTER_ALIGNMENT)
+            delta[0] = -w*0.5;
+        
+        else if(alignment & H_RIGHT_ALIGNMENT)
+            delta[0] = -w;
+            
+        else
+            delta[0] = 0;
+
+       if(alignment & V_CENTER_ALIGNMENT)
+            delta[1] = h*0.5;
+        else if(alignment & V_TOP_ALIGNMENT)
+            delta[1] = 0;
+        else 
+            delta[1] = h;
+        
+      //  delta[1] = 0;
+        printf("w=%f, h=%f\n", w,h);
+        glUniform2fv(txt2_delta,1,delta);
+        log_this(100, "start: %d, stop: %d\n",ti->formating_index->list[i], ti->formating_index->list[i+1]);
+        for (j=ti->formating_index->list[i]; j<ti->formating_index->list[i+1]; j++)
+        {
+            //int format_index = ti->formating_index->list[j];
+            ATLAS *a = tb->formating->font->list[j];
+            
+            glBindTexture(GL_TEXTURE_2D, a->tex);
+            color = tb->formating->color->list + j*4;
+            
+            //int n_points = 6 * ((char*) (tb->formating->txt_index->list[j+1]) - ((char*) tb->formating->txt_index->list[j]));
+            n_points = tb->dims->coord_index->list[j+1]-tb->dims->coord_index->list[j];
+            
+            
+            printf("txt = %s, tex=%d,npoints=%d,  color = %f, %f, %f, %f\n",tb->txt->txt + tb->formating->txt_index->list[j], a->tex,n_points, color[0], color[1], color[2], color[3]);
+
+                glUniform4fv(txt2_color,1,color );
+                
+                glDrawArrays(GL_TRIANGLES, tot_points,n_points);       
+       //           glDrawArrays(GL_TRIANGLE_STRIP, tot_points,n_points);       
+                tot_points+=n_points;
+        }
+    }
+    glDisableVertexAttribArray(txt2_box);
+
+    glUseProgram(0);
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
+    return 0;
+    
+}
 
 int loadSymbols()
 {

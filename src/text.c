@@ -27,7 +27,7 @@
 #include "log.h"
 #include "text.h"
 #include "mem.h"
-
+#include "utils.h"
 
 TEXT* init_txt(size_t s)
 {
@@ -239,17 +239,43 @@ uint32_t utf82unicode(const char *text,const char **the_rest)
     return res;
 }
 
-static TXT_DIMS* init_txt_dims(char *text_start)
+static TXT_INFO* init_txt_info()
+{
+    TXT_INFO *ti = st_malloc(sizeof(TXT_INFO));
+    ti->formating_index = init_gluint_list();
+    add2gluint_list(ti->formating_index, 0);
+    //ti->text_index = init_gluint_list();
+    //add2gluint_list(ti->text_index, 0);
+    ti->linestart_index = init_gluint_list();
+    add2gluint_list(ti->linestart_index,0);
+    ti->alignment = init_gluint_list();
+    ti->points = NULL;
+    ti->ntexts = 0;
+    
+    return ti;
+}
+
+static int destroy_txt_info(TXT_INFO *ti)
+{
+ destroy_gluint_list(ti->formating_index);
+ //destroy_gluint_list(ti->text_index);
+    destroy_gluint_list(ti->linestart_index);
+ destroy_gluint_list(ti->alignment);
+    
+ return 0;
+}
+
+static TXT_DIMS* init_txt_dims()
 {
     TXT_DIMS *td = st_malloc(sizeof(TXT_DIMS));
-    td->txt_index = init_pointer_list();
-    add2pointer_list(td->txt_index, text_start);
+    td->txt_index = init_gluint_list();
+    add2gluint_list(td->txt_index, 0);
     
     td->coords = init_txt_coords(64);
-    td->coord_index = init_pointer_list();
-    add2pointer_list(td->coord_index, td->coords->coords);
-    td->linebreaks = init_pointer_list();
-    add2pointer_list(td->linebreaks, td->coords->coords);    
+    td->coord_index = init_gluint_list();
+    add2gluint_list(td->coord_index, 0);
+    td->linestart = init_gluint_list();  
+    add2gluint_list(td->linestart,0);
     td->line_widths = init_glfloat_list();
     td->max_widths = init_glfloat_list();
     td->widths = init_glfloat_list();
@@ -260,10 +286,10 @@ static TXT_DIMS* init_txt_dims(char *text_start)
 
 static int destroy_txt_dims(TXT_DIMS *td)
 {
- destroy_pointer_list(td->txt_index);
- destroy_pointer_list(td->coord_index);
+ destroy_gluint_list(td->txt_index);
+ destroy_gluint_list(td->coord_index);
  destroy_txt_coords(td->coords);
-destroy_pointer_list(td->linebreaks);
+destroy_gluint_list(td->linestart);
 destroy_glfloat_list(td->line_widths);
  destroy_glfloat_list(td->max_widths);
  destroy_glfloat_list(td->heights);
@@ -271,14 +297,14 @@ destroy_glfloat_list(td->line_widths);
  return 0;
 }
 
-static TXT_FORMATING* init_txt_formating(char *text_start)
+static TXT_FORMATING* init_txt_formating()
 {
     TXT_FORMATING *tf = st_malloc(sizeof(TXT_FORMATING));
-    tf->txt_index = init_pointer_list();
-    add2pointer_list(tf->txt_index, text_start);
+    tf->txt_index = init_gluint_list();
+    add2gluint_list(tf->txt_index, 0);
     tf->color = init_glfloat_list();
     tf->font = init_pointer_list();    
-    tf->nstyles = 0;
+    tf->nform = 0;
     
     return tf;
 }
@@ -286,7 +312,7 @@ static TXT_FORMATING* init_txt_formating(char *text_start)
 static int destroy_txt_formating(TXT_FORMATING *tf)
 {
  
-    destroy_pointer_list(tf->txt_index);
+    destroy_gluint_list(tf->txt_index);
     destroy_glfloat_list(tf->color);
     destroy_pointer_list(tf->font);    
     free(tf);
@@ -302,12 +328,9 @@ TEXTBLOCK* init_textblock()
 
         tb->txt = init_txt(32);
 
-    TXT_FORMATING *formating = st_malloc(sizeof(TXT_FORMATING));
-    formating->txt_index = init_pointer_list();
-    add2pointer_list(formating->txt_index, tb->txt->txt);   //We register the startpoint of the text as first text index
-    
     tb->formating = init_txt_formating(tb->txt->txt);
     tb->dims = init_txt_dims(tb->txt->txt);
+    tb->txt_info = init_txt_info();
     return tb;
 }
 
@@ -330,13 +353,10 @@ static int realloc_textblock(TEXTBLOCK *tb)
 */
 int destroy_textblock(TEXTBLOCK *tb)
 {
-    int i;
-
-    destroy_txt(tb->txt);
-    
-    tb->formating = NULL;
+    destroy_txt(tb->txt); 
     destroy_txt_formating(tb->formating);
     destroy_txt_dims(tb->dims);
+    destroy_txt_info(tb->txt_info);
     free(tb);
     tb = NULL;
     return 0;
@@ -351,7 +371,7 @@ int destroy_textblock(TEXTBLOCK *tb)
  *      the preceeding with APPENDING_STRING  
  * 3) Add a totally new string what will use it's own anchor point, Use NEW_STRING as last parameter
  * */
-int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width, int newstring)
+int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width,int alignment, int newstring)
 {    
     
 
@@ -359,39 +379,73 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
     size_t len = strlen(txt);
     TEXT *text = tb->txt;
     char *txt_startpoint;
+    int nlinestarts = 0;
     if(text->used)
-        txt_startpoint = text->txt+text->used-1; //We set the startpoint to be the last nullterminator;
+        txt_startpoint = text->txt+text->used; //We set the startpoint to be the last nullterminator;
     else
         txt_startpoint = text->txt;
     
     if((len) > (text->alloced - text->used))
-        realloc_txt(text, text->used-1 + len); //We overwrite the last nullterminator 
+        realloc_txt(text, text->used + len+1); //We overwrite the last nullterminator 
 
     strncpy(txt_startpoint, txt, len + 1);//We overwrite the last nullterminator and put a new nullpointer last
     text->used += len;
 
     TXT_FORMATING *formating = tb->formating;
     
-    add2pointer_list(formating->txt_index, text->txt+len);
+    add2gluint_list(formating->txt_index, text->used);
+    
     
     addbatch2glfloat_list(formating->color,4, font_color);
+    
+    //We multiply after inserting to list, to not affect font_color from calling function
+    
+    GLfloat *color = formating->color->list+formating->color->used-4;
+    multiply_float_array(color, 1.0/255, 4);
+    
     add2pointer_list(formating->font, font);    
 
     if(newstring)
     {
-        add2pointer_list(tb->dims->txt_index, txt_startpoint+len);
-        add2pointer_list(tb->dims->coord_index,tb->dims->coords->coords + tb->dims->coords->used);
+        add2gluint_list(tb->dims->txt_index, text->used);
+       // add2gluint_list(tb->dims->coord_index,tb->dims->coords->used);
         add2glfloat_list(tb->dims->widths, 0);
         add2glfloat_list(tb->dims->heights, 0);
+        add2glfloat_list(tb->dims->max_widths, 0);
         
+        add2gluint_list(tb->txt_info->formating_index, tb->formating->nform);
+        
+        add2gluint_list(tb->txt_info->alignment, alignment);
         tb->cursor_x=0;
         tb->cursor_y=0; 
         tb->rowheight=0;
+        nlinestarts = tb->dims->linestart->used;
+        tb->txt_info->ntexts++;
     }   
-    calc_dims(tb,max_width, LEFT_ALIGNMENT);
+    calc_dims(tb,max_width);
   
+    tb->formating->nform++;
     
-    return 0;
+    
+       // tb->dims->coord_index->list[tb->dims->coord_index->used-1] = tb->dims->coords->used;
+       add2gluint_list(tb->dims->coord_index, tb->dims->coords->used);
+    //   printf("coords = %p, %p, %p\n",*tb->dims->coord_index->list, tb->dims->coord_index->list[tb->dims->coord_index->used-1],tb->dims->coord_index->list[tb->dims->coord_index->used-2]);
+       
+     //  printf("coords used = %d\n",((float**) tb->dims->coord_index->list)[tb->dims->coord_index->used-1]-((float**) tb->dims->coord_index->list)[tb->dims->coord_index->used-2]);
+       
+       
+        tb->txt_info->formating_index->list[tb->txt_info->formating_index->used-1] = tb->formating->nform;
+    
+        //add2gluint_list(tb->txt_info->formating_index, tb->formating->nform);
+        
+        if(tb->dims->linestart->used > nlinestarts)
+            tb->txt_info->linestart_index->list[tb->txt_info->linestart_index->used-1] = tb->dims->linestart->used; //add first linebreak in text to line break coord_index
+            
+    
+            log_this(100,"txt = %s, tex=%d, color = %f, %f, %f, %f\n",txt, font->tex, color[0], color[1], color[2], color[3]);
+    
+    
+    return tb->txt_info->ntexts;
 
 }
 

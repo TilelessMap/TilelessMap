@@ -32,10 +32,13 @@
 #include "theclient.h"
 
 
-
-#define LEFT_ALIGNMENT 1
-#define CENTER_ALIGNMENT 2
-#define RIGHT_ALIGNMENT 3
+//Alignment left bottom is default
+#define H_LEFT_ALIGNMENT 0
+#define V_BOTTOM_ALIGNMENT 0
+#define H_CENTER_ALIGNMENT 1
+#define V_CENTER_ALIGNMENT 2
+#define H_RIGHT_ALIGNMENT 4
+#define V_TOP_ALIGNMENT 8
 
 
 #define APPENDING_STRING 0
@@ -79,18 +82,28 @@ typedef struct
 
 typedef struct
 {
-    POINTER_LIST *txt_index;
+    GLUINT_LIST *formating_index;
+    //GLUINT_LIST *text_index; Not needed since relation is 1:1 in index
+    GLUINT_LIST *linestart_index;
+    POINT_LIST *points;
+    GLUINT_LIST *alignment;
+    size_t ntexts;
+}TXT_INFO;
+
+typedef struct
+{
+    GLUINT_LIST *txt_index;
     GLFLOAT_LIST *color;
     POINTER_LIST *font;
-    size_t nstyles;
+    size_t nform;
 }TXT_FORMATING;
 
 typedef struct
 {    
-    POINTER_LIST *txt_index;    
-    POINTER_LIST *coord_index;
+    GLUINT_LIST *txt_index;    
+    GLUINT_LIST *coord_index;
     TEXTCOORDS *coords;
-    POINTER_LIST *linebreaks;
+    GLUINT_LIST *linestart;
     GLFLOAT_LIST *line_widths; 
     GLFLOAT_LIST *max_widths;
     GLFLOAT_LIST *widths;
@@ -101,6 +114,7 @@ typedef struct
     TEXT *txt;
     TXT_FORMATING *formating;
     TXT_DIMS *dims;
+    TXT_INFO *txt_info;
     float cursor_x;
     float cursor_y;
     float rowheight;
@@ -127,19 +141,19 @@ uint32_t utf82unicode(const char *text,const char **the_rest);
 
 TEXTBLOCK* init_textblock();
 int destroy_textblock(TEXTBLOCK *tb);
-//int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font);
-int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width, int newstring);
+int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width,int alignment, int newstring);
 
 
 
 int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... );
-int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb);
+//int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl, GLfloat *color,int max_width, TEXTBLOCK *tb);
+int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl,  TEXTBLOCK *tb);
 
 TEXTCOORDS* init_txt_coords(size_t size);
 int check_and_realloc_txt_coords(TEXTCOORDS *tc, size_t needed);
 int destroy_txt_coords(TEXTCOORDS *tc);
 WCHAR_TEXT  *tmp_unicode_txt;
-int calc_dims(TEXTBLOCK *tb,int max_width, int alignment);
+int calc_dims(TEXTBLOCK *tb,int max_width);
 /*TODO This is just temporary
  * Later there will be something holding all txt_coordinates from all layers and controls
  * and all of it will be rendered from there. */

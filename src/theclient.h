@@ -245,19 +245,8 @@ GLuint create_shader(const char* source, GLenum type);
 void print_log(GLuint object);
 int loadOrSaveDb(sqlite3 *pInMemory, const char *zFilename, int isSave);
 
-/*utils*/
-void copy2ref_box(MATRIX *matrix_hndl,MATRIX *ref);
-int multiply_matrices(GLfloat *matrix1,GLfloat *matrix2, GLfloat *theMatrix);
-int multiply_matrix_vektor(GLfloat *matrix,GLfloat *vektor_in, GLfloat *vektor_out);
 
-/*This is functions for manipulating bbox, translations and zoom*/
-int px2m(GLfloat *bbox,GLint px_x,GLint px_y,GLfloat *w_x,GLfloat *w_y);
-int calc_translate(GLfloat w_x,GLfloat w_y, GLfloat *transl);
-int calc_scale(GLfloat *bbox, GLfloat zoom, GLfloat *scale);
-void windowResize(int newWidth,int newHeight,MATRIX *matrix_hndl,MATRIX *out);
 
-void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix);
-int reset_matrix(MATRIX *matrix_handl);
 //void initialBBOX(GLfloat x, GLfloat y, GLfloat width, GLfloat *newBBOX);
 
 /*event handling*/
@@ -327,7 +316,6 @@ void reproject(GLfloat *points,uint8_t utm_in,uint8_t utm_out, uint8_t hemi_in, 
 int check_column(const unsigned char *dbname,const unsigned char * layername, const unsigned char  *col_name);
 
 
-int search_string(const char *w,const  char *s);
 /*********************** Global variables*******************************/
 
 
@@ -382,6 +370,17 @@ GLint txt_box;
 GLint txt_tex;
 GLint txt_texpos;
 GLint txt_color;
+
+//new textprogram
+GLuint txt2_program;
+GLint txt2_coord2d;
+GLint txt2_matrix;
+GLint txt2_px_matrix;
+GLint txt2_delta;
+GLint txt2_box;
+GLint txt2_tex;
+GLint txt2_texpos;
+GLint txt2_color;
 
 GLuint gen_vbo;
 

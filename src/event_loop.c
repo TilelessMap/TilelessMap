@@ -29,6 +29,7 @@
 #include "info.h"
 #include "matrix_handling.h"
 #include "log.h"
+#include "utils.h"
 
 void mainLoop(SDL_Window* window,struct  CTRL *controls)
 {
@@ -79,7 +80,9 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
-        fprintf(stderr,"opengl error 65 :%d\n", err);
+       while ((err = glGetError()) != GL_NO_ERROR) {
+	fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
     }
 
 //    get_data(window, newBBOX, theMatrix);

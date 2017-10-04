@@ -638,16 +638,29 @@ int init_resources(char *dir)
     info_box_color[1] = 1;
     info_box_color[2] = 1;
     info_box_color[3] = 0.9;
-    build_program();
+    
+    
+    if(build_program())
+    {
 
+          while ((err = glGetError()) != GL_NO_ERROR) {
+        fprintf(stderr,"1 - opengl error:%d in func %s\n", err, __func__);
+        }
+    }
     attach_db(dir, missing_db);
 
 //   load_styles();
     add_system_default_style();
+    
     init_symbols();
+    
+          
     loadSymbols();
+    
+          
     if(load_layers(missing_db))
         log_this(100, "There is a problem loading layers");
+    
     destroy_txt(missing_db);
     init_gps();
     init_info_Layer();
