@@ -100,10 +100,10 @@ int main(int argc, char **argv)
     float color[] = {255,0,0,255};
     short margins[2] = {20,20};
     
-    CTRL *button = add_button(controls, controls,box ,"Test jg ", button_test,"rundgång", color,80,margins,1);
+    //CTRL *button = add_button(controls, controls,box ,"Test jg ", button_test,"rundgång", color,80,margins,1);
     
     
-    init_matrix_handler(button, 1, 1,1);    
+    //init_matrix_handler(button, 1, 1,1);    
     TLM_start(controls);
     
     TLM_close();

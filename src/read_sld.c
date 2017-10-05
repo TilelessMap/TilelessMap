@@ -419,16 +419,19 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
     check_and_add_style(oneLayer, tree, node, key_type, &s);
     mxml_node_t *n, *symbolizer;
 	const char *font_family = NULL;
-    const char* font_weight_txt;
+    const char *font_weight_txt;
+    const char *font_style_txt;
     int size;
     int font_weight = 0;
     if( ! s->text_styles)
     {
-        s->text_styles =  st_malloc(sizeof(LINE_STYLE));
+        s->text_styles =  st_malloc(sizeof(TEXT_STYLE));
         s->text_styles->nsyms = 0;
         s->text_styles->color = init_glfloat_list();
         s->text_styles->size = init_glfloat_list();
         s->text_styles->z = init_glfloat_list();
+        s->text_styles->anchorpoint = init_glfloat_list();
+        s->text_styles->displacement = init_glfloat_list();
         s->text_styles->a = init_pointer_list();
     }
 
@@ -472,7 +475,11 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
                     font_weight = NORMAL_TYPE;
                 else if(!strcmp(font_weight_txt,"bold"))
                     font_weight = BOLD_TYPE;
-                else if(!strcmp(font_weight_txt,"italic"))
+            }
+            else if(!strcmp(attr, "font-style"))
+            {
+                font_style_txt = mxmlGetOpaque(n);
+                if(!strcmp(font_style_txt,"italic"))
                     font_weight = ITALIC_TYPE;
             }
 
@@ -522,6 +529,38 @@ static int parse_textstyle(LAYER_RUNTIME *oneLayer,char **parsed_text_attr, mxml
         * we use the reversed symbol order in the sld as z-value*/
         add2glfloat_list(s->text_styles->z,z);
 
+        
+         mxml_node_t *Placement = mxmlFindElement(symbolizer, symbolizer, "se:LabelPlacement", NULL, NULL,  MXML_DESCEND);
+         //According to SLD standard default anchorPoint is center
+        float AnchorPoint[2] = {0.5, 0.5};
+        float Displacement[2] = {0,0};
+         if(Placement)
+         {
+            mxml_node_t *AnchorPoint_n = mxmlFindElement(Placement, Placement, "se:AnchorPoint",  NULL, NULL,  MXML_DESCEND); 
+            if(AnchorPoint_n)
+            {
+                const char *AnchorPointX_s = mxmlGetOpaque(mxmlFindElement(AnchorPoint_n, AnchorPoint_n, "se:AnchorPointX",  NULL, NULL,  MXML_DESCEND));
+                if(AnchorPointX_s)
+                    AnchorPoint[0] = strtof(AnchorPointX_s, NULL);
+                const char *AnchorPointY_s = mxmlGetOpaque(mxmlFindElement(AnchorPoint_n, AnchorPoint_n, "se:AnchorPointY",  NULL, NULL,  MXML_DESCEND));
+                if(AnchorPointY_s)
+                    AnchorPoint[1] = strtof(AnchorPointY_s, NULL);
+            }
+            mxml_node_t *Displacement_n = mxmlFindElement(Placement, Placement, "se:Displacement",  NULL, NULL,  MXML_DESCEND);     
+            if(Displacement_n) 
+            {
+                const char *DisplacementX_s = mxmlGetOpaque(mxmlFindElement(Displacement_n, Displacement_n, "se:DisplacementX",  NULL, NULL,  MXML_DESCEND));
+                if(DisplacementX_s)
+                    Displacement[0] = strtof(DisplacementX_s, NULL);                
+                const char *DisplacementY_s = mxmlGetOpaque(mxmlFindElement(Displacement_n, Displacement_n, "se:DisplacementY",  NULL, NULL,  MXML_DESCEND));
+                if(DisplacementY_s)
+                    Displacement[1] = strtof(DisplacementY_s, NULL);
+            }
+         }
+        
+        addbatch2glfloat_list(s->text_styles->anchorpoint,2,AnchorPoint );
+        addbatch2glfloat_list(s->text_styles->displacement,2,Displacement );
+        
         s->text_styles->nsyms++;
     }
     //  const char *symbol = mxmlGetText(mxmlFindPath(node, "se:Description/se:Title"), 0);

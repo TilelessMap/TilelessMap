@@ -1,6 +1,7 @@
 #ifndef _interface_H
 #define _interface_H
 
+#include "../structures.h"
 #include "../text.h"
 #include "../matrix_handling.h"
 #include "../fonts.h"
@@ -86,6 +87,7 @@ struct CTRL
     GLfloat color[4];
     TEXTBLOCK *txt;
     GLshort txt_margin[2]; //distance in pixels from control border where text starts
+    uint8_t alignment;
     int txt_size; //text size, or more correct index of atlas to use (1,2 or 3)
     void *obj; //used to connect a layer for instance to a control
     int z; //used both for rendering, but more importingly to decide which click event wins if many are triggered

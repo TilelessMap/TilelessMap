@@ -2,7 +2,7 @@
 #include "mem.h"
 #include "buffer_handling.h"
 #include "uthash.h"
-
+#include "twkb.h"
 
 
 
@@ -663,7 +663,7 @@ int reset_buffers(LAYER_RUNTIME *layer)
 
 
 
-int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
+struct STYLES* get_style(struct STYLES *styles, void *val,int val_type)
 {
     struct STYLES *s = NULL;
     if(val_type == INT_TYPE)
@@ -688,43 +688,50 @@ int get_style(struct STYLES *styles, POINTER_LIST *list, void *val,int val_type)
         }
     }
 
-    add2pointer_list(list, s);
-    return 0;
+    return s;
 }
 
 GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
+    struct STYLES *s;
     log_this(10,"layer = %s  and ",l->name);
 //   add2gluint_list(l->style_id, style_id);
     int type = l->type;
     if(type & 224)
     {
 //        add2union_list(l->points->style_id, &(ts->styleID));
-        get_style(l->styles, l->points->style_id, &(ts->styleID), ts->styleid_type);
+        s = get_style(l->styles, &(ts->styleID), ts->styleid_type);
+        
+
+        add2pointer_list(l->points->style_id, s);
         return l->points->points;
     }
     else if(type & 16)
     {
-        get_style(l->styles, l->lines->style_id, &(ts->styleID), ts->styleid_type);
+        s = get_style(l->styles, &(ts->styleID), ts->styleid_type);
+        add2pointer_list(l->lines->style_id, s);
         return l->lines->vertex_array;
     }
 
     else if(type & 6)
     {
-        get_style(l->styles, l->polygons->line_style_id, &(ts->styleID), ts->styleid_type);
+        s = get_style(l->styles,  &(ts->styleID), ts->styleid_type);
+        add2pointer_list(l->polygons->line_style_id, s);
         return l->polygons->vertex_array;
     }
     else
         return NULL;
 
 
+    
 }
 
 
 GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
-
-    get_style(l->styles, l->wide_lines->style_id, &(ts->styleID), ts->styleid_type);
+    struct STYLES *s = get_style(l->styles, &(ts->styleID), ts->styleid_type);
+    
+        add2pointer_list(l->wide_lines->style_id, s);
 //   add2union_list(l->wide_lines->style_id, &(ts->styleID));
     return l->wide_lines->vertex_array;
 
@@ -808,6 +815,26 @@ int addsym(uint8_t id, size_t n_points, GLfloat *points)
     return 0;
 
 }
+
+
+void text_reset_buffer(TEXTSTRUCT *text_buf)
+{
+    text_buf->used_n_vals = 0;
+    text_buf->used_n_chars = 0;
+}
+
+void text_destroy_buffer(TEXTSTRUCT *text_buf)
+{
+    free(text_buf->char_array);
+    free(text_buf->rotation);
+    free(text_buf->size);
+    free(text_buf->styleID);
+    free(text_buf->anchor);
+    free(text_buf);
+    return;
+}
+
+
 /*
 int destroy_symbols()
 {

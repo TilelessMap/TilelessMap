@@ -34,7 +34,9 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     if(oneLayer->type & 32)
     {
-        render_text(oneLayer,theMatrix);
+        //render_text(oneLayer,theMatrix);
+        load_text(oneLayer,theMatrix);
+    render_text(oneLayer,theMatrix);
         return 0;
     }
     /*  POINT_LIST *rb = oneLayer->points;
@@ -219,6 +221,13 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     if(oneLayer->geometryType == RASTER)
         return 0;
 
+    
+    
+        while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d before func %s layer %s\n", err, __func__,oneLayer->name);
+}
+
+
     LINESTRING_LIST *line = oneLayer->wide_lines;
     uint32_t  i;
     GLfloat *color,z, lw=0;
@@ -277,11 +286,17 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
 
 
+        while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"2 - opengl error:%d in func %s layer %s\n", err, __func__,oneLayer->name);
+}
 
 
     for (i=0; i<line->line_start_indexes->used; i++)
     {
 
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s, i = %d\n", err, __func__,i);
+}
         //    Uint32 styleID = *(rb->styleID+i);
 
         struct STYLES *styles = (struct STYLES *) *((struct STYLES **)line->style_id->list +i);
@@ -317,6 +332,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
             //  printf("color = %f, %f, %f, %f, z=%f, unit=%d, width=%f\n",color[0],color[1], color[2],color[3], z, unit, lw);
 
+
             glUniform1fv(lw_z,1,&z );
             glUniform4fv(lw_color,1,color );
             glUniform1fv(lw_linewidth,1,&lw );
@@ -335,6 +351,9 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         n_vals_acc = *(line->line_start_indexes->list + i)/vals_per_point;
 
     }
+        while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"1 - opengl error:%d in func %s layer %s\n", err, __func__,oneLayer->name);
+}
     glDisableVertexAttribArray(lw_norm);
 
     glDisableVertexAttribArray(lw_coord2d);
@@ -343,7 +362,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     glUseProgram(0);
     
     while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+fprintf(stderr,"0 - opengl error:%d in func %s layer %s\n", err, __func__,oneLayer->name);
 }
 
     return 0;
@@ -690,6 +709,29 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
 }
 */
 
+int load_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
+{
+    
+    
+
+    TEXTBLOCK *tb = oneLayer->text->tb;
+    tb->txt_info->points = oneLayer->points;
+    
+    glBindBuffer(GL_ARRAY_BUFFER, tb->txt_info->points->tbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*(tb->dims->coords->used), tb->dims->coords->coords, GL_STATIC_DRAW);       
+    
+     while ((err = glGetError()) != GL_NO_ERROR) {
+        log_this(10, "Problem 2\n");
+        fprintf(stderr,"opengl error wt:%d\n", err);
+    }
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
+    return 0;
+}
+
+
+
 /**
  * Render text using the currently loaded font and currently set font size.
  * Rendering starts at coordinates (x, y), z is always 0.
@@ -697,281 +739,130 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
  */
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
-    ATLAS *a;
-    log_this(10, "Entering renderText\n");
-    int i;
-    GLfloat *color;
-
-    int offset = 0;;
-    char *txt;
-//   glGenBuffers(1, &text_vbo);
-    /* Create a texture that will be used to hold one "glyph" */
-
-    //  glGenBuffers(1, &text_vbo);
-    GLfloat point_coord[2];
-    GLfloat point_offset[] = {0,0};
-
-    //  GLESSTRUCT *rb = oneLayer->res_buf;
-
-    POINT_LIST *point = oneLayer->points;
     
-    glBindBuffer(GL_ARRAY_BUFFER, point->vbo);
-    glUseProgram(txt_program);
 
-    glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
+    log_this(10, "Entering %s\n", __func__);
+    
+    if(!oneLayer->text->tb->txt_info->ntexts)
+        return 0;
+int tot_points = 0;
+float delta[2];
+//    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
+    if(oneLayer->type & 32 && oneLayer->points->point_start_indexes->used!=oneLayer->text->tb->txt_info->ntexts)
+    {
+        log_this(100,"There is a mismatch between number of labels and number of corresponding points\n");
+        return 1;
+    }
 
+    TEXTBLOCK *tb = oneLayer->text->tb;
+    
+    POINT_LIST *point = oneLayer->points;
 
     GLfloat sx = (GLfloat)(2.0 / CURR_WIDTH);
     GLfloat sy = (GLfloat)(2.0 / CURR_HEIGHT);
 
+    GLfloat pxMatrix[16] = {sx, 0,0,0,0,sy,0,0,0,0,1,0,-1,-1,0,1};
 
-//    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
-    if(oneLayer->type & 32 && oneLayer->text->used_n_vals!=point->point_start_indexes->used)
+    uint32_t i, j;//, np, pi;
+    GLfloat *color, *startp;
+    
+    TXT_INFO *ti = tb->txt_info;
+
+    
+    glUseProgram(txt2_program);
+    glUniformMatrix4fv(txt2_matrix, 1, GL_FALSE,theMatrix );
+    
+    glUniformMatrix4fv(txt2_px_matrix, 1, GL_FALSE,pxMatrix );
+    
+    glBindBuffer(GL_ARRAY_BUFFER, point->tbo);
+    
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"4 - opengl error:%d in func %s\n", err, __func__);
+}
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"3 - opengl error:%d in func %s\n", err, __func__);
+}
+    glEnableVertexAttribArray(txt2_box);
+    /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
+    
+    
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"2 - opengl error:%d in func %s\n", err, __func__);
+}
+    glVertexAttribPointer(
+        txt2_box,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
+
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"1 - opengl error:%d in func %s\n", err, __func__);
+}
+        int r = 0;
+    for (i=0; i<ti->ntexts; i++)
     {
-        printf("There is a mismatch between number of labels and number of corresponding points\n");
-    }
-    int used=0;
-
-    int nw = point->point_start_indexes->used;
-
-
-    n_words += nw;
-    total_points += nw;
-
-
-    for (i=0; i<nw; i++)
-    {
-
-        total_points += 1;
-//       int psz =  *(oneLayer->text->size+i);
-
-//log_this(10, "psz = %d \n",psz);
-
-
-
         struct STYLES *styles = (struct STYLES *) *((struct STYLES **)point->style_id->list +i);
         if(!styles)
             styles=system_default_style;
         TEXT_STYLE *style = styles->text_styles;
 
         if(!style)
-            continue;
-        int r;
-        for (r = 0; r<style->nsyms; r++)
+            return 1;
+        
+    uint8_t ndims = oneLayer->n_dims;
+        startp = point->points->list + point->point_start_indexes->list[i]-ndims;
+        glUniform2fv(txt2_coord2d,1,startp);
+        
+        float w = tb->dims->widths->list[i];
+        float h = tb->dims->heights->list[i];
+        float *anchor = style->anchorpoint->list;
+        
+            delta[0] = -w*anchor[0];
+            delta[1] = h*anchor[1];
+        
+        
+      //  delta[1] = 0;
+        glUniform2fv(txt2_delta,1,delta);
+        for (j=ti->formating_index->list[i]; j<ti->formating_index->list[i+1]; j++)
         {
+            //int format_index = ti->formating_index->list[j];
+            ATLAS *a = tb->formating->font->list[j];
+            
+            glBindTexture(GL_TEXTURE_2D, a->tex);
+            
+            //int n_points = 6 * ((char*) (tb->formating->txt_index->list[j+1]) - ((char*) tb->formating->txt_index->list[j]));
+            n_points = tb->dims->coord_index->list[j+1]-tb->dims->coord_index->list[j];
+            
 
             color = style->color->list + 4*r;
-            /*        point_coord[0] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims);
-                    point_coord[1] =  *(rb->vertex_array+ *(rb->start_index+i)*ndims + 1);
 
-            point_coord[0] =  *(point->points->list + i*ndims);
-            point_coord[1] =  *(point->points->list + i*ndims + 1);
-            */
-            point_coord[0] =  *(point->points->list + offset);
-            point_coord[1] =  *(point->points->list + offset + 1);
+            
+            log_this(10,"txt = %s, tex=%d,npoints=%d,  color = %f, %f, %f, %f\n",tb->txt->txt + tb->formating->txt_index->list[j], a->tex,n_points, color[0], color[1], color[2], color[3]);
 
-            offset = *(point->point_start_indexes->list + i);
-            //  printf("c1 = %f, c2 = %f\n", point_coord[0], point_coord[1]);
-
-            txt = oneLayer->text->char_array+used;
-            used+=strlen(txt)+1;
-
-
-
-//        a = fonts[0]->fss->fs[psz].normal;
-            a=style->a->list[r];
-            // printf("---------------------------------------------  a is %p\n", a);
-            draw_it(color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d,txt,0, sx, sy);
+                glUniform4fv(txt2_color,1,color );
+                
+                glDrawArrays(GL_TRIANGLES, tot_points,n_points);       
+       //           glDrawArrays(GL_TRIANGLE_STRIP, tot_points,n_points);       
+                tot_points+=n_points;
         }
-
-
-
-
     }
+    glDisableVertexAttribArray(txt2_box);
 
     glUseProgram(0);
 
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+}
     return 0;
 }
 
 
 
-static inline int add_line(ATLAS *a,GLfloat x, GLfloat y, uint32_t *txt, unsigned int n_chars, float sx, float sy,POINT_T *coords )
-{
 
-    uint32_t p;
-    unsigned int i, c=0;
-    for(i = 0; i<n_chars; i++)
-    {
-
-        p = *(txt + i);
-        /* Calculate the vertex and texture coordinates */
-        float x2 = x + a->metrics[p].bl * sx;
-        float y2 = -(y) - a->metrics[p].bt * sy;
-        float w = a->metrics[p].bw * sx;
-        float h = a->metrics[p].bh * sy;
- //       float h = a->ch * sy;
-
-        /* Advance the cursor to the start of the next character */
-        x += a->metrics[p].ax * sx;
-        y += a->metrics[p].ay * sy;
-
-        /* Skip glyphs that have no pixels */
-        if (!w || !h)
-            continue;
-
-        coords[c++] = (POINT_T) {
-            x2, -y2, a->metrics[p].tx, a->metrics[p].ty
-        };
-        coords[c++] = (POINT_T) {
-            x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty
-        };
-        coords[c++] = (POINT_T) {
-            x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h
-        };
-        coords[c++] = (POINT_T) {
-            x2 + w, -y2, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty
-        };
-        coords[c++] = (POINT_T) {
-            x2, -y2 - h, a->metrics[p].tx, a->metrics[p].ty + a->metrics[p].bh / a->h
-        };
-        coords[c++] = (POINT_T) {
-            x2 + w, -y2 - h, a->metrics[p].tx + a->metrics[p].bw / a->w, a->metrics[p].ty + a->metrics[p].bh / a->h
-        };
-    }
-    return c;
-}
-
-
-int draw_it(GLfloat *color,GLfloat *startp,GLfloat *offset,ATLAS *a/* int atlas_nr,int bold*/,GLint txt_box,GLint txt_color,GLint txt_coord2d,char *txt,GLint max_width, float sx, float sy)
-{
-
-    GLfloat x,y;
-    uint8_t p;
-    unsigned int i;
-    GLfloat max_used_width = 0;
-    glBindTexture(GL_TEXTURE_2D, a->tex);
-    
-    //    glUniform1i(text_uniform_tex, 0);
-    /* Set up the VBO for our vertex data */
-    glEnableVertexAttribArray(txt_box);
-//   glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
-    glVertexAttribPointer(txt_box, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-
-    glUniform4fv(txt_color,1,color);
-
-    glUniform2fv(txt_coord2d,1,startp);
-
-
-    size_t npoints = 6 * strlen(txt);
-    size_t coordssize = npoints * sizeof(POINT_T);
-
-    check_and_realloc_txt_coords(txt_coords, npoints);
-
-    POINT_T *coords = txt_coords->coords+txt_coords->used;
-
-    //txt_coords->used += npoints;
-
-    //POINT_T coords[6000];
-    int c = 0;
-
-    reset_wc_txt(tmp_unicode_txt);
-    add_utf8_2_wc_txt(tmp_unicode_txt, txt);
-
-    /* Loop through all characters */
-    n_letters +=tmp_unicode_txt->used;
-    GLfloat rh_pixels= a->ch * 1.1;
-    GLfloat rh = rh_pixels * sy;
-    x = offset[0] * sx;
-    y = offset[1] * sy - a->ch * sy;
-    if(max_width)
-    {
-        int nlines=0;
-        GLfloat line_width = 0, word_width = 0;
-        unsigned int n_chars_in_line = 0, n_chars_in_word = 0, line_start=0;
-        //uint32_t *last_word = 0;
-        for(i = 0; i<tmp_unicode_txt->used; i++)
-        {
-            p = *(tmp_unicode_txt->txt + i);
-
-            word_width += a->metrics[p].ax;
-            n_chars_in_word++;
-
-            if(p==32)
-            {
-                n_chars_in_line += n_chars_in_word;
-                line_width += word_width;
-                n_chars_in_word = 0;
-                word_width = 0;
-            }
-            else if (p=='\n')
-            {
-                n_chars_in_line += n_chars_in_word;
-                c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
-                line_start = i;
-                max_used_width = max_f(max_used_width, line_width);
-                word_width = line_width = 0;
-                n_chars_in_line = n_chars_in_word =0;
-                nlines++;
-                offset[0] = x = 0;
-
-            }
-            if(line_width + word_width > max_width)
-            {
-                if(n_chars_in_line == 0) //there is only 1 word in line, we have to cut the word
-                {
-                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_word-1, sx, sy, coords+c) ;
-                    line_start = i;
-                    word_width = line_width = 1;
-                    n_chars_in_line = n_chars_in_word =1;
-                }
-                else //we put the last word on the next line instead
-                {
-                    c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
-                    max_used_width = max_f(max_used_width, line_width);
-                    line_width = 0;
-                    line_start += n_chars_in_line;
-                    n_chars_in_line =0;
-
-                }
-                nlines++;
-                offset[0] = x = 0;
-            }
-        }
-        if(word_width > 0 || line_width > 0)
-        {
-
-            n_chars_in_line += n_chars_in_word;
-            line_width += word_width;
-            c += add_line(a,x,y - rh*nlines,tmp_unicode_txt->txt + line_start,n_chars_in_line, sx, sy, coords+c) ;
-        }
-
-        max_used_width = max_f(max_used_width, line_width);
-        offset[0] += line_width;
-        offset[1] -= rh_pixels*nlines;
-
-    }
-    else
-        c += add_line(a,x,y,tmp_unicode_txt->txt,tmp_unicode_txt->used, sx, sy, coords) ;
-
-
-    /* Draw all the character on the screen in one go */
-    glBufferData(GL_ARRAY_BUFFER, coordssize, coords, GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, c);
-
-    // glDrawArrays(GL_TRIANGLE_STRIP, 0, c);
-
-    glDisableVertexAttribArray(txt_box);
-while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
-}
-    return max_used_width;
-}
-
-
-
-int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix)
+int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix,LAYER_RUNTIME *l, float *anchor, float *displacement)
 {
     
     log_this(10, "Entering renderLine\n");
@@ -981,8 +872,6 @@ int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix)
     TXT_INFO *ti = tb->txt_info;
     POINT_LIST *point = ti->points;
 
-    unsigned int n_vals = 0, n_vals_acc = 0;
-    uint8_t ndims = 2;
     
     glUniformMatrix4fv(txt2_matrix, 1, GL_FALSE,theMatrix );
     
@@ -1014,25 +903,13 @@ float delta[2];
         printf("startp: %f, %f\n",startp[0], startp[1]);
         glUniform2fv(txt2_coord2d,1,startp);
         
-        unsigned int alignment = ti->alignment->list[i]; //We only support 1 text per control for now, so only 1 alignment
         float w = tb->dims->widths->list[i];
         float h = tb->dims->heights->list[i];
    
-        if(alignment & H_CENTER_ALIGNMENT)
-            delta[0] = -w*0.5;
         
-        else if(alignment & H_RIGHT_ALIGNMENT)
-            delta[0] = -w;
-            
-        else
-            delta[0] = 0;
-
-       if(alignment & V_CENTER_ALIGNMENT)
-            delta[1] = h*0.5;
-        else if(alignment & V_TOP_ALIGNMENT)
-            delta[1] = 0;
-        else 
-            delta[1] = h;
+            delta[0] = -w*anchor[0];
+            delta[1] = h*anchor[1];
+        
         
       //  delta[1] = 0;
         printf("w=%f, h=%f\n", w,h);

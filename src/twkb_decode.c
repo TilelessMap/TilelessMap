@@ -24,6 +24,7 @@
 
 #include "theclient.h"
 #include "buffer_handling.h"
+#include "twkb.h"
 
 static void init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts);
 static int decode_point(TWKB_PARSE_STATE *ts);
@@ -84,6 +85,8 @@ init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts )
     {
         strcpy(ts->styleID.string_type,old_ts->styleID.string_type);
     }
+    ts->unicode_txt = old_ts->unicode_txt;
+    ts->txt = old_ts->txt;
     ts->theLayer = old_ts->theLayer;
     ts->thi = old_ts->thi;
     ts->thi->has_bbox=0;
@@ -425,8 +428,8 @@ int* decode_element_array(TWKB_PARSE_STATE *old_ts)
 
     npoints = (uint32_t) buffer_read_uvarint(ts.tb);
     // add2union_list(theLayer->polygons->style_id, &(old_ts->styleID));
-    get_style(theLayer->styles, theLayer->polygons->style_id, &(old_ts->styleID), old_ts->styleid_type);
-
+    struct STYLES *s = get_style(theLayer->styles, &(old_ts->styleID), old_ts->styleid_type);
+    add2pointer_list(theLayer->polygons->style_id, s);
     for( i = 0; i < npoints; i++ )
     {
         for( j = 0; j < 3; j++ )

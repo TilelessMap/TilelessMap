@@ -73,10 +73,10 @@ int add_default_controls()
     multiply_short_array(info_box, size_factor, 4);
 
     txt = init_textblock();
-    append_2_textblock(txt,"INFO", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+    append_2_textblock(txt,"INFO", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
-    register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 1,1);
-
+    CTRL *info = register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 1,1);
+    info->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
 
     /**** define layer menu -button at main screen ******/
     GLshort layers_box[] = {5,85,155,155};
@@ -85,11 +85,11 @@ int add_default_controls()
     show_layer_control = 0;
 
     txt = init_textblock();
-    append_2_textblock(txt,"LAYERS", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+    append_2_textblock(txt,"LAYERS", font, fontcolor,0,NEW_STRING, tmp_unicode_txt);
 
-    struct CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
+    CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
-    
+    layers_button->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
     
     
     add_tileless_info(controls);
@@ -185,7 +185,7 @@ ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
     {
         //TEXT *txt = init_txt(5);
         TEXTBLOCK *txt = init_textblock();
-        append_2_textblock(txt,"X", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+        append_2_textblock(txt,"X", font, fontcolor,0,NEW_STRING, tmp_unicode_txt);
 //        add_txt(txt, "X");
         t->txt=txt;
         oneLayer->visible = 1;
@@ -276,7 +276,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
 
         txt = init_textblock();
-        append_2_textblock(txt,oneLayer->title, font, fontcolor,0,H_LEFT_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+        append_2_textblock(txt,oneLayer->title, font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
 
         GLshort click_box[] = {rowstart_x, rowstart_y-click_size,rowstart_x + click_size,rowstart_y};
@@ -289,9 +289,10 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
             add_txt(x_txt, "X");
             */
             x_txt = init_textblock();
-            append_2_textblock(x_txt,"X", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+            append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
             new_ctrl = register_control(CHECKBOX, layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,x_txt,box_text_margins, 1,10);
+            new_ctrl->alignment = V_CENTER_ALIGNMENT | H_CENTER_ALIGNMENT;
         }
         else
             new_ctrl = register_control(CHECKBOX,layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,NULL,box_text_margins, 1,10);
@@ -324,9 +325,9 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     add_txt(x_txt, "X");
     */
     x_txt = init_textblock();
-    append_2_textblock(x_txt,"X", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
-    register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
-
+    append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+    CTRL *cb = register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
+    cb->alignment = V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT;
     return 0;
 }
 
@@ -366,19 +367,18 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
      {
     
         const unsigned char *txt = sqlite3_column_text(preparedinfo, 0);
-        int text_size = sqlite3_column_int(preparedinfo, 1);
         int bold = sqlite3_column_int(preparedinfo, 2);
   //      int link_to_page = sqlite3_column_int(preparedinfo, 3);
         
         if(bold)
             font = loadatlas("freesans",BOLD_TYPE, 12);
         else
-            font = loadatlas("freesans",BOLD_TYPE, 12);
+            font = loadatlas("freesans",NORMAL_TYPE, 12);
             
     printf("txt = %s\n", (char*)txt);
-            append_2_textblock(tb, (char*)txt, font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+            append_2_textblock(tb, (char*)txt, font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
         
-            append_2_textblock(tb," \n ", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, APPENDING_STRING);
+            append_2_textblock(tb," \n ", font, fontcolor,0, APPENDING_STRING, tmp_unicode_txt);
         
      }
     
@@ -453,7 +453,7 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
     GLfloat fontcolor[] = {0,0,0,255};
     
     TEXTBLOCK *x_txt = init_textblock();
-    append_2_textblock(x_txt,"i", font, fontcolor,0,H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT, NEW_STRING);
+    append_2_textblock(x_txt,"i", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
     return register_control(BUTTON, ctrl,ctrl, init_show_info,&page,NULL,info_box,info_color,x_txt,box_text_margins, 1,10);
 
     

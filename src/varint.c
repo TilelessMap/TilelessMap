@@ -22,7 +22,7 @@
  **********************************************************************/
 
 #include "theclient.h"
-
+#include "twkb.h"
 /**
 Reads an unsigned varInt value
 */

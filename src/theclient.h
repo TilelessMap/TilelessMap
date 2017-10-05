@@ -59,13 +59,12 @@
 #include "symbols.h"
 #include "uthash.h"
 #include "buffer_handling.h"
-#include "twkb.h"
 
 #define INIT_WIDTH 1000
 #define INIT_HEIGHT 500
 
 //Set this to 0 to do the data fetching in serial. Good for debugging
-#define THREADING 1
+#define THREADING 0
 
 #define DEFAULT_TEXT_BUF 1024
 
@@ -75,6 +74,15 @@
 #define INIT_PS_POOL_SIZE 10
 
 
+/*twkb types*/
+#define	POINTTYPE			1
+#define	LINETYPE			2
+#define	POLYGONTYPE		3
+#define	MULTIPOINTTYPE	4
+#define	MULTILINETYPE		5
+#define	MULTIPOLYGONTYPE	6
+#define	COLLECTIONTYPE		7
+#define	RASTER		        128
 struct CTRL;
 
 typedef struct
@@ -153,6 +161,8 @@ typedef struct
     GLFLOAT_LIST *color;
     GLFLOAT_LIST *size;
     GLFLOAT_LIST *z;
+    GLFLOAT_LIST *anchorpoint;
+    GLFLOAT_LIST *displacement;
     POINTER_LIST *a;
     int nsyms;
 }
@@ -206,38 +216,6 @@ GLushort* element_get_start(uint32_t npoints, uint8_t ndims, ELEMENTSTRUCT *elem
 int element_set_end(uint32_t npoints, uint8_t ndims,uint32_t styleID, ELEMENTSTRUCT *element_buf);
 GLfloat* increase_buffer(GLESSTRUCT *res_buf);
 */
-TEXTSTRUCT* init_text_buf();
-int text_write(const char *the_text,uint32_t styleID, GLshort size, float rotation,uint32_t anchor, TEXTSTRUCT *text_buf);
-void text_reset_buffer(TEXTSTRUCT *text_buf);
-void text_destroy_buffer(TEXTSTRUCT *text_buf);
-
-
-//int id; //just for debugging, remove later
-
-/* Functions for decoding twkb*/
-int read_header (TWKB_PARSE_STATE *ts);
-int decode_twkb_start(uint8_t *buf, size_t buf_len);
-int decode_twkb(TWKB_PARSE_STATE *old_ts);
-int* decode_element_array(TWKB_PARSE_STATE *old_ts);
-
-/*a type holding pointers to our parsing functions*/
-typedef int (*parseFunctions_p)(TWKB_PARSE_STATE*);
-
-/*Functions for decoding varInt*/
-int64_t unzigzag64(uint64_t val);
-uint64_t buffer_read_uvarint(TWKB_BUF *tb);
-int64_t buffer_read_svarint(TWKB_BUF *tb);
-uint8_t buffer_read_byte(TWKB_BUF *tb);
-void buffer_jump_varint(TWKB_BUF *tb,int n);
-
-
-
-/*resetting GLESSTRUCT buffer*/
-void reset_buffer();
-
-/*resetting ELEMENTSTRUCT buffer*/
-void element_reset_buffer();
-
 /*Functions exposed to other programs*/
 void *twkb_fromSQLiteBBOX_thread( void *theL);
 void *twkb_fromSQLiteBBOX( void *theL);
@@ -346,7 +324,7 @@ STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
 size_t length_global_symbols;*/
 void render_text_test(const char *text, float x, float y, float sx, float sy);
-
+int load_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int CURR_WIDTH;
 int CURR_HEIGHT;

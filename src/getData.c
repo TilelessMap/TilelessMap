@@ -28,7 +28,6 @@
 
 
 
-
 int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls)
 {
 
@@ -62,10 +61,9 @@ int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls)
         {
             //  log_this(10, "decode nr %d\n", i);
             oneLayer->BBOX = map_matrix->bbox;
-#ifdef THREADING
+
 #if THREADING >0
             pthread_create(&threads[i], NULL, twkb_fromSQLiteBBOX_thread, (void *) oneLayer);
-#endif
 #else
             twkb_fromSQLiteBBOX((void *) oneLayer);
 #endif
@@ -100,10 +98,9 @@ int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls)
         type = oneLayer->type;
         if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
-#ifdef THREADING
+            
 #if THREADING >0
             rc = pthread_join(threads[t], NULL);
-#endif
 #else
             rc = 0;
 #endif
@@ -124,6 +121,10 @@ int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls)
             if(type & 6)
                 loadPolygon( oneLayer, map_matrix->matrix);
 
+            
+    while ((err = glGetError()) != GL_NO_ERROR) {
+fprintf(stderr,"0 - opengl error:%d in func %s layer %s\n", err, __func__,oneLayer->name);
+}
         }
 
     }

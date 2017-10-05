@@ -24,7 +24,7 @@
 
 #include "theclient.h"
 #include "buffer_handling.h"
-
+#include "twkb.h"
 /*
 static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)
 {
@@ -193,6 +193,13 @@ void *twkb_fromSQLiteBBOX(void *theL)
     if(err)
         log_this(1,"sqlite problem 2, %d\n",err);
 
+    WCHAR_TEXT *unicode_txt;
+    if(theLayer->type & 32)
+    {
+         ts.unicode_txt = NULL ;
+         unicode_txt = init_wc_txt(64);
+         theLayer->text->tb = init_textblock();
+    }
     /*
     if(theLayer->points)
         theLayer->points->style_id->list_type = theLayer->style_key_type;
@@ -295,8 +302,11 @@ void *twkb_fromSQLiteBBOX(void *theL)
             size = sqlite3_column_int(prepared_statement, 6);
             rotation = (GLfloat) sqlite3_column_double(prepared_statement, 7);
             anchor = (GLint) sqlite3_column_double(prepared_statement, 8);
-
-            text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
+            struct STYLES *s = theLayer->points->style_id->list[theLayer->points->style_id->used-1];
+            append_2_textblock(theLayer->text->tb, txt, s->text_styles->a->list[0],NULL, 0, NEW_STRING,unicode_txt);
+        
+            ts.txt = txt;
+            //text_write(txt,0, (GLshort) size, rotation,anchor, theLayer->text);
         }
 
     }

@@ -165,7 +165,7 @@ int add_n_utf8_2_wc_txt(WCHAR_TEXT *t,const char *in, size_t len)
 {
 
     uint32_t p = 0;
-    int i;
+    unsigned int i;
     const char *u = in;
     for (i=0;i<len;i++)
     {
@@ -322,14 +322,13 @@ static int destroy_txt_formating(TXT_FORMATING *tf)
 
 TEXTBLOCK* init_textblock()
 {
-    unsigned int i;
     TEXTBLOCK *tb = st_malloc(sizeof(TEXTBLOCK));
     tb->txt = st_malloc(sizeof(TEXT*));
 
         tb->txt = init_txt(32);
 
-    tb->formating = init_txt_formating(tb->txt->txt);
-    tb->dims = init_txt_dims(tb->txt->txt);
+    tb->formating = init_txt_formating();
+    tb->dims = init_txt_dims();
     tb->txt_info = init_txt_info();
     return tb;
 }
@@ -371,7 +370,7 @@ int destroy_textblock(TEXTBLOCK *tb)
  *      the preceeding with APPENDING_STRING  
  * 3) Add a totally new string what will use it's own anchor point, Use NEW_STRING as last parameter
  * */
-int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width,int alignment, int newstring)
+int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_color, int max_width,int newstring, WCHAR_TEXT *unicode_txt)
 {    
     
 
@@ -379,29 +378,35 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
     size_t len = strlen(txt);
     TEXT *text = tb->txt;
     char *txt_startpoint;
-    int nlinestarts = 0;
-    if(text->used)
-        txt_startpoint = text->txt+text->used; //We set the startpoint to be the last nullterminator;
-    else
-        txt_startpoint = text->txt;
+    unsigned int nlinestarts = 0;
     
     if((len) > (text->alloced - text->used))
         realloc_txt(text, text->used + len+1); //We overwrite the last nullterminator 
 
-    strncpy(txt_startpoint, txt, len + 1);//We overwrite the last nullterminator and put a new nullpointer last
+        
+        
+    if(text->used)
+        txt_startpoint = text->txt+text->used; 
+    else
+        txt_startpoint = text->txt;
+    
+    strncpy(txt_startpoint, txt, len + 1);
     text->used += len;
 
     TXT_FORMATING *formating = tb->formating;
     
     add2gluint_list(formating->txt_index, text->used);
     
-    
-    addbatch2glfloat_list(formating->color,4, font_color);
-    
-    //We multiply after inserting to list, to not affect font_color from calling function
+    if(font_color)
+    {
+        addbatch2glfloat_list(formating->color,4, font_color);
     
     GLfloat *color = formating->color->list+formating->color->used-4;
     multiply_float_array(color, 1.0/255, 4);
+    }
+    
+    //We multiply after inserting to list, to not affect font_color from calling function
+    
     
     add2pointer_list(formating->font, font);    
 
@@ -415,14 +420,13 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
         
         add2gluint_list(tb->txt_info->formating_index, tb->formating->nform);
         
-        add2gluint_list(tb->txt_info->alignment, alignment);
         tb->cursor_x=0;
         tb->cursor_y=0; 
         tb->rowheight=0;
         nlinestarts = tb->dims->linestart->used;
         tb->txt_info->ntexts++;
     }   
-    calc_dims(tb,max_width);
+    calc_dims(tb,max_width,unicode_txt);
   
     tb->formating->nform++;
     
@@ -442,10 +446,8 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
             tb->txt_info->linestart_index->list[tb->txt_info->linestart_index->used-1] = tb->dims->linestart->used; //add first linebreak in text to line break coord_index
             
     
-            log_this(100,"txt = %s, tex=%d, color = %f, %f, %f, %f\n",txt, font->tex, color[0], color[1], color[2], color[3]);
-    
-    
-    return tb->txt_info->ntexts;
+
+        return tb->txt_info->ntexts;
 
 }
 

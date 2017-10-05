@@ -121,22 +121,7 @@ int text_write(const char *the_text,uint32_t styleID, GLshort size, float rotati
 
 
 
-void text_reset_buffer(TEXTSTRUCT *text_buf)
-{
-    text_buf->used_n_vals = 0;
-    text_buf->used_n_chars = 0;
-}
 
-void text_destroy_buffer(TEXTSTRUCT *text_buf)
-{
-    free(text_buf->char_array);
-    free(text_buf->rotation);
-    free(text_buf->size);
-    free(text_buf->styleID);
-    free(text_buf->anchor);
-    free(text_buf);
-    return;
-}
 
 
 

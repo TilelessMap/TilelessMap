@@ -193,6 +193,8 @@ static int destroy_text_style(TEXT_STYLE *s)
     destroy_glfloat_list(s->color);
     destroy_glfloat_list(s->size);
     destroy_glfloat_list(s->z);
+    destroy_glfloat_list(s->anchorpoint);
+    destroy_glfloat_list(s->displacement);
     destroy_pointer_list(s->a);
     st_free(s);
     return 0;
