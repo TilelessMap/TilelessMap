@@ -15,7 +15,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     TEXTBLOCK *tb;
     int i = 0;
 
-
+int max_width = 1000;
     char number_text[32];
     char header_tot[32];
 
@@ -80,6 +80,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     tb = init_textblock();
 
             GLfloat fontcolor[] = {0,0,0,255};
+            append_2_textblock(tb, "Info\n", text_font_bold, fontcolor,max_width,NEW_STRING, tmp_unicode_txt);
     while (sqlite3_step(prepared_layer_info)==SQLITE_ROW)
     {
 
@@ -94,30 +95,30 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
             int row = sqlite3_column_int(prepared_info, 1);
             int col = sqlite3_column_int(prepared_info, 2);
 
-            snprintf(header_tot, 32, "\n%s: ", header);
             
-            append_2_textblock(tb, (const char*) header_tot, text_font_bold, fontcolor,0,NEW_STRING, tmp_unicode_txt);
+            append_2_textblock(tb, (const char*) header_tot, text_font_bold, fontcolor,max_width,APPENDING_STRING, tmp_unicode_txt);
             if(type == SQLITE_INTEGER)
             {
                 int val_int = sqlite3_column_int(prepared_layer_info, i);
-                snprintf(number_text, 32, "%d", val_int);
+                snprintf(number_text, 32, "%d\n", val_int);
                 printf("header = %s, row = %d, col = %d, value = %d    \n",header, row, col, val_int);
-                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
 
             }
             else if (type == SQLITE_FLOAT)
             {
                 double val_float = sqlite3_column_double(prepared_layer_info, i);
-                snprintf(number_text, 32, "%f", val_float);
+                snprintf(number_text, 32, "%f\n", val_float);
                 printf("header = %s, row = %d, col = %d, value = %lf    \n",header, row, col, val_float);
-                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+                append_2_textblock(tb, (const char*) number_text, text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
 
             }
             else if (type == SQLITE_TEXT)
             {
                 const unsigned char *val_txt = sqlite3_column_text(prepared_layer_info, i);
                 printf("header = %s, row = %d, col = %d, value = %s    \n",header, row, col, val_txt);
-                append_2_textblock(tb, (const char*) val_txt, text_font_normal, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+                append_2_textblock(tb, (const char*) val_txt, text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
+                append_2_textblock(tb, "\n", text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
 
             }
             i++;
@@ -126,7 +127,7 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     }
     GLshort box[4];
     box[0] = box[1] = 30;
-    box[2] = CURR_WIDTH - 30;
+    box[2] = 1000;
     box[3] = CURR_HEIGHT - 30;
     GLfloat color[] = {200,255,200,150};
     GLshort txt_margin[] = {50,50};
@@ -135,7 +136,8 @@ static int printinfo(LAYER_RUNTIME *theLayer,uint64_t twkb_id)
     CTRL *controls = get_master_control();
     struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);
     add_txt_2_textbox(textbox, tb);
-
+    textbox->alignment = V_TOP_ALIGNMENT|H_LEFT_ALIGNMENT;
+    
     init_matrix_handler(textbox, 1, 0, 0);
     incharge = textbox;
 

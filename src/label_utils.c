@@ -132,7 +132,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
         GLfloat line_width = x, word_width = 0;
         
         int nlines=0;
-        if(x==0)
+        if(x==0 && y==0)
             nlines++;
         unsigned int line_start=0;
     if(max_width)
@@ -217,6 +217,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
     tb->dims->max_widths->list[tb->dims->max_widths->used-1] = max_f(tb->dims->max_widths->list[tb->dims->max_widths->used-1], max_width);
     tb->dims->widths->list[tb->dims->widths->used-1] = max_f(tb->dims->widths->list[tb->dims->widths->used-1], max_used_width);
     tb->dims->heights->list[tb->dims->heights->used-1] +=rh*nlines;
+    printf("height = %f\n", tb->dims->heights->list[tb->dims->heights->used-1]);
     
 return 0;
 }
