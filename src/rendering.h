@@ -4,7 +4,7 @@
 
 
 #include "text.h"
-int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix,LAYER_RUNTIME *l, float *anchor, float *displacement);
+int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix, float *anchor, float *displacement);
 
 
 #endif

@@ -153,7 +153,12 @@ CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_i
 
 int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *height);
 
+CTRL* add_table(struct CTRL *caller, struct CTRL *spatial_parent, GLfloat *color, short box[4],short *margin, tileless_event_function click_func);
 
+CTRL* add_row(struct CTRL *spatial_parent, GLfloat *color, short ncols, short *column_widths);
+
+CTRL* add_cell(struct CTRL *spatial_parent,char *txt, GLfloat *color,GLfloat *font_color, short *margin, tileless_event_function click_func,void *val, int font_size);
+int print_controls(CTRL *ctrl,int level);
 #endif
 
 

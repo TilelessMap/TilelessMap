@@ -35,7 +35,7 @@ int loadPoint(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     if(oneLayer->type & 32)
     {
         //render_text(oneLayer,theMatrix);
-        load_text(oneLayer,theMatrix);
+        load_text(oneLayer);
     render_text(oneLayer,theMatrix);
         return 0;
     }
@@ -223,9 +223,10 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 
     
     
-        while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"0 - opengl error:%d before func %s layer %s\n", err, __func__,oneLayer->name);
-}
+    while ((err = glGetError()) != GL_NO_ERROR) 
+    {
+        fprintf(stderr,"0 - opengl error:%d before func %s layer %s\n", err, __func__,oneLayer->name);
+    }
 
 
     LINESTRING_LIST *line = oneLayer->wide_lines;
@@ -709,7 +710,7 @@ int render_info(SDL_Window* window,GLfloat *theMatrix)
 }
 */
 
-int load_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
+int load_text(LAYER_RUNTIME *oneLayer)
 {
     
     
@@ -741,9 +742,9 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
 {
     
 
-    log_this(10, "Entering %s\n", __func__);
+    log_this(10, "Entering %s with layer %s\n", __func__, oneLayer->name);
     
-    if(!oneLayer->text->tb->txt_info->ntexts)
+    if(!oneLayer->text->tb || !oneLayer->text->tb->txt_info->ntexts)
         return 0;
 int tot_points = 0;
 float delta[2];
@@ -862,7 +863,7 @@ fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
 
 
 
-int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix,LAYER_RUNTIME *l, float *anchor, float *displacement)
+int draw_txt(TEXTBLOCK *tb,GLfloat *theMatrix,GLfloat *pxMatrix, float *anchor, float *displacement)
 {
     
     log_this(10, "Entering renderLine\n");
@@ -900,7 +901,6 @@ float delta[2];
     for (i=0; i<ti->ntexts; i++)
     {
         startp = point->points->list + point->point_start_indexes->list[i];
-        printf("startp: %f, %f\n",startp[0], startp[1]);
         glUniform2fv(txt2_coord2d,1,startp);
         
         float w = tb->dims->widths->list[i];
@@ -912,9 +912,7 @@ float delta[2];
         
         
       //  delta[1] = 0;
-        printf("w=%f, h=%f\n", w,h);
         glUniform2fv(txt2_delta,1,delta);
-        log_this(100, "start: %d, stop: %d\n",ti->formating_index->list[i], ti->formating_index->list[i+1]);
         for (j=ti->formating_index->list[i]; j<ti->formating_index->list[i+1]; j++)
         {
             //int format_index = ti->formating_index->list[j];
@@ -927,7 +925,7 @@ float delta[2];
             n_points = tb->dims->coord_index->list[j+1]-tb->dims->coord_index->list[j];
             
             
-            printf("txt = %s, tex=%d,npoints=%d,  color = %f, %f, %f, %f\n",tb->txt->txt + tb->formating->txt_index->list[j], a->tex,n_points, color[0], color[1], color[2], color[3]);
+        //    printf("txt = %s, tex=%d,npoints=%d,  color = %f, %f, %f, %f\n",tb->txt->txt + tb->formating->txt_index->list[j], a->tex,n_points, color[0], color[1], color[2], color[3]);
 
                 glUniform4fv(txt2_color,1,color );
                 

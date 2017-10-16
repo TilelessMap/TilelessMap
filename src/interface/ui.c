@@ -239,6 +239,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLfloat fontcolor[]= {0,0,0,255};
 
     struct CTRL *layers_meny = register_control(BOX,  spatial_parent,logical_parent, NULL,NULL,NULL,box,color, NULL,NULL, 1,0);
+    print_controls(NULL,0);
 //    printf("layers_menu=%p\n", layers_meny);
     GLshort startx, starty, p[] = {0,0};
 
@@ -261,6 +262,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLshort radio_box[] = {radiostart_x,starty, radiostart_x + radio_width,starty+row_dist};
     struct CTRL *radio_master = init_radio( layers_meny,layers_meny,radio_box,radio_box_color,  NULL, NULL,  1, 0 );
     LAYER_RUNTIME *oneLayer;
+    
     for (i=0; i<global_layers->nlayers; i++)
     {
 
@@ -268,11 +270,6 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
         GLshort rowstart_y = starty - i * row_height;
 
         oneLayer = global_layers->layers + i;
-        /*
-                txt = init_txt(20);
-
-                printf("title = %s\n", oneLayer->title);
-                add_txt(txt, oneLayer->title);*/
 
 
         txt = init_textblock();
@@ -284,10 +281,6 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
         if(oneLayer->visible)
         {
-            /*x_txt = init_txt(5);
-
-            add_txt(x_txt, "X");
-            */
             x_txt = init_textblock();
             append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
@@ -320,14 +313,13 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
 
     GLfloat close_color[]= {200,100,100,200};
-    /*x_txt = init_txt(5);
 
-    add_txt(x_txt, "X");
-    */
     x_txt = init_textblock();
     append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
     CTRL *cb = register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
     cb->alignment = V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT;
+    
+    
     return 0;
 }
 

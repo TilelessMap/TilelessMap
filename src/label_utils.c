@@ -37,6 +37,7 @@ static inline int add_line(ATLAS *a,GLfloat *x, GLfloat y, uint32_t *txt, unsign
 
         p = *(txt + i);
         /* Calculate the vertex and texture coordinates */
+       
         float x2 = *x + a->metrics[p].bl;
         float y2 = -(y) - a->metrics[p].bt;
         float w = a->metrics[p].bw;
@@ -100,12 +101,6 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
         txt_end = tb->txt->txt + tb->formating->txt_index->list[list_size-1];  
     }
     
-    //char* last_block_start;
-    //char *last_block_end;
-    //list_size = tb->dims->txt_index->used;
-    //last_block_start = tb->txt->txt + tb->dims->txt_index->list[list_size-2];
-    //last_block_end = tb->txt->txt + tb->dims->txt_index->list[list_size-1];
-    
      str_len = txt_end-txt_start;
     size_t npoints = 6 * str_len;
     size_t coordssize = npoints * sizeof(POINT_T);
@@ -142,7 +137,6 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
         for(i = 0; i<unicode_txt->used; i++)
         {
             p = *(unicode_txt->txt + i);
-
             word_width += a->metrics[p].ax;
             n_chars_in_word++;
             if(p=='\0')
@@ -177,7 +171,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
                     c += add_line(a,&x,y - rh*nlines,unicode_txt->txt + line_start,n_chars_in_word-1,  coords+c) ;
                     line_start = i;
                     word_width = line_width = 1;
-                    n_chars_in_line = n_chars_in_word =1;
+                    n_chars_in_word =1;
                     max_used_width = max_width;
                 }
                 else //we put the last word on the next line instead
@@ -217,7 +211,7 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
     tb->dims->max_widths->list[tb->dims->max_widths->used-1] = max_f(tb->dims->max_widths->list[tb->dims->max_widths->used-1], max_width);
     tb->dims->widths->list[tb->dims->widths->used-1] = max_f(tb->dims->widths->list[tb->dims->widths->used-1], max_used_width);
     tb->dims->heights->list[tb->dims->heights->used-1] +=rh*nlines;
-    printf("height = %f\n", tb->dims->heights->list[tb->dims->heights->used-1]);
+  //  printf("height = %f in func %s with text %s\n", tb->dims->heights->list[tb->dims->heights->used-1], __func__, txt);
     
 return 0;
 }
@@ -229,9 +223,6 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
 
 
     char txt_tot[1024];
-
-
-    ATLAS *a;
     va_list args;
     va_start (args, txt);
     vsnprintf (txt_tot,1024,txt, args);
@@ -252,21 +243,6 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
     glGenBuffers(1, &text_vbo);
     glUseProgram(txt_program);
 
-
-    GLfloat norm_color[4];
-
-    norm_color[0] = color[0] / 255;
-    norm_color[1] = color[1] / 255;
-    norm_color[2] = color[2] / 255;
-    norm_color[3] = color[3] / 255;
-
-    /*   GLfloat point_coord[2];
-
-       point_coord[0]= x;
-       point_coord[1]= y;
-     */
-    //  glUniform4fv(txt_color,1,norm_color );
-
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
         fprintf(stderr,"opengl error wt:%d\n", err);
@@ -274,19 +250,6 @@ int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GL
 
     glUniformMatrix4fv(txt_matrix, 1, GL_FALSE,theMatrix );
 
-
-    if(bold)
-    {
-        //   a = font_bold[atlas_nr-1];
-        a = loadatlas("freesans",BOLD_TYPE, size);
-
-    }
-    else
-    {
-        //a = font_normal[atlas_nr-1];
-
-        a = loadatlas("freesans",NORMAL_TYPE, size);
-    }
 
 //TODO, need to be reworked for TEXTBOX, but don't know if this function is of any use
    // draw_it(norm_color,point_coord,point_offset, a, txt_box, txt_color, txt_coord2d, txt_tot,max_width, sx, sy);
@@ -348,7 +311,7 @@ int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl,  TEXTBLOCK *tb,flo
     
 
 
-    draw_txt(tb,theMatrix, theMatrix,NULL, anchor, displacement);
+    draw_txt(tb,theMatrix, theMatrix,anchor, displacement);
 
 
     return 0;

@@ -64,7 +64,7 @@
 #define INIT_HEIGHT 500
 
 //Set this to 0 to do the data fetching in serial. Good for debugging
-#define THREADING 0
+#define THREADING 1
 
 #define DEFAULT_TEXT_BUF 1024
 
@@ -324,7 +324,7 @@ STYLES_RUNTIME *global_styles;
 size_t length_global_styles;
 size_t length_global_symbols;*/
 void render_text_test(const char *text, float x, float y, float sx, float sy);
-int load_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
+int load_text(LAYER_RUNTIME *oneLayer);
 int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int CURR_WIDTH;
 int CURR_HEIGHT;

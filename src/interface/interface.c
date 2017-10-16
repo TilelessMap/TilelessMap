@@ -472,17 +472,23 @@ int check_click(struct  CTRL *controls, int x, int y)
 static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
 
-    //log_this(100,"render control\n");
+        if(ctrl->type == TABLE_CELL)
+        {
+            short v_marg = ctrl->relatives->parent->txt_margin[1];
+         ctrl->box[3] = ctrl->relatives->parent->box[3] - v_marg;  
+         ctrl->box[1] = ctrl->relatives->parent->box[1] + v_marg;   
+        }
     render_simple_rect(ctrl->box, ctrl->color, matrix_hndl);
     if(ctrl->txt)
     {
-
-        //log_this(100,"render control text %s\n", ctrl->txt->txt);
         GLfloat point_coord[2] = {ctrl->box[0] + ctrl->txt_margin[0], ctrl->box[3] - ctrl->txt_margin[1]};
         
         unsigned int alignment = ctrl->alignment; 
         float anchor[2]={0,0};
         float displacement[2]={0,0};
+        
+        
+        
         if(alignment & H_CENTER_ALIGNMENT)
         {            
             point_coord[0] = ctrl->box[0] + 0.5 * (ctrl->box[2] - ctrl->box[0]);
@@ -524,6 +530,7 @@ static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
 
 int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
+    log_this(10, "entering %s with %p\n",__func__, ctrl);
     int i;
     if(!ctrl->active)
         return 0;
@@ -531,9 +538,9 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
     if(ctrl == incharge)
         matrix_hndl = ctrl->matrix_handler;
     render_control(ctrl, matrix_hndl);
-    for (i=0; i < ctrl->caller->n_children; i++)
+    for (i=0; i < ctrl->relatives->n_children; i++)
     {
-        render_controls(ctrl->caller->children[i], matrix_hndl);
+        render_controls(ctrl->relatives->children[i], matrix_hndl);
     }
     return 0;
 }
@@ -576,8 +583,73 @@ int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *heig
     }    
     *(height) = h+=current_row_height;
     *(width) = max_i(w, current_row_width);
-    
-
     return 0;
     
+}
+
+int print_controls(CTRL *ctrl,int level)
+{
+char txt[1024], c, *type_txt;
+int i, r;
+
+if (!ctrl)
+    ctrl = get_master_control();
+
+
+if(ctrl->active)
+    c = '+';
+else
+    c = '-';
+ 
+ memset(txt,' ',level);
+ r = level;
+ txt[r] = c;
+ r++;
+ 
+ if(ctrl->type == MASTER)
+     type_txt = "MASTER";
+ else if(ctrl->type == BOX)
+     type_txt = "BOX";
+ else if(ctrl->type == BUTTON)
+     type_txt = "BUTTON";
+ else if(ctrl->type == TEXTBOX)
+     type_txt = "TEXTBOX";
+ else if(ctrl->type == CHECKBOX)
+     type_txt = "CHECKBOX";
+ else if(ctrl->type == RADIOBUTTON)
+     type_txt = "RADIOBUTTON";
+ else if(ctrl->type == TABLE)
+     type_txt = "TABLE";
+ else if(ctrl->type == TABLE_ROW)
+     type_txt = "TABLE_ROW";
+ else if(ctrl->type == TABLE_CELL)
+     type_txt = "TABLE_CELL";
+ else 
+     type_txt = "Unknown type";
+     
+     
+ int len = strlen(type_txt);
+  //  memcpy(txt+r, type_txt, len);
+ 
+snprintf(txt+r, 1024-r, "%s, %p",type_txt,(void*) ctrl);
+r+=len+2+sizeof(void*);
+ 
+ if(ctrl->txt)
+ {
+     snprintf(txt+r, 1024-r, " - %s",ctrl->txt->txt->txt);
+    r+=strlen(ctrl->txt->txt->txt) +3;
+ }
+ txt[r] = '\0';
+ log_this(100,"%s\n", txt);
+ 
+ for (i=0;i<ctrl->relatives->n_children;i++)
+ {
+  CTRL *child = ctrl->relatives->children[i];
+  print_controls(child, level+1);
+ }
+ 
+ 
+ return 0;
+     
+ 
 }

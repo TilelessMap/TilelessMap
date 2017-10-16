@@ -153,6 +153,7 @@ LAYER_RUNTIME* init_layer_runtime(int n)
 //        theLayer->close_ring = 0;
         theLayer->styles = NULL;
         theLayer->style_key_type = INT_TYPE;
+        theLayer->text = NULL;
     }
     return lr;
 }

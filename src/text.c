@@ -374,7 +374,7 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
 {    
     
 
-    
+    log_this(10, "entering %s with text: %s\n",__func__, txt);
     size_t len = strlen(txt);
     TEXT *text = tb->txt;
     char *txt_startpoint;

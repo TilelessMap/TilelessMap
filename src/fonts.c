@@ -253,12 +253,12 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
 
 ATLAS* loadatlas(const char* fontname,int fonttype, int size)
 {
+    log_this(10, "Entering %s\n",__func__);
     if(size > MAX_FONT_SIZE)
     {
         log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);
         size = MAX_FONT_SIZE;
     }
-    log_this(10, "Entering %s\n",__func__);
     char *sql_txt;
     int rc;
     sqlite3_stmt *preparedFonts;
@@ -302,7 +302,6 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
     }
     // int nStyles = sqlite3_column_int(preparedCountStyle, 0);
 
-    log_this(10,"namn = %s\n",sqlite3_column_text(preparedFonts, 0));
     const unsigned char *res_fontname = sqlite3_column_text(preparedFonts, 0);
     int res_type=sqlite3_column_int(preparedFonts, 1);
 
@@ -329,7 +328,6 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
         f->a[size] = create_atlas(face, size);
 
     FT_Done_Face(face);
-    log_this(10,"-------------------returning font %s,typ %d, size %d, pointer %p\n", res_fontname, res_type,size, f->a[size]);
     sqlite3_clear_bindings(preparedFonts);
     sqlite3_reset(preparedFonts);
 
