@@ -24,7 +24,6 @@
 #include "../theclient.h"
 #include "../mem.h"
 #include "interface.h"
-#include <GL/glew.h>
 #include "../utils.h"
 
 

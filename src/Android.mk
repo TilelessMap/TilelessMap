@@ -29,30 +29,31 @@ src/interface/ui.c \
 src/interface/interface.c \
 src/interface/textbox.c \
 src/interface/radiobutton.c \
-    src/fonts.c \
-    src/reproject.c \
-    src/mem.c \
-    src/buffer_handling.c \
-    src/gps.c \
-    src/label_utils.c \
-    src/layer_utils.c \
-    src/init_data.c \
-    src/linewidth.c \
-	src/simple_geometries.c \
-	src/log.c \
-	src/text.c \
-	src/mem_handling.c \
-	src/handle_db.c \
-	src/shader_utils.c \
-	src/utils.c \
-	src/getData.c \
-	src/eventHandling.c \
-	src/twkb.c \
-	src/varint.c \
-	src/twkb_decode.c \
-	src/rendering.c \
-	src/touch.c \
-	src/main.c
+src/interface/table.c \
+src/fonts.c \
+src/reproject.c \
+src/mem.c \
+src/buffer_handling.c \
+src/gps.c \
+src/label_utils.c \
+src/layer_utils.c \
+src/init_data.c \
+src/linewidth.c \
+src/simple_geometries.c \
+src/log.c \
+src/text.c \
+src/mem_handling.c \
+src/handle_db.c \
+src/shader_utils.c \
+src/utils.c \
+src/getData.c \
+src/eventHandling.c \
+src/twkb.c \
+src/varint.c \
+src/twkb_decode.c \
+src/rendering.c \
+src/touch.c \
+src/main.c
 
 
 #mxml

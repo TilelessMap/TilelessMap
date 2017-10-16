@@ -64,8 +64,11 @@ static int table_test(void *ctrl, void *val, tileless_event_func_in_func func_in
     return 0;
     
 }
-
+#ifdef __ANDROID__ 
+int SDL_main(int argc, char **argv)
+#else
 int main(int argc, char **argv)
+#endif
 {
 
     char *projectfile=NULL, *dir=NULL;
@@ -121,7 +124,7 @@ int main(int argc, char **argv)
    // CTRL *button = add_button(controls, controls,box ,"Test jg ", button_test,"rundgång", color,80,margins,1);
     
     //init_matrix_handler(button, 1, 1,1);  
-short box2[4] = {1500, 1000, 2000, 1800};
+short box2[4] = {500, 500, 1000, 1300};
 short margins2[2] = {2,2};
     
     CTRL *table = add_table(controls, controls, color, box2, margins2, table_test);
