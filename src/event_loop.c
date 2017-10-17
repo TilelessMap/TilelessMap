@@ -395,8 +395,22 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
 //                        copyNew2CurrentBBOX(newBBOX, currentBBOX);
 
                         glViewport(0,0,CURR_WIDTH, CURR_HEIGHT);
-
+                        log_this(10,"new size = %d, %d\n", CURR_WIDTH, CURR_HEIGHT);
                         check_screen_size();
+                        
+                        if(!incharge)
+                        {
+                            matrixFromDeltaMouse(&map_matrix,&map_matrix,0,0,0,0);
+                            get_data(window, &map_matrix, controls);
+                        }
+                        else
+                        {
+                            matrixFromDeltaMouse(incharge->matrix_handler,incharge->matrix_handler,0,0,0,0);
+                            render_data(window, map_matrix.matrix, controls);
+                        }
+
+                            
+                            
                     }
                     break;
 
