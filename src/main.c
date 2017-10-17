@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     TLM_init(projectfile, dir);
     
     CTRL* controls = TLM_init_controls(NATIVE_default);
-    
+    /*
     short box[4] = {500,500,1200,700};
     float color[] = {0,0,0,150};
     short margins[2] = {20,20};
@@ -144,7 +144,7 @@ short margins2[2] = {2,2};
     cell = add_cell(row, "test mer", color, color2, margins2, NULL,NULL, 20);
       
     
-    init_matrix_handler(table, 1, 1,1);  
+    init_matrix_handler(table, 1, 1,1);  */
     TLM_start(controls);
     
     TLM_close();

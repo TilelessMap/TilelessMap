@@ -12,12 +12,14 @@ void free_resources(SDL_Window* window,SDL_GLContext context)
 
     glDeleteProgram(std_program);
     glDeleteProgram(txt_program);
+    glDeleteProgram(txt2_program);
     glDeleteProgram(lw_program);
 
     glDeleteProgram(gps_program);
     glDeleteProgram(sym_program);
     glDeleteProgram(raster_program);
 
+    destroy_control(get_master_control());
  //   destroy_layer_runtime(layerRuntime,nLayers);
     destroy_layers(global_layers);
     destroy_layer_runtime(infoLayer,1);

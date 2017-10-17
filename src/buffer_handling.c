@@ -45,7 +45,7 @@ static int increase_glfloat_list(GLFLOAT_LIST *l, size_t needed_space)
     return 0;
 }
 
-static int reset_glfloat_list(GLFLOAT_LIST *l)
+int reset_glfloat_list(GLFLOAT_LIST *l)
 {
     l->used = 0;
     return 0;
@@ -406,7 +406,7 @@ static int increase_pointer_list(POINTER_LIST *l, size_t needed_space)
     return 0;
 }
 
-static int reset_pointer_list(POINTER_LIST *l)
+int reset_pointer_list(POINTER_LIST *l)
 {
     l->used = 0;
     return 0;
@@ -514,7 +514,7 @@ static int reset_raster_list(RASTER_LIST *l)
     reset_uint8_list(l->data);
     return 0;
 }
-static int reset_point_list(POINT_LIST *l)
+int reset_point_list(POINT_LIST *l)
 {
     if(!l)
         return 0;
@@ -561,9 +561,10 @@ static int destroy_raster_list(RASTER_LIST *l)
     glDeleteBuffers(1,&(l->cibo));
     glDeleteBuffers(1,&(l->cvbo));
     free(l);
+    l=NULL;
     return 0;
 }
-static int destroy_point_list(POINT_LIST *l)
+int destroy_point_list(POINT_LIST *l)
 {
     if(!l)
         return 0;
@@ -572,6 +573,7 @@ static int destroy_point_list(POINT_LIST *l)
     destroy_pointer_list(l->style_id);
     glDeleteBuffers(1,&(l->vbo));
     free(l);
+    l=NULL;
     return 0;
 }
 
@@ -585,6 +587,7 @@ static int destroy_linestring_list(LINESTRING_LIST *l)
     destroy_pointer_list(l->style_id);
     glDeleteBuffers(1,&(l->vbo));
     free(l);
+    l=NULL;
     return 0;
 
 }
@@ -830,6 +833,7 @@ void text_destroy_buffer(TEXTSTRUCT *text_buf)
     free(text_buf->size);
     free(text_buf->styleID);
     free(text_buf->anchor);
+    destroy_textblock(text_buf->tb);
     free(text_buf);
     return;
 }

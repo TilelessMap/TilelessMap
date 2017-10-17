@@ -247,15 +247,21 @@ int destroy_control(struct CTRL *t)
         }
     }
     free(t->relatives->children);
-    remove_child(t->caller->parent->caller, t);
-    remove_child(t->relatives->parent->relatives, t);
+    if(t->caller->parent)
+        remove_child(t->caller->parent->caller, t);
+    if(t->relatives->parent)
+        remove_child(t->relatives->parent->relatives, t);
     destroy_family(t->caller);
     destroy_family(t->relatives);
+    if(t->txt && t->txt->txt_info->points)
+        destroy_point_list(t->txt->txt_info->points);
     if(t->txt)
         destroy_textblock(t->txt);
 
     if(t->matrix_handler)
         free(t->matrix_handler);
+    
+    
     free(t);
     t=NULL;
 

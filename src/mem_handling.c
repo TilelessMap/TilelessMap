@@ -52,7 +52,7 @@ TEXTSTRUCT* init_text_buf()
     text_buf->used_n_vals = 0;
 
     text_buf->max_n_vals=START_MAX_labels ;
-    text_buf->tb = NULL;
+    text_buf->tb = init_textblock();
 
 
     //printf("buffer size = %ld\n", res_buf->index_array-res_buf->buffer_end);

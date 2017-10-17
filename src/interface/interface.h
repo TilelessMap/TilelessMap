@@ -159,6 +159,7 @@ CTRL* add_row(struct CTRL *spatial_parent, GLfloat *color, short ncols, short *c
 
 CTRL* add_cell(struct CTRL *spatial_parent,char *txt, GLfloat *color,GLfloat *font_color, short *margin, tileless_event_function click_func,void *val, int font_size);
 int print_controls(CTRL *ctrl,int level);
+int destroy_control(struct CTRL *t);
 #endif
 
 

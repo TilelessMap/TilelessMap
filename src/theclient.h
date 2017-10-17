@@ -64,7 +64,7 @@
 #define INIT_HEIGHT 500
 
 //Set this to 0 to do the data fetching in serial. Good for debugging
-#define THREADING 1
+#define THREADING 0
 
 #define DEFAULT_TEXT_BUF 1024
 

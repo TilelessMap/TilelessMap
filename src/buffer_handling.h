@@ -53,12 +53,16 @@ int addbatch2glushort_list(GLUSHORT_LIST *list,GLuint n_vals, GLushort *vals);
 
 
 int add2union_list(UNION_LIST *list, void *val);
+int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);
 
 int add2pointer_list(POINTER_LIST *list, void *val);
 int setzero2pointer_list(POINTER_LIST *list,GLuint n_vals);
 int setzero2int64_list(INT64_LIST *list,int64_t n_vals);
+
 int reset_gluint_list(GLUINT_LIST *l);
-int addbatch2uint8_list(UINT8_LIST *list,GLuint n_vals, uint8_t *vals);
+int reset_glfloat_list(GLFLOAT_LIST *l);
+int reset_pointer_list(POINTER_LIST *l);
+int reset_point_list(POINT_LIST *l);
 
 
 int destroy_glfloat_list(GLFLOAT_LIST *l);
@@ -70,6 +74,10 @@ int destroy_uint8_list(UINT8_LIST *l);
 
 int destroy_symbol_list(SYMBOLS *l);
 int destroy_buffers(LAYER_RUNTIME *layer);
+
+int destroy_point_list(POINT_LIST *l);
+
+
 int reset_buffers(LAYER_RUNTIME *layer);
 
 int init_buffers(LAYER_RUNTIME *layer);

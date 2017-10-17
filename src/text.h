@@ -75,6 +75,7 @@ int print_txtblock(GLfloat *point_coord, MATRIX *matrix_hndl,  TEXTBLOCK *tb,flo
 
 TEXTCOORDS* init_txt_coords(size_t size);
 int check_and_realloc_txt_coords(TEXTCOORDS *tc, size_t needed);
+int reset_txt_coords(TEXTCOORDS *tc);
 int destroy_txt_coords(TEXTCOORDS *tc);
 WCHAR_TEXT  *tmp_unicode_txt;
 int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt);
@@ -83,4 +84,5 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt);
  * and all of it will be rendered from there. */
 TEXTCOORDS *txt_coords;
 
+int reset_textblock(TEXTBLOCK *tb);
 #endif

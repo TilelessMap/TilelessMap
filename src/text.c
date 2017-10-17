@@ -90,6 +90,7 @@ int reset_txt(TEXT *t)
 int destroy_txt(TEXT *t)
 {
     free(t->txt);
+    t->txt = NULL;
     t->alloced=0;
     t->used=0;
     free(t);
@@ -244,8 +245,6 @@ static TXT_INFO* init_txt_info()
     TXT_INFO *ti = st_malloc(sizeof(TXT_INFO));
     ti->formating_index = init_gluint_list();
     add2gluint_list(ti->formating_index, 0);
-    //ti->text_index = init_gluint_list();
-    //add2gluint_list(ti->text_index, 0);
     ti->linestart_index = init_gluint_list();
     add2gluint_list(ti->linestart_index,0);
     ti->alignment = init_gluint_list();
@@ -255,13 +254,33 @@ static TXT_INFO* init_txt_info()
     return ti;
 }
 
+static int reset_txt_info(TXT_INFO *ti)
+{
+ reset_gluint_list(ti->formating_index);
+    add2gluint_list(ti->formating_index, 0);
+    reset_gluint_list(ti->linestart_index);
+    add2gluint_list(ti->linestart_index,0);
+ reset_gluint_list(ti->alignment);
+ /*if(ti->points)
+     reset_point_list(ti->points);
+ */
+    ti->ntexts = 0;
+    
+ return 0;
+}
+
+
 static int destroy_txt_info(TXT_INFO *ti)
 {
  destroy_gluint_list(ti->formating_index);
  //destroy_gluint_list(ti->text_index);
     destroy_gluint_list(ti->linestart_index);
  destroy_gluint_list(ti->alignment);
-    
+/* if(ti->points)
+     destroy_point_list(ti->points);
+  */  
+ st_free(ti);
+    ti = NULL;
  return 0;
 }
 
@@ -294,6 +313,20 @@ destroy_glfloat_list(td->line_widths);
  destroy_glfloat_list(td->max_widths);
  destroy_glfloat_list(td->heights);
  destroy_glfloat_list(td->widths);
+ free(td);
+ td = NULL;
+ return 0;
+}
+static int reset_txt_dims(TXT_DIMS *td)
+{
+ reset_gluint_list(td->txt_index);
+ reset_gluint_list(td->coord_index);
+ reset_txt_coords(td->coords);
+reset_gluint_list(td->linestart);
+reset_glfloat_list(td->line_widths);
+ reset_glfloat_list(td->max_widths);
+ reset_glfloat_list(td->heights);
+ reset_glfloat_list(td->widths);
  return 0;
 }
 
@@ -308,6 +341,16 @@ static TXT_FORMATING* init_txt_formating()
     
     return tf;
 }
+static int reset_txt_formating(TXT_FORMATING *tf)
+{
+    reset_gluint_list(tf->txt_index);
+    add2gluint_list(tf->txt_index, 0);
+    reset_glfloat_list(tf->color);
+    reset_pointer_list(tf->font);    
+    tf->nform = 0;
+    
+    return 0;
+}
 
 static int destroy_txt_formating(TXT_FORMATING *tf)
 {
@@ -316,6 +359,7 @@ static int destroy_txt_formating(TXT_FORMATING *tf)
     destroy_glfloat_list(tf->color);
     destroy_pointer_list(tf->font);    
     free(tf);
+    tf=NULL;
  return 0;
 }
 
@@ -323,14 +367,22 @@ static int destroy_txt_formating(TXT_FORMATING *tf)
 TEXTBLOCK* init_textblock()
 {
     TEXTBLOCK *tb = st_malloc(sizeof(TEXTBLOCK));
-    tb->txt = st_malloc(sizeof(TEXT*));
+ //   tb->txt = st_malloc(sizeof(TEXT*));
 
-        tb->txt = init_txt(32);
+    tb->txt = init_txt(32);
 
     tb->formating = init_txt_formating();
     tb->dims = init_txt_dims();
     tb->txt_info = init_txt_info();
     return tb;
+}
+int reset_textblock(TEXTBLOCK *tb)
+{
+    reset_txt(tb->txt);
+    reset_txt_formating(tb->formating);
+    reset_txt_dims(tb->dims);
+    reset_txt_info(tb->txt_info);
+    return 0;
 }
 
 /*
@@ -483,6 +535,13 @@ int check_and_realloc_txt_coords(TEXTCOORDS *tc, size_t needed)
     }
     return 0;
 
+}
+
+int reset_txt_coords(TEXTCOORDS *tc)
+{
+    if(tc && tc->used)
+        tc->used = 0;
+    return 0;
 }
 
 int destroy_txt_coords(TEXTCOORDS *tc)

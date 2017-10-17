@@ -186,6 +186,7 @@ typedef struct
     //GLUINT_LIST *text_index; Not needed since relation is 1:1 in index
     GLUINT_LIST *linestart_index;
     POINT_LIST *points;
+    int pointlist_owner; 
     GLUINT_LIST *alignment;
     size_t ntexts;
 }TXT_INFO;

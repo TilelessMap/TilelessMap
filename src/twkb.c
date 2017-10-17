@@ -198,7 +198,7 @@ void *twkb_fromSQLiteBBOX(void *theL)
     {
          ts.unicode_txt = NULL ;
          unicode_txt = init_wc_txt(64);
-         theLayer->text->tb = init_textblock();
+         reset_textblock(theLayer->text->tb);
     }
     /*
     if(theLayer->points)
@@ -310,7 +310,9 @@ void *twkb_fromSQLiteBBOX(void *theL)
         }
 
     }
-
+    
+    if(theLayer->type & 32)
+        destroy_wc_txt(unicode_txt);
     sqlite3_clear_bindings(prepared_statement);
     sqlite3_reset(prepared_statement);
 
