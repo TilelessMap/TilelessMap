@@ -49,7 +49,7 @@ int check_screen_size()
         screensize = BIGSCREEN;
         size_factor = 2;
         character_size = 40;
-        text_size = 18;
+        text_size = 30;
     }
     else if (CURR_WIDTH >500)
     {
@@ -57,7 +57,7 @@ int check_screen_size()
         screensize = MIDDLESCREEN;
         size_factor = 1.5;
         character_size = 30;
-        text_size = 14;
+        text_size = 25;
     }
     else
     {
@@ -65,7 +65,7 @@ int check_screen_size()
         screensize = SMALLSCREEN;
         size_factor = 1;
         character_size = 20;
-        text_size = 10;
+        text_size = 20;
     }
     
     text_font_normal = NULL;

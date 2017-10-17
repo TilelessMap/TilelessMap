@@ -303,6 +303,21 @@ static TXT_DIMS* init_txt_dims()
     return td;
 }
 
+static int reset_txt_dims(TXT_DIMS *td)
+{
+ reset_gluint_list(td->txt_index);
+    add2gluint_list(td->txt_index, 0);
+ reset_gluint_list(td->coord_index);
+    add2gluint_list(td->coord_index, 0);
+ reset_txt_coords(td->coords);
+reset_gluint_list(td->linestart);  
+    add2gluint_list(td->linestart,0);
+reset_glfloat_list(td->line_widths);
+ reset_glfloat_list(td->max_widths);
+ reset_glfloat_list(td->heights);
+ reset_glfloat_list(td->widths);
+ return 0;
+}
 static int destroy_txt_dims(TXT_DIMS *td)
 {
  destroy_gluint_list(td->txt_index);
@@ -315,18 +330,6 @@ destroy_glfloat_list(td->line_widths);
  destroy_glfloat_list(td->widths);
  free(td);
  td = NULL;
- return 0;
-}
-static int reset_txt_dims(TXT_DIMS *td)
-{
- reset_gluint_list(td->txt_index);
- reset_gluint_list(td->coord_index);
- reset_txt_coords(td->coords);
-reset_gluint_list(td->linestart);
-reset_glfloat_list(td->line_widths);
- reset_glfloat_list(td->max_widths);
- reset_glfloat_list(td->heights);
- reset_glfloat_list(td->widths);
  return 0;
 }
 

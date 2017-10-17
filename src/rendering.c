@@ -743,7 +743,7 @@ int  render_text(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     
 
     log_this(10, "Entering %s with layer %s\n", __func__, oneLayer->name);
-    
+    int npoints = 0;
     if(!oneLayer->text->tb || !oneLayer->text->tb->txt_info->ntexts)
         return 0;
 int tot_points = 0;
@@ -835,19 +835,20 @@ fprintf(stderr,"1 - opengl error:%d in func %s\n", err, __func__);
             glBindTexture(GL_TEXTURE_2D, a->tex);
             
             //int n_points = 6 * ((char*) (tb->formating->txt_index->list[j+1]) - ((char*) tb->formating->txt_index->list[j]));
-            n_points = tb->dims->coord_index->list[j+1]-tb->dims->coord_index->list[j];
             
-
+            npoints = tb->dims->coord_index->list[j+1]-tb->dims->coord_index->list[j];
+            
             color = style->color->list + 4*r;
 
             
-            log_this(10,"txt = %s, tex=%d,npoints=%d,  color = %f, %f, %f, %f\n",tb->txt->txt + tb->formating->txt_index->list[j], a->tex,n_points, color[0], color[1], color[2], color[3]);
+         //   log_this(10,"txt = %s, tex=%d,npoints=%d,  color = %f, %f, %f, %f\n",tb->txt->txt + tb->formating->txt_index->list[j], a->tex,npoints, color[0], color[1], color[2], color[3]);
 
                 glUniform4fv(txt2_color,1,color );
                 
-                glDrawArrays(GL_TRIANGLES, tot_points,n_points);       
+                glDrawArrays(GL_TRIANGLES, tot_points,npoints);       
        //           glDrawArrays(GL_TRIANGLE_STRIP, tot_points,n_points);       
-                tot_points+=n_points;
+                tot_points+=npoints;
+                
         }
     }
     glDisableVertexAttribArray(txt2_box);
