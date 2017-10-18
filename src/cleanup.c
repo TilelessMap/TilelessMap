@@ -29,7 +29,7 @@
 #include "log.h"
 #include "cleanup.h"
 
-void free_resources(SDL_Window* window,SDL_GLContext context) 
+void free_resources(SDL_Window* window,SDL_GLContext context)
 {
     log_this(10, "Entering free_resources\n");
 
@@ -43,7 +43,7 @@ void free_resources(SDL_Window* window,SDL_GLContext context)
     glDeleteProgram(raster_program);
 
     destroy_control(get_master_control());
- //   destroy_layer_runtime(layerRuntime,nLayers);
+//   destroy_layer_runtime(layerRuntime,nLayers);
     destroy_layers(global_layers);
     destroy_layer_runtime(infoLayer,1);
     free(gps_circle);

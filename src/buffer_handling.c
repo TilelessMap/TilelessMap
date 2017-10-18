@@ -728,7 +728,7 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
     {
 //        add2union_list(l->points->style_id, &(ts->styleID));
         s = get_style(l->styles, &(ts->styleID), ts->styleid_type);
-        
+
 
         add2pointer_list(l->points->style_id, s);
         return l->points->points;
@@ -750,15 +750,15 @@ GLFLOAT_LIST* get_coord_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
         return NULL;
 
 
-    
+
 }
 
 
 GLFLOAT_LIST* get_wide_line_list(LAYER_RUNTIME *l, TWKB_PARSE_STATE *ts)
 {
     struct STYLES *s = get_style(l->styles, &(ts->styleID), ts->styleid_type);
-    
-        add2pointer_list(l->wide_lines->style_id, s);
+
+    add2pointer_list(l->wide_lines->style_id, s);
 //   add2union_list(l->wide_lines->style_id, &(ts->styleID));
     return l->wide_lines->vertex_array;
 

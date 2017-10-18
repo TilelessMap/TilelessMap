@@ -49,15 +49,15 @@ struct CTRL* init_controls()
 {
     GLshort box[] = {0,0,0,0}; //This is just a dummy box that we use for the master control.
     controls =  register_control(MASTER, NULL,NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,1,0);
-    
-    
+
+
     return controls;
 }
 
 int add_default_controls()
 {
-    
-    
+
+
     TEXTBLOCK *txt;
     ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
 
@@ -90,17 +90,17 @@ int add_default_controls()
     CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     layers_button->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
-    
-    
+
+
     add_tileless_info(controls);
-    
+
     return 0;
 }
 
 
 CTRL* get_master_control()
 {
- return controls;   
+    return controls;
 }
 
 static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
@@ -169,7 +169,7 @@ static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_fun
     LAYER_RUNTIME *oneLayer = (LAYER_RUNTIME*) t->obj;
 
     GLfloat fontcolor[]= {0,0,0,255};
-ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
+    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
     uint8_t current_status = oneLayer->visible;
 
     if(current_status)
@@ -262,7 +262,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLshort radio_box[] = {radiostart_x,starty, radiostart_x + radio_width,starty+row_dist};
     struct CTRL *radio_master = init_radio( layers_meny,layers_meny,radio_box,radio_box_color,  NULL, NULL,  1, 0 );
     LAYER_RUNTIME *oneLayer;
-    
+
     for (i=0; i<global_layers->nlayers; i++)
     {
 
@@ -318,8 +318,8 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
     CTRL *cb = register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
     cb->alignment = V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT;
-    
-    
+
+
     return 0;
 }
 
@@ -328,17 +328,17 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
 int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_func)
 {
-    
+
     log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) page_p,func_in_func);
-  
+
     struct CTRL *t = (struct CTRL *) ctrl;
     int page = *((int*) page_p);
     ATLAS *font;
-    
+
     GLfloat fontcolor[] = {0,0,0,255};
     sqlite3_stmt *preparedinfo;
     char *sql = "select txt, text_size, bold, link_to_page from tilelessmap_info where page = ? order by orderby;";
-    
+
     int rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinfo, 0);
 
     if (rc != SQLITE_OK ) {
@@ -346,39 +346,39 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
         sqlite3_close(projectDB);
         return 1;
     }
-    
-    
+
+
     sqlite3_bind_int(preparedinfo, 1,page);
-    
+
     if(t->txt)
         destroy_textblock(t->txt);
-    
+
     TEXTBLOCK *tb = init_textblock();
-    
-     while(sqlite3_step(preparedinfo) ==  SQLITE_ROW)
-     {
-    
+
+    while(sqlite3_step(preparedinfo) ==  SQLITE_ROW)
+    {
+
         const unsigned char *txt = sqlite3_column_text(preparedinfo, 0);
         int bold = sqlite3_column_int(preparedinfo, 2);
-  //      int link_to_page = sqlite3_column_int(preparedinfo, 3);
-        
+        //      int link_to_page = sqlite3_column_int(preparedinfo, 3);
+
         if(bold)
             font = loadatlas("freesans",BOLD_TYPE, 12);
         else
             font = loadatlas("freesans",NORMAL_TYPE, 12);
-            
-    printf("txt = %s\n", (char*)txt);
-            append_2_textblock(tb, (char*)txt, font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
-        
-            append_2_textblock(tb," \n ", font, fontcolor,0, APPENDING_STRING, tmp_unicode_txt);
-        
-     }
-    
-    
+
+        printf("txt = %s\n", (char*)txt);
+        append_2_textblock(tb, (char*)txt, font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+
+        append_2_textblock(tb," \n ", font, fontcolor,0, APPENDING_STRING, tmp_unicode_txt);
+
+    }
+
+
     t->txt = tb;
-    
+
     sqlite3_finalize(preparedinfo);
-    
+
     return 0;
 }
 
@@ -386,39 +386,39 @@ int init_show_info(void *ctrl, void *val, tileless_event_func_in_func func_in_fu
 {
 
     log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
-    
+
     struct CTRL *t = (struct CTRL *) ctrl;
-    
+
 
     GLshort box_start_x = 10 * size_factor, box_start_y = 10 * size_factor;
-    
+
     GLshort box_height = 1000, box_width = CURR_WIDTH - 2 * box_start_y;
-    
+
     GLshort box[] = {box_start_x,CURR_HEIGHT - box_start_y - box_height,box_start_x + box_width,CURR_HEIGHT - box_start_y};
-    
-    
+
+
     GLfloat color[]= {255,255,255,220};
-    
-    
-    
+
+
+
     GLshort box_text_margins[] = {4,4};
     multiply_short_array(box_text_margins, size_factor, 2);
-    
+
 
 
     struct CTRL *info_box = register_control(TEXTBOX, controls,t, NULL,NULL,NULL,box,color, NULL,box_text_margins, 1,20);
-    
-    
+
+
     add_close_button(info_box);
     int page = 1;
     set_info_txt(info_box, &page, NULL);
-    
+
     init_matrix_handler(info_box, 1, 0, 0);
     matrixFromBBOX(info_box->matrix_handler);
-    
+
     incharge = info_box;
     return 0;
-    
+
 }
 
 
@@ -430,10 +430,10 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
     int page = 1;
     GLshort box_text_margins[] = {20,10};
     multiply_short_array(box_text_margins, size_factor, 2);
-    
+
     GLshort click_size = 60 * size_factor;
     GLshort startx, starty, p[] = {0,0};
-    
+
     p[0] = CURR_WIDTH;
 
     startx = p[0] - 80*size_factor;
@@ -443,13 +443,13 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
 
     GLfloat info_color[]= {100,200, 100,200};
     GLfloat fontcolor[] = {0,0,0,255};
-    
+
     TEXTBLOCK *x_txt = init_textblock();
     append_2_textblock(x_txt,"i", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
     return register_control(BUTTON, ctrl,ctrl, init_show_info,&page,NULL,info_box,info_color,x_txt,box_text_margins, 1,10);
 
-    
-    
+
+
 }
 
 

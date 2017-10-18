@@ -96,7 +96,7 @@ typedef struct
     short *heights_list;
     short *x_list;
     short *y_list;
-}CTRL_CHILD_CONSTRINTS;
+} CTRL_CHILD_CONSTRINTS;
 
 struct CTRL
 {

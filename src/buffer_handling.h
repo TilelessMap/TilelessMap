@@ -22,8 +22,8 @@
  ***********************************************************************/
 
 
- 
- #ifndef _buffer_handling_H
+
+#ifndef _buffer_handling_H
 #define _buffer_handling_H
 
 /* Use glew.h instead of gl.h to get all the GL prototypes declared */

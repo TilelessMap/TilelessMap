@@ -41,7 +41,7 @@ static inline int32_t max_i(int a, int b)
 
 int check_screen_size()
 {
-    
+
     int character_size, text_size;
     if(CURR_WIDTH > 1000)
     {
@@ -67,13 +67,13 @@ int check_screen_size()
         character_size = 20;
         text_size = 20;
     }
-    
+
     text_font_normal = NULL;
     text_font_bold = NULL;
     char_font = NULL;
-        text_font_normal = loadatlas("freesans",NORMAL_TYPE, text_size);
-        text_font_bold = loadatlas("freesans",BOLD_TYPE, text_size);
-        char_font = loadatlas("freesans",BOLD_TYPE, character_size);
+    text_font_normal = loadatlas("freesans",NORMAL_TYPE, text_size);
+    text_font_bold = loadatlas("freesans",BOLD_TYPE, text_size);
+    char_font = loadatlas("freesans",BOLD_TYPE, character_size);
     return 0;
 
 }
@@ -260,8 +260,8 @@ int destroy_control(struct CTRL *t)
 
     if(t->matrix_handler)
         free(t->matrix_handler);
-    
-    
+
+
     free(t);
     t=NULL;
 
@@ -364,10 +364,10 @@ int parent_add_child(struct CTRL *parent, struct CTRL *child)
 
 struct CTRL* add_close_button(struct CTRL *ctrl)
 {
-    
+
     GLshort box_text_margins[] = {4,4};
     multiply_short_array(box_text_margins, size_factor, 2);
-    
+
     GLshort click_size = 30 * size_factor;
     GLshort startx, starty, p[] = {0,0};
     get_top_right(ctrl, p);
@@ -378,16 +378,16 @@ struct CTRL* add_close_button(struct CTRL *ctrl)
     GLshort close_box[] = {startx, starty,startx + click_size,starty + click_size};
 
     GLfloat close_color[]= {200,100,100,200};
-    
-    
+
+
     TEXTBLOCK *x_txt = init_textblock(1);
     GLfloat fontcolor[] = {0,0,0,255};
     append_2_textblock(x_txt,"X", char_font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
     return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
 
-    
-    
-    
+
+
+
 }
 
 int close_ctrl(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
@@ -477,54 +477,54 @@ int check_click(struct  CTRL *controls, int x, int y)
 static int render_control(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
 
-        if(ctrl->type == TABLE_CELL)
-        {
-            short v_marg = ctrl->relatives->parent->txt_margin[1];
-         ctrl->box[3] = ctrl->relatives->parent->box[3] - v_marg;  
-         ctrl->box[1] = ctrl->relatives->parent->box[1] + v_marg;   
-        }
+    if(ctrl->type == TABLE_CELL)
+    {
+        short v_marg = ctrl->relatives->parent->txt_margin[1];
+        ctrl->box[3] = ctrl->relatives->parent->box[3] - v_marg;
+        ctrl->box[1] = ctrl->relatives->parent->box[1] + v_marg;
+    }
     render_simple_rect(ctrl->box, ctrl->color, matrix_hndl);
     if(ctrl->txt)
     {
         GLfloat point_coord[2] = {ctrl->box[0] + ctrl->txt_margin[0], ctrl->box[3] - ctrl->txt_margin[1]};
-        
-        unsigned int alignment = ctrl->alignment; 
-        float anchor[2]={0,0};
-        float displacement[2]={0,0};
-        
-        
-        
+
+        unsigned int alignment = ctrl->alignment;
+        float anchor[2]= {0,0};
+        float displacement[2]= {0,0};
+
+
+
         if(alignment & H_CENTER_ALIGNMENT)
-        {            
+        {
             point_coord[0] = ctrl->box[0] + 0.5 * (ctrl->box[2] - ctrl->box[0]);
-            anchor[0] = 0.5;            
+            anchor[0] = 0.5;
         }
         else if(alignment & H_RIGHT_ALIGNMENT)
         {
             point_coord[0] = ctrl->box[2] - ctrl->txt_margin[0];
-            anchor[0] = 1;            
+            anchor[0] = 1;
         }
-            
+
         else
         {
             point_coord[0] = ctrl->box[0] + ctrl->txt_margin[0];
-            anchor[0] = 0;            
+            anchor[0] = 0;
         }
 
-       if(alignment & V_CENTER_ALIGNMENT)
-       {
+        if(alignment & V_CENTER_ALIGNMENT)
+        {
             point_coord[1] = ctrl->box[1] + 0.5 * (ctrl->box[3] - ctrl->box[1]);
-            anchor[1] = 0.5;            
-       }
+            anchor[1] = 0.5;
+        }
         else if(alignment & V_TOP_ALIGNMENT)
         {
             point_coord[1] = ctrl->box[3] - ctrl->txt_margin[1];
-            anchor[1] = 0;            
+            anchor[1] = 0;
         }
         else
         {
             point_coord[1] = ctrl->box[1] + ctrl->txt_margin[1];
-            anchor[1] = 1;            
+            anchor[1] = 1;
         }
         print_txtblock(point_coord, matrix_hndl, ctrl->txt,anchor, displacement);
 
@@ -554,22 +554,22 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
 
 int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *height)
 {
-    int w=0, h=0,current_row_height=0, current_row_width=0,pw, ph; 
+    int w=0, h=0,current_row_height=0, current_row_width=0,pw, ph;
     int len, i;
-    
+
     //using tmp_unicode_txt here makes it not thread-safe.
     //But it saves a lot of malloc
-    
+
     reset_wc_txt(tmp_unicode_txt);
     add_utf8_2_wc_txt(tmp_unicode_txt,txt);
-    
-    
+
+
     len = strlen(txt);
     uint8_t p;
-    for(i=0;i<len;i++)
+    for(i=0; i<len; i++)
     {
         p = tmp_unicode_txt->txt[i];
-        
+
         if(p=='\n')
         {
             h+=current_row_height;
@@ -581,80 +581,80 @@ int calc_text_widthandheight(const char *txt, ATLAS *font, int *width, int *heig
         {
             ph = font->ch;
             pw = font->metrics[p].ax;
-            
+
             current_row_height = max_i(current_row_height, ph);
             current_row_width+=pw;
-        }                    
-    }    
+        }
+    }
     *(height) = h+=current_row_height;
     *(width) = max_i(w, current_row_width);
     return 0;
-    
+
 }
 
 int print_controls(CTRL *ctrl,int level)
 {
-char txt[1024], c, *type_txt;
-int i, r;
+    char txt[1024], c, *type_txt;
+    int i, r;
 
-if (!ctrl)
-    ctrl = get_master_control();
+    if (!ctrl)
+        ctrl = get_master_control();
 
 
-if(ctrl->active)
-    c = '+';
-else
-    c = '-';
- 
- memset(txt,' ',level);
- r = level;
- txt[r] = c;
- r++;
- 
- if(ctrl->type == MASTER)
-     type_txt = "MASTER";
- else if(ctrl->type == BOX)
-     type_txt = "BOX";
- else if(ctrl->type == BUTTON)
-     type_txt = "BUTTON";
- else if(ctrl->type == TEXTBOX)
-     type_txt = "TEXTBOX";
- else if(ctrl->type == CHECKBOX)
-     type_txt = "CHECKBOX";
- else if(ctrl->type == RADIOBUTTON)
-     type_txt = "RADIOBUTTON";
- else if(ctrl->type == TABLE)
-     type_txt = "TABLE";
- else if(ctrl->type == TABLE_ROW)
-     type_txt = "TABLE_ROW";
- else if(ctrl->type == TABLE_CELL)
-     type_txt = "TABLE_CELL";
- else 
-     type_txt = "Unknown type";
-     
-     
- int len = strlen(type_txt);
-  //  memcpy(txt+r, type_txt, len);
- 
-snprintf(txt+r, 1024-r, "%s, %p",type_txt,(void*) ctrl);
-r+=len+2+sizeof(void*);
- 
- if(ctrl->txt)
- {
-     snprintf(txt+r, 1024-r, " - %s",ctrl->txt->txt->txt);
-    r+=strlen(ctrl->txt->txt->txt) +3;
- }
- txt[r] = '\0';
- log_this(100,"%s\n", txt);
- 
- for (i=0;i<ctrl->relatives->n_children;i++)
- {
-  CTRL *child = ctrl->relatives->children[i];
-  print_controls(child, level+1);
- }
- 
- 
- return 0;
-     
- 
+    if(ctrl->active)
+        c = '+';
+    else
+        c = '-';
+
+    memset(txt,' ',level);
+    r = level;
+    txt[r] = c;
+    r++;
+
+    if(ctrl->type == MASTER)
+        type_txt = "MASTER";
+    else if(ctrl->type == BOX)
+        type_txt = "BOX";
+    else if(ctrl->type == BUTTON)
+        type_txt = "BUTTON";
+    else if(ctrl->type == TEXTBOX)
+        type_txt = "TEXTBOX";
+    else if(ctrl->type == CHECKBOX)
+        type_txt = "CHECKBOX";
+    else if(ctrl->type == RADIOBUTTON)
+        type_txt = "RADIOBUTTON";
+    else if(ctrl->type == TABLE)
+        type_txt = "TABLE";
+    else if(ctrl->type == TABLE_ROW)
+        type_txt = "TABLE_ROW";
+    else if(ctrl->type == TABLE_CELL)
+        type_txt = "TABLE_CELL";
+    else
+        type_txt = "Unknown type";
+
+
+    int len = strlen(type_txt);
+    //  memcpy(txt+r, type_txt, len);
+
+    snprintf(txt+r, 1024-r, "%s, %p",type_txt,(void*) ctrl);
+    r+=len+2+sizeof(void*);
+
+    if(ctrl->txt)
+    {
+        snprintf(txt+r, 1024-r, " - %s",ctrl->txt->txt->txt);
+        r+=strlen(ctrl->txt->txt->txt) +3;
+    }
+    txt[r] = '\0';
+    log_this(100,"%s\n", txt);
+
+    for (i=0; i<ctrl->relatives->n_children; i++)
+    {
+        CTRL *child = ctrl->relatives->children[i];
+        print_controls(child, level+1);
+    }
+
+
+    return 0;
+
+
 }

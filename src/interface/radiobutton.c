@@ -129,7 +129,7 @@ struct CTRL* add_radio_button(struct CTRL *radio_master, tileless_event_func_in_
     }
     else
         radio_button = register_control(RADIOBUTTON, radio_master, radio_master,radio_clicked,NULL, set_unset, box, color, NULL,text_margins, default_active,radio_master->z + 1);
-   
+
     radio_button->alignment = V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT;
 
     return radio_button;

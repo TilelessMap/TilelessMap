@@ -80,9 +80,9 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         log_this(10, "Problem 2\n");
-       while ((err = glGetError()) != GL_NO_ERROR) {
-	fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
-}
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
+        }
     }
 
 //    get_data(window, newBBOX, theMatrix);
@@ -163,7 +163,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                       {*/
                     if(incharge)
                     {
-                        
+
                         if(wheel_y > 0)
                             matrixFromBboxPointZoom(incharge->matrix_handler,incharge->matrix_handler,px_x_clicked, px_y_clicked, 0.5);
                         else
@@ -172,14 +172,14 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                     }
                     else
                     {
-                        
+
                         if(wheel_y > 0)
                             matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 0.5);
                         else
                             matrixFromBboxPointZoom(&map_matrix,&map_matrix,px_x_clicked, px_y_clicked, 2);
 
                     }
-                   
+
                     get_data(window, &map_matrix, controls);
 
                     // copyNew2CurrentBBOX(newBBOX, currentBBOX);
@@ -200,15 +200,15 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                             if(!incharge)
                             {
                                 matrixFromDeltaMouse(&map_matrix,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                             //   render_data(window, map_matrix.matrix, controls);
+                                //   render_data(window, map_matrix.matrix, controls);
                             }
                             else
                             {
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                            //    render_data(window, map_matrix.matrix, controls);
+                                //    render_data(window, map_matrix.matrix, controls);
                             }
-                                render_data(window, map_matrix.matrix, controls);
-                     
+                            render_data(window, map_matrix.matrix, controls);
+
                             //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                             while ((err = glGetError()) != GL_NO_ERROR) {
                                 log_this(10, "Problem 2\n");
@@ -397,7 +397,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                         glViewport(0,0,CURR_WIDTH, CURR_HEIGHT);
                         log_this(10,"new size = %d, %d\n", CURR_WIDTH, CURR_HEIGHT);
                         check_screen_size();
-                        
+
                         if(!incharge)
                         {
                             matrixFromDeltaMouse(&map_matrix,&map_matrix,0,0,0,0);
@@ -409,8 +409,8 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                             render_data(window, map_matrix.matrix, controls);
                         }
 
-                            
-                            
+
+
                     }
                     break;
 
