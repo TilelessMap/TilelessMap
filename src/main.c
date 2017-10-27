@@ -26,8 +26,6 @@
 #include "tilelessmap.h"
 #include <string.h>
 
-
-
 static int button_test(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 {
     log_this(100, "Yes, it works, getting text %s\n", (char*) val);
