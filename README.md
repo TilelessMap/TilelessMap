@@ -2,7 +2,7 @@
 a map client for offline usage
 
 This is just about the client.
-Packaging the mapdata in PostGIS is a separate project: https://github.com/nicklasaven/pg_tileless 
+Packaging the mapdata in PostGIS is a separate project: https://github.com/TilelessMap/pg_tileless 
 
 #### What is this? ####
 
@@ -14,12 +14,15 @@ This is is still just a proof of concept project, but it starts to show some pot
 
 #### What is working now? ####
 
-The map client is tested on Debian and Android. It compiles on windows,  with Visual Studio, but I only have that on a virtual machine, where I haven't succeeded to reach the gpu. So I haven't tried running it.
+The map client is tested on Debian and Android, Windows and raspberry Pi. There is some issue on the Pi making it crash after a while.
 
 For Android I haven't yet found how to share the right parts of the Android Studio project, but that will come soon. It is basicly the Android project from libsdl.org
 
-Some map data and android apk can be found at:
-http://twkb.jordogskog.no/
+Some map data can be found at:
+https://twkb.jordogskog.no/maps/
+
+compiled android apk
+https://twkb.jordogskog.no/downloads/
 
 
 
@@ -31,13 +34,14 @@ http://twkb.jordogskog.no/
 To compile you need:
 freetype
 sdl2
+sdl2-image (for orthophotos)
 glew
 
 sqlite is part of the source-code for simplicity.
 
 To install all dependencies on a clean debian system:
 
-    apt-get install git build-essential pkg-config libfreetype6-dev libsdl2-dev libglew-dev
+    apt-get install git build-essential pkg-config libfreetype6-dev libsdl2-dev libsdl2-image-dev libglew-dev libmxml-dev
 
 #### Compile ####
 
@@ -45,19 +49,19 @@ To install all dependencies on a clean debian system:
 
     make
 
-#### Get map data ####
+#### Get some test map data ####
 
 
-    wget http://twkb.jordogskog.no/boston.tileless
+    wget https://twkb.jordogskog.no/maps/solor.tileless
 
 #### Run ###
 
-    ./tileless -f boston.tileless -d ./
+    ./tileless -f solor.tileless -d ./
 
 the -d option is to set the working directory. Since a map project can be spread over many sqlite files the working directory is where the client searches for the other data-bases.
 
 ## Some notes ##
 
-The map data is packed in sqlite databases. Databases with project information (like layers and styles) are called .tileless as a convention. Pure map data dataabses are called .sqlite.
+The map data is packed in sqlite databases. Databases with project information (like layers and styles) are called .tileless as a convention. Pure map data databases are called .sqlite.
 
 Licensce GPL v2
