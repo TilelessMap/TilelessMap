@@ -5,10 +5,10 @@ android {
     compileSdkVersion 21
     buildToolsVersion '25.0.0'
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 19
-        versionCode 3
-        versionName "1.1.1"
+        minSdkVersion 21
+        targetSdkVersion 21
+        versionCode 1
+        versionName "0.1.0"
 
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
