@@ -1,30 +1,29 @@
-
 /**********************************************************************
  *
- * TileLess
+ * TileLessMap
  *
- * TileLess is free software: you can redistribute it and/or modify
+ * TileLessMap is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * TileLess is distributed in the hope that it will be useful,
+ * 
+ * TileLessMap is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with TileLess.  If not, see <http://www.gnu.org/licenses/>.
+ * along with TileLessMap.  If not, see <http://www.gnu.org/licenses/>.
  *
  **********************************************************************
  *
- * Copyright (C) 2016-2017 Nicklas Avén
+ * Copyright (C) 2016-2018 Nicklas Avén
  *
- **********************************************************************/
+ ***********************************************************************/
 #include "theclient.h"
 #include "text.h"
 #include "mem.h"
-#include "utils.h"
+
 
 #define MAXWIDTH 1024
 
@@ -284,7 +283,7 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
      * (default style with right type) This means right type gets prioritized before font type
      * This could be discussed if it is right*/
     sql_txt = "select name,type, font from main.fonts order by \"name\" = ? desc ,type = ? desc, prio;";
-    check_sql(sql_txt);
+	check_sql(sql_txt);
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
     if (rc != SQLITE_OK ) {

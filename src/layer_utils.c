@@ -1,25 +1,25 @@
 /**********************************************************************
  *
- * TileLess
+ * TileLessMap
  *
- * TileLess is free software: you can redistribute it and/or modify
+ * TileLessMap is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * TileLess is distributed in the hope that it will be useful,
+ * 
+ * TileLessMap is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with TileLess.  If not, see <http://www.gnu.org/licenses/>.
+ * along with TileLessMap.  If not, see <http://www.gnu.org/licenses/>.
  *
  **********************************************************************
  *
- * Copyright (C) 2016-2017 Nicklas Avén
+ * Copyright (C) 2016-2018 Nicklas Avén
  *
- **********************************************************************/
+ ***********************************************************************/
 
 
 
@@ -36,7 +36,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     int rc;
     sqlite3_stmt *prepared_sql;
     snprintf(sql, 1024, "select count(*) from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
-    check_sql(sql);
+	check_sql(sql);
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
     if (rc != SQLITE_OK ) {
@@ -72,6 +72,7 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
     sqlite3_stmt *prepared_sql;
     snprintf(sql, 1024, "select sql from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
 //   printf("sql = %s\n", sql);
+check_sql(sql);
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
     if (rc != SQLITE_OK ) {
