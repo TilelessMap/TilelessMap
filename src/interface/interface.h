@@ -163,9 +163,6 @@ int get_bottom_right(struct CTRL *t, GLshort *p);
 int get_top_right(struct CTRL *t, GLshort *p);
 
 int destroy_control(struct CTRL *t);
-uint8_t screensize;
-
-GLfloat size_factor;
 int check_screen_size();
 ATLAS *text_font_normal,*text_font_bold, *char_font;
 //CTRL* add_button(struct CTRL* caller, struct CTRL* spatial_parent, GLshort box_in[],const char *txt, tileless_event_function click_func, GLfloat* color,int font_size,short *txt_margin, int default_active);
