@@ -61,7 +61,7 @@
 #define INIT_HEIGHT 500
 
 //Set this to 0 to do the data fetching in serial. Good for debugging
-#define THREADING 1
+#define THREADING 0
 
 #define DEFAULT_TEXT_BUF 1024
 
@@ -243,7 +243,7 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 void render_txt(SDL_Window* window) ;
 int loadPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
 int  renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix);
-int render_data(SDL_Window* window,GLfloat *theMatrix, struct CTRL *controls);
+int render_data(SDL_Window* window,MATRIX *theMatrix, struct CTRL *controls);
 int render_info(SDL_Window* window,GLfloat *theMatrix);
 
 

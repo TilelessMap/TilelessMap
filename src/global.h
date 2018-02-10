@@ -20,7 +20,19 @@
  * Copyright (C) 2016-2017 Nicklas Avén
  *
  ***********************************************************************/
+#ifndef _global_H
+#define _global_H
 
-
-
+#include <stdint.h>
 #define APPNAME "TILELESS"
+
+
+
+uint8_t screensize;
+
+float size_factor;
+float text_size_factor;
+
+float dpi;
+
+#endif

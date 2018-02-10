@@ -89,7 +89,7 @@ int max_width = 1000;
 
 
     sqlite3_reset(prepared_info);
-
+    check_sql(layer_info_sql->txt);
     rc = sqlite3_prepare_v2(projectDB, layer_info_sql->txt, -1,&prepared_layer_info, 0);
     if (rc != SQLITE_OK ) {
         log_this(100, "SQL error in %s\n",layer_info_sql->txt );

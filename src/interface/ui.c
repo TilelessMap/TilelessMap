@@ -338,7 +338,7 @@ int set_info_txt(void *ctrl, void *page_p, tileless_event_func_in_func func_in_f
     GLfloat fontcolor[] = {0,0,0,255};
     sqlite3_stmt *preparedinfo;
     char *sql = "select txt, text_size, bold, link_to_page from tilelessmap_info where page = ? order by orderby;";
-
+    check_sql(sql);
     int rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinfo, 0);
 
     if (rc != SQLITE_OK ) {

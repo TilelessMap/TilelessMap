@@ -23,7 +23,7 @@
 
 #ifndef _utils_H
 #define _utils_H
-
+int check_sql(char *sql);
 int multiply_short_array(GLshort *a, GLfloat v, GLshort ndims);
 int multiply_float_array(float *a, float v, GLshort ndims);
 

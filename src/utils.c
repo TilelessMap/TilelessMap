@@ -39,6 +39,27 @@
     newBBOX[3] = y+height/2;
 }*/
 
+int check_sql(char *sql)
+{
+    int i;
+    int c;
+    int to_check = ';';
+    int sql_len = strlen(sql);
+    for(i=0;i<sql_len;i++)
+    {
+        c=*sql;
+        sql++;    
+        if(c==to_check)
+        {
+            if(*sql)
+            {                               
+                sqlite3_close(projectDB);
+                return EXIT_FAILURE;
+            }
+        }        
+    }
+    return 0;
+}
 void initialBBOX(GLfloat x, GLfloat y, GLfloat width, MATRIX *map_matrix)
 {
     GLfloat ratio = (GLfloat) CURR_HEIGHT/ (GLfloat) CURR_WIDTH;

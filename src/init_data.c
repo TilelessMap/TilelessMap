@@ -28,6 +28,7 @@
 #include "symbols.h"
 #include "mem.h"
 #include "theclient.h"
+#include "utils.h"
 /********************************************************************************
   Attach all databases with data for the project
 */
@@ -39,7 +40,7 @@ static int attach_db(char *dir, TEXT *missing_db)
     sqlite3_stmt *preparedDb2Attach;
     char sql[2048];
     char *sqlDb2Attach = " select distinct d.source, d.name from dbs d inner join layers l on d.name=l.source;";
-
+    check_sql(sqlDb2Attach);
     rc = sqlite3_prepare_v2(projectDB, sqlDb2Attach, -1, &preparedDb2Attach, 0);
     if (rc != SQLITE_OK ) {
         log_this(1, "SQL error in %s\n",sqlDb2Attach );
@@ -58,6 +59,8 @@ static int attach_db(char *dir, TEXT *missing_db)
 		else
 			snprintf(sqlAttachDb, sizeof(sql), "ATTACH '%s' AS %s;", dbsource, dbname);
 		log_this(10, "attachsql = %s\n",sqlAttachDb );
+        
+        check_sql(sqlAttachDb);
         rc = sqlite3_exec(projectDB,sqlAttachDb,NULL, NULL, &err_msg);
         if (rc != 0)
         {
@@ -91,6 +94,7 @@ static int count_layers()
     sqlite3_stmt *preparedCountLayers;
     char *sqlCountLayers = "SELECT COUNT(*) FROM layers l ; ";
 
+        check_sql(sqlCountLayers);
     rc = sqlite3_prepare_v2(projectDB, sqlCountLayers, -1, &preparedCountLayers, 0);
 
     if (rc != SQLITE_OK ) {
@@ -128,6 +132,7 @@ static int load_symbols()
                        "symbol_id, n_dirs, length_second, rotation  "
                        "from symbols order by symbol_id;";
 
+    check_sql(sqlSymbols);
     rc = sqlite3_prepare_v2(projectDB, sqlSymbols, -1, &preparedSymbolsLoading, 0);
 
     if (rc != SQLITE_OK ) {
@@ -226,6 +231,7 @@ static int load_layers(TEXT *missing_db)
 
     log_this(10, "Get Layer sql : %s\n",sqlLayerLoading);
     
+    check_sql(sqlLayerLoading);
     rc = sqlite3_prepare_v2(projectDB, sqlLayerLoading, -1, &preparedLayerLoading, 0);
     if (rc != SQLITE_OK ) {
         log_this(110, "SQL error in %s\n",sqlLayerLoading);
@@ -288,6 +294,7 @@ static int load_layers(TEXT *missing_db)
             {
                 snprintf(sql, 2048, "SELECT geometry_fld,data_fld, id_fld,spatial_idx,  utm_zone, hemisphere, tilewidth, tileheight from %s.raster_columns where layer_name='%s';", dbname, layername);
 
+                check_sql(sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
                 if (rc != SQLITE_OK ) {
@@ -318,6 +325,7 @@ static int load_layers(TEXT *missing_db)
                 snprintf(sql, 2048, "select %s, %s,%s, %s,0, x,y from %s.%s o inner join %s.%s i on o.%s = i.id where  i.minX<? and i.maxX>? and i.minY<? and i.maxY >? order by x, y;",
                          geometry_fld,data_fld,idfield, idfield, dbname, layername, dbname, geometryindex, idfield);
 
+                check_sql(sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
                 log_this(10, "sql %s\n",sql );
                 if (rc != SQLITE_OK ) {
@@ -355,6 +363,7 @@ static int load_layers(TEXT *missing_db)
 
 
                 log_this(10, "Get info from geometry_columns : %s\n",sql);
+                check_sql(sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_geo_col, 0);
 
                 if (rc != SQLITE_OK ) {
@@ -512,6 +521,7 @@ static int load_layers(TEXT *missing_db)
                         stylewhere );
 
                         */
+                check_sql(sql);
                 rc = sqlite3_prepare_v2(projectDB, sql, -1,&preparedLayer, 0);
                 log_this(10, "sql %s\n",sql );
                 if (rc != SQLITE_OK ) {
@@ -568,7 +578,7 @@ static int load_layers(TEXT *missing_db)
         sqlite3_stmt *preparedinitBox;
 
         char *sql = "select x,y,box_width, utm_zone, hemisphere from init_box;";
-
+        check_sql(sql);
         rc = sqlite3_prepare_v2(projectDB, sql, -1, &preparedinitBox, 0);
 
 

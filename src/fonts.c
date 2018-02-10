@@ -24,7 +24,7 @@
 #include "theclient.h"
 #include "text.h"
 #include "mem.h"
-
+#include "utils.h"
 
 #define MAXWIDTH 1024
 
@@ -254,6 +254,8 @@ static FONT* check_font(const char *fontname, int fonttype, int size)
 ATLAS* loadatlas(const char* fontname,int fonttype, int size)
 {
     log_this(10, "Entering %s\n",__func__);
+    
+    size *= text_size_factor;
     if(size > MAX_FONT_SIZE)
     {
         log_this(100,"TilelessMap doesn't support larger fonts than %d. Font size %d will be used\n",MAX_FONT_SIZE,MAX_FONT_SIZE);
@@ -282,6 +284,7 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
      * (default style with right type) This means right type gets prioritized before font type
      * This could be discussed if it is right*/
     sql_txt = "select name,type, font from main.fonts order by \"name\" = ? desc ,type = ? desc, prio;";
+    check_sql(sql_txt);
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
     if (rc != SQLITE_OK ) {

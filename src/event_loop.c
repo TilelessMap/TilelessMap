@@ -101,7 +101,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
 
             if(ev.type == GPSEventType)
             {
-                render_data(window, map_matrix.matrix, controls);
+                render_data(window, &map_matrix, controls);
             }
             else
             {
@@ -131,9 +131,8 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                         if(! map_modus && !any_hit)
                         {
                             identify(&map_matrix, mouse_up_x,mouse_up_y);
-                            //render_data(window, map_matrix.matrix);
                         }
-                        render_data(window, map_matrix.matrix, controls);
+                        render_data(window, &map_matrix, controls);
 
                     }
                     else
@@ -149,7 +148,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                         else
                         {
                             matrixFromDeltaMouse(incharge->matrix_handler,&ref, mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                            render_data(window, map_matrix.matrix, controls);
+                            render_data(window, &map_matrix, controls);
                         }
                         //}
 
@@ -200,14 +199,12 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                             if(!incharge)
                             {
                                 matrixFromDeltaMouse(&map_matrix,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                //   render_data(window, map_matrix.matrix, controls);
                             }
                             else
                             {
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                //    render_data(window, map_matrix.matrix, controls);
                             }
-                            render_data(window, map_matrix.matrix, controls);
+                            render_data(window, &map_matrix, controls);
 
                             //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                             while ((err = glGetError()) != GL_NO_ERROR) {
@@ -266,7 +263,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                         {
                             identify(&map_matrix, (GLint) (tx * CURR_WIDTH), (GLint)(ty * CURR_HEIGHT));
                         }
-                        render_data(window, map_matrix.matrix, controls);
+                        render_data(window, &map_matrix, controls);
                         reset_touch_que(touches);
                     }
                     else
@@ -289,7 +286,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
 
                                     get_box_from_touches(touches, incharge->matrix_handler,&ref);
                                     matrixFromBBOX(incharge->matrix_handler);
-                                    render_data(window, map_matrix.matrix, controls);
+                                    render_data(window, &map_matrix, controls);
                                 }
 
                                 reset_touch_que(touches);
@@ -312,7 +309,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                             else
                             {
                                 matrixFromDeltaMouse(incharge->matrix_handler,&ref,mouse_down_x,mouse_down_y,mouse_up_x,mouse_up_y);
-                                render_data(window, map_matrix.matrix, controls);
+                                render_data(window, &map_matrix, controls);
                             }
 
                             reset_touch_que(touches);
@@ -352,7 +349,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
 
 
                         if(n_events<2)
-                            render_data(window, map_matrix.matrix, controls);
+                            render_data(window, &map_matrix, controls);
 
 
                     }
@@ -378,7 +375,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                         }
 
                         if(n_events<2)
-                            render_data(window, map_matrix.matrix, controls);
+                            render_data(window, &map_matrix, controls);
                         //         copyNew2CurrentBBOX(newBBOX, currentBBOX);
                     }
                     //}
@@ -406,7 +403,7 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                         else
                         {
                             matrixFromDeltaMouse(incharge->matrix_handler,incharge->matrix_handler,0,0,0,0);
-                            render_data(window, map_matrix.matrix, controls);
+                            render_data(window, &map_matrix, controls);
                         }
 
 

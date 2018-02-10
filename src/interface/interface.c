@@ -25,7 +25,7 @@
 #include "../mem.h"
 #include "interface.h"
 #include "../utils.h"
-
+#include "../global.h"
 
 static inline int32_t max_i(int a, int b)
 {
@@ -43,31 +43,31 @@ int check_screen_size()
 {
 
     int character_size, text_size;
-    if(CURR_WIDTH > 1000)
+    if(dpi>300)
     {
         log_this(100,"BIGSCREEN");
         screensize = BIGSCREEN;
-        size_factor = 2;
-        character_size = 40;
-        text_size = 30;
+        size_factor = 4;
+        text_size_factor = 4;
     }
-    else if (CURR_WIDTH >500)
+    else if (dpi>200)
     {
         log_this(100,"MIDDLESCREEN");
         screensize = MIDDLESCREEN;
-        size_factor = 1.5;
-        character_size = 30;
-        text_size = 25;
+        size_factor = 2;
+        text_size_factor = 2;
     }
     else
     {
         log_this(100,"SMALLSCREEN");
         screensize = SMALLSCREEN;
         size_factor = 1;
-        character_size = 20;
-        text_size = 20;
+        text_size_factor = 1;
     }
 
+    log_this(100, "dpi is %f\n",dpi);
+        character_size = 20;
+        text_size = 20;
     text_font_normal = NULL;
     text_font_bold = NULL;
     char_font = NULL;

@@ -352,6 +352,7 @@ fprintf(stderr,"0 - opengl error:%d in func %s, i = %d\n", err, __func__,i);
         n_vals_acc = *(line->line_start_indexes->list + i)/vals_per_point;
 
     }
+        //    printf("n_vals_acc %d\n", n_vals_acc);
         while ((err = glGetError()) != GL_NO_ERROR) {
 fprintf(stderr,"1 - opengl error:%d in func %s layer %s\n", err, __func__,oneLayer->name);
 }
@@ -551,6 +552,7 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         n_vals = n_vals_acc = 0;
         glDisableVertexAttribArray(std_coord2d);
     }
+    
     if(!(oneLayer->type & 8))
     {
         LINE_STYLE *style = NULL;
@@ -622,12 +624,13 @@ fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
 
 
 
-static int render_data_layers(GLfloat *theMatrix, CTRL *controls)
+static int render_data_layers(MATRIX *theMatrix, CTRL *controls)
 {
     log_this(10, "Entering render_data\n");
     int i;
     LAYER_RUNTIME *oneLayer;
 
+    GLfloat meterPerPixel = (theMatrix->bbox[3]-theMatrix->bbox[1])/CURR_HEIGHT;
 
     total_points=0;
     for (i=0; i<global_layers->nlayers; i++)
@@ -638,25 +641,26 @@ static int render_data_layers(GLfloat *theMatrix, CTRL *controls)
              continue;*/
         int type = oneLayer->type;
 //printf("render layer %s\n",oneLayer->name);
-        if(oneLayer->visible)
+        if(oneLayer->visible && oneLayer->minScale<=meterPerPixel && oneLayer->maxScale>meterPerPixel)
         {
 
-//~ log_this(10, "render : %d\n",oneLayer->geometryType);
+//~ 
+            log_this(100, "render : %s\n",oneLayer->name);
             if(oneLayer->geometryType >= RASTER)
-                loadandRenderRaster( oneLayer, theMatrix);
+                loadandRenderRaster( oneLayer, theMatrix->matrix);
             //     log_this(10, "render point");
             if (type & 32)
-                render_text(oneLayer, theMatrix);
+                render_text(oneLayer, theMatrix->matrix);
 
             if(type & (224-32))
-                renderPoint(oneLayer, theMatrix);
+                renderPoint(oneLayer, theMatrix->matrix);
 
             if(type & 8)
-                renderLineTri(oneLayer,theMatrix);
+                renderLineTri(oneLayer,theMatrix->matrix);
             if (type & 16)
-                renderLine( oneLayer, theMatrix);
+                renderLine( oneLayer, theMatrix->matrix);
             if(type & 4)
-                renderPolygon( oneLayer, theMatrix);
+                renderPolygon( oneLayer, theMatrix->matrix);
             //renderLine(oneLayer, theMatrix,1);
 
 
@@ -664,7 +668,7 @@ static int render_data_layers(GLfloat *theMatrix, CTRL *controls)
 
 
     }
-    renderGPS(theMatrix);
+    renderGPS(theMatrix->matrix);
 
     //render_simple_rect(5,75,300,225);
 
@@ -679,7 +683,7 @@ fprintf(stderr,"0 - opengl error:%d in func %s\n", err, __func__);
 
 
 
-int render_data(SDL_Window* window,GLfloat *theMatrix, CTRL *controls)
+int render_data(SDL_Window* window,MATRIX *theMatrix, CTRL *controls)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -688,7 +692,7 @@ int render_data(SDL_Window* window,GLfloat *theMatrix, CTRL *controls)
 
     if(infoRenderLayer->visible)
     {
-        loadPolygon(infoRenderLayer, theMatrix);
+        loadPolygon(infoRenderLayer, theMatrix->matrix);
     }
     SDL_GL_SwapWindow(window);
 
@@ -751,7 +755,7 @@ float delta[2];
 //    if(oneLayer->show_text && oneLayer->text->used_n_vals!=rb->used_n_pa)
     if(oneLayer->type & 32 && oneLayer->points->point_start_indexes->used!=oneLayer->text->tb->txt_info->ntexts)
     {
-        log_this(100,"There is a mismatch between number of labels and number of corresponding points\n");
+        log_this(100,"There is a mismatch between number of labels and number of corresponding points, %d points and %d texts",oneLayer->points->point_start_indexes->used, oneLayer->text->tb->txt_info->ntexts );
         return 1;
     }
 
@@ -778,18 +782,19 @@ float delta[2];
     glBindBuffer(GL_ARRAY_BUFFER, point->tbo);
     
     while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"4 - opengl error:%d in func %s\n", err, __func__);
-}
+        fprintf(stderr,"4 - opengl error:%d in func %s\n", err, __func__);
+    }
     while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"3 - opengl error:%d in func %s\n", err, __func__);
-}
+        fprintf(stderr,"3 - opengl error:%d in func %s\n", err, __func__);
+    }
     glEnableVertexAttribArray(txt2_box);
     /* Describe our vertices array to OpenGL (it can't guess its format automatically) */
     
     
-    while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"2 - opengl error:%d in func %s\n", err, __func__);
-}
+    while ((err = glGetError()) != GL_NO_ERROR) 
+    {
+        fprintf(stderr,"2 - opengl error:%d in func %s\n", err, __func__);
+    }
     glVertexAttribPointer(
         txt2_box,
         4,
@@ -799,9 +804,10 @@ fprintf(stderr,"2 - opengl error:%d in func %s\n", err, __func__);
         0
     );
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-fprintf(stderr,"1 - opengl error:%d in func %s\n", err, __func__);
-}
+    while ((err = glGetError()) != GL_NO_ERROR) 
+    {
+        fprintf(stderr,"1 - opengl error:%d in func %s\n", err, __func__);
+    }
         int r = 0;
     for (i=0; i<ti->ntexts; i++)
     {

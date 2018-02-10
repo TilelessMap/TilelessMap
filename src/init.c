@@ -82,7 +82,16 @@ extern int TLM_init(char *f, char *dir)
 
     CURR_WIDTH = r.w*0.9;
     CURR_HEIGHT = r.h*0.9;
+    
 
+int res = SDL_GetDisplayDPI(0,&dpi, NULL, NULL);
+if (res) {
+    // Unrecoverable error, exit here.
+    printf("Failed to get screen dpi: %s\n", SDL_GetError());
+    dpi=100;
+}
+
+//printf("res = %d, diagonal = %f, horizontal = %f, vertical = %f\n",res, d,h,v);
 #ifndef __ANDROID__
     window = SDL_CreateWindow("TilelessMap",
                                           0, 0, CURR_WIDTH, CURR_HEIGHT,

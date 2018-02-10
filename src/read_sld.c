@@ -27,6 +27,7 @@
 #include "mem.h"
 #include "buffer_handling.h"
 #include "fonts.h"
+#include "global.h"
 static GLfloat* read_color(const char* str, GLfloat *c)
 {
 
