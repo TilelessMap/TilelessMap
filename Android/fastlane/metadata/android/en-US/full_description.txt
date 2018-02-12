@@ -1,0 +1,42 @@
+A mapclient that reads data from a local SQLite database and renders 
+the map through openGL. 
+
+The database that the app reads from can be anywhere on the phone, which means 
+that the same data can be used across multiple apps. If you need to reinstall 
+the app, the data will not be touched. That is good since you can handle many 
+GB of data in the app. In the future there will hopefully be a separate app 
+taking care of keeping your data up to date, which is a simple task since 
+syncronization can be done based on timestamps of single geometries.
+
+This project is still more of a "proof of concept". Any contributions to make 
+it more complete and feature rich is welcome. Hopefully this can become a 
+healthy community project. 
+
+''''The maps''''
+You can get maps from "ready to use" databases or you can pack your own.
+
+A few maps that is "ready to use" can be downloded from 
+[https://tilelessmap.org/maps/ https://tilelessmap.org/maps/]
+
+To pack your own maps go to 
+[https://github.com/TilelessMap/pg_tileless https://github.com/TilelessMap/pg_tileless]
+
+
+The app as it stands now is built on top of these open source projects:
+
+Simple Direct Media Layer library, SDL, originally licensed under zlib license.
+[https://www.libsdl.org https://www.libsdl.org]
+
+SDL_image, originally licensed under zlib license
+[https://www.libsdl.org/projects/SDL_image/ https://www.libsdl.org/projects/SDL_image/]
+
+FreeType, originally released under FreeType License
+[https://www.freetype.org https://www.freetype.org]
+
+Mini-XML, originally released under  [https://github.com/michaelrsweet/mxml/blob/master/COPYING Mini-XML license]
+[http://www.msweet.org/mxml http://www.msweet.org/mxml]
+
+uthash, originally released under [http://troydhanson.github.io/uthash/license.html BSD revised license]
+
+Point in Polygon algorithm ported to C from Dan Sundays code
+[http://www.geomalgorithms.com/a03-_inclusion.html http://www.geomalgorithms.com/a03-_inclusion.html]
