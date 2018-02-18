@@ -299,6 +299,9 @@ struct timeval tval_before, tval_after, tval_result;
 #endif
 
 int init_success;
+
+char database_name[256];
+char working_dir[256];
 int map_modus;
 GLfloat info_box_color[4];
 sqlite3 *projectDB;

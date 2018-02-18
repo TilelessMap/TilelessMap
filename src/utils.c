@@ -261,8 +261,8 @@ float min_f(float a, float b)
         return a;
 }
 
-char *database_name = NULL;
-char *working_dir = NULL;
+//char *database_name = NULL;
+//char *working_dir = NULL;
 
 static void register_projdb(const char *dbname, const char *dirname)
 {
@@ -273,8 +273,8 @@ static void register_projdb(const char *dbname, const char *dirname)
   
                 log_this(100, "in register_projdb %s, dirname %s, %p, %p",(const char*) dbname,(const char*) dirname, dbname, dirname);
 
-        database_name = st_malloc(strlen(dbname) + 1);
-        working_dir = st_malloc(strlen(dirname) + 1);
+//        database_name = st_malloc(strlen(dbname) + 1);
+//        working_dir = st_malloc(strlen(dirname) + 1);
                 
         log_this(100, "in register_projdb %s, dirname %s, %p, %p",(const char*) database_name,(const char*) working_dir, database_name, working_dir);
         strcpy(database_name, dbname);

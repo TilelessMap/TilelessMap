@@ -50,7 +50,7 @@ int check_screen_size()
         size_factor = 2;
         text_size_factor = 2;
     }
-    else if (dpi>200)
+    else if (dpi>250)
     {
         log_this(100,"MIDDLESCREEN");
         screensize = MIDDLESCREEN;
