@@ -47,15 +47,15 @@ int check_screen_size()
     {
         log_this(100,"BIGSCREEN");
         screensize = BIGSCREEN;
-        size_factor = 4;
-        text_size_factor = 4;
+        size_factor = 2;
+        text_size_factor = 2;
     }
     else if (dpi>200)
     {
         log_this(100,"MIDDLESCREEN");
         screensize = MIDDLESCREEN;
-        size_factor = 2;
-        text_size_factor = 2;
+        size_factor = 1.5;
+        text_size_factor = 1.5;
     }
     else
     {

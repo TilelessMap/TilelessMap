@@ -43,7 +43,7 @@ allprojects {
 dependencies {
 // other stuff here
     compile "com.android.support:support-v4:25.4.0"
- //   compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.4.0'
 // update the 23.0.0 to latest version available
 }
