@@ -32,7 +32,7 @@
 /********************************************************************************
   Attach all databases with data for the project
 */
-static int attach_db(char *dir, TEXT *missing_db)
+static int attach_db(const char *dir, TEXT *missing_db)
 {
 
     int rc;
@@ -635,7 +635,7 @@ static int init_info_Layer()
 
 }
 
-int init_resources(char *dir)
+int init_resources(const char *dir)
 {
     log_this(10, "Entering %s\n",__func__);
     map_modus = 1;
@@ -677,7 +677,6 @@ int init_resources(char *dir)
     tmp_unicode_txt = init_wc_txt(256);
     return 0;
 }
-
 
 
 

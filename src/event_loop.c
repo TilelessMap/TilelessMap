@@ -29,16 +29,43 @@
 #include "matrix_handling.h"
 #include "log.h"
 #include "utils.h"
-
+#include "tilelessmap.h"
 void mainLoop(SDL_Window* window,struct  CTRL *controls)
 {
     log_this(100, "Entering mainLoop now\n");
+    
+    
+    
+    SDL_Event ev;
+    GPSEventType = ((Uint32) -1);
+    haveDBEventType = ((Uint32) -1);
+    
+    
+        
+     while (!projectDB && !init_success)
+    {    
+        
+        if (SDL_WaitEvent(&ev)) /* execution suspends here while waiting on an event */
+        {
+            log_this(100, "ev.type %d, %d", ev.type,haveDBEventType );
+            if(haveDBEventType && ev.type == haveDBEventType)
+            { 
+                log_this(100, "in event loop filname %s, dirname %s, %p, %p",(const char*) ev.user.data1,(const char*) ev.user.data2, ev.user.data1, ev.user.data2);
+                TLM_init_db((const char*) ev.user.data1,(const char*) ev.user.data2);
+                controls = TLM_init_controls(NATIVE_default);
+               log_this(30,"Yes, have db");
+            }
+            if(ev.type == SDL_QUIT)
+                    return;                    
+           
+        }
+    }
+
+            
 //return;
     GLfloat tx,ty;
     int mouse_down = 0;
     int wheel_y;
-    SDL_Event ev;
-    GPSEventType = ((Uint32)-1);
     SDL_Event tmp_ev[10];
     int n_events;
     GLint px_x_clicked,px_y_clicked;

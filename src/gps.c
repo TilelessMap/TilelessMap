@@ -29,9 +29,6 @@ void gps_in(double latitude, double longitude, double acc)
 {
     if(GPSEventType == ((Uint32)-1))
         GPSEventType = SDL_RegisterEvents(1);
-
-
-
     log_this(100, " let's reproj: lat = %lf, lon = %lf", latitude, longitude);
 
     int hemi = 0;
@@ -61,8 +58,5 @@ void gps_in(double latitude, double longitude, double acc)
         event.user.data2 = 0;
         SDL_PushEvent(&event);
     }
-
-
-
 
 }

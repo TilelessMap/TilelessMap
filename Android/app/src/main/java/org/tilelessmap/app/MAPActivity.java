@@ -3,6 +3,7 @@ package org.tilelessmap.app;
 import org.libsdl.app.SDLActivity;
 
 //import android.location.Location;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -14,6 +15,11 @@ import android.location.LocationManager;
 import android.os.*;
 import android.provider.Settings;
 import android.util.Log;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
+import android.content.pm.PackageManager;
+
+import java.io.File;
 
 /*
  * A sample wrapper class that just calls SDLActivity
@@ -21,14 +27,85 @@ import android.util.Log;
 
 public class MAPActivity extends SDLActivity
 {
+
+    private static final String TAG = "TilelessMap";
     gps gps;
+    private static final int MY_PERMISSION_ACCESS_FINE_LOCATION = 20;
+    private static final int MY_PERMISSION_ACCESS_WRITE_EXTERNAL_STORAGE = 21;
+    public static native void onNativehaveDB(String the_file, String the_dir);
+    String the_file;
+    String the_dir;
+
+
+
+void get_file() {
+
+    FileChooser FC = new FileChooser(this);
+    FC.setFileListener(new FileChooser.FileSelectedListener() {
+        @Override
+        public void fileSelected(final File file) {
+            the_file = file.getAbsolutePath();
+            the_dir = file.getParent();
+            onNativehaveDB(the_file, the_dir);
+            // Set up the surface
+        }
+    });
+
+    FC.setExtension("tileless");
+    FC.showDialog();
+
+}
+
 
     protected void onCreate(Bundle savedInstanceState)
     {
 
         super.onCreate(savedInstanceState);
-        gps = new gps(this);
+
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED )
+        {
+            ActivityCompat.requestPermissions( this, new String[] {android.Manifest.permission.WRITE_EXTERNAL_STORAGE  },MY_PERMISSION_ACCESS_WRITE_EXTERNAL_STORAGE );
         }
+        else
+        {
+            get_file();
+        }
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED )
+        {
+            ActivityCompat.requestPermissions( this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION  },MY_PERMISSION_ACCESS_FINE_LOCATION );
+        }
+        else
+        {
+            gps = new gps(this);
+        }
+
+
+
+
+
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        switch (requestCode) {
+            case MY_PERMISSION_ACCESS_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                get_file();
+                }
+            }
+            case MY_PERMISSION_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    gps = new gps(this);
+
+                }
+            }
+        }
+    }
 
 
 
@@ -79,6 +156,15 @@ class gps extends Service implements LocationListener {
     }
 
     public Location startGPS() {
+        if ( Build.VERSION.SDK_INT >= 23)
+        {
+
+            int permission_test = ActivityCompat.checkSelfPermission( MAPActivity.getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION );
+            if(permission_test!= PackageManager.PERMISSION_GRANTED) {
+                return null;
+            }
+        }
+
         try {
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
@@ -195,7 +281,16 @@ class gps extends Service implements LocationListener {
 
 
     public void onLocationChanged(Location location) {
-        Log.d("GPS","a change is here");
+        if ( Build.VERSION.SDK_INT >= 23)
+        {
+
+            int permission_test = ActivityCompat.checkSelfPermission( MAPActivity.getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION );
+                 if(permission_test!= PackageManager.PERMISSION_GRANTED) {
+                     return;
+                 }
+        }
+
+                Log.d("GPS","a change is here");
         if (locationManager != null) {
             location = locationManager
                     .getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -207,6 +302,7 @@ class gps extends Service implements LocationListener {
                 Log.d("GPS", "lat = " + latitude + "lon = " + longitude);
             }
         }
+
     }
 
     @Override

@@ -36,7 +36,7 @@ import org.w3c.dom.Text;
 /**
     SDL Activity
 */
-public class SDLActivity extends Activity {
+public abstract class SDLActivity extends Activity {
     private static final String TAG = "SDL";
 
     // Keep track of the paused state
@@ -58,8 +58,6 @@ public class SDLActivity extends Activity {
     protected static SDLJoystickHandler mJoystickHandler;
 
 
-    String the_file;
-    String the_dir;
     // This is what SDL runs in. It invokes SDL_main(), eventually
     protected static Thread mSDLThread;
 
@@ -100,16 +98,7 @@ public class SDLActivity extends Activity {
      * @return arguments for the native application.
      */
     protected String[] getArguments() {
-        String[] str = new String[4];
-        str[0] = "-f";
-        str[1] = the_file;
-        // str[1] = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-        str[2] = "-d";
-        str[3] = the_dir + "/";
-        //  str[3] = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParent();
-        Log.i(TAG, "File to use is: " + str[1]);
-        Log.i(TAG, "Dir to use is: " + str[3]);
-        return str;
+        return new String[0];
     }
 
 
@@ -190,39 +179,11 @@ public class SDLActivity extends Activity {
         mLayout = new RelativeLayout(this);
         //For fileChooser flavor
 
-        String flavor = "filechooser";
-        if(flavor == "filechooser")
-        {
+        mSurface = new SDLSurface(getApplication());
+        mLayout.addView(mSurface);
+        setContentView(mLayout);
 
-            FileChooser FC = new FileChooser(this);
-            FC.setFileListener(new FileChooser.FileSelectedListener() {
-                @Override
-                public void fileSelected(final File file) {
-                    the_file = file.getAbsolutePath();
-                    the_dir = file.getParent();
-                    // Set up the surface
-                    mSurface = new SDLSurface(getApplication());
-                    mLayout.addView(mSurface);
-                    setContentView(mLayout);
-                }
-            });
-
-            FC.setExtension("tileless");
-            FC.showDialog();
-        }
-        else
-        {
-            mSurface = new SDLSurface(getApplication());
-            mLayout.addView(mSurface);
-            setContentView(mLayout);
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), flavor + ".tileless");
-
-            the_file = file.getAbsolutePath();
-            the_dir = file.getParent();
-        }
-
-
-            mJoystickHandler = new SDLJoystickHandler_API12();
+        mJoystickHandler = new SDLJoystickHandler_API12();
 
 
 

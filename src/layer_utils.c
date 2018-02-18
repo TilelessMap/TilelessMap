@@ -36,7 +36,7 @@ int check_layer(const unsigned char *dbname, const unsigned char  *layername)
     int rc;
     sqlite3_stmt *prepared_sql;
     snprintf(sql, 1024, "select count(*) from %s.sqlite_master where type in ('table','view') and name = '%s'", dbname, layername);
-	check_sql(sql);
+    check_sql(sql);
     rc = sqlite3_prepare_v2(projectDB, sql, -1, &prepared_sql, 0);
 
     if (rc != SQLITE_OK ) {

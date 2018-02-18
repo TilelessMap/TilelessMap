@@ -1,4 +1,4 @@
-package org.libsdl.app;
+package org.tilelessmap.app;
 
 import android.app.Activity;
 import android.app.Dialog;

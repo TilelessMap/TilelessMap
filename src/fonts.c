@@ -23,7 +23,7 @@
 #include "theclient.h"
 #include "text.h"
 #include "mem.h"
-
+#include "utils.h"
 
 #define MAXWIDTH 1024
 
@@ -283,7 +283,7 @@ ATLAS* loadatlas(const char* fontname,int fonttype, int size)
      * (default style with right type) This means right type gets prioritized before font type
      * This could be discussed if it is right*/
     sql_txt = "select name,type, font from main.fonts order by \"name\" = ? desc ,type = ? desc, prio;";
-	check_sql(sql_txt);
+    check_sql(sql_txt);
     rc = sqlite3_prepare_v2(projectDB, sql_txt, -1, &preparedFonts, 0);
 
     if (rc != SQLITE_OK ) {

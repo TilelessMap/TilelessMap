@@ -25,6 +25,7 @@
 #include "theclient.h"
 #include "interface/interface.h"
 #include "mem.h"
+#include "tilelessmap.h"
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -38,6 +39,7 @@
     newBBOX[2] = x+width/2;
     newBBOX[3] = y+height/2;
 }*/
+
 int check_sql(char *sql)
 {
     int i;
@@ -259,9 +261,51 @@ float min_f(float a, float b)
         return a;
 }
 
+char *database_name = NULL;
+char *working_dir = NULL;
+
+static void register_projdb(const char *dbname, const char *dirname)
+{
+    if(haveDBEventType == ((Uint32)-1))
+    {
+        haveDBEventType = SDL_RegisterEvents(1);
+        log_this(100, " ok, have a proj db, hopefully, %s, %s, haveDBEventType=%d", dbname, dirname,haveDBEventType );
+  
+                log_this(100, "in register_projdb %s, dirname %s, %p, %p",(const char*) dbname,(const char*) dirname, dbname, dirname);
+
+        database_name = st_malloc(strlen(dbname) + 1);
+        working_dir = st_malloc(strlen(dirname) + 1);
+                
+        log_this(100, "in register_projdb %s, dirname %s, %p, %p",(const char*) database_name,(const char*) working_dir, database_name, working_dir);
+        strcpy(database_name, dbname);
+        strcpy(working_dir, dirname);
+        
+        if (haveDBEventType != ((Uint32) -1)) {
+            SDL_Event event;
+            SDL_memset(&event, 0, sizeof(event)); /* or SDL_zero(event) */
+            event.type = haveDBEventType;
+            event.user.data1 = (void*) database_name;
+            event.user.data2 = (void*) working_dir;
+            SDL_PushEvent(&event);
+        }
+    }
+}
 
 
 #ifdef __ANDROID__
+JNIEXPORT void JNICALL Java_org_tilelessmap_app_MAPActivity_onNativehaveDB(
+    JNIEnv *env, jclass type, jstring the_file_,
+                                                  jstring the_dir_) {
+    const char *the_file = (*env)->GetStringUTFChars(env, the_file_, 0);
+    const char *the_dir = (*env)->GetStringUTFChars(env, the_dir_, 0);
+
+    register_projdb(the_file, the_dir);
+
+    (*env)->ReleaseStringUTFChars(env, the_file_, the_file);
+    (*env)->ReleaseStringUTFChars(env, the_dir_, the_dir);
+}
+
+
 JNIEXPORT void JNICALL Java_org_tilelessmap_app_gps_onNativeGPS(
     JNIEnv* env, jclass jcls,
     double latitude, double longitude, double acc)

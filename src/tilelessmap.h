@@ -62,6 +62,8 @@ typedef struct
 
 /*************** Init and close *******************/
 extern int TLM_init(char *f, char *dir);
+extern int TLM_init_SDL();
+extern int TLM_init_db(const char *f,const char *dir);
 extern void TLM_start();
 extern void TLM_close();
 

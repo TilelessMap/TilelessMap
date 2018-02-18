@@ -193,7 +193,7 @@ typedef struct {
 
 
 
-int init_resources(char *dir);
+int init_resources(const char *dir);
 /*************Memory handling***********/
 
 
@@ -298,6 +298,7 @@ int check_column(const unsigned char *dbname,const unsigned char * layername, co
 struct timeval tval_before, tval_after, tval_result;
 #endif
 
+int init_success;
 int map_modus;
 GLfloat info_box_color[4];
 sqlite3 *projectDB;
@@ -405,6 +406,7 @@ typedef struct  {
 
 point gps_point;
 Uint32 GPSEventType;
+Uint32 haveDBEventType;
 GLuint text_vbo;
 int gps_npoints;
 GLuint gps_vbo;

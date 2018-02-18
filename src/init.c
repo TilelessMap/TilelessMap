@@ -33,22 +33,13 @@
 static SDL_Window* window;
 static SDL_GLContext context;
 
-extern int TLM_init(char *f, char *dir)
+extern int TLM_init_SDL()
 {
     log_this(10, "Entering function %s \n", __func__);
-    
+    init_success = 0; //to stop application fromstarting before everything is finished
     text_scale=2;
-   char projectfile[256];
-
-
-    if (!(f))
-    {
-        log_this(110, "Too few arguments \n");
-        return 1;
-    }
-    snprintf(projectfile, 500, "%s",f);
-    
-    
+ 
+    projectDB = NULL;
     
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -127,8 +118,24 @@ if (res) {
         return EXIT_FAILURE;
     }
 #endif
+return 0;
+}
 
 
+
+extern int TLM_init_db(const char *f,const char *dir)
+{
+    
+      char projectfile[256];
+
+
+    if (!(f))
+    {
+        log_this(110, "Too few arguments \n");
+        return 1;
+    }
+    snprintf(projectfile, 500, "%s",f);
+    
     /* Open db-connection*/
     sqlite3_initialize();
 
@@ -153,7 +160,7 @@ if (res) {
 
     if (init_resources(dir))
         return EXIT_FAILURE;
-
+    init_success = 1;
     return EXIT_SUCCESS;
 }
 
