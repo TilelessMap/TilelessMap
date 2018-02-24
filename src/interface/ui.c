@@ -25,7 +25,7 @@
 #include "../theclient.h"
 #include "../mem.h"
 #include "interface.h"
-#include "../fonts.h"
+#include "../text/fonts.h"
 #include "../utils.h"
 
 static uint8_t show_layer_control;

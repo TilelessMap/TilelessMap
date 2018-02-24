@@ -25,7 +25,7 @@
 #include "theclient.h"
 #include "interface/interface.h"
 #include "info.h"
-#include "matrix_handling.h"
+#include "handle_input/matrix_handling.h"
 #include "log.h"
 #include "cleanup.h"
 

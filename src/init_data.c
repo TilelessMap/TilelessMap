@@ -24,7 +24,7 @@
 
 #include "buffer_handling.h"
 #include "interface/interface.h"
-#include "read_sld.h"
+#include "styling/read_sld.h"
 #include "symbols.h"
 #include "mem.h"
 #include "theclient.h"

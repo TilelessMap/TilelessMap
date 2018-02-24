@@ -22,8 +22,8 @@
  ***********************************************************************/
 
 
-#include "theclient.h"
-#include "buffer_handling.h"
+#include "../theclient.h"
+#include "../buffer_handling.h"
 #include "twkb.h"
 
 static void init_decode(TWKB_PARSE_STATE *ts,TWKB_PARSE_STATE *old_ts);

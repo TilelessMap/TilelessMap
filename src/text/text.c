@@ -22,10 +22,10 @@
  ***********************************************************************/
 
 #include <stdlib.h>
-#include "log.h"
+#include "../log.h"
 #include "text.h"
-#include "mem.h"
-#include "utils.h"
+#include "../mem.h"
+#include "../utils.h"
 
 TEXT* init_txt(size_t s)
 {

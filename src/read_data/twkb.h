@@ -23,9 +23,9 @@
 #ifndef _twkb_H
 #define _twkb_H
 
-#include "text.h"
-#include "buffer_handling.h"
-#include "structures.h"
+#include "../text/text.h"
+#include "../buffer_handling.h"
+#include "../structures.h"
 /***************************************************************
 			DECODING TWKB						*/
 /*Holds a buffer with the twkb-data during read*/

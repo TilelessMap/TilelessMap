@@ -21,9 +21,9 @@
  *
  ***********************************************************************/
 
-#include "theclient.h"
-#include "interface/interface.h"
-#include "utils.h"
+#include "../theclient.h"
+#include "../interface/interface.h"
+#include "../utils.h"
 
 /*int  matrixFromBBOX(GLfloat *newBBOX, GLfloat *theMatrix )
 {

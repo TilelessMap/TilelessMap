@@ -26,9 +26,9 @@
 
 
 
-#include "matrix_handling.h"
-#include "buffer_handling.h"
-#include "structures.h"
+#include "../handle_input/matrix_handling.h"
+#include "../buffer_handling.h"
+#include "../structures.h"
 #include "fonts.h"
 
 //Alignment left bottom is default

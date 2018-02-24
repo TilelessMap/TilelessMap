@@ -24,9 +24,9 @@
 #define _interface_H
 
 #include "../structures.h"
-#include "../text.h"
-#include "../matrix_handling.h"
-#include "../fonts.h"
+#include "../text/text.h"
+#include "../handle_input/matrix_handling.h"
+#include "../text/fonts.h"
 
 
 #define MASTER      0

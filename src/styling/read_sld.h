@@ -23,7 +23,7 @@
 #ifndef READ_SLD_H
 #define READ_SLD_H
 
-#include "theclient.h"
+#include "../theclient.h"
 
 
 

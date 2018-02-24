@@ -21,8 +21,8 @@
  *
  ***********************************************************************/
 
-#include "theclient.h"
-#include "utils.h"
+#include "../theclient.h"
+#include "../utils.h"
 
 
 FINGEREVENT* init_touch_que()

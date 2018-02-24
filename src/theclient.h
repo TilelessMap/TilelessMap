@@ -33,7 +33,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-#include "fonts.h"
 #include <time.h>
 #ifndef _WIN32
 #include <sys/time.h>
@@ -50,9 +49,10 @@
 #endif
 /* Using SDL2 for the base window and OpenGL context init */
 #include "SDL.h"
-#include "text.h"
+#include "text/fonts.h"
+#include "text/text.h"
 #include "global.h"
-#include "matrix_handling.h"
+#include "handle_input/matrix_handling.h"
 #include "symbols.h"
 #include "uthash.h"
 #include "buffer_handling.h"
@@ -218,7 +218,6 @@ void *twkb_fromSQLiteBBOX_thread( void *theL);
 void *twkb_fromSQLiteBBOX( void *theL);
 GLuint create_shader(const char* source, GLenum type);
 void print_log(GLuint object);
-int loadOrSaveDb(sqlite3 *pInMemory, const char *zFilename, int isSave);
 
 
 

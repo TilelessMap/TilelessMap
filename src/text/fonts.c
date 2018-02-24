@@ -20,10 +20,10 @@
  * Copyright (C) 2016-2018 Nicklas Avén
  *
  ***********************************************************************/
-#include "theclient.h"
+#include "../theclient.h"
 #include "text.h"
-#include "mem.h"
-#include "utils.h"
+#include "../mem.h"
+#include "../utils.h"
 
 #define MAXWIDTH 1024
 

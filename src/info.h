@@ -23,7 +23,7 @@
 #ifndef _info_H
 #define _info_H
 
-#include "matrix_handling.h"
+#include "handle_input/matrix_handling.h"
 #include "interface/interface.h"
 
 int identify(MATRIX *map_matrix, int x, int y);

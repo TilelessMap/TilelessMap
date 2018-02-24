@@ -25,7 +25,7 @@
 #include "theclient.h"
 #include "buffer_handling.h"
 #include "info.h"
-#include "text.h"
+#include "text/text.h"
 #include "interface/interface.h"
 #include "utils.h"
 

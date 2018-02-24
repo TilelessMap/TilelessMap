@@ -22,8 +22,8 @@
  ***********************************************************************/
 
 
-#include "theclient.h"
-#include "buffer_handling.h"
+#include "../theclient.h"
+#include "../buffer_handling.h"
 #include "twkb.h"
 /*
 static int get_blob(TWKB_BUF *tb,sqlite3_stmt *res, int icol)

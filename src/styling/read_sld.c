@@ -22,12 +22,12 @@
  ***********************************************************************/
 
 #include "read_sld.h"
-#include "ext/mxml/mxml.h"
+#include "../ext/mxml/mxml.h"
 #include <limits.h>
-#include "mem.h"
-#include "buffer_handling.h"
-#include "fonts.h"
-#include "global.h"
+#include "../mem.h"
+#include "../buffer_handling.h"
+#include "../text/fonts.h"
+#include "../global.h"
 static GLfloat* read_color(const char* str, GLfloat *c)
 {
 
