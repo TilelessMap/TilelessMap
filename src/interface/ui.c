@@ -47,7 +47,7 @@ static struct CTRL *controls;
 struct CTRL* init_controls()
 {
     GLshort box[] = {0,0,0,0}; //This is just a dummy box that we use for the master control.
-    controls =  register_control(MASTER, NULL,NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,1,0);
+    controls =  register_control(MASTER, NULL,NULL,NULL,NULL, NULL, box,NULL, NULL, NULL,7,0);
 
 
     return controls;
@@ -74,7 +74,7 @@ int add_default_controls()
     txt = init_textblock();
     append_2_textblock(txt,"INFO", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
-    CTRL *info = register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 1,1);
+    CTRL *info = register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 7,1);
     info->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
 
     /**** define layer menu -button at main screen ******/
@@ -86,10 +86,9 @@ int add_default_controls()
     txt = init_textblock();
     append_2_textblock(txt,"LAYERS", font, fontcolor,0,NEW_STRING, tmp_unicode_txt);
 
-    CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 1,1);
+    CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 7,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     layers_button->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
-
 
     add_tileless_info(controls);
 
@@ -237,7 +236,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
     GLfloat fontcolor[]= {0,0,0,255};
 
-    struct CTRL *layers_meny = register_control(BOX,  spatial_parent,logical_parent, NULL,NULL,NULL,box,color, NULL,NULL, 1,0);
+    struct CTRL *layers_meny = register_control(BOX,  spatial_parent,logical_parent, NULL,NULL,NULL,box,color, NULL,NULL, 7,0);
     print_controls(NULL,0);
 //    printf("layers_menu=%p\n", layers_meny);
     GLshort startx, starty, p[] = {0,0};
@@ -259,7 +258,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
     GLshort radiostart_x = startx + click_size + col_dist + text_width + col_dist;
 
     GLshort radio_box[] = {radiostart_x,starty, radiostart_x + radio_width,starty+row_dist};
-    struct CTRL *radio_master = init_radio( layers_meny,layers_meny,radio_box,radio_box_color,  NULL, NULL,  1, 0 );
+    struct CTRL *radio_master = init_radio( layers_meny,layers_meny,radio_box,radio_box_color,  NULL, NULL,  7, 0 );
     LAYER_RUNTIME *oneLayer;
 
     for (i=0; i<global_layers->nlayers; i++)
@@ -283,16 +282,16 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
             x_txt = init_textblock();
             append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
-            new_ctrl = register_control(CHECKBOX, layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,x_txt,box_text_margins, 1,10);
+            new_ctrl = register_control(CHECKBOX, layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,x_txt,box_text_margins, 7,10);
             new_ctrl->alignment = V_CENTER_ALIGNMENT | H_CENTER_ALIGNMENT;
         }
         else
-            new_ctrl = register_control(CHECKBOX,layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,NULL,box_text_margins, 1,10);
+            new_ctrl = register_control(CHECKBOX,layers_meny,layers_meny, set_layer_visibility,NULL,NULL,click_box,click_box_color,NULL,box_text_margins, 7,10);
 
-        register_control(TEXTBOX, layers_meny,new_ctrl, NULL,NULL,NULL,text_box,txt_box_color,txt,margins, 1,10); //register text label and set checkbox as logical parent
+        register_control(TEXTBOX, layers_meny,new_ctrl, NULL,NULL,NULL,text_box,txt_box_color,txt,margins, 7,10); //register text label and set checkbox as logical parent
         new_ctrl->obj = (void*) oneLayer;
 
-        new_ctrl = add_radio_button(radio_master,set_info_layer, click_size, row_dist, 1, oneLayer->info_active);
+        new_ctrl = add_radio_button(radio_master,set_info_layer, click_size, row_dist, 7, oneLayer->info_active);
         new_ctrl->obj = (void*) oneLayer;
     }
 
@@ -315,7 +314,7 @@ static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_
 
     x_txt = init_textblock();
     append_2_textblock(x_txt,"X", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
-    CTRL *cb = register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10); //register text label and set checkbox as logical parent
+    CTRL *cb = register_control(CHECKBOX, layers_meny,layers_meny, hide_layer_selecter,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 7,10); //register text label and set checkbox as logical parent
     cb->alignment = V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT;
 
 
@@ -405,7 +404,7 @@ int init_show_info(void *ctrl, void *val, tileless_event_func_in_func func_in_fu
 
 
 
-    struct CTRL *info_box = register_control(TEXTBOX, controls,t, NULL,NULL,NULL,box,color, NULL,box_text_margins, 1,20);
+    struct CTRL *info_box = register_control(TEXTBOX, controls,t, NULL,NULL,NULL,box,color, NULL,box_text_margins, 7,20);
 
 
     add_close_button(info_box);
@@ -445,7 +444,7 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
 
     TEXTBLOCK *x_txt = init_textblock();
     append_2_textblock(x_txt,"i", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
-    return register_control(BUTTON, ctrl,ctrl, init_show_info,&page,NULL,info_box,info_color,x_txt,box_text_margins, 1,10);
+    return register_control(BUTTON, ctrl,ctrl, init_show_info,&page,NULL,info_box,info_color,x_txt,box_text_margins, 7,10);
 
 
 

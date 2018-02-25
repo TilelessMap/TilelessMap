@@ -61,7 +61,7 @@
 #define INIT_HEIGHT 500
 
 //Set this to 0 to do the data fetching in serial. Good for debugging
-#define THREADING 0
+#define THREADING 1
 
 #define DEFAULT_TEXT_BUF 1024
 
@@ -80,6 +80,7 @@
 #define	MULTIPOLYGONTYPE	6
 #define	COLLECTIONTYPE		7
 #define	RASTER		        128
+
 struct CTRL;
 
 typedef struct

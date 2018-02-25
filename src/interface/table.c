@@ -32,7 +32,7 @@ CTRL* add_table(struct CTRL *caller, struct CTRL *spatial_parent, GLfloat *color
 
     int z = spatial_parent->z + 1;
 
-    return register_control(TABLE,spatial_parent,caller,click_func, NULL, NULL,box,color,NULL,margin, 1, z);
+    return register_control(TABLE,spatial_parent,caller,click_func, NULL, NULL,box,color,NULL,margin, 7, z);
 
 
 }
@@ -77,7 +77,7 @@ CTRL* add_row(struct CTRL *spatial_parent, GLfloat *color, short ncols, short *c
 
     short box[4] = {x1,y1,x2,y2};
 
-    CTRL *ctrl = register_control(TABLE_ROW,spatial_parent,spatial_parent,NULL, NULL, NULL,box,color,NULL,margin, 1, z);
+    CTRL *ctrl = register_control(TABLE_ROW,spatial_parent,spatial_parent,NULL, NULL, NULL,box,color,NULL,margin, 7, z);
 
     ctrl->child_constriants = st_malloc(sizeof(CTRL_CHILD_CONSTRINTS));
     ctrl->child_constriants->max_children = ncols;
@@ -144,7 +144,7 @@ CTRL* add_cell(struct CTRL *spatial_parent,char *txt, GLfloat *color,GLfloat *fo
 
     short box[] = {x1, y1, x2, y2};
 
-    CTRL *cell = register_control(TABLE_CELL,spatial_parent,spatial_parent,click_func, val, NULL,box,color, tb,margin, 1, z);
+    CTRL *cell = register_control(TABLE_CELL,spatial_parent,spatial_parent,click_func, val, NULL,box,color, tb,margin, 7, z);
     return cell;
 }
 

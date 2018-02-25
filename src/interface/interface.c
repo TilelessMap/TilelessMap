@@ -383,7 +383,7 @@ struct CTRL* add_close_button(struct CTRL *ctrl)
     TEXTBLOCK *x_txt = init_textblock(1);
     GLfloat fontcolor[] = {0,0,0,255};
     append_2_textblock(x_txt,"X", char_font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
-    return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 1,10);
+    return register_control(BUTTON, ctrl,ctrl, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 7,10);
 
 
 
@@ -441,7 +441,7 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
             y = (int) roundf(ny_y);
             //  printf("nyX = %f, nyY = %f\n", ny_x,ny_y);
         }
-        if(child->active && check_box(child->box, x,y))
+        if((child->active & CHECK_CLICK) && check_box(child->box, x,y))
         {
             *any_hit = 1;
             check_controls(child, x, y, event, z, any_hit);
@@ -537,12 +537,13 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
     log_this(10, "entering %s with %p\n",__func__, ctrl);
     int i;
-    if(!ctrl->active)
+    if(!ctrl->active & ACTIVE)
         return 0;
 
     if(ctrl == incharge)
         matrix_hndl = ctrl->matrix_handler;
-    render_control(ctrl, matrix_hndl);
+    if(ctrl->active & RENDER)
+        render_control(ctrl, matrix_hndl);
     for (i=0; i < ctrl->relatives->n_children; i++)
     {
         render_controls(ctrl->relatives->children[i], matrix_hndl);

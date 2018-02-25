@@ -45,6 +45,11 @@
 #define SMALLSCREEN     1
 
 #define DEFAULT_TXT_MARGIN 10
+
+#define ACTIVE 1
+#define CHECK_CLICK 2
+#define RENDER 4
+
 typedef struct
 {
     GLshort minx;
@@ -101,7 +106,7 @@ typedef struct
 struct CTRL
 {
     uint8_t id;
-    uint8_t active;
+    uint8_t active; 
     GLshort box[4];
     RELATIONS *caller;// a child can be a fullscreen started from a small parent box.
     RELATIONS *relatives;

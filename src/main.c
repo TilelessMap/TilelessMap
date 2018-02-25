@@ -25,42 +25,6 @@
 #include "tilelessmap.h"
 #include <string.h>
 
-static int button_test(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
-{
-    log_this(100, "Yes, it works, getting text %s\n", (char*) val);
- 
-    if(incharge == ctrl)   
-    {
-    init_matrix_handler(ctrl, 0, 0,0);    
-    incharge = NULL;
-    }
-    else
-    {
-    init_matrix_handler(ctrl, 1, 1,1);    
-    incharge = ctrl;
-    }
-    
-    return 0;
-    
-}
-static int table_test(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
-{
-    log_this(100, "Yes, it works, getting text %s\n", (char*) val);
- 
-    if(incharge == ctrl)   
-    {
-    init_matrix_handler(ctrl, 0, 0,0);    
-    incharge = NULL;
-    }
-    else
-    {
-    init_matrix_handler(ctrl, 1, 1,1);    
-    incharge = ctrl;
-    }
-    
-    return 0;
-    
-}
 #ifdef __ANDROID__ 
 int SDL_main(int argc, char **argv)
 #else
