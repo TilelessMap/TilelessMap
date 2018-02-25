@@ -21,7 +21,7 @@ LOCAL_CFLAGS += -DSQLITE_ENABLE_RTREE -O3  -funroll-loops
 LOCAL_LDLIBS += -lGLESv1_CM -lGLESv2 -llog
 # Add your application source files here...
 LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.c \
-$(THE_APP_ROOT)/main.c
+$(THE_APP_ROOT)/main.c \
 $(THE_APP_ROOT)/event_loop.c \
 $(THE_APP_ROOT)/cleanup.c \
 $(THE_APP_ROOT)/init.c \
@@ -56,7 +56,7 @@ $(THE_APP_ROOT)/interface/button.c \
 $(THE_APP_ROOT)/interface/interface.c \
 $(THE_APP_ROOT)/interface/ui.c \
 $(THE_APP_ROOT)/interface/textbox.c \
-$(THE_APP_ROOT)/interface/radiobutton.c \
+$(THE_APP_ROOT)/interface/radiobutton.c 
 
 
 
