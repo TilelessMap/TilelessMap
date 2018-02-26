@@ -1,5 +1,8 @@
 # TileLess
-a map client for offline usage
+A map client for offline usage
+
+<a href="https://f-droid.org/packages/org.tilelessmap.app/" target="_blank">
+<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="90"/></a>
 
 This is just about the client.
 Packaging the mapdata in PostGIS is a separate project: https://github.com/TilelessMap/pg_tileless 
