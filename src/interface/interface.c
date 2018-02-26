@@ -441,25 +441,46 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
             y = (int) roundf(ny_y);
             //  printf("nyX = %f, nyY = %f\n", ny_x,ny_y);
         }
-        if((child->active & CHECK_CLICK) && check_box(child->box, x,y))
+        if(child->active & ACTIVE) 
         {
-            *any_hit = 1;
-            check_controls(child, x, y, event, z, any_hit);
+            
 
-            if(child->on_click.te_func && child->z >= *z)
-            {
-                *z = child->z;
-                event->te_func = child->on_click.te_func;
-                event->data = child->on_click.data;
-                event->caller = child->on_click.caller;
-                event->te_func_in_func = child->on_click.te_func_in_func;
+
+            check_controls(child, x, y, event, z, any_hit);
+            if((child->active & CHECK_CLICK) && check_box(child->box, x,y))
+            {    
+                    *any_hit = 1;
+                if(child->on_click.te_func && child->z >= *z)
+                {
+                    *z = child->z;
+                    event->te_func = child->on_click.te_func;
+                    event->data = child->on_click.data;
+                    event->caller = child->on_click.caller;
+                    event->te_func_in_func = child->on_click.te_func_in_func;
+                }
             }
         }
 
     }
     return 0;
 }
-
+static int reset_controls(struct  CTRL *ctrl)
+{
+    if(!map_modus)
+        return 0;
+    int i, n_children;
+    
+    n_children = ctrl->relatives->n_children;
+      for (i=0; i<n_children; i++)
+    {
+        struct CTRL *child = *(ctrl->relatives->children+i);
+        reset_controls(child);
+        child->active = child->active & 1;
+    }  
+    incharge = NULL;
+   return 0; 
+    
+}
 int check_click(struct  CTRL *controls, int x, int y)
 {
 
@@ -470,6 +491,12 @@ int check_click(struct  CTRL *controls, int x, int y)
     check_controls(controls, x,CURR_HEIGHT -  y, &te, &z, &any_hit);
     if(te.te_func)
         te.te_func(te.caller, te.data, te.te_func_in_func);
+    if(!any_hit)
+    {
+        reset_controls(controls);
+    
+        controls->relatives->children[0]->active = 7;
+    }
     return any_hit;
 }
 
