@@ -470,14 +470,13 @@ static int reset_controls(struct  CTRL *ctrl)
         return 0;
     int i, n_children;
     
-    n_children = ctrl->relatives->n_children;
-      for (i=0; i<n_children; i++)
-    {
-        struct CTRL *child = *(ctrl->relatives->children+i);
-        reset_controls(child);
-        child->active = child->active & 1;
-    }  
-    incharge = NULL;
+    
+    CTRL *start = ctrl->relatives->children[0];
+    
+    CTRL *menu_table = start->relatives->children[0];
+    
+    menu_table->active = 0;
+    start->active = 7;
    return 0; 
     
 }
@@ -495,7 +494,6 @@ int check_click(struct  CTRL *controls, int x, int y)
     {
         reset_controls(controls);
     
-        controls->relatives->children[0]->active = 7;
     }
     return any_hit;
 }
@@ -564,7 +562,7 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
     log_this(10, "entering %s with %p\n",__func__, ctrl);
     int i;
-    if(!ctrl->active & ACTIVE)
+    if(!(ctrl->active & ACTIVE))
         return 0;
 
     if(ctrl == incharge)
