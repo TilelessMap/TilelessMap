@@ -2,8 +2,7 @@ package org.tilelessmap.app;
 
 import org.libsdl.app.SDLActivity;
 
-//import android.location.Location;
-import android.app.Activity;
+
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -21,6 +20,7 @@ import android.content.pm.PackageManager;
 
 import java.io.File;
 
+
 /*
  * A sample wrapper class that just calls SDLActivity
  */
@@ -31,14 +31,28 @@ public class MAPActivity extends SDLActivity
     private static final String TAG = "TilelessMap";
     gps gps;
     private static final int MY_PERMISSION_ACCESS_FINE_LOCATION = 20;
-    private static final int MY_PERMISSION_ACCESS_WRITE_EXTERNAL_STORAGE = 21;
     public static native void onNativehaveDB(String the_file, String the_dir);
-    String the_file;
-    String the_dir;
+    public static String the_file;
+    public static String the_dir;
 
 
 
-void get_file() {
+    protected String[] getArguments() {
+        String[] str = new String[4];
+        str[0] = "-f";
+        str[1] = MAPActivity.the_file;
+        //       str[1] = "/storage/emulated/0/Download/sverige_sld.tileless";
+        //       str[1] = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+        str[2] = "-d";
+        str[3] = MAPActivity.the_dir + "/";
+        //     str[3] = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getParent();
+        Log.i(TAG, "File to use is: " + str[1]);
+        Log.i(TAG, "Dir to use is: " + str[3]);
+        return str;
+    }
+
+
+void getFile() {
 
     FileChooser FC = new FileChooser(this);
     FC.setFileListener(new FileChooser.FileSelectedListener() {
@@ -53,23 +67,20 @@ void get_file() {
 
     FC.setExtension("tileless");
     FC.showDialog();
-
 }
 
 
     protected void onCreate(Bundle savedInstanceState)
     {
 
+        Intent intent = getIntent();
+        the_file = intent.getStringExtra(HomeActivity.EXTRA_THE_FILE);
+        the_dir = intent.getStringExtra(HomeActivity.EXTRA_THE_DIR);
+        Log.i(TAG, "the_file: " + the_file);
+        Log.i(TAG, "the_dir: " + the_dir);
         super.onCreate(savedInstanceState);
 
-        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED )
-        {
-            ActivityCompat.requestPermissions( this, new String[] {android.Manifest.permission.WRITE_EXTERNAL_STORAGE  },MY_PERMISSION_ACCESS_WRITE_EXTERNAL_STORAGE );
-        }
-        else
-        {
-            get_file();
-        }
+
         if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED )
         {
             ActivityCompat.requestPermissions( this, new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION  },MY_PERMISSION_ACCESS_FINE_LOCATION );
@@ -79,23 +90,12 @@ void get_file() {
             gps = new gps(this);
         }
 
-
-
-
-
     }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
         switch (requestCode) {
-            case MY_PERMISSION_ACCESS_WRITE_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                get_file();
-                }
-            }
             case MY_PERMISSION_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
@@ -117,7 +117,6 @@ void get_file() {
 
 
 }
-
 
 
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TilelessMap</string>
+    <string name="go">Starta</string>
+    <string name="choose_file">Välj Fil</string>
+    <string name="welcome">Välkommen till TilelessMap</string>
+    <string name="missing_file">Du behöver välja ett kartprojekt att öppna</string>
+</resources>

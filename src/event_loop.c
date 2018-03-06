@@ -129,6 +129,11 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
             {
                 render_data(window, &map_matrix, controls);
             }
+            else if(ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_AC_BACK)
+            {
+                    free(touches);
+                    return;
+            }
             else
             {
                 switch (ev.type)
@@ -440,6 +445,8 @@ void mainLoop(SDL_Window* window,struct  CTRL *controls)
                 case SDL_QUIT:
                     free(touches);
                     return;
+                    
+                    
                 }
             }
         }
