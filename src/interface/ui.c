@@ -58,7 +58,7 @@ int add_default_controls()
 
 
     TEXTBLOCK *txt;
-    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
+    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 25);
 
     //This is the margin (left and bottom) that will be used for the 2 buttons defined below
     GLshort txt_margin[] = {20,20};
@@ -208,7 +208,7 @@ int set_info_layer(void *ctrl, void *val)
 }
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent)
 {
-    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
+    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 20);
     int i;
     TEXTBLOCK *txt, *x_txt;
 
