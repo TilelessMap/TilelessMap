@@ -158,7 +158,7 @@ int max_width = 1000;
     multiply_short_array(txt_margin, size_factor, 2);
     
     CTRL *controls = get_master_control();
-    struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);
+    struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 7,20);
     add_txt_2_textbox(textbox, tb);
     textbox->alignment = V_TOP_ALIGNMENT|H_LEFT_ALIGNMENT;
     
