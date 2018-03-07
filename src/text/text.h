@@ -76,8 +76,17 @@ TEXTCOORDS* init_txt_coords(size_t size);
 int check_and_realloc_txt_coords(TEXTCOORDS *tc, size_t needed);
 int reset_txt_coords(TEXTCOORDS *tc);
 int destroy_txt_coords(TEXTCOORDS *tc);
+
+/*This is ugly. tmp_unicode_txt is used in a lot of places just to reduce calls to malloc
+ * But this gives that it can only be used in serial and not in threads.
+ * It is used only when creating controls, which is done in the same thread.
+ * If used in layers which is handles in differnt threads it will be problems*/
 WCHAR_TEXT  *tmp_unicode_txt;
+
+
 int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt);
+int get_txt_height(TEXTBLOCK *tb);
+
 /*TODO This is just temporary
  * Later there will be something holding all txt_coordinates from all layers and controls
  * and all of it will be rendered from there. */

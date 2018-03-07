@@ -433,7 +433,7 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
     char *txt_startpoint;
     unsigned int nlinestarts = 0;
     
-    if((len) > (text->alloced - text->used))
+    if((len) > (text->alloced - text->used - 1))
         realloc_txt(text, text->used + len+1); //We overwrite the last nullterminator 
 
         
@@ -443,7 +443,7 @@ int append_2_textblock(TEXTBLOCK *tb, const char* txt, ATLAS *font, float *font_
     else
         txt_startpoint = text->txt;
     
-    strncpy(txt_startpoint, txt, len + 1);
+    memcpy(txt_startpoint, txt, len + 1);
     text->used += len;
 
     TXT_FORMATING *formating = tb->formating;

@@ -421,7 +421,7 @@ int n_polys;
 int n_tri;
 int n_words;
 int n_letters;
-
+int mod_points;
 
 GLuint  texes[256];
 GLenum err;

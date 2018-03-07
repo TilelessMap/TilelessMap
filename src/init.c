@@ -118,6 +118,10 @@ if (res) {
         return EXIT_FAILURE;
     }
 #endif
+
+show_timing_yes = 0;
+
+
 return 0;
 }
 

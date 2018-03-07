@@ -67,7 +67,7 @@ int check_screen_size()
 
     log_this(100, "dpi is %f\n",dpi);
         character_size = 20;
-        text_size = 20;
+        text_size = 15;
     text_font_normal = NULL;
     text_font_bold = NULL;
     char_font = NULL;
@@ -261,6 +261,8 @@ int destroy_control(struct CTRL *t)
     if(t->matrix_handler)
         free(t->matrix_handler);
 
+    if(t->id)
+        free(t->id);
 
     free(t);
     t=NULL;
@@ -292,7 +294,15 @@ int init_matrix_handler(struct CTRL *ctrl, uint8_t vertical_enabled, uint8_t hor
 
 }
 
-
+int ctrl_add_onclick(CTRL *ctrl, tileless_event_function click_func, void* onclick_arg)
+{
+    
+    ctrl->on_click.te_func = click_func;
+    ctrl->on_click.data = onclick_arg;
+    ctrl->on_click.caller = ctrl;
+    ctrl->on_click.te_func_in_func = NULL;
+    return 0;
+}
 //struct CTRL* register_control(struct CTRL *parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,int default_active)
 CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller, tileless_event_function click_func, void* onclick_arg, tileless_event_func_in_func func_in_func, GLshort* box, GLfloat* color, TEXTBLOCK* txt, GLshort* txt_margin, int default_active, int z)
 {
@@ -330,7 +340,7 @@ CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller,
         add_child(caller->caller, ctrl);
 
     ctrl->matrix_handler = NULL;
-
+    ctrl->id = NULL;
     return ctrl;
 }
 
@@ -681,6 +691,16 @@ int print_controls(CTRL *ctrl,int level)
 
 
     return 0;
+}
 
-
+int set_ctrl_id(CTRL *ctrl, char *id)
+{
+    
+    if(ctrl->id)
+        return 1;
+    int len = strlen(id) + 1;
+    ctrl->id = st_malloc(len);
+    
+    memcpy(ctrl->id,id, len); 
+    return 0;
 }

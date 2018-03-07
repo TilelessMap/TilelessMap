@@ -26,11 +26,14 @@
 #include "../mem.h"
 #include "interface.h"
 #include "../text/fonts.h"
+#include "../text/text.h"
 #include "../utils.h"
 
 static uint8_t show_layer_control;
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent);
 static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
+static int show_timing(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
+static int hide_timing(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int hide_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_func func_in_func);
@@ -76,7 +79,18 @@ int add_default_controls()
 
     CTRL *info = register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 7,1);
     info->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
+    
+    
+    /**** define timing button at main screen ******/
+    GLshort timing_box[] = {CURR_WIDTH - 70 * size_factor,5,CURR_WIDTH - 5,65 *size_factor};
 
+    txt = init_textblock();
+    append_2_textblock(txt,"T", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+
+    CTRL *timing = register_control(BUTTON, controls,controls, show_timing,NULL,NULL,timing_box,color, txt,txt_margin, 7,1);
+    info->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
+    set_ctrl_id(timing, "timing_button");
+    
     /**** define layer menu -button at main screen ******/
     GLshort layers_box[] = {5,85,155,155};
     multiply_short_array(layers_box, size_factor, 4);
@@ -450,4 +464,115 @@ struct CTRL* add_tileless_info(struct CTRL *ctrl)
 
 }
 
+int show_timing(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
+{
+    int i;
+     ((CTRL*) ctrl)->active = 0;
+    show_timing_yes = 1;
+     CTRL *master_control = get_master_control();
+ 
+    for (i=0;i<master_control->relatives->n_children;i++)
+    {
+        CTRL *child = master_control->relatives->children[i];
+        
+        if(child->id && !strcmp(child->id, "timing"))
+        {
+            child->active = 7;
+            return 0;
+        }     
+    }
+    
+}
 
+int hide_timing(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
+{
+    int i;
+    ((CTRL*) ctrl)->active = 0;
+    show_timing_yes = 0;
+     CTRL *master_control = get_master_control();
+ 
+    for (i=0;i<master_control->relatives->n_children;i++)
+    {
+        CTRL *child = master_control->relatives->children[i];
+        
+        if(child->id && !strcmp(child->id, "timing_button"))
+        {
+            child->active = 7;
+            return 0;
+        }     
+    }
+}
+
+
+int add_timing_info(struct timeval tv,int total_points,int n_lines,int n_polys,int n_tri)
+{
+    
+ CTRL *master_control = get_master_control();
+ int i;
+ 
+    CTRL *timing_info = NULL;
+    for (i=0;i<master_control->relatives->n_children;i++)
+    {
+        CTRL *child = master_control->relatives->children[i];
+        
+        if(child->id && !strcmp(child->id, "timing"))
+        {
+            timing_info = child;
+            break;
+        }     
+    }
+ 
+    TEXTBLOCK *tb;
+    if (!timing_info)
+    {
+        GLshort box_width = 200 * size_factor;
+        GLshort box[4];
+        box[0] = CURR_WIDTH - box_width - 30;    
+        box[1] = 30;
+        box[2] = CURR_WIDTH - 30;
+        box[3] = 230 * size_factor;
+        GLfloat color[] = {200,255,200,200};
+        
+        GLshort txt_margin[] = {5,5};
+        timing_info = init_textbox(controls, controls, box, color, txt_margin, 7,1);
+        ctrl_add_onclick(timing_info, hide_timing, NULL);
+        set_ctrl_id(timing_info, "timing");
+        timing_info->alignment = V_TOP_ALIGNMENT|H_LEFT_ALIGNMENT;
+    }
+    else if(timing_info->txt)
+    {
+        destroy_textblock(timing_info->txt);
+    }
+    
+    
+        tb = init_textblock();
+        add_txt_2_textbox(timing_info, tb);
+ 
+ 
+    GLfloat fontcolor[] = {0,0,0,255};
+ 
+    int max_width = 1000;
+    
+    append_2_textblock(tb, "Timings\n", text_font_bold, fontcolor,max_width,NEW_STRING, tmp_unicode_txt);
+    
+    char txt[512];
+    snprintf(txt,64, "fetch & render: %ld.%06ld ms\n", (long int)tv.tv_sec, (long int)tv.tv_usec);
+    append_2_textblock(tb, (const char*) txt, text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
+    
+    
+    snprintf(txt,512, 
+    "Number of:\n \
+    vertex: %d\n \
+    lines: %d\n \
+    polygons: %d\n \
+    triangels: %d", total_points, n_lines, n_polys, n_tri);
+    append_2_textblock(tb, (const char*) txt, text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
+    
+    int txt_height = get_txt_height(tb);
+    timing_info->box[3] = timing_info->box[1] + txt_height + 2 * timing_info->txt_margin[1];
+    
+    
+    
+ //   
+    return 0;
+}

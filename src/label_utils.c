@@ -216,7 +216,10 @@ int calc_dims(TEXTBLOCK *tb,int max_width, WCHAR_TEXT *unicode_txt)
 return 0;
 }
 
-
+int get_txt_height(TEXTBLOCK *tb)
+{
+ return tb->dims->heights->list[tb->dims->heights->used-1];   
+}
 //TODO, need to be reworked for TEXTBOX, but don't know if this function is of any use
 int print_txt(GLfloat *point_coord,GLfloat *point_offset, MATRIX *matrix_hndl,GLfloat *color,int size,int bold,int max_width, const char *txt, ... )
 {

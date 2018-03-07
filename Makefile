@@ -51,5 +51,5 @@ src/ext/sqlite/sqlite3.o \
 all:     $(SRC)
 	gcc -o tileLess  $(SRC) $(CPPFLAGS) $(LDLIBS)
 clean:
-	rm -f src/*.o src/interface/*.o src/ext/sqlite/*.o
+	rm -f src/*.o src/interface/*.o src/handle_input/*.o src/read_data/*.o src/styling/*.o src/text/*.o src/ext/sqlite/*.o
 .PHONY: all clean
