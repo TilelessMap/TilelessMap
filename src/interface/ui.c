@@ -67,6 +67,7 @@ int add_default_controls()
 
     GLfloat color[]= {0,0,0,100};
     
+    
     GLfloat table_border[]= {0,0,0,255};
     GLfloat row_color[]= {255,200,220,255};
     GLfloat fontcolor[]= {0,0,0,255};
@@ -74,18 +75,22 @@ int add_default_controls()
     /**** define start_button ******/
     GLshort start_box[] = {5,5,100,100};
 
+    
    // multiply_short_array(start_box, size_factor, 4);
 
     txt = init_textblock();
     append_2_textblock(txt,">>", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
     
+    
 
     CTRL *start = register_control(BUTTON, controls,controls, show_menu,NULL,NULL,start_box,color, txt,txt_margin, 7,0.01);
 
+    
     start->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
     
     
     GLshort table_box[] = {50,50,650,650};
+    
     
     GLshort table_margins[] = {3,3};
     CTRL *row;
@@ -102,6 +107,7 @@ int add_default_controls()
     row = add_row(table, row_color, 1, column_widths);
     cell = add_cell(row, "LAYERS", row_color, fontcolor, cell_margins, show_layer_selecter, NULL, 40);
 
+    
     /*
     GLshort info_box[] = {5,5,135,65};
     multiply_short_array(info_box, size_factor, 4);
@@ -191,8 +197,10 @@ static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_fun
     log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
     struct CTRL *t = (struct CTRL *) ctrl;
 
-    create_layers_meny(t, t);
+    create_layers_meny(t, t)
+    
     t->relatives->parent->relatives->parent->active = 0; 
+    
     
 
     return 0;
