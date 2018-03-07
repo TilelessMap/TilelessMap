@@ -135,7 +135,7 @@ CTRL* init_controls();
 int add_default_controls();
 CTRL* get_master_control();
 int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl);
-struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *caller, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z);
+struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *caller, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, float z);
 
 struct CTRL* add_close_button(struct CTRL *ctrl);
 /*Radiobutton*/

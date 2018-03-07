@@ -30,9 +30,9 @@
 CTRL* add_table(struct CTRL *caller, struct CTRL *spatial_parent, GLfloat *color, short box[4],short *margin, tileless_event_function click_func)
 {
 
-    int z = spatial_parent->z + 1;
+    int z = spatial_parent->z + 0.001;
 
-    return register_control(TABLE,spatial_parent,caller,click_func, NULL, NULL,box,color,NULL,margin, 7, z);
+    return register_control(TABLE,spatial_parent,caller,click_func, NULL, NULL,box,color,NULL,margin, 7, 0.5);
 
 
 }
@@ -47,7 +47,7 @@ CTRL* add_row(struct CTRL *spatial_parent, GLfloat *color, short ncols, short *c
         return NULL;
     }
 
-    int z = spatial_parent->z + 0.001;
+    int z = 0.7;
 
     int n_siblings = spatial_parent->relatives->n_children;
     short x1, x2, y1, y2;

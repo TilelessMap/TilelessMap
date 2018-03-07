@@ -31,6 +31,7 @@
 static uint8_t show_layer_control;
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent);
 static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
+static int show_menu(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int hide_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_func func_in_func);
@@ -58,38 +59,66 @@ int add_default_controls()
 
 
     TEXTBLOCK *txt;
-    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
+    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 25);
 
     //This is the margin (left and bottom) that will be used for the 2 buttons defined below
     GLshort txt_margin[] = {20,20};
     multiply_short_array(txt_margin, size_factor, 2);
 
-    GLfloat color[]= {200,255,200,200};
+    GLfloat color[]= {0,0,0,100};
+    GLfloat table_border[]= {0,0,0,255};
+    GLfloat row_color[]= {255,200,220,255};
     GLfloat fontcolor[]= {0,0,0,255};
 
+    /**** define start_button ******/
+    GLshort start_box[] = {5,5,100,100};
+   // multiply_short_array(start_box, size_factor, 4);
+
+    txt = init_textblock();
+    append_2_textblock(txt,">>", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
+    
+    CTRL *start = register_control(BUTTON, controls,controls, show_menu,NULL,NULL,start_box,color, txt,txt_margin, 7,0.01);
+    start->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
+    
+    
+    GLshort table_box[] = {50,50,650,650};
+    GLshort table_margins[] = {3,3};
+    CTRL *row;
+    CTRL *cell;
+    CTRL *table = add_table(start, start, table_border,table_box,table_margins, NULL);
+    table->active = 0;
+    short column_widths[] = {300};
     /**** define info-button at main screen ******/
+    short cell_margins[] = {0, 0};
+    row = add_row(table, row_color, 1, column_widths);
+    cell = add_cell(row, "INFO", row_color, fontcolor, cell_margins, switch_map_modus, NULL, 40);
+    
+    show_layer_control = 0;
+    row = add_row(table, row_color, 1, column_widths);
+    cell = add_cell(row, "LAYERS", row_color, fontcolor, cell_margins, show_layer_selecter, NULL, 40);
+    /*
     GLshort info_box[] = {5,5,135,65};
     multiply_short_array(info_box, size_factor, 4);
+    
 
     txt = init_textblock();
     append_2_textblock(txt,"INFO", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
-    CTRL *info = register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 7,1);
+    CTRL *info = register_control(BUTTON, start,start, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 0,1);
     info->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
-
+*/
     /**** define layer menu -button at main screen ******/
-    GLshort layers_box[] = {5,85,155,155};
+   /* GLshort layers_box[] = {5,85,155,155};
     multiply_short_array(layers_box, size_factor, 4);
 
-    show_layer_control = 0;
 
     txt = init_textblock();
     append_2_textblock(txt,"LAYERS", font, fontcolor,0,NEW_STRING, tmp_unicode_txt);
 
-    CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 7,1);
+    CTRL *layers_button = register_control(BUTTON, start,start, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 0,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     layers_button->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
-
+*/
     add_tileless_info(controls);
 
     return 0;
@@ -134,6 +163,21 @@ static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func f
     return 0;
 }
 
+static int show_menu(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
+{
+    log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
+    struct CTRL *t = (struct CTRL *) ctrl;
+    int n_children = t->relatives->n_children;
+    int i; 
+    t->active = 1;
+    for (i=0;i<n_children;i++)
+    {
+     t->relatives->children[i]->active = 7; 
+    }
+    
+    return 0;
+}
+
 
 static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func)
 {
@@ -141,8 +185,8 @@ static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_fun
     log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
     struct CTRL *t = (struct CTRL *) ctrl;
 
-    create_layers_meny(controls, t);
-
+    create_layers_meny(t, t);
+    t->relatives->parent->relatives->parent->active = 0; 
 
     return 0;
 }
@@ -208,7 +252,7 @@ int set_info_layer(void *ctrl, void *val)
 }
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent)
 {
-    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
+    ATLAS *font = loadatlas("freesans",BOLD_TYPE, 20);
     int i;
     TEXTBLOCK *txt, *x_txt;
 

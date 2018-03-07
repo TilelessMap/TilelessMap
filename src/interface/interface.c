@@ -294,7 +294,7 @@ int init_matrix_handler(struct CTRL *ctrl, uint8_t vertical_enabled, uint8_t hor
 
 
 //struct CTRL* register_control(struct CTRL *parent, tileless_event_function click_func,void *onclick_arg, GLshort *box,int default_active)
-CTRL* register_control(int type,struct CTRL* spatial_parent,struct CTRL* caller, tileless_event_function click_func, void* onclick_arg, tileless_event_func_in_func func_in_func, GLshort* box, GLfloat* color, TEXTBLOCK* txt, GLshort* txt_margin, int default_active, int z)
+CTRL* register_control(int type, CTRL* spatial_parent, CTRL* caller, tileless_event_function click_func, void* onclick_arg, tileless_event_func_in_func func_in_func, GLshort* box, GLfloat* color, TEXTBLOCK* txt, GLshort* txt_margin, int default_active, float z)
 {
     struct CTRL *ctrl = st_malloc(sizeof(struct CTRL));
     ctrl->type = type;
@@ -441,25 +441,45 @@ static int check_controls(struct CTRL *ctrl, int x, int y, tileless_event *event
             y = (int) roundf(ny_y);
             //  printf("nyX = %f, nyY = %f\n", ny_x,ny_y);
         }
-        if((child->active & CHECK_CLICK) && check_box(child->box, x,y))
+        if(child->active & ACTIVE) 
         {
-            *any_hit = 1;
-            check_controls(child, x, y, event, z, any_hit);
+            
 
-            if(child->on_click.te_func && child->z >= *z)
-            {
-                *z = child->z;
-                event->te_func = child->on_click.te_func;
-                event->data = child->on_click.data;
-                event->caller = child->on_click.caller;
-                event->te_func_in_func = child->on_click.te_func_in_func;
+
+            check_controls(child, x, y, event, z, any_hit);
+            if((child->active & CHECK_CLICK) && check_box(child->box, x,y))
+            {    
+                    *any_hit = 1;
+                if(child->on_click.te_func && child->z >= *z)
+                {
+                    *z = child->z;
+                    event->te_func = child->on_click.te_func;
+                    event->data = child->on_click.data;
+                    event->caller = child->on_click.caller;
+                    event->te_func_in_func = child->on_click.te_func_in_func;
+                }
             }
         }
 
     }
     return 0;
 }
-
+static int reset_controls(struct  CTRL *ctrl)
+{
+    if(!map_modus)
+        return 0;
+    int i, n_children;
+    
+    
+    CTRL *start = ctrl->relatives->children[0];
+    
+    CTRL *menu_table = start->relatives->children[0];
+    
+    menu_table->active = 0;
+    start->active = 7;
+   return 0; 
+    
+}
 int check_click(struct  CTRL *controls, int x, int y)
 {
 
@@ -470,6 +490,11 @@ int check_click(struct  CTRL *controls, int x, int y)
     check_controls(controls, x,CURR_HEIGHT -  y, &te, &z, &any_hit);
     if(te.te_func)
         te.te_func(te.caller, te.data, te.te_func_in_func);
+    if(!any_hit)
+    {
+        reset_controls(controls);
+    
+    }
     return any_hit;
 }
 
@@ -537,7 +562,7 @@ int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl)
 {
     log_this(10, "entering %s with %p\n",__func__, ctrl);
     int i;
-    if(!ctrl->active & ACTIVE)
+    if(!(ctrl->active & ACTIVE))
         return 0;
 
     if(ctrl == incharge)
