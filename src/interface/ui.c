@@ -248,6 +248,7 @@ int set_info_layer(void *ctrl, void *val)
 
     return 0;
 }
+
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent)
 {
     ATLAS *font = loadatlas("freesans",BOLD_TYPE, 40);
