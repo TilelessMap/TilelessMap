@@ -17,7 +17,7 @@
  *
  **********************************************************************
  *
- * Copyright (C) 2016-2018 Nicklas AvÃ©n
+ * Copyright (C) 2016-2018 Nicklas Avén
  *
  ***********************************************************************/
 
@@ -31,7 +31,6 @@
 static uint8_t show_layer_control;
 static int create_layers_meny(struct CTRL *spatial_parent, struct CTRL *logical_parent);
 static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
-static int show_menu(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int show_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int hide_layer_selecter(void *ctrl, void *val, tileless_event_func_in_func func_in_func);
 static int set_layer_visibility(void *ctrl, void *val,tileless_event_func_in_func func_in_func);
@@ -65,29 +64,17 @@ int add_default_controls()
     GLshort txt_margin[] = {20,20};
     multiply_short_array(txt_margin, size_factor, 2);
 
-    GLfloat color[]= {0,0,0,100};
+    GLfloat color[]= {200,255,200,200};
     GLfloat fontcolor[]= {0,0,0,255};
 
-    /**** define start_button ******/
-    GLshort start_box[] = {5,5,65,65};
-   // multiply_short_array(start_box, size_factor, 4);
-
-    txt = init_textblock();
-    append_2_textblock(txt,">>", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
-    
-    CTRL *start = register_control(BUTTON, controls,controls, show_menu,NULL,NULL,start_box,color, txt,txt_margin, 7,1);
-    start->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
-    
-    
     /**** define info-button at main screen ******/
     GLshort info_box[] = {5,5,135,65};
     multiply_short_array(info_box, size_factor, 4);
-    
 
     txt = init_textblock();
     append_2_textblock(txt,"INFO", font, fontcolor,0, NEW_STRING, tmp_unicode_txt);
 
-    CTRL *info = register_control(BUTTON, start,start, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 0,1);
+    CTRL *info = register_control(BUTTON, controls,controls, switch_map_modus,NULL,NULL,info_box,color, txt,txt_margin, 7,1);
     info->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
 
     /**** define layer menu -button at main screen ******/
@@ -99,7 +86,7 @@ int add_default_controls()
     txt = init_textblock();
     append_2_textblock(txt,"LAYERS", font, fontcolor,0,NEW_STRING, tmp_unicode_txt);
 
-    CTRL *layers_button = register_control(BUTTON, start,start, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 0,1);
+    CTRL *layers_button = register_control(BUTTON, controls,controls, show_layer_selecter,NULL,NULL, layers_box,color, txt,txt_margin, 7,1);
     layers_button->obj = &show_layer_control; // we register the variable show_layer_control to the button so we can get the status from there
     layers_button->alignment = H_CENTER_ALIGNMENT|V_CENTER_ALIGNMENT;
 
@@ -144,21 +131,6 @@ static int switch_map_modus(void *ctrl, void *val, tileless_event_func_in_func f
         return 1;
     }
 
-    return 0;
-}
-
-static int show_menu(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
-{
-    log_this(10, "Entering function %s with val %d and pointer to func in func %p\n", __func__, (int*) val,func_in_func);
-    struct CTRL *t = (struct CTRL *) ctrl;
-    int n_children = t->relatives->n_children;
-    int i; 
-    t->active = 1;
-    for (i=0;i<n_children;i++)
-    {
-     t->relatives->children[i]->active = 7; 
-    }
-    
     return 0;
 }
 
