@@ -565,7 +565,7 @@ int add_timing_info(struct timeval tv,int total_points,int n_lines,int n_polys,i
     vertex: %d\n \
     lines: %d\n \
     polygons: %d\n \
-    triangels: %d", total_points, n_lines, n_polys, n_tri);
+    triangels: %d ", total_points, n_lines, n_polys, n_tri);
     append_2_textblock(tb, (const char*) txt, text_font_normal, fontcolor,max_width, APPENDING_STRING, tmp_unicode_txt);
     
     int txt_height = get_txt_height(tb);
