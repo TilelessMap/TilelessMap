@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TilelessMap</string>
+    <string name="welcome">This is a map client reading from sqlite and rendering in openGL es2.
+    Map projects are stored in sqlite databases with the .tileless file ending.
+    There can also be multiple more sqlite databases with data referenced from the project db.
+
+    You can find a few databases that are ready to use at:
+    https://tilelessmap.org/maps</string>
+    <string name="go">Start</string>
+    <string name="choose_file">Choose File</string>
+    <string name="missing_file">You need a map project to open</string>
 </resources>
