@@ -105,7 +105,7 @@ typedef struct
 
 struct CTRL
 {
-    uint8_t id;
+    char *id;
     uint8_t active; 
     GLshort box[4];
     RELATIONS *caller;// a child can be a fullscreen started from a small parent box.
@@ -123,9 +123,10 @@ struct CTRL
     CTRL_CHILD_CONSTRINTS *child_constriants;
 };
 
+int show_timing_yes;
+int add_timing_info(struct timeval tv,int total_points,int n_lines,int n_polys,int n_tri);
 
-
-
+int set_ctrl_id(CTRL *ctrl, char *id);
 
 int check_click(struct CTRL *controls, int x, int y);
 
@@ -135,6 +136,7 @@ CTRL* init_controls();
 int add_default_controls();
 CTRL* get_master_control();
 int render_controls(struct CTRL *ctrl, MATRIX *matrix_hndl);
+int ctrl_add_onclick(CTRL *ctrl, tileless_event_function click_func, void* onclick_arg);
 struct CTRL* register_control(int type, struct CTRL *spatial_parent,struct CTRL *caller, tileless_event_function click_func,void *onclick_arg,tileless_event_func_in_func func_in_func, GLshort *box,GLfloat *color,TEXTBLOCK *txt, GLshort *txt_margin, int default_active, int z);
 
 struct CTRL* add_close_button(struct CTRL *ctrl);

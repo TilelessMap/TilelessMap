@@ -84,7 +84,7 @@ int get_data(SDL_Window* window,MATRIX *map_matrix,struct CTRL *controls)
     n_tri=0;
     n_words=0;
     n_letters=0;
-
+    mod_points=0;
 
     for(t=0; t<global_layers->nlayers; t++)
 //     for(t=0; t<0; t++)
@@ -133,17 +133,22 @@ fprintf(stderr,"0 - opengl error:%d in func %s layer %s\n", err, __func__,oneLay
         loadPolygon(infoRenderLayer, map_matrix->matrix);
 
     renderGPS(map_matrix->matrix);
-    render_controls(controls, NULL);
 
 
 
 #ifndef _WIN32
     gettimeofday(&tval_after, NULL);
 
-   // timersub(&tval_after, &tval_before, &tval_result);
-//   print_txt(10,80,200,0,0,255,1, "time used in seconds: %ld.%06ld", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+    timersub(&tval_after, &tval_before, &tval_result);
+    if(show_timing_yes)
+        add_timing_info(tval_result,total_points,n_lines,n_polys,n_tri);
+   // printf("test\n");
+ // printf( "time used in seconds: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+  
+ //   printf("test klart");
 #endif
 
+    render_controls(controls, NULL);
     total_points=0;
 
 //render_txt(window);

@@ -158,7 +158,7 @@ int max_width = 1000;
     multiply_short_array(txt_margin, size_factor, 2);
     
     CTRL *controls = get_master_control();
-    struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 1,20);
+    struct CTRL *textbox = init_textbox(controls, controls, box, color, txt_margin, 7,20);
     add_txt_2_textbox(textbox, tb);
     textbox->alignment = V_TOP_ALIGNMENT|H_LEFT_ALIGNMENT;
     
@@ -179,8 +179,9 @@ int max_width = 1000;
     GLfloat close_color[]= {200,100,100,200};
     TEXTBLOCK *x_txt = init_textblock();
     append_2_textblock(x_txt,"X", char_font, fontcolor,0,NEW_STRING, tmp_unicode_txt);
-    register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 7,22); //register text label and
-
+    CTRL *c_box = register_control(CHECKBOX, textbox,textbox, close_ctrl,NULL,NULL,close_box,close_color,x_txt,box_text_margins, 7,22); //register text label and
+    
+    c_box->alignment = V_CENTER_ALIGNMENT|H_CENTER_ALIGNMENT;
 
     return 1;
 }

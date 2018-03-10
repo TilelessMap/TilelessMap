@@ -275,8 +275,9 @@ int renderLineTri(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE,16);
     glEnable (GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
-//    n_lines += line->line_start_indexes->used;
-    //  total_points += line->vertex_array->used/ndims;
+    n_lines += line->line_start_indexes->used;
+    total_points += line->vertex_array->used/ndims;
+    mod_points += line->vertex_array->used/ndims;
 
 
     /*    printf("------------------------------------------------------\n");
@@ -499,9 +500,8 @@ int renderPolygon(LAYER_RUNTIME *oneLayer,GLfloat *theMatrix)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->ebo);
         glUniformMatrix4fv(std_matrix, 1, GL_FALSE,theMatrix );
 
-        // n_polys += poly->pa_start_indexes->used;
-        //total_points += poly->vertex_array->used/ndims;
-        //n_tri += poly->element_array->used/3;
+        total_points += poly->vertex_array->used/ndims;
+        n_tri += poly->element_array->used/3;
 
 
         for (i=0; i<used_n_poly; i++)
