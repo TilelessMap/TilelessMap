@@ -3,6 +3,14 @@
     <string name="app_name">TilelessMap</string>
     <string name="go">Starta</string>
     <string name="choose_file">Välj Fil</string>
-    <string name="welcome">Välkommen till TilelessMap</string>
+    <string name="welcome">Detta är en kartklient som läser från SQLite och renderar i ioenGL es2.
+        Kartprojekt lagras i sqlite-baser med filändelsen -tileless.
+        Det kan också finnas flera ytterligare sqlite-baser med data som refereras från projektbasen\n
+\n
+  Det finns några projekt och databaser, klara att använda på:\n
+    https://tilelessmap.org/maps\n
+    \n
+    För att göra egna kartor ta en titt på:\n
+    https://github.com/TilelessMap/pg_tileless</string>
     <string name="missing_file">Du behöver välja ett kartprojekt att öppna</string>
 </resources>
