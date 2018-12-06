@@ -88,7 +88,7 @@ int reset_gluint_list(GLUINT_LIST *l);
 int reset_glfloat_list(GLFLOAT_LIST *l);
 int reset_pointer_list(POINTER_LIST *l);
 int reset_point_list(POINT_LIST *l);
-
+int reset_uint8_list(UINT8_LIST *l);
 
 int destroy_glfloat_list(GLFLOAT_LIST *l);
 int destroy_gluint_list(GLUINT_LIST *l);

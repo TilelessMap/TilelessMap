@@ -181,6 +181,8 @@ static int load_layers(TEXT *missing_db)
     char sql[2048];
     uint8_t type = 0;
     char sqlSel2[15];
+    
+
     /*  if(!(check_column((const unsigned char *) "main",(const unsigned char *) "layers",(const unsigned char *) "override_type")))
       {
 
@@ -257,7 +259,7 @@ static int load_layers(TEXT *missing_db)
         }
 
         oneLayer=global_layers->layers + i;
-        
+        oneLayer->rawdata = init_uint8_list();
         const unsigned char * dbname = sqlite3_column_text(preparedLayerLoading, 0);
         const unsigned char *layername = sqlite3_column_text(preparedLayerLoading,1);
         oneLayer->visible = sqlite3_column_int(preparedLayerLoading, 2);

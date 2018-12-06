@@ -270,6 +270,7 @@ void destroy_layer_runtime(LAYER_RUNTIME *lr, int n)
                    element_destroy_buffer(theLayer->tri_index);
                }*/
         destroy_buffers(theLayer);
+        destroy_uint8_list(theLayer->rawdata);
         if(theLayer->type & 32)
             text_destroy_buffer(theLayer->text);
 

@@ -311,7 +311,6 @@ JNIEXPORT void JNICALL Java_org_tilelessmap_app_gps_onNativeGPS(
     double latitude, double longitude, double acc)
 {
     gps_in(latitude, longitude, acc);
-
 }
 #endif
 

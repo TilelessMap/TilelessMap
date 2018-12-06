@@ -359,7 +359,7 @@ static int increase_uint8_list(UINT8_LIST *l, size_t needed_space)
     return 0;
 }
 
-static int reset_uint8_list(UINT8_LIST *l)
+int reset_uint8_list(UINT8_LIST *l)
 {
     l->used = 0;
     return 0;

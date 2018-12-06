@@ -474,14 +474,13 @@ int show_timing(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
     for (i=0;i<master_control->relatives->n_children;i++)
     {
         CTRL *child = master_control->relatives->children[i];
-        
         if(child->id && !strcmp(child->id, "timing"))
         {
             child->active = 7;
             return 0;
-        }     
+        }
     }
-    
+	return 0;
 }
 
 int hide_timing(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
@@ -494,19 +493,18 @@ int hide_timing(void* ctrl, void* val, tileless_event_func_in_func func_in_func)
     for (i=0;i<master_control->relatives->n_children;i++)
     {
         CTRL *child = master_control->relatives->children[i];
-        
         if(child->id && !strcmp(child->id, "timing_button"))
         {
             child->active = 7;
             return 0;
-        }     
+        }
     }
+    return 0;
 }
 
 
 int add_timing_info(struct timeval tv,int total_points,int n_lines,int n_polys,int n_tri)
 {
-    
  CTRL *master_control = get_master_control();
  int i;
  
@@ -514,7 +512,6 @@ int add_timing_info(struct timeval tv,int total_points,int n_lines,int n_polys,i
     for (i=0;i<master_control->relatives->n_children;i++)
     {
         CTRL *child = master_control->relatives->children[i];
-        
         if(child->id && !strcmp(child->id, "timing"))
         {
             timing_info = child;

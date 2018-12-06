@@ -336,7 +336,7 @@ typedef struct
     TEXTSTRUCT *text;
     INT64_LIST *twkb_id;
     RASTER_LIST *rast;
-    
+    UINT8_LIST *rawdata;
 }
 LAYER_RUNTIME;
 
