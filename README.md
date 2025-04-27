@@ -1,3 +1,16 @@
+# TilelessMap (Archived)
+
+⚠️ This repository is no longer maintained.
+
+The official and current version of TilelessMap is now hosted at:
+
+👉 [https://gitlab.com/tilelessmap/tilelessmap](https://gitlab.com/tilelessmap/tilelessmap)
+
+For latest updates, development, and downloads, please visit the new repository.
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+
 # TileLess
 A map client for offline usage
 
