@@ -1,83 +1,63 @@
-# TilelessMap (Archived)
 
-⚠️ This repository is no longer maintained.
+### **TilelessMap – Offline-first vector maps without tiles**
 
-The official and current version of TilelessMap is now hosted at:
+> **This GitHub repository contains an early historical version of TilelessMap.**
+>
+> 🚀 **Active development, releases, and issue tracking now live on GitLab:**
+> 👉 [https://gitlab.com/tilelessmap/tilelessmap](https://gitlab.com/tilelessmap/tilelessmap)
+>
+> 📱 **Android app (current):**
+> 👉 Google Play: *TilelessMap*
 
-👉 [https://gitlab.com/tilelessmap/tilelessmap](https://gitlab.com/tilelessmap/tilelessmap)
+---
 
-For latest updates, development, and downloads, please visit the new repository.
+### What is TilelessMap?
 
+**TilelessMap** is an offline-first map engine and application designed for situations where:
 
--------------------------------------------------------------------------------------------------------------------------------
+* internet access is limited or unavailable
+* large amounts of detailed vector map data must be stored locally
+* precision matters more than convenience
+* tiled web maps (XYZ / Web Mercator) are a poor fit
 
-# TileLess
-A map client for offline usage
+Unlike most modern map apps, TilelessMap:
 
-<a href="https://f-droid.org/packages/org.tilelessmap.app/" target="_blank">
-<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="90"/></a>
+* does **not** rely on tiles
+* uses **local vector databases (SQLite / TWKB)**
+* supports **UTM-based projections**
+* is designed for **field work, planning, and offline exploration**
 
-This is just about the client.
-Packaging the mapdata in PostGIS is a separate project: https://github.com/TilelessMap/pg_tileless 
+---
 
-#### What is this? ####
+### Project status
 
-This project tries to target the vacuum behind the enormous evolution of online mapping the last decade.
+* ✔ Actively developed
+* ✔ Open source (GPL)
+* ✔ Android app released
+* ✔ Offline vector packages for large regions (e.g. Sweden, Yellowstone)
 
-There are situations when keeping a lot of structured map data in a device for the field is nessecary. This project tries to explore some possibilities about that.
+This GitHub repository is preserved as a **historical snapshot** of the early TilelessMap client and to document the project’s long evolution.
 
-This is is still just a proof of concept project, but it starts to show some potential.
+---
 
-#### What is working now? ####
+### Where to go next
 
-The map client is tested on Debian and Android, Windows and raspberry Pi. There is some issue on the Pi making it crash after a while.
+* 🔧 **Source code & development:**
+  [https://gitlab.com/tilelessmap/tilelessmap](https://gitlab.com/tilelessmap/tilelessmap)
+* 🌍 **Project website:**
+  [https://tilelessmap.org](https://tilelessmap.org)
+* 🗺️ **PostGIS / map packaging tutorial:**
+  [https://gitlab.com/tilelessmap/tilelessmap-tutorial](https://gitlab.com/tilelessmap/tilelessmap-tutorial)
 
-For Android I haven't yet found how to share the right parts of the Android Studio project, but that will come soon. It is basicly the Android project from libsdl.org
+---
 
-Some map data can be found at:
-https://twkb.jordogskog.no/maps/
+### Why keep this repository?
 
-compiled android apk
-https://twkb.jordogskog.no/downloads/
+TilelessMap began as an experiment long before offline-first mapping became fashionable.
+This repository remains public to show:
 
+* the project’s long-term continuity
+* architectural ideas explored early on
+* how the current system evolved
 
-
-
-## Install and run ##
-
-#### Dependencies ####
-
-To compile you need:
-freetype
-sdl2
-sdl2-image (for orthophotos)
-glew
-
-sqlite is part of the source-code for simplicity.
-
-To install all dependencies on a clean debian system:
-
-    apt-get install git build-essential pkg-config libfreetype6-dev libsdl2-dev libsdl2-image-dev libglew-dev libmxml-dev
-
-#### Compile ####
-
-
-
-    make
-
-#### Get some test map data ####
-
-
-    wget https://twkb.jordogskog.no/maps/solor.tileless
-
-#### Run ###
-
-    ./tileless -f solor.tileless -d ./
-
-the -d option is to set the working directory. Since a map project can be spread over many sqlite files the working directory is where the client searches for the other data-bases.
-
-## Some notes ##
-
-The map data is packed in sqlite databases. Databases with project information (like layers and styles) are called .tileless as a convention. Pure map data databases are called .sqlite.
-
-Licensce GPL v2
+For anything current, please follow the links above.
